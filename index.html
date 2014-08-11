@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head><title>Phoenix</title></head>
+  <body>
+    hello world!!!<br>
+    <br>
+    <a href="#" onclick="demoNotification()">Test Notification</a>
+    <a href="#" onclick="demoTrayPopup()">Test Popup</a>
+
+<script src="jquery-2.1.1.min.js"></script>
+<script src="nw-desktop-notifications.js"></script>
+
+    <script>
+var gui = require('nw.gui');
+var win = gui.Window.get();
+
+var tray = new gui.Tray({ title: 'Tray', icon: 'img/icon.png' });
+var menu = new gui.Menu();
+menu.append(new gui.MenuItem({ type: 'checkbox', label: 'box1' }));
+tray.menu = menu;
+
+function demoNotification() {
+	new Notification("Title", { tag: 'tag', body: 'body', iconUrl: 'img/icon.png', icon: 'img/icon.png' });
+}
+
+function demoTrayPopup() {
+	window.LOCAL_NW.desktopNotifications.notify('img/icon.png', 'title', 'Test <em>content</em> <sup>whassup</sup>');
+}
+win.on('closed', function() {
+	window.LOCAL_NW.desktopNotifications.closeAnyOpenNotificationWindows();
+});
+
+</script>
+  </body>
+</html>
