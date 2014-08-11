@@ -2,9 +2,11 @@
   "name": "phoenix",
   "main": "index.html",
   "window": {
-    "toolbar": true,
+    "toolbar": false,
+    "frame": false,
     "width": 800,
-    "height": 600
+    "height": 600,
+    "icon": "img/icon.png"
   },
   "single-instance": true
 }

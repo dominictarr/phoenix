@@ -1,0 +1,24 @@
+#nav .row {
+	padding: 0;
+}
+
+#profiles {
+	list-style: none;
+	padding: 15px 20px;
+}
+#profiles li {
+	display: inline-block;
+	padding: 0 20px;
+	text-align: center;
+}
+#profiles li a {
+	color: #555;
+}
+#profiles li a:hover {
+	color: #888;
+}
+#profiles li a img {
+	border-radius: 50%;
+	width: 128px;
+	height: 128px;
+}

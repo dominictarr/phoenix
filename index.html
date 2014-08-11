@@ -1,14 +1,36 @@
 <!DOCTYPE html>
 <html>
-  <head><title>Phoenix</title></head>
+  <head>
+  	<title>Phoenix</title>
+	<link rel="stylesheet" href="css/gumby.css">
+  	<link rel="stylesheet" href="css/index.css">
+  </head>
   <body>
-    hello world!!!<br>
-    <br>
-    <a href="#" onclick="demoNotification()">Test Notification</a>
-    <a href="#" onclick="demoTrayPopup()">Test Popup</a>
+  	<div class="navbar" id="nav" style="-webkit-app-region: drag">
+		<div class="row">
+			<h1 class="ten columns logo"><img src="img/title.jpg" /></h1>
+			<ul class="two columns" style="-webkit-app-region: no-drag;"><li><a href="#">New Profile</a></li></ul>
+		</div>
+	</div>
 
-<script src="jquery-2.1.1.min.js"></script>
-<script src="nw-desktop-notifications.js"></script>
+    <ul id="profiles">
+    	<li><a href="#"><img src="img/avatars/dangerous-to-go-alone-cat.jpg"><br>Bob</a></li>
+    	<li><a href="#"><img src="img/avatars/oldlady.jpg"><br>Alice</a></li>
+    	<li><a href="#"><img src="img/plus.jpg"><br>New profile</a></li>
+    </ul>
+    <br>
+    <div class="medium primary btn"><a href="#" onclick="demoNotification()">Test Notification</a></div>
+    <div class="medium default btn"><a href="#" onclick="demoTrayPopup()">Test Popup</a></div>
+    <br>
+    <div class="small secondary btn"><a href="#" onclick="win.reload()">Reload</a></div>
+    <div class="small warning btn"><a href="#" onclick="win.showDevTools()">Debugger</a></div>
+    <div class="small danger btn"><a href="#" onclick="win.close()">Close</a></div>
+
+
+<script src="js/jquery-2.1.1.min.js"></script>
+<script src="js/modernizr-2.6.2.min.js"></script>
+<script src="js/gumby.min.js"></script>
+<script src="js/nw-desktop-notifications.js"></script>
 
     <script>
 var gui = require('nw.gui');
@@ -19,8 +41,19 @@ var menu = new gui.Menu();
 menu.append(new gui.MenuItem({ type: 'checkbox', label: 'box1' }));
 tray.menu = menu;
 
+/*var http = require('http');
+http.createServer(function (req, res) {
+  res.writeHead(200, {'Content-Type': 'text/plain'});
+  res.end('Hello World\n');
+}).listen(65000, '127.0.0.1');
+notify('Phoenix is now hosting privately at localhost:65000');*/
+
+function notify(text) {
+	new Notification('Phoenix', { body: text, iconUrl: 'img/icon.png', icon: 'img/icon.png' });
+}
+
 function demoNotification() {
-	new Notification("Title", { tag: 'tag', body: 'body', iconUrl: 'img/icon.png', icon: 'img/icon.png' });
+	notify('Test Notification')
 }
 
 function demoTrayPopup() {
