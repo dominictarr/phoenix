@@ -1,5 +1,23 @@
-#nav .row {
-	padding: 0;
+#nav .controls {
+	width: 200px;
+	float: right;
+	-webkit-app-region: no-drag;
+}
+#nav .controls a {
+	display: inline-block;
+	width: 50px;
+	height: 25px;
+	text-align: center;
+	line-height: 1.5;
+}
+#nav .controls .secondary {
+	color: #18742F;
+}
+#nav .controls .default {
+	color: #7A7A7A;
+}
+#nav .controls .danger {
+	color: #771414;
 }
 
 #profiles {

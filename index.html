@@ -7,24 +7,34 @@
   </head>
   <body>
   	<div class="navbar" id="nav" style="-webkit-app-region: drag">
-		<div class="row">
-			<h1 class="ten columns logo"><img src="img/title.jpg" /></h1>
-			<ul class="two columns" style="-webkit-app-region: no-drag;"><li><a href="#">New Profile</a></li></ul>
-		</div>
+		<h1 class="logo"><img src="img/title.jpg" /></h1>
+		<div class="controls"><a href="javascript:win.showDevTools()" class="warning btn"><i class="icon-tools"></i></a><a href="javascript:win.reload()" class="secondary btn"><i class="icon-ccw"></i></a><a href="javascript:win.minimize()" class="default btn"><i class="icon-minus"></i></a><a href="javascript:win.close()" class="danger btn"><i class="icon-cancel"></i></a></div>
 	</div>
-
     <ul id="profiles">
     	<li><a href="#"><img src="img/avatars/dangerous-to-go-alone-cat.jpg"><br>Bob</a></li>
     	<li><a href="#"><img src="img/avatars/oldlady.jpg"><br>Alice</a></li>
     	<li><a href="#"><img src="img/plus.jpg"><br>New profile</a></li>
     </ul>
+    <table>
+		<caption>Your Activity</caption>
+		<tbody>
+			<tr>
+				<td>Bob</td>
+				<td>Published <a href="#">Family Trip Photos 2014</a>.</td>
+			</tr>
+			<tr>
+				<td>Bob</td>
+				<td>Signed into <a href="#">my-social-network.com</a>.</td>
+			</tr>
+			<tr>
+				<td>Alice</td>
+				<td>Was created.</td>
+			</tr>
+		</tbody>
+	</table>
     <br>
     <div class="medium primary btn"><a href="#" onclick="demoNotification()">Test Notification</a></div>
     <div class="medium default btn"><a href="#" onclick="demoTrayPopup()">Test Popup</a></div>
-    <br>
-    <div class="small secondary btn"><a href="#" onclick="win.reload()">Reload</a></div>
-    <div class="small warning btn"><a href="#" onclick="win.showDevTools()">Debugger</a></div>
-    <div class="small danger btn"><a href="#" onclick="win.close()">Close</a></div>
 
 
 <script src="js/jquery-2.1.1.min.js"></script>
