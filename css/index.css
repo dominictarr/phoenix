@@ -20,22 +20,39 @@
 	color: #771414;
 }
 
-#profiles {
-	list-style: none;
+#debug-new-profile, #debug-alice-profile {
+	display: none;
+}
+#debug-new-profile.active, #debug-alice-profile.active {
+	display: block;
+}
+.profile {
 	padding: 15px 20px;
 }
-#profiles li {
+.profile .profile-info {
+	margin-bottom: 1em;
+}
+.profile .profile-info .profile-avatar {
 	display: inline-block;
 	padding: 0 20px;
 	text-align: center;
+	vertical-align: top;
 }
-#profiles li a {
+.profile .profile-info .profile-details {
+	display: inline-block;
+}
+.profile .profile-info .profile-avatar a {
 	color: #555;
+	font-size: 17.6px;
+	font-size: 1.1rem;
+	line-height: 1.625em;
+	font-family: "Roboto";
+	font-weight: 400;
 }
-#profiles li a:hover {
+.profile .profile-info .profile-avatar a:hover {
 	color: #888;
 }
-#profiles li a img {
+.profile .profile-info .profile-avatar a img {
 	border-radius: 50%;
 	width: 128px;
 	height: 128px;

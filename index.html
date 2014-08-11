@@ -10,31 +10,47 @@
 		<h1 class="logo"><img src="img/title.jpg" /></h1>
 		<div class="controls"><a href="javascript:win.showDevTools()" class="warning btn"><i class="icon-tools"></i></a><a href="javascript:win.reload()" class="secondary btn"><i class="icon-ccw"></i></a><a href="javascript:win.minimize()" class="default btn"><i class="icon-minus"></i></a><a href="javascript:win.close()" class="danger btn"><i class="icon-cancel"></i></a></div>
 	</div>
-    <ul id="profiles">
-    	<li><a href="#"><img src="img/avatars/dangerous-to-go-alone-cat.jpg"><br>Bob</a></li>
-    	<li><a href="#"><img src="img/avatars/oldlady.jpg"><br>Alice</a></li>
-    	<li><a href="#"><img src="img/plus.jpg"><br>New profile</a></li>
-    </ul>
-    <table>
-		<caption>Your Activity</caption>
-		<tbody>
-			<tr>
-				<td>Bob</td>
-				<td>Published <a href="#">Family Trip Photos 2014</a>.</td>
-			</tr>
-			<tr>
-				<td>Bob</td>
-				<td>Signed into <a href="#">my-social-network.com</a>.</td>
-			</tr>
-			<tr>
-				<td>Alice</td>
-				<td>Was created.</td>
-			</tr>
-		</tbody>
-	</table>
+	<div class="profile" id="debug-new-profile">
+		<div class="profile-info">
+			<div class="profile-avatar"><a href="#"><img src="img/plus.jpg"><br>New profile</a></div>
+		</div>
+	</div>
+	<div class="profile active" id="debug-alice-profile">
+		<div class="profile-info">
+			<div class="profile-avatar"><a href="#"><img src="img/avatars/oldlady.jpg"></a></div>
+			<div class="profile-details">
+				<p><strong>Alice</strong></p>
+				<p>
+					Friends: <a href="#">17 (5 online)</a><br>
+					Sessions: <a href="#">Logged into 3 sites</a><br>
+					<div class="small default btn"><a href="#">Edit Your Profile</a></div>
+				</p>
+			</div>
+		</div>
+	    <table class="profile-activity">
+			<caption>Your Activity</caption>
+			<tbody>
+				<tr>
+					<td>Bob</td>
+					<td>Published <a href="#">Family Trip Photos 2014</a>.</td>
+				</tr>
+				<tr>
+					<td>Alice</td>
+					<td>Signed into <a href="#">my-social-network.com</a>.</td>
+				</tr>
+				<tr>
+					<td>Alice</td>
+					<td>Was created.</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
     <br>
-    <div class="medium primary btn"><a href="#" onclick="demoNotification()">Test Notification</a></div>
-    <div class="medium default btn"><a href="#" onclick="demoTrayPopup()">Test Popup</a></div>
+    <div style="position: fixed; bottom: 0">
+	    <div class="medium primary btn"><a href="#" onclick="demoNotification()">Test Notification</a></div>
+	    <div class="medium default btn"><a href="#" onclick="demoTrayPopup()">Test Popup</a></div>
+	    <div class="medium default btn"><a href="#" class="toggle" gumby-trigger="#debug-new-profile | #debug-alice-profile">Toggle profile view</a></div>
+	</div>
 
 
 <script src="js/jquery-2.1.1.min.js"></script>
