@@ -1,5 +1,4 @@
-@charset "UTF-8";
-
+@charset "IBM437";
 /**
 * Gumby Framework
 * ---------------
@@ -636,46 +635,22 @@ html, body { height: 100%; }
 
 /* Fonts */
 @font-face { font-family: "entypo"; font-style: normal; font-weight: 400; src: url(../fonts/icons/entypo.eot); src: url("../fonts/icons/entypo.eot?#iefix") format("ie9-skip-eot"), url("../fonts/icons/entypo.woff") format("woff"), url("../fonts/icons/entypo.ttf") format("truetype"); }
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 300;
-  src: local('Roboto Light'), local('Roboto-Light'), url(../fonts/roboto-light.woff2) format('woff2'), url(../fonts/roboto-light.woff) format('woff');
-}
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Roboto Regular'), local('Roboto-Regular'), url(../fonts/roboto-regular.woff2) format('woff2'), url(../fonts/roboto-regular.woff) format('woff');
-}
-@font-face {
-  font-family: 'Roboto';
-  font-style: normal;
-  font-weight: 900;
-  src: local('Roboto Black'), local('Roboto-Black'), url(../fonts/roboto-black.woff2) format('woff2'), url(../fonts/roboto-black.woff) format('woff');
-}
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 300;
-  src: local('Roboto Light Italic'), local('Roboto-LightItalic'), url(../fonts/roboto-light-italic.woff2) format('woff2'), url(../fonts/roboto-light-italic.woff) format('woff');
-}
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 400;
-  src: local('Roboto Italic'), local('Roboto-Italic'), url(../fonts/roboto-italic.woff2) format('woff2'), url(../fonts/roboto-italic.woff) format('woff');
-}
-@font-face {
-  font-family: 'Roboto';
-  font-style: italic;
-  font-weight: 900;
-  src: local('Roboto Black Italic'), local('Roboto-BlackItalic'), url(../fonts/roboto-black-italic.woff2) format('woff2'), url(../fonts/roboto-black-italic.woff) format('woff');
-}
+
+@font-face { font-family: 'Roboto'; font-style: normal; font-weight: 300; src: local("Roboto Light"), local("Roboto-Light"), url(../fonts/roboto-light.woff2) format("woff2"), url(../fonts/roboto-light.woff) format("woff"); }
+
+@font-face { font-family: 'Roboto'; font-style: normal; font-weight: 400; src: local("Roboto Regular"), local("Roboto-Regular"), url(../fonts/roboto-regular.woff2) format("woff2"), url(../fonts/roboto-regular.woff) format("woff"); }
+
+@font-face { font-family: 'Roboto'; font-style: normal; font-weight: 900; src: local("Roboto Black"), local("Roboto-Black"), url(../fonts/roboto-black.woff2) format("woff2"), url(../fonts/roboto-black.woff) format("woff"); }
+
+@font-face { font-family: 'Roboto'; font-style: italic; font-weight: 300; src: local("Roboto Light Italic"), local("Roboto-LightItalic"), url(../fonts/roboto-light-italic.woff2) format("woff2"), url(../fonts/roboto-light-italic.woff) format("woff"); }
+
+@font-face { font-family: 'Roboto'; font-style: italic; font-weight: 400; src: local("Roboto Italic"), local("Roboto-Italic"), url(../fonts/roboto-italic.woff2) format("woff2"), url(../fonts/roboto-italic.woff) format("woff"); }
+
+@font-face { font-family: 'Roboto'; font-style: italic; font-weight: 900; src: local("Roboto Black Italic"), local("Roboto-BlackItalic"), url(../fonts/roboto-black-italic.woff2) format("woff2"), url(../fonts/roboto-black-italic.woff) format("woff"); }
 
 /* Typography */
-h1, h2, h3, h4, h5, h6 { font-family: "Roboto"; font-weight: Normal; color: #444444; text-rendering: optimizeLegibility; padding-top: 0.273em; line-height: 1.15538em; padding-bottom: 0.273em; }
-h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: #d04526; }
+h1, h2, h3, h4, h5, h6 { font-family: "Roboto"; font-weight: 300; color: #444444; text-rendering: optimizeLegibility; padding-top: 0.273em; line-height: 1.15538em; padding-bottom: 0.273em; }
+h1 a, h2 a, h3 a, h4 a, h5 a, h6 a { color: #3085d6; }
 
 @media only screen and (max-width: 767px) { h1, h2, h3, h4, h5, h6 { word-wrap: break-word; } }
 h1 { font-size: 68px; font-size: 4.25rem; }
@@ -703,7 +678,7 @@ p.lead { font-size: 20px; font-size: 1.25rem; margin-bottom: 18px; }
 @media only screen and (max-width: 768px) { p { font-size: 17.6px; font-size: 1.1rem; line-height: 1.625em; } }
 
 a { color: #3085d6; text-decoration: none; outline: 0; line-height: inherit; }
-a:hover { color: #c03d20; }
+a:hover { color: #5b9ede; }
 
 /*=====================================================
  Lists  ======================================================*/
@@ -731,7 +706,7 @@ dl dt { font-weight: bold; font-size: 16px; font-size: 1rem; }
 /* Mobile */
 em { font-style: italic; line-height: inherit; }
 
-strong { font-weight: 900; line-height: inherit; }
+strong { font-weight: 700; line-height: inherit; }
 
 small { font-size: 56.4%; line-height: inherit; }
 
@@ -760,7 +735,7 @@ abbr { text-transform: none; }
   abbr[title]:after { content: " (" attr(title) ")"; }
   a[href^="javascript:"]:after, a[href^="#"]:after { content: ""; }
   /* Don't show links for images, or javascript/internal links */
-  pre, blockquote { border: 1px solid #999999; page-break-inside: avoid; }
+  pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
   thead { display: table-header-group; }
   /* css-discuss.incutio.com/wiki/Printing_Tables */
   tr, img { page-break-inside: avoid; }
@@ -1296,7 +1271,7 @@ img { -ms-interpolation-mode: bicubic; }
   .navbar ul.active { height: auto; max-height: 600px; z-index: 999998; -webkit-transition-duration: 0.5s; -moz-transition-duration: 0.5s; -o-transition-duration: 0.5s; transition-duration: 0.5s; -webkit-box-shadow: 0 2px 2px #252728; -moz-box-shadow: 0 2px 2px #252728; box-shadow: 0 2px 2px #252728; } }
 .navbar ul li { display: table-cell; text-align: center; padding-bottom: 0; margin: 0; height: 60px; line-height: 58px; }
 @media only screen and (max-width: 767px) { .navbar ul li { display: block; position: relative; min-height: 50px; max-height: 320px; height: auto; width: 100%; border-right: 0 !important; -webkit-box-shadow: none; -moz-box-shadow: none; box-shadow: none; -webkit-transition-duration: 0.5s; -moz-transition-duration: 0.5s; -o-transition-duration: 0.5s; transition-duration: 0.5s; } }
-.navbar ul li > a { display: block; padding: 0 16px; white-space: nowrap; color: white; height: 60px; line-height: 58px; font-size: 16px; font-size: 1rem; }
+.navbar ul li > a { display: block; padding: 0 16px; white-space: nowrap; color: white; text-shadow: 0 1px 2px #191a1b, 0 1px 0 #191a1b; height: 60px; line-height: 58px; font-size: 16px; font-size: 1rem; }
 .navbar ul li > a i.icon-popup { position: absolute; }
 .navbar ul li .btn { border-color: #000101 !important; }
 .navbar ul li.field { margin-bottom: 0 !important; margin-right: 0; }
@@ -1368,7 +1343,7 @@ img { -ms-interpolation-mode: bicubic; }
 .subnav li.active a, .subnav dd.active a { background: #4a4d50; padding: 5px 9px; text-shadow: 0 1px 1px #4a4d50; }
 
 /* Buttons */
-.btn, .skiplink { display: inline-block; width: auto; background: #f2f2f2; -webkit-appearance: none; font-family: "Roboto"; font-weight: 400; padding: 0 !important; text-align: center; }
+.btn, .skiplink { display: inline-block; width: auto; background: #f2f2f2; -webkit-appearance: none; font-family: "Roboto"; font-weight: 600; padding: 0 !important; text-align: center; }
 .btn > a, .btn input, .btn button, .skiplink > a, .skiplink input, .skiplink button { display: block; padding: 0 18px; color: white; height: 100%; }
 .btn input, .btn button, .skiplink input, .skiplink button { background: none; border: none; width: 100%; font-size: 100%; cursor: pointer; font-weight: 400; -webkit-appearance: none; -moz-appearance: none; appearance: none; }
 
@@ -1527,7 +1502,7 @@ label + .xnarrow:last-child, label + .narrow:last-child, label + .normal:last-ch
 
 .prepend .btn a, .prepend .btn input, .prepend .btn button, .append .btn a, .append .btn input, .append .btn button { padding: 0 12px; }
 
-.prepend .adjoined, .append .adjoined { padding: 0 10px 0 10px; background: #f2f2f2; border: 1px solid #d8d8d8; font-family: "Roboto"; font-weight: 900; color: #555555; font-size: 16px; font-size: 1rem; height: 36px; line-height: 34px; }
+.prepend .adjoined, .append .adjoined { padding: 0 10px 0 10px; background: #f2f2f2; border: 1px solid #d8d8d8; font-family: "Roboto"; font-weight: 600; color: #555555; font-size: 16px; font-size: 1rem; height: 36px; line-height: 34px; }
 
 .prepend .adjoined, .prepend .btn { margin-right: -1px; }
 
@@ -1580,7 +1555,7 @@ label + .xnarrow:last-child, label + .narrow:last-child, label + .normal:last-ch
 .js .field .radio.success i, .js .field .checkbox.success i { color: #58c026; }
 .js .field .radio.success span, .js .field .checkbox.success span { border-color: #58c026; color: #58c026; background: #c0eeaa; -webkit-transition-duration: 0.2s; -moz-transition-duration: 0.2s; -o-transition-duration: 0.2s; transition-duration: 0.2s; }
 .js .field .radio.checked i, .js .field .checkbox.checked i { position: absolute; top: -1px; left: -8px; line-height: 16px; }
-.js .field .radio span, .js .field .checkbox span { display: inline-block; width: 16px; height: 16px; position: relative; top: 2px; border: solid 1px #cccccc; background: #fefefe; }
+.js .field .radio span, .js .field .checkbox span { display: inline-block; width: 16px; height: 16px; position: relative; top: 2px; border: solid 1px #ccc; background: #fefefe; }
 .js .field .radio input[type="radio"], .js .field .radio input[type="checkbox"], .js .field .checkbox input[type="radio"], .js .field .checkbox input[type="checkbox"] { display: none; }
 .js .field .radio span { -webkit-border-radius: 8px; -moz-border-radius: 8px; -ms-border-radius: 8px; -o-border-radius: 8px; border-radius: 8px; }
 .js .field .checkbox span { -webkit-border-radius: 3px; -moz-border-radius: 3px; -ms-border-radius: 3px; -o-border-radius: 3px; border-radius: 3px; }
@@ -1588,7 +1563,7 @@ label + .xnarrow:last-child, label + .narrow:last-child, label + .normal:last-ch
 .field .text input[type="search"] { -webkit-appearance: textfield; }
 
 /* Form Picker Element (<select>) */
-.picker { position: relative; width: auto; display: inline-block; margin: 0 0 2px 1.2%; overflow: hidden; border: 1px solid #e5e5e5; -webkit-border-radius: 4px; -moz-border-radius: 4px; -ms-border-radius: 4px; -o-border-radius: 4px; border-radius: 4px; font-family: "Roboto"; font-weight: 900; height: auto; background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(100%, #f2f2f2)); background-image: -webkit-linear-gradient(#ffffff, #f2f2f2); background-image: -moz-linear-gradient(#ffffff, #f2f2f2); background-image: -o-linear-gradient(#ffffff, #f2f2f2); background-image: linear-gradient(#ffffff, #f2f2f2); }
+.picker { position: relative; width: auto; display: inline-block; margin: 0 0 2px 1.2%; overflow: hidden; border: 1px solid #e5e5e5; -webkit-border-radius: 4px; -moz-border-radius: 4px; -ms-border-radius: 4px; -o-border-radius: 4px; border-radius: 4px; font-family: "Roboto"; font-weight: 600; height: auto; background-image: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #ffffff), color-stop(100%, #f2f2f2)); background-image: -webkit-linear-gradient(#ffffff, #f2f2f2); background-image: -moz-linear-gradient(#ffffff, #f2f2f2); background-image: -o-linear-gradient(#ffffff, #f2f2f2); background-image: linear-gradient(#ffffff, #f2f2f2); }
 .picker:after { content: "\25BE"; font-family: entypo; z-index: 0; position: absolute; right: 8%; top: 50%; margin-top: -12px; color: #555555; }
 .picker:first-child { margin-left: 0; }
 .picker select { position: relative; display: block; min-width: 100%; width: 135%; height: 34px; padding: 6px 45px 6px 15px; color: #555555; border: none; background: transparent; outline: none; -webkit-appearance: none; z-index: 99; cursor: pointer; font-size: 16px; font-size: 1rem; }
@@ -1615,7 +1590,7 @@ label + .xnarrow:last-child, label + .narrow:last-child, label + .normal:last-ch
 
 .label { padding: 0 10px; font-size: 12px; font-size: 0.75rem; -webkit-border-radius: 2px; -moz-border-radius: 2px; -ms-border-radius: 2px; -o-border-radius: 2px; border-radius: 2px; }
 
-.alert { padding: 0 10px; font-family: "Roboto"; font-weight: 400; list-style-type: none; word-wrap: break-word; margin-bottom: 8px; font-size: 14px; font-size: 0.875rem; -webkit-border-radius: 4px; -moz-border-radius: 4px; -ms-border-radius: 4px; -o-border-radius: 4px; border-radius: 4px; }
+.alert { padding: 0 10px; font-family: "Roboto"; font-weight: 600; list-style-type: none; word-wrap: break-word; margin-bottom: 8px; font-size: 14px; font-size: 0.875rem; -webkit-border-radius: 4px; -moz-border-radius: 4px; -ms-border-radius: 4px; -o-border-radius: 4px; border-radius: 4px; }
 .alert.primary { background: #85b7e7; border: 1px solid #3085d6; color: #1a5186; }
 .alert.secondary { background: #80cb92; border: 1px solid #42a35a; color: #255a32; }
 .alert.default { background: white; border: 1px solid #f2f2f2; color: #bfbfbf; color: #555555; border: 1px solid #f2f2f2; }
@@ -1630,7 +1605,7 @@ label + .xnarrow:last-child, label + .narrow:last-child, label + .normal:last-ch
 .tab-nav { margin: 0; padding: 0; border-bottom: 1px solid #e5e5e5; }
 .tab-nav > li { display: inline-block; width: auto; padding: 0; margin: 0 2.12766% 0 0; cursor: default; top: 1px; -webkit-box-shadow: 0 1px 0 white; -moz-box-shadow: 0 1px 0 white; box-shadow: 0 1px 0 white; }
 .tab-nav > li > li { display: inline-block; width: auto; padding: 0; margin: 0 2.12766% 0 0; cursor: default; top: 1px; -webkit-box-shadow: 0 1px 0 white; -moz-box-shadow: 0 1px 0 white; box-shadow: 0 1px 0 white; }
-.tab-nav > li > li > a { display: block; width: auto; padding: 0 16px; margin: 0; color: #555555; font-family: "Roboto"; font-weight: 400; border: 1px solid #e5e5e5; border-width: 1px 1px 0 1px; text-shadow: 0 1px 1px white; background: #f2f2f2; cursor: pointer; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; -ms-border-radius: 4px 4px 0 0; -o-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; height: 42px; line-height: 40px; }
+.tab-nav > li > li > a { display: block; width: auto; padding: 0 16px; margin: 0; color: #555555; font-family: "Roboto"; font-weight: 600; border: 1px solid #e5e5e5; border-width: 1px 1px 0 1px; text-shadow: 0 1px 1px white; background: #f2f2f2; cursor: pointer; -webkit-border-radius: 4px 4px 0 0; -moz-border-radius: 4px 4px 0 0; -ms-border-radius: 4px 4px 0 0; -o-border-radius: 4px 4px 0 0; border-radius: 4px 4px 0 0; height: 42px; line-height: 40px; }
 .tab-nav > li > li > a:hover { text-decoration: none; background: whitesmoke; }
 .tab-nav > li > li > a:active { background: #ededed; }
 .tab-nav > li > li.active > a { height: 43px; line-height: 41px; background: white; cursor: default; }
@@ -1664,7 +1639,7 @@ label + .xnarrow:last-child, label + .narrow:last-child, label + .normal:last-ch
 .image { line-height: 0; margin-bottom: 20px; }
 .image.circle { -webkit-border-radius: 50% !important; -moz-border-radius: 50% !important; -ms-border-radius: 50% !important; -o-border-radius: 50% !important; border-radius: 50% !important; overflow: hidden; width: auto; }
 .image.rounded { overflow: hidden; -webkit-border-radius: 4px 4px; -moz-border-radius: 4px 4px; -ms-border-radius: 4px 4px; -o-border-radius: 4px 4px; border-radius: 4px 4px; }
-.image.photo { border: 5px solid white; -webkit-box-shadow: 0 0 1px #555555; -moz-box-shadow: 0 0 1px #555555; box-shadow: 0 0 1px #555555; }
+.image.photo { border: 5px solid #fff; -webkit-box-shadow: 0 0 1px #555555; -moz-box-shadow: 0 0 1px #555555; box-shadow: 0 0 1px #555555; }
 .image.photo.polaroid { padding-bottom: 50px; background: #fff; }
 
 /* Video */
@@ -1712,7 +1687,7 @@ table.rounded thead th, table.rounded thead td, table.rounded caption + tbody tr
 
 /* SHAME */
 .ie8 .xxwide, .ie8 .xwide, .ie8 .wide, .ie8 .normal, .ie8 .narrow, .ie8 .xnarrow { display: inline; }
-.ie8 .xxwide + input, .ie8 .xwide + input, .ie8 .wide + input, .ie8 .normal + input, .ie8 .narrow + input, .ie8 .xnarrow + input { display: inline; margin: 0 0 0 -0.25em; }
+.ie8 .xxwide + input, .ie8 .xwide + input, .ie8 .wide + input, .ie8 .normal + input, .ie8 .narrow + input, .ie8 .xnarrow + input { display: inline; margin: 0 0 0 -.25em; }
 .ie8 .ttip:before, .ie8 .ttip:after { display: none; }
 .ie8 .ttip:hover:before, .ie8 .ttip:hover:after { display: block; }
 

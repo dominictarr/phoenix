@@ -5,7 +5,7 @@
     "toolbar": false,
     "frame": false,
     "width": 570,
-    "height": 600,
+    "height": 310,
     "icon": "img/icon.png"
   },
   "single-instance": true

@@ -1,0 +1,29 @@
+#nav { margin: 0; }
+
+#nav h1 img { position: relative; top: 2px; }
+
+#nav .controls { width: 200px; float: right; -webkit-app-region: no-drag; }
+
+#nav .controls a { display: inline-block; width: 50px; height: 25px; text-align: center; line-height: 1.5; }
+
+#nav .controls .secondary { color: #18742F; }
+
+#nav .controls .default { color: #7A7A7A; }
+
+#nav .controls .danger { color: #771414; }
+
+#debug-new-profile, #debug-alice-profile { display: none; }
+
+#debug-new-profile.active, #debug-alice-profile.active { display: block; }
+
+.profile { padding: 15px 20px; }
+
+.profile .profile-info .profile-avatar { display: inline-block; padding: 0 20px; text-align: center; vertical-align: top; }
+
+.profile .profile-info .profile-details { display: inline-block; }
+
+.profile .profile-info .profile-avatar a { color: #555; font-size: 17.6px; font-size: 1.1rem; line-height: 1.625em; font-family: "Roboto"; font-weight: 400; }
+
+.profile .profile-info .profile-avatar a:hover { color: #888; }
+
+.profile .profile-info .profile-avatar a img { border-radius: 50%; width: 128px; height: 128px; }

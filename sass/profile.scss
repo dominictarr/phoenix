@@ -1,24 +1,4 @@
-#nav .controls {
-	width: 200px;
-	float: right;
-	-webkit-app-region: no-drag;
-}
-#nav .controls a {
-	display: inline-block;
-	width: 50px;
-	height: 25px;
-	text-align: center;
-	line-height: 1.5;
-}
-#nav .controls .secondary {
-	color: #18742F;
-}
-#nav .controls .default {
-	color: #7A7A7A;
-}
-#nav .controls .danger {
-	color: #771414;
-}
+@import "nav";
 
 #debug-new-profile, #debug-alice-profile {
 	display: none;
@@ -28,9 +8,6 @@
 }
 .profile {
 	padding: 15px 20px;
-}
-.profile .profile-info {
-	margin-bottom: 1em;
 }
 .profile .profile-info .profile-avatar {
 	display: inline-block;
