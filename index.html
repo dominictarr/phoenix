@@ -10,10 +10,6 @@
 		<h1 class="logo"><img src="img/title.jpg" /></h1>
 		<div class="controls"><a href="javascript:win.showDevTools()" class="warning btn"><i class="icon-tools"></i></a><a href="javascript:win.reload()" class="secondary btn"><i class="icon-ccw"></i></a><a href="javascript:win.minimize()" class="default btn"><i class="icon-minus"></i></a><a href="javascript:win.close()" class="danger btn"><i class="icon-cancel"></i></a></div>
 	</div>
-    <div>
-	    <div class="medium primary btn"><a href="index.html">Profile</a></div>
-	    <div class="medium default btn"><a href="feeds.html">Feed</a></div>
-	</div>
 	<div class="profile" id="debug-new-profile">
 		<div class="profile-info">
 			<div class="profile-avatar"><a href="#"><img src="img/plus.jpg"><br>New profile</a></div>
@@ -38,6 +34,7 @@
 <script src="js/modernizr-2.6.2.min.js"></script>
 <script src="js/gumby.min.js"></script>
 <script src="js/nw-desktop-notifications.js"></script>
+<script src="js/backend-loader.js"></script>
 
     <script>
 var gui = require('nw.gui');
@@ -45,18 +42,15 @@ var win = gui.Window.get();
 
 var tray = new gui.Tray({ title: 'Tray', icon: 'img/icon.png' });
 var menu = new gui.Menu();
+menu.append(new gui.MenuItem({ type: 'normal', label: 'Open Feed', click: function() {
+	gui.Shell.openExternal('http://localhost:65000');
+}}));
+menu.append(new gui.MenuItem({ type: 'separator' }));
 menu.append(new gui.MenuItem({ type: 'normal', label: 'Quit Phoenix', click: function() {
 	window.LOCAL_NW.desktopNotifications.closeAnyOpenNotificationWindows();
 	win.close(true);
 }}));
 tray.menu = menu;
-
-/*var http = require('http');
-http.createServer(function (req, res) {
-  res.writeHead(200, {'Content-Type': 'text/plain'});
-  res.end('Hello World\n');
-}).listen(65000, '127.0.0.1');
-notify('Phoenix is now hosting privately at localhost:65000');*/
 
 function notify(text) {
 	new Notification('Phoenix', { body: text, iconUrl: 'img/icon.png', icon: 'img/icon.png' });
