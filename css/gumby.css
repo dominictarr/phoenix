@@ -1749,16 +1749,23 @@ form { margin: 0; padding: 1em; }
 .feed .content img { max-width: 100%; max-height: 200px; }
 .feed .content .media-post .image { float: left; margin-right: 1em; }
 
-.profile .profile-avatar { display: inline-block; padding: 0 20px; text-align: center; vertical-align: top; }
+.profile .profile-avatar { float: left; padding: 0 20px; text-align: center; vertical-align: top; }
 .profile .profile-avatar a { color: #555; font-size: 17.6px; font-size: 1.1rem; line-height: 1.625em; font-family: "Roboto"; font-weight: 400; }
 .profile .profile-avatar a:hover { color: #888; }
 .profile .profile-avatar a img { border-radius: 50%; width: 128px; height: 128px; }
-.profile .profile-summary { display: inline-block; text-align: left; }
+.profile .profile-summary { margin-left: 170px; text-align: left; }
 .profile .profile-summary h2 { padding-bottom: 0; }
 .profile .profile-summary h3 { padding-top: 0; }
-.profile .profile-summary h3 small { font-size: 75%; }
-.profile .profile-data .label { background: transparent; border: 0; }
+.profile .profile-data .label.none { background: transparent; border: 0; color: #555555; }
 .profile .profile-data .label, .profile .profile-data .value { font-size: 14px; font-size: 0.9rem; line-height: 20px; height: 22px; }
+.profile.small .profile-avatar a img { width: 64px; height: 64px; }
+.profile.small .profile-summary { margin-left: 110px; }
+.profile.small .profile-summary h3 { padding-bottom: 0; }
+.profile.small .profile-summary h4 { padding-top: 0; }
+
+.nomargin { margin: 0 !important; }
+
+.nopadding { padding: 0 !important; }
 
 table.noborder { border: 0; }
 table.noborder tr td { border: 0; }
@@ -1767,4 +1774,4 @@ table.alignkeyright tr td:first-child { text-align: right; }
 
 hr { border-width: 1px; }
 
-.label.default + .value.default { border: 1px solid #f2f2f2; font-size: 12px; font-size: 0.75rem; padding: 0 10px; display: inline-block; }
+.label + .value.default { border: 1px solid #f2f2f2; font-size: 12px; font-size: 0.75rem; padding: 0 10px; display: inline-block; }

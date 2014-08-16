@@ -3,6 +3,9 @@
 @import "feed";
 @import "profile";
 
+.nomargin { margin: 0 !important; }
+.nopadding { padding: 0 !important; }
+
 table {
 	&.noborder {
 		border: 0;
@@ -26,7 +29,7 @@ hr {
 	border-width: 1px;
 }
 
-.label.default + .value.default {
+.label + .value.default {
 	border: 1px solid $default-color;
 	font-size: 12px;
 	font-size: 0.75rem;
