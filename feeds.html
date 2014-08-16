@@ -6,67 +6,71 @@
   	<link rel="stylesheet" href="css/feed.css">
   </head>
   <body>
-  	<div class="navbar" id="nav"><h1 class="logo"><img src="img/title.jpg" /></h1></div>
-    <div>
-        <div class="medium primary btn"><a href="/">Feed</a></div><div class="medium default btn"><a href="/profile/">Profile</a></div>
+  	<div class="navbar" id="nav">
+        <h1 class="four columns logo"><img src="img/title.jpg" /></h1>
+        <div class="eight columns">
+            <div class="medium primary btn"><a href="/">Feed</a></div><div class="medium default btn"><a href="/profile/">Profile</a></div>
+        </div>
     </div>
 
     <div class="row">
-        <div class="twelve columns">
 
+        <div class="four columns push_eight">
+            <br>
             <form>
-                <div class="field"><textarea class="input textarea" placeholder="Post an update"></textarea></div>
+                <div class="field"><textarea class="input textarea" placeholder="Compose a post"></textarea></div>
+                <div class="btn default medium pretty"><button>Post</button></div>
             </form>
+            <br>
+        </div>
+        <div class="eight columns pull_four">
 
             <table class="feed">
-            	<tbody>
-            		<tr>
-            			<td class="avatar"><a href="#"><img src="img/avatars/oldlady.jpg"></a></td>
-            			<td class="content">
-            				<p><strong>Alice</strong> posted 5 minutes ago</p>
-            				<div class="media-post">
-            					<a href="#" class="image photo"><img src="http://i.imgur.com/xu9oJVK.jpg"></a>
-            					<h4><a href="#">Vacation photos</a></h4>
-            					<p>Photo Album</p>
-            				</div>
-            			</td>
-            		</tr>
-            		<tr>
-            			<td class="avatar"><a href="#"><img src="img/avatars/dangerous-to-go-alone-cat.jpg"></a></td>
-            			<td class="content">
-            				<p><strong>Bob</strong> posted 7 minutes ago</p>
-            				<p>I know Gavin McInnes is trying to be edgy and transgressive, but I've yet to read a piece that conveys anything other than misanthropic hate</p>
-            			</td>
-            		</tr>
-            		<tr>
-            			<td class="avatar"><a href="#"><img src="img/avatars/dangerous-to-go-alone-cat.jpg"></a></td>
-            			<td class="content">
-            				<p><strong>Bob</strong> posted 35 minutes ago</p>
-            				<p>Trees in the springtime. <a href="#">http://www.smbc-comics.com/?id=3449</a></p>
-            			</td>
-            		</tr>
-            		<tr>
-            			<td class="avatar"><a href="#"><img src="img/avatars/oldlady.jpg"></a></td>
-            			<td class="content">
-            				<p><strong>Alice</strong> posted 1 hour ago</p>
-            				<p>How do I follow my grandson?</p>
-            			</td>
-            		</tr>
-            		<tr>
-            			<td class="avatar"><a href="#"><img src="img/avatars/oldlady.jpg"></a></td>
-            			<td class="content">
-            				<p><strong>Alice</strong> posted 1 hour ago</p>
-            				<p>Follow Tim Howard</p>
-            			</td>
-            		</tr>
-            		<tr>
-            			<td class="avatar"><a href="#"><img src="img/avatars/oldlady.jpg"></a></td>
-            			<td class="content">
-            				<p><strong>Alice</strong> posted 1 hour ago</p>
-            				<p>Follow timmy</p>
-            			</td>
-            		</tr>
-            	</tbody>
+                <tbody>
+                    <tr>
+                        <td class="avatar"><a href="/profile/" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop"><img src="img/avatars/dangerous-to-go-alone-cat.jpg"></a></td>
+                        <td class="content">
+                            <p><strong>Bob</strong> posted 7 minutes ago</p>
+                            <p><span class="label default">From</span><span class="value default">Austin, TX</span></p>
+                            <p><span class="label default">Born</span><span class="value default">August 9, 1986</span></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="avatar"><a href="/profile/" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom"><img src="img/avatars/oldlady.jpg"></a></td>
+                        <td class="content">
+                            <p><strong>Alice</strong> posted 35 minutes ago</p>
+                            <p>How do I follow my grandson?</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="avatar"><a href="/profile/" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop"><img src="img/avatars/dangerous-to-go-alone-cat.jpg"></a></td>
+                        <td class="content">
+                            <p><strong>Bob</strong> posted 1 hour ago</p>
+                            <p>Trees in the springtime. <a href="#">http://www.smbc-comics.com/?id=3449</a></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="avatar"><a href="/profile/" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom"><img src="img/avatars/oldlady.jpg"></a></td>
+                        <td class="content">
+                            <p><strong>Alice</strong> posted 1 hour ago</p>
+                            <p>Follow Tim Howard</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="avatar"><a href="/profile/" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom"><img src="img/avatars/oldlady.jpg"></a></td>
+                        <td class="content">
+                            <p><strong>Alice</strong> posted 1 hour ago</p>
+                            <p>Follow timmy</p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="avatar"><a href="/profile/" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom"><img src="img/avatars/oldlady.jpg"></a></td>
+                        <td class="content">
+                            <p><strong>Alice</strong> posted 1 hour ago</p>
+                            <p><span class="label default">I trust</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Bob</a></span><span class="label default">to guard my account</span></p>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
         </div>
     </div>

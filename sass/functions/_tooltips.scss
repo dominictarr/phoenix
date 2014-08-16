@@ -1,6 +1,6 @@
 // CSS Tooltips
 
-@mixin tooltip($tt-min-width, $tt-bgcolor, $tt-position, $tt-align) {
+@mixin tooltip($tt-min-width, $tt-bgcolor, $tt-fgcolor, $tt-position, $tt-align) {
   position: relative;
 
   &:after {
@@ -38,7 +38,7 @@
       text-align: left;
     }
 
-    color: #fff;
+    color: $tt-fgcolor;
     content: attr(data-tooltip);
     line-height: 1.5;
     font-size: $norm;
