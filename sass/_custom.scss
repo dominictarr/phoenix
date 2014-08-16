@@ -1,1 +1,31 @@
-// Your custom SCSS should be written here...
+
+table {
+	&.noborder {
+		border: 0;
+		tr td {
+			border: 0;
+		}
+	}
+	&.nopadding {
+		tr td {
+			padding: 0 1em 0 0;
+		}
+	}
+	&.alignkeyright {
+		tr td:first-child {
+			text-align: right;
+		}
+	}
+}
+
+hr {
+	border-width: 1px;
+}
+
+.label.default + .value.default {
+	border: 1px solid $default-color;
+	font-size: 12px;
+	font-size: 0.75rem;
+	padding: 0 10px;
+	display: inline-block;
+}

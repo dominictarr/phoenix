@@ -8,6 +8,10 @@ function createServer(port) {
 			res.writeHead(200, {'Content-Type': 'text/html'});
 			return fs.createReadStream('./feeds.html').pipe(res);
 		}
+		if (pathStarts('/profile/')) {
+			res.writeHead(200, {'Content-Type': 'text/html'});
+			return fs.createReadStream('./profile.html').pipe(res);
+		}
 		if (pathStarts('/js/')) {
 			res.writeHead(200, {'Content-Type': 'application/javascript'});
 			return fs.createReadStream('./'+req.url).pipe(res);

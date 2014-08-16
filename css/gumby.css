@@ -1692,3 +1692,12 @@ table.rounded thead th, table.rounded thead td, table.rounded caption + tbody tr
 .ie8 .ttip:hover:before, .ie8 .ttip:hover:after { display: block; }
 
 .ie9 .radio.checked i, .ie9 .checkbox.checked i { top: 0; }
+
+table.noborder { border: 0; }
+table.noborder tr td { border: 0; }
+table.nopadding tr td { padding: 0 1em 0 0; }
+table.alignkeyright tr td:first-child { text-align: right; }
+
+hr { border-width: 1px; }
+
+.label.default + .value.default { border: 1px solid #f2f2f2; font-size: 12px; font-size: 0.75rem; padding: 0 10px; display: inline-block; }

@@ -12,6 +12,8 @@
 
 #nav .controls .danger { color: #771414; }
 
+form { margin: 0; padding: 1em; }
+
 .feed .avatar { width: 85px; }
 
 .feed .avatar a img { border-radius: 50%; width: 64px; height: 64px; vertical-align: middle; }
