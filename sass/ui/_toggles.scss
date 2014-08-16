@@ -38,13 +38,7 @@
  		background: $modal-window-color;
  		z-index: 2;
  		overflow: auto;
-    @include respond(portrait-tablets) {
-      width: 80%;
-      min-height: 80%;
-      max-height: 80%;
-      top: 10%;
-    }
-    @include respond(all-phones) {
+    @include respond(document-width) {
       width: 92.5%;
       min-height: 92.5%;
       max-height: 92.5%;
