@@ -1,0 +1,38 @@
+form {
+	margin: 0;
+	padding: 1em;
+}
+
+.feed {
+	.avatar {
+		width: 85px;
+		a img {
+			border-radius: 50%;
+			width: 64px;
+			height: 64px;
+			vertical-align: middle;
+		}
+	}
+	.content {
+		.ctrls {
+			float: right;
+			a {
+				color: #ccc;
+				&:hover {
+					color: $info-hover-color;
+				}
+			}
+		}
+		.image {
+			display: inline-block;
+		}
+		img {
+			max-width: 100%;
+			max-height: 200px;
+		}
+		.media-post .image {
+			float: left;
+			margin-right: 1em;
+		}
+	}
+}
