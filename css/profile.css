@@ -12,7 +12,6 @@
 
 #nav .controls .danger { color: #771414; }
 
-.profile { padding: 15px 20px; }
 .profile .profile-info .profile-avatar { display: inline-block; padding: 0 20px; text-align: center; vertical-align: top; }
 .profile .profile-info .profile-avatar a { color: #555; font-size: 17.6px; font-size: 1.1rem; line-height: 1.625em; font-family: "Roboto"; font-weight: 400; }
 .profile .profile-info .profile-avatar a:hover { color: #888; }
@@ -21,4 +20,5 @@
 .profile .profile-info .profile-summary h2 { padding-bottom: 0; }
 .profile .profile-info .profile-summary h3 { padding-top: 0; }
 .profile .profile-info .profile-summary h3 small { font-size: 75%; }
+.profile .profile-info .profile-data .label { background: transparent; border: 0; }
 .profile .profile-info .profile-data .label, .profile .profile-info .profile-data .value { font-size: 14px; font-size: 0.9rem; line-height: 20px; height: 22px; }
