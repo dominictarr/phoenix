@@ -21,7 +21,6 @@
 					<h3><small>ID: <a href="#" class="switch" gumby-trigger="#pubkey-modal">Yabiv-huhaf Fubar-kasom</a></small></h3>
 					<p>
 						<span class="btn primary pretty"><a href="#">Follow</a></span>
-						<span class="btn default pretty"><a href="#">Send Friend Request</a></span>
 					</p>
 					<br>
 				</div>
@@ -30,17 +29,16 @@
 		<div class="row">
 			<div class="four columns push_eight">
 				<p>
-					<strong>Friends</strong><br>
-					<span class="label primary"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop (Mutual Friend)">Bob</a></span>
-					<span class="label primary"><a href="#" class="ttip long" data-tooltip="ID: Hip-hop Pip-pop (Mutual Friend)">Carla</a></span>
-					<span class="label default"><a href="#" class="ttip long" data-tooltip="ID: Tothe-left Tothe-right">David</a></span>
-					<span class="label primary"><a href="#" class="ttip long" data-tooltip="ID: What-ever Test-data (Mutual Friend)">Ellen</a></span>
-					<span class="label default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Frank</a></span>
-					<span class="label default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Gina</a></span>
+					<strong>Verified by</strong><br>
+					<span class="label primary"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop (Verified)">Bob</a></span>
+					<span class="label default"><a href="#" class="ttip long" data-tooltip="ID: Jackie-jorp Jomp">Carla</a></span>
+				</p>
+				<p>
+					<span class="btn default small pretty"><button class="switch" gumby-trigger="#verify-modal">Sign this ID</button></span></p>
 				</p>
 				<br>
-				<p><span class="btn default medium pretty"><button>Encrypt a message for Alice</button></span></p>
-				<p><span class="btn default medium pretty"><button>Decrypt a message from Alice</button></span></p>
+				<p><span class="btn default medium pretty"><button class="switch" gumby-trigger="#encrypt-modal">Encrypt a message for Alice</button></span></p>
+				<p><span class="btn default medium pretty"><button class="switch" gumby-trigger="#decrypt-modal">Decrypt a message from Alice</button></span></p>
 			</div>
         	<div class="eight columns pull_four">
 				<table class="feed">
@@ -48,14 +46,7 @@
                         <td class="avatar"><a href="/profile/" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom"><img src="/img/avatars/oldlady.jpg"></a></td>
                         <td class="content">
                             <p><strong>Alice</strong> <small>1 hour ago</small></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Carla</a></span><span class="label default">as my friend</span></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">David</a></span><span class="label default">as my friend</span></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Ellen</a></span><span class="label default">as my friend</span></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Frank</a></span><span class="label default">as my friend</span></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Gina</a></span><span class="label default">as my friend</span></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Hank</a></span><span class="label default">as my friend</span></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Ilene</a></span><span class="label default">as my friend</span></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Jack</a></span><span class="label default">as my friend</span></p>
+                            <p><span class="label default">Verified by</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Carla</a></span></p>
                         </td>
                     </tr>
 		    		<tr>
@@ -83,7 +74,7 @@
                         <td class="avatar"><a href="/profile/" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom"><img src="/img/avatars/oldlady.jpg"></a></td>
                         <td class="content">
                             <p><strong>Alice</strong> <small>1 hour ago</small></p>
-                            <p><span class="label default">I added</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Bob</a></span><span class="label default">as my friend</span></p>
+                            <p><span class="label default">Verified by</span><span class="value default"><a href="#" class="ttip long" data-tooltip="ID: Bleep-bloop Wheep-whoop">Bob</a></span></p>
                         </td>
                     </tr>
                     <tr>
@@ -105,13 +96,73 @@
                 <div class="ten columns centered text-center">
                     <h2>Alice's ID <br><small>Yabiv-huhaf Fubar-kasom</small></h2>
                     <h3>Alice's Public Key</h3>
-                    <div class="field"><textarea readonly class="input textarea" rows=10>ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAqrv2LbIS76UVWd6JfLgrBtrG3a7poTb0ptwOqt9LslZQzmVc7NFa2KAA6zyekJYsXlKF6T999fb2A8FsaGtF2fIH7VepZs2pXyHCNT6FyGYZ80z6izvq9Cmioh+2ES0hw/66InP4OoBY7Pu9nPZzPL/YziHBu6Gm+PeC5dU8FeNwIpHcxUP/SjRhRpdFrSlPHjGsEKI4XORp8sId8VOn+Q1iBSBPokdA5AQ6gkzNG2ax0MksIhVaCgNkJKXOzOPI02vfhBHNyuWJU4LxsySx5qKTk1Kkmw2OJ748r9Xw2u3KSHG0KknU2Zym45qE8RxkhXbGtzrWqQpKhDTLTNn0MQ== Paul Frazee@PAULFRAZEE-VM</textarea></div>
+                    <div class="field"><textarea readonly class="input textarea" rows="7">AAAAB3NzaC1yc2EAAAABIwAAAQEAqrv2LbIS76UVWd6JfLgrBtrG3a7poTb0ptwOqt9LslZQzmVc7NFa2KAA6zyekJYsXlKF6T999fb2A8FsaGtF2fIH7VepZs2pXyHCNT6FyGYZ80z6izvq9Cmioh+2ES0hw/66InP4OoBY7Pu9nPZzPL/YziHBu6Gm+PeC5dU8FeNwIpHcxUP/SjRhRpdFrSlPHjGsEKI4XORp8sId8VOn+Q1iBSBPokdA5AQ6gkzNG2ax0MksIhVaCgNkJKXOzOPI02vfhBHNyuWJU4LxsySx5qKTk1Kkmw2OJ748r9Xw2u3KSHG0KknU2Zym45qE8RxkhXbGtzrWqQpKhDTLTNn0MQ==</textarea></div>
                     <br>
                     <h4>What is this?</h4>
                     <p>This is <a href="#" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom">Alice</a>'s ID and Public Key. They uniquely identify <a href="#" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom">Alice</a> in the Phoenix network.</p>
                     <br>
                     <h4>What's a public key?</h4>
                     <p>A public key is a tool to 1) encrypt messages so that only <a href="#" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom">Alice</a> can read them, and 2) verify that messages have been written by <a href="#" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom">Alice</a>. With it, you and <a href="#" class="ttip long" data-tooltip="ID: Yabiv-huhaf Fubar-kasom">Alice</a> can communicate safely.</p>
+                    <br><br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+	<div class="modal pubkey-modal" id="verify-modal">
+        <div class="content">
+            <a class="close switch" gumby-trigger="|#verify-modal"><i class="icon-cancel" /></i></a>
+            <div class="row">
+                <div class="ten columns centered text-center">
+                    <h2>Sign this ID<br><small>Yabiv-huhaf Fubar-kasom</small></h2>
+                    <h3>Public Key</h3>
+                    <div class="field"><textarea readonly class="input textarea" rows="7">AAAAB3NzaC1yc2EAAAABIwAAAQEAqrv2LbIS76UVWd6JfLgrBtrG3a7poTb0ptwOqt9LslZQzmVc7NFa2KAA6zyekJYsXlKF6T999fb2A8FsaGtF2fIH7VepZs2pXyHCNT6FyGYZ80z6izvq9Cmioh+2ES0hw/66InP4OoBY7Pu9nPZzPL/YziHBu6Gm+PeC5dU8FeNwIpHcxUP/SjRhRpdFrSlPHjGsEKI4XORp8sId8VOn+Q1iBSBPokdA5AQ6gkzNG2ax0MksIhVaCgNkJKXOzOPI02vfhBHNyuWJU4LxsySx5qKTk1Kkmw2OJ748r9Xw2u3KSHG0KknU2Zym45qE8RxkhXbGtzrWqQpKhDTLTNn0MQ==</textarea></div>
+                    <p>Check the data above. Is this Alice's public key? Ask them in-person or over the phone, and only hit "Sign" if you're 100% sure!</p>
+                    <p>
+                    	<span class="btn medium primary pretty"><a href="#">Sign</a></span>
+                    	<span class="btn medium default pretty"><a href="#" class="switch" gumby-trigger="|#verify-modal">Cancel</a></span>
+                    </p>
+                    <br>
+                    <h4>What does this do?</h4>
+                    <p>This tool broadcasts your signature Alice's ID-card. Your followers can see the signature and feel confident this is really Alice.</p>
+                    <br>
+                    <h4>Should I sign it?</h4>
+                    <p>The nightmare scenario is that somebody is pretending to be Alice. On the Internet, it's not hard to do that! If you didn't get the ID or public key in person, then call up your friend and double-check it with them. Otherwise, it's best not to sign it at all.</p>
+                    <br>
+                    <h4>Where can I get my ID or public key?</h4>
+                    <p>If someone wants to verify you, they'll need your ID and public key. You can get them on <a href="#">your profile page</a>, but, since you asked, here they are:</p>
+                    <p><strong>ID:</strong><br>Bleep-bloop Wheep-whoop</p>
+                    <p><strong>Public Key:</strong><br><span class="field"><textarea rows="7" class="input textarea" readonly>AAAAB3NzaC1yc2EAAAABIwAAAQEAqrv2LbIS76UVWd6JfLgrBtrG3a7poTb0ptwOqt9LslZQzmVc7NFa2KAA6zyekJYsXlKF6T999fb2A8FsaGtF2fIH7VepZs2pXyHCNT6FyGYZ80z6izvq9Cmioh+2ES0hw/66InP4OoBY7Pu9nPZzPL/YziHBu6Gm+PeC5dU8FeNwIpHcxUP/SjRhRpdFrSlPHjGsEKI4XORp8sId8VOn+Q1iBSBPokdA5AQ6gkzNG2ax0MksIhVaCgNkJKXOzOPI02vfhBHNyuWJU4LxsySx5qKTk1Kkmw2OJ748r9Xw2u3KSHG0KknU2Zym45qE8RxkhXbGtzrWqQpKhDTLTNn0MQ==</textarea></span></p>
+                    <br><br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+	<div class="modal" id="encrypt-modal">
+        <div class="content">
+            <a class="close switch" gumby-trigger="|#encrypt-modal"><i class="icon-cancel" /></i></a>
+            <div class="row">
+                <div class="ten columns centered">
+                    <h2 class="text-center">Encrypter</h2>
+                    <p>Enter your message:</p>
+                    <div class="field"><textarea class="input textarea" rows=6></textarea></div>
+                    <p><span class="btn medium primary pretty"><a href="#">Encrypt</a></span></p>
+                    <br><br>
+                </div>
+            </div>
+        </div>
+    </div>
+
+	<div class="modal" id="decrypt-modal">
+        <div class="content">
+            <a class="close switch" gumby-trigger="|#decrypt-modal"><i class="icon-cancel" /></i></a>
+            <div class="row">
+                <div class="ten columns centered">
+                    <h2 class="text-center">Decrypter</h2>
+                    <p>Enter the encrypted message:</p>
+                    <div class="field"><textarea class="input textarea" rows=6></textarea></div>
+                    <p><span class="btn medium primary pretty"><a href="#">Decrypt</a></span></p>
                     <br><br>
                 </div>
             </div>
