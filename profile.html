@@ -20,7 +20,7 @@
 					<h2>Alice</h2>
 					<h3><small>Joined August 18, 2014</small></h3>
 					<p>
-						<span class="btn primary pretty switch ttip long" gumby-trigger="#follow-modal" data-tooltip="Receive updates from this user"><a href="#">Follow</a></span>
+						<span class="btn primary pretty ttip long" data-tooltip="Receive updates from this user"><a href="#">Follow</a></span>
 					</p>
 					<br>
 				</div>
@@ -29,17 +29,18 @@
 		<div class="row">
 			<div class="four columns push_eight">
 				<p>
-					<strong>Followed by</strong><br>
-					<span class="label primary"><a href="#" class="ttip" data-tooltip="You follow Bob">Bob</a></span>
+					<strong>Verified by</strong><br>
+					<span class="label primary"><a href="#" class="ttip" data-tooltip="You have verified Bob">Bob</a></span>
 					<span class="label default"><a href="#">Carla</a></span>
 				</p>
 				<p>
-					<span class="btn danger small pretty"><button class="switch ttip long" gumby-trigger="#warning-modal" data-tooltip="Warn Your Network about This Account">Flag This Account</button></span></p>
+                    <span class="btn default small pretty icon-left entypo icon-check switch ttip long" gumby-trigger="#verify-modal" data-tooltip="Assure Your Network about This Account"><a href="#">Verify</a></span>
+					<span class="btn default small pretty icon-left entypo icon-flag switch ttip long" gumby-trigger="#warning-modal" data-tooltip="Warn Your Network about This Account"><a href="#">Flag</a></span>
 				</p>
 				<br>
                 <p><strong>Encrypt a message</strong></p>
                 <div class="field"><textarea class="input textarea" rows="6"></textarea></div>
-				<p><span class="btn default small pretty"><button class="ttip long" data-tooltip="Encrypt this message for Alice">Encrypt</button></span></p>
+                <p><span class="btn default small pretty icon-left entypo icon-lock switch ttip long" gumby-trigger="#warning-modal" data-tooltip="Encrypt this message for Alice"><a href="#">Encrypt</a></span></p>
 			</div>
         	<div class="eight columns pull_four">
 				<table class="feed">
@@ -47,7 +48,7 @@
                         <td class="avatar"><a href="/profile/"><img src="/img/avatars/oldlady.jpg"></a></td>
                         <td class="content">
                             <p><strong>Alice</strong> <small>1 hour ago</small></p>
-                            <p><span class="label default">Followed by</span><span class="value default"><a href="#">Carla</a></span></p>
+                            <p><span class="label default">Verified by</span><span class="value default"><a href="#">Carla</a></span></p>
                         </td>
                     </tr>
 		    		<tr>
@@ -75,7 +76,7 @@
                         <td class="avatar"><a href="/profile/"><img src="/img/avatars/oldlady.jpg"></a></td>
                         <td class="content">
                             <p><strong>Alice</strong> <small>1 hour ago</small></p>
-                            <p><span class="label default">Followed by</span><span class="value default"><a href="#">Bob</a></span></p>
+                            <p><span class="label default">Verified by</span><span class="value default"><a href="#">Bob</a></span></p>
                         </td>
                     </tr>
                     <tr>
@@ -90,20 +91,20 @@
 		</div>
 	</div>
 
-	<div class="modal pubkey-modal" id="follow-modal">
+	<div class="modal pubkey-modal" id="verify-modal">
         <div class="content">
-            <a class="close switch" gumby-trigger="|#follow-modal"><i class="icon-cancel" /></i></a>
+            <a class="close switch" gumby-trigger="|#verify-modal"><i class="icon-cancel" /></i></a>
             <div class="row">
                 <div class="ten columns centered text-center">
-                    <h2>Follow Alice</h2>
+                    <h2>Verify Alice</h2>
                     <div class="pubkey">
                         <code>F43G 59D3 WR1A 11SZ<br>C783 34ZZ A1MJ 8721</code>
                     </div>
-                    <p>Check the key above. Is this Alice's? Ask them in-person or over the phone, and only hit "Follow" if you're 100% sure!</p>
+                    <p>Check the key above. Is this Alice's? Ask them in-person or over the phone, and only hit "Verify" if you're 100% sure!</p>
                     <br>
                     <p>
-                    	<span class="btn medium primary pretty"><a href="#">Follow</a></span>
-                    	<span class="btn medium default pretty"><a href="#" class="switch" gumby-trigger="|#follow-modal">Cancel</a></span>
+                    	<span class="btn medium primary pretty"><a href="#">Verify</a></span>
+                    	<span class="btn medium default pretty"><a href="#" class="switch" gumby-trigger="|#verify-modal">Cancel</a></span>
                     </p>
                 </div>
             </div>
@@ -118,9 +119,9 @@
                     <h2>Flag this Account</h2>
                     <br>
                     <p class="field"><label class="radio" for="radio1"><input name="warning-type" id="radio1" type="radio"><span></span> This account may have been compromised</label></p>
-                    <p class="field"><label class="radio" for="radio2"><input name="warning-type" id="radio2" type="radio"><span></span> This account is an imposter</label></p>
-                    <p class="field"><label class="radio" for="radio3"><input name="warning-type" id="radio3" type="radio"><span></span> This is a spam account</label></p>
-                    <p class="field"><label class="radio" for="radio4"><input name="warning-type" id="radio4" type="radio"><span></span> This account is abusive</label></p>
+                    <p class="field"><label class="radio" for="radio3"><input name="warning-type" id="radio3" type="radio"><span></span> This account verifies users which should not be trusted</label></p>
+                    <p class="field"><label class="radio" for="radio2"><input name="warning-type" id="radio2" type="radio"><span></span> This account has lied about its identity</label></p>
+                    <p class="field"><label class="radio" for="radio4"><input name="warning-type" id="radio4" type="radio"><span></span> This account is spamming or abusive</label></p>
                     <br>
                     <p>
                     	<span class="btn medium danger pretty"><a href="#">Issue Warning</a></span>
