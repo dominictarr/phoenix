@@ -1736,7 +1736,9 @@ table.rounded thead th, table.rounded thead td, table.rounded caption + tbody tr
 
 #nav .controls .danger { color: #771414; }
 
-.pubkey-modal .field .input.textarea { line-height: 22px; padding: 6px 10px; }
+.pubkey-modal .pubkey { border: 1px solid #e5e5e5; padding: 1em; position: relative; width: 50%; margin: 2em auto; }
+.pubkey-modal .pubkey::before { content: 'Public Key'; display: inline-block; position: absolute; top: -0.9em; padding: 0 1em; margin-left: 2em; background: white; }
+.pubkey-modal code { font-family: consolas, monospace; background: #eee; }
 
 form { margin: 0; padding: 1em; }
 

@@ -8,7 +8,7 @@
   	<div class="navbar" id="nav">
 		<h1 class="logo four columns"><img src="/img/title.jpg" /></h1>
 	    <div class="eight columns">
-		    <div class="medium default btn"><a href="/">Gossip</a></div><div class="medium primary btn"><a href="/profile/">Profile</a></div><div class="medium default btn"><a href="/search/">Find user</a></div>
+		    <div class="medium default btn"><a href="/">Gossip</a></div><div class="medium primary btn"><a href="/profile/">Profile</a></div><div class="medium default btn"><a href="/search/">Find user</a></div><div class="medium default btn"><a href="/decrypt">Decrypt</a></div>
 		</div>
 	</div>
 	<div class="profile">
@@ -34,11 +34,12 @@
 					<span class="label default"><a href="#">Carla</a></span>
 				</p>
 				<p>
-					<span class="btn danger small pretty"><button class="switch ttip long" gumby-trigger="#warning-modal" data-tooltip="Warn Your Network about This Account">Shun This Account</button></span></p>
+					<span class="btn danger small pretty"><button class="switch ttip long" gumby-trigger="#warning-modal" data-tooltip="Warn Your Network about This Account">Flag This Account</button></span></p>
 				</p>
 				<br>
-				<p><span class="btn default medium pretty"><button class="switch" gumby-trigger="#encrypt-modal">Encrypt a message for Alice</button></span></p>
-				<p><span class="btn default medium pretty"><button class="switch" gumby-trigger="#decrypt-modal">Decrypt a message from Alice</button></span></p>
+                <p><strong>Encrypt a message</strong></p>
+                <div class="field"><textarea class="input textarea" rows="6"></textarea></div>
+				<p><span class="btn default small pretty"><button class="ttip long" data-tooltip="Encrypt this message for Alice">Encrypt</button></span></p>
 			</div>
         	<div class="eight columns pull_four">
 				<table class="feed">
@@ -94,10 +95,12 @@
             <a class="close switch" gumby-trigger="|#follow-modal"><i class="icon-cancel" /></i></a>
             <div class="row">
                 <div class="ten columns centered text-center">
-                    <h2>Follow Alice<br><small>Joined Aug 18, 2014</small></h2>
-                    <h3>Public Key</h3>
-                    <div class="field"><textarea readonly class="input textarea" rows="7">AAAAB3NzaC1yc2EAAAABIwAAAQEAqrv2LbIS76UVWd6JfLgrBtrG3a7poTb0ptwOqt9LslZQzmVc7NFa2KAA6zyekJYsXlKF6T999fb2A8FsaGtF2fIH7VepZs2pXyHCNT6FyGYZ80z6izvq9Cmioh+2ES0hw/66InP4OoBY7Pu9nPZzPL/YziHBu6Gm+PeC5dU8FeNwIpHcxUP/SjRhRpdFrSlPHjGsEKI4XORp8sId8VOn+Q1iBSBPokdA5AQ6gkzNG2ax0MksIhVaCgNkJKXOzOPI02vfhBHNyuWJU4LxsySx5qKTk1Kkmw2OJ748r9Xw2u3KSHG0KknU2Zym45qE8RxkhXbGtzrWqQpKhDTLTNn0MQ==</textarea></div>
-                    <p>Check the data above. Is this Alice's public key? Ask them in-person or over the phone, and only hit "Follow" if you're 100% sure!</p>
+                    <h2>Follow Alice</h2>
+                    <div class="pubkey">
+                        <code>F43G 59D3 WR1A 11SZ<br>C783 34ZZ A1MJ 8721</code>
+                    </div>
+                    <p>Check the key above. Is this Alice's? Ask them in-person or over the phone, and only hit "Follow" if you're 100% sure!</p>
+                    <br>
                     <p>
                     	<span class="btn medium primary pretty"><a href="#">Follow</a></span>
                     	<span class="btn medium default pretty"><a href="#" class="switch" gumby-trigger="|#follow-modal">Cancel</a></span>
@@ -112,7 +115,7 @@
             <a class="close switch" gumby-trigger="|#warning-modal"><i class="icon-cancel" /></i></a>
             <div class="row">
                 <div class="ten columns centered text-center">
-                    <h2>Shun this Account</h2>
+                    <h2>Flag this Account</h2>
                     <br>
                     <p class="field"><label class="radio" for="radio1"><input name="warning-type" id="radio1" type="radio"><span></span> This account may have been compromised</label></p>
                     <p class="field"><label class="radio" for="radio2"><input name="warning-type" id="radio2" type="radio"><span></span> This account is an imposter</label></p>
@@ -123,36 +126,6 @@
                     	<span class="btn medium danger pretty"><a href="#">Issue Warning</a></span>
                     	<span class="btn medium default pretty"><a href="#" class="switch" gumby-trigger="|#warning-modal">Cancel</a></span>
                     </p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-	<div class="modal" id="encrypt-modal">
-        <div class="content">
-            <a class="close switch" gumby-trigger="|#encrypt-modal"><i class="icon-cancel" /></i></a>
-            <div class="row">
-                <div class="ten columns centered">
-                    <h2 class="text-center">Encrypter</h2>
-                    <p>Enter your message:</p>
-                    <div class="field"><textarea class="input textarea" rows=6></textarea></div>
-                    <p><span class="btn medium primary pretty"><a href="#">Encrypt</a></span></p>
-                    <br><br>
-                </div>
-            </div>
-        </div>
-    </div>
-
-	<div class="modal" id="decrypt-modal">
-        <div class="content">
-            <a class="close switch" gumby-trigger="|#decrypt-modal"><i class="icon-cancel" /></i></a>
-            <div class="row">
-                <div class="ten columns centered">
-                    <h2 class="text-center">Decrypter</h2>
-                    <p>Enter the encrypted message:</p>
-                    <div class="field"><textarea class="input textarea" rows=6></textarea></div>
-                    <p><span class="btn medium primary pretty"><a href="#">Decrypt</a></span></p>
-                    <br><br>
                 </div>
             </div>
         </div>

@@ -17,6 +17,10 @@ function createServer(port) {
 			res.writeHead(200, {'Content-Type': 'text/html'});
 			return fs.createReadStream('./search.html').on('error', serve404).pipe(res);
 		}
+		if (pathStarts('/decrypt')) {
+			res.writeHead(200, {'Content-Type': 'text/html'});
+			return fs.createReadStream('./decrypt.html').on('error', serve404).pipe(res);
+		}
 		if (pathStarts('/js/')) {
 			res.writeHead(200, {'Content-Type': 'application/javascript'});
 			return fs.createReadStream('./'+req.url).on('error', serve404).pipe(res);

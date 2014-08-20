@@ -1,6 +1,22 @@
 .pubkey-modal {
-	.field .input.textarea {
-		line-height: 22px;
-		padding: 6px 10px;
+	.pubkey {
+		border: 1px solid $table-border-color;
+		padding: 1em;
+		position: relative;
+		width: 50%;
+		margin: 2em auto;
+		&::before {
+			content: 'Public Key';
+			display: inline-block;
+			position: absolute;
+			top: -0.9em;
+			padding: 0 1em;
+			margin-left: 2em;
+			background: white;
+		}
+	}
+	code {
+		font-family: consolas, monospace;
+		background: #eee;
 	}
 }
