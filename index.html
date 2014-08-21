@@ -2,31 +2,73 @@
 <html>
   <head>
   	<title>Phoenix</title>
-	<link rel="stylesheet" href="/css/gumby.css">
-  	<link rel="stylesheet" href="/css/profile.css">
+	<link rel="stylesheet" href="./css/gumby.css">
   </head>
   <body>
   	<div class="navbar" id="nav">
-		<h1 class="logo"><img src="/img/title.jpg" /></h1>
+        <h1 class="twelve columns logo"><img src="img/title.jpg" /></h1>
+    </div>
+
+    <div id="d1" class="debugpage hide">
+		<table class="profiles">
+			<tr class="profile">
+				<td class="profile-avatar"><a href="#" onclick="goto(d3)"><img src="./img/plus.jpg"></a></td>
+				<td class="profile-summary">
+					<h2><a href=# onclick="goto(d3)">New account</a></h2>
+					<h3><small>Get started</small></h3>
+				</td>
+			</tr>
+		</table>
+    </div>
+
+    <div id="d2" class="debugpage hide">
+		<table class="profiles">
+			<tr class="profile">
+				<td class="profile-avatar"><a href="#" onclick="goto(d4)"><img src="./img/avatars/oldlady.jpg"></a></td>
+				<td class="profile-summary">
+					<h2>Alice</h2>
+					<h3><small>Created August 18, 2014</small></h3>
+					<p><span class="label primary"><a href=# onclick="gui.Shell.openExternal('http://localhost:65000/profile/')">Profile page</a></span></p>
+				</td>
+			</tr>
+		</table>
 	</div>
-	<div class="profile" id="debug-new-profile">
-		<div class="profile-info">
-			<div class="profile-avatar"><a href="#"><img src="img/plus.jpg"><br>New profile</a></div>
-		</div>
+
+    <div id="d3" class="debugpage hide">
+    	<form>
+    		<ul>
+				<li class="field">
+					<input class="input" type="text" placeholder="Username" />
+				</li>
+				<li class="field">
+					<input class="input" type="file" placeholder="Image (optional)" />
+				</li>
+				<li class="field">
+					<input class="input" type="password" placeholder="Password" />
+				</li>
+				<li class="field">
+					<input class="input" type="password" placeholder="Confirm Password" />
+				</li>
+				<li class="field text-right">
+					<span class="btn pretty primary medium"><button onclick="goto(d2)">Create</button></span>
+					<span class="btn pretty default medium"><button onclick="goto(d1)">Cancel</button></span>
+				</li>
+			</ul>
+		</form>
 	</div>
-	<div class="profile active" id="debug-alice-profile">
-		<div class="profile-info">
-			<div class="profile-avatar"><a href="#"><img src="img/avatars/oldlady.jpg"></a></div>
-			<div class="profile-details">
-				<p><strong>Alice</strong></p>
-				<p>
-					Friends: <a href="#">Following 17 users</a><br>
-					Sessions: <a href="#">Logged into 3 sites</a><br>
-					<small><a href="feeds.html">312 posts</a> | <a href="feeds.html">4 feeds</a></small>
-					<!-- <div class="small default btn"><a href="#">Edit Your Profile</a></div> -->
-				</p>
-			</div>
-		</div>
+
+    <div id="d4" class="debugpage hide">
+    	<form>
+    		<ul>
+				<li class="field">
+					<input class="input" type="file" placeholder="Image" value="./img/avatars/oldlady.jpg" />
+				</li>
+				<li class="field text-right">
+					<span class="btn pretty primary medium"><button onclick="goto(d2)">Update image</button></span>
+					<span class="btn pretty default medium"><button onclick="goto(d1)">Cancel</button></span>
+				</li>
+			</ul>
+		</form>
 	</div>
 
 <script src="js/jquery-2.1.1.min.js"></script>
@@ -67,6 +109,12 @@ win.on('closed', function() {
 	window.LOCAL_NW.desktopNotifications.closeAnyOpenNotificationWindows();
 });
 
+function goto(page) {
+	$('.debugpage').addClass('hide');
+	$(page).removeClass('hide');
+	win.height = $(page).height() + 132;
+}
+goto(d1);
 </script>
   </body>
 </html>

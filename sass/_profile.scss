@@ -52,3 +52,14 @@
 		}
 	}
 }
+
+.profiles {
+	margin: 0;
+
+	.profile {
+		.profile-avatar {
+			float: none;
+			padding: 10px;
+		}
+	}
+}
