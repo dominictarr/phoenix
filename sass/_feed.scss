@@ -50,12 +50,7 @@ form {
 				}
 			}
 
-			&.foryou {
-				cursor: pointer;
-				border: 1px solid $primary-color;
-			}
 			&.decrypted {
-				cursor: default;
 				code:before {
 					content: "#{$entypo-icon-lock-open}";
 				}

@@ -1753,8 +1753,6 @@ form { margin: 0; padding: 1em; }
 .feed .content .encrypted-message { border: 1px solid #D6D6D6; padding: 0.7em 1em; background: #eee; }
 .feed .content .encrypted-message code { word-break: break-all; font-family: consolas, monospace; }
 .feed .content .encrypted-message code:before { font-family: "entypo"; content: "\1f512"; padding-right: 3px; }
-.feed .content .encrypted-message.foryou { cursor: pointer; border: 1px solid #3085d6; }
-.feed .content .encrypted-message.decrypted { cursor: default; }
 .feed .content .encrypted-message.decrypted code:before { content: "\1f513"; }
 
 .profile .profile-avatar { float: left; padding: 0 20px; text-align: center; vertical-align: top; }
