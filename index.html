@@ -112,7 +112,7 @@ win.on('closed', function() {
 function goto(page) {
 	$('.debugpage').addClass('hide');
 	$(page).removeClass('hide');
-	win.height = $(page).height() + 132;
+	win.height = $(page).height() + 100;// + 132;
 }
 goto(d1);
 </script>

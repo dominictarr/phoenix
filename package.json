@@ -2,7 +2,7 @@
   "name": "phoenix",
   "main": "index.html",
   "window": {
-    "toolbar": true,
+    "toolbar": false,
     "frame": true,
     "width": 570,
     "height": 310,

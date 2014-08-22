@@ -40,7 +40,7 @@
 				<br>
                 <p><strong>Encrypt a message</strong></p>
                 <div class="field"><textarea class="input textarea" rows="6"></textarea></div>
-                <p><span class="btn default small pretty icon-left entypo icon-lock switch ttip long" gumby-trigger="#warning-modal" data-tooltip="Encrypt this message for Alice"><a href="#">Encrypt</a></span></p>
+                <p><span class="btn default small pretty icon-left entypo icon-lock switch ttip long" gumby-trigger="#encrypt-modal" data-tooltip="Encrypt this message for Alice"><a href="#">Encrypt</a></span></p>
 			</div>
         	<div class="eight columns pull_four">
 				<table class="feed">
@@ -126,6 +126,25 @@
                     <p>
                     	<span class="btn medium danger pretty"><a href="#">Issue Warning</a></span>
                     	<span class="btn medium default pretty"><a href="#" class="switch" gumby-trigger="|#warning-modal">Cancel</a></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="encrypt-modal">
+        <div class="content">
+            <a class="close switch" gumby-trigger="|#encrypt-modal"><i class="icon-cancel" /></i></a>
+            <div class="row">
+                <div class="ten columns centered text-center">
+                    <h2>Encrypted Message</h2>
+                    <textarea readonly rows="10" style="width: 100%">7f18a07f1769b250e9d38a09169b250e9dcb3781409073787f138a09169b250e9dcb3781409073787338a069b250e9dc3731409073787f138a09169b250e9dcb3781409073787f138a09169b250e9dcb37814090f50e9dcb378f138ab383881409f138a09169b250e9dc140907379cb3781409138a09169b250e9dcb3781409073787f138a09169b250e9dcb37814090138a0916973787b73787f138a7814b378090073787f7073787f118709169b250e9dcb3781409073787f138a09169b250e9dcb3781409073787f138a09169b250e9dcb378140907378</textarea>
+                    <br><br>
+                    <p>Only Alice will be able to decrypt this message. You can email it privately, or broadcast it on your feed.</p>
+                    <br>
+                    <p>
+                        <span class="btn medium primary pretty"><a href="#">Broadcast</a></span>
+                        <span class="btn medium default pretty"><a href="#" class="switch" gumby-trigger="|#encrypt-modal">Cancel</a></span>
                     </p>
                 </div>
             </div>

@@ -57,9 +57,17 @@
 	margin: 0;
 
 	.profile {
+		td {
+			padding: 20px 10px;
+		}
 		.profile-avatar {
 			float: none;
-			padding: 10px;
+		}
+		.label {
+			font-size: 1rem;
+			font-weight: normal;
+			line-height: 29px;
+			height: 30px;
 		}
 	}
 }

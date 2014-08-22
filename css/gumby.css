@@ -1750,6 +1750,12 @@ form { margin: 0; padding: 1em; }
 .feed .content .image { display: inline-block; }
 .feed .content img { max-width: 100%; max-height: 200px; }
 .feed .content .media-post .image { float: left; margin-right: 1em; }
+.feed .content .encrypted-message { border: 1px solid #D6D6D6; padding: 0.7em 1em; background: #eee; }
+.feed .content .encrypted-message code { word-break: break-all; font-family: consolas, monospace; }
+.feed .content .encrypted-message code:before { font-family: "entypo"; content: "\1f512"; padding-right: 3px; }
+.feed .content .encrypted-message.foryou { cursor: pointer; border: 1px solid #3085d6; }
+.feed .content .encrypted-message.decrypted { cursor: default; }
+.feed .content .encrypted-message.decrypted code:before { content: "\1f513"; }
 
 .profile .profile-avatar { float: left; padding: 0 20px; text-align: center; vertical-align: top; }
 .profile .profile-avatar a { color: #555; font-size: 17.6px; font-size: 1.1rem; line-height: 1.625em; font-family: "Roboto"; font-weight: 400; }
@@ -1764,6 +1770,11 @@ form { margin: 0; padding: 1em; }
 .profile.small .profile-summary { margin-left: 110px; }
 .profile.small .profile-summary h3 { padding-bottom: 0; }
 .profile.small .profile-summary h4 { padding-top: 0; }
+
+.profiles { margin: 0; }
+.profiles .profile td { padding: 20px 10px; }
+.profiles .profile .profile-avatar { float: none; }
+.profiles .profile .label { font-size: 1rem; font-weight: normal; line-height: 29px; height: 30px; }
 
 .nomargin { margin: 0 !important; }
 
