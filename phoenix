@@ -1,0 +1,13 @@
+#!/usr/bin/env node
+
+switch (process.argv[2]) {
+	case 'localhost':
+		require('./js/localhost').createServer(65000);
+		console.log('Listening on localhost:65000');
+		break;
+
+	case 'relay':
+		require('./js/relay').createServer(64000);
+		console.log('Listening on localhost:64000');
+		break;
+}

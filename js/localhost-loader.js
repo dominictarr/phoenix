@@ -1,6 +1,6 @@
-var backend = require('./js/backend');
+var localhost = require('./js/localhost');
 if (!global.server) {
-	global.server = backend.createServer(65000);
+	global.server = localhost.createServer(65000);
 	global.server.on('listening', notify.bind(null, 'Phoenix is now hosting privately at localhost:65000'));
 	global.server.on('error', function() {
 		// :TODO: give better error messages

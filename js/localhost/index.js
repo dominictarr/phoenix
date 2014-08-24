@@ -48,10 +48,6 @@ function createServer(port) {
 	return server;
 }
 
-function notify(text) {
-	new Notification('Phoenix', { body: text, iconUrl: 'img/icon.png', icon: 'img/icon.png' });
-}
-
 module.exports = {
 	createServer: createServer
 };
