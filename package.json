@@ -13,6 +13,9 @@
     "level-sublevel": "~6.3.1",
     "secure-scuttlebutt": "latest",
     "nomnom": "1.8.0",
-    "osenv": "0.0.3"
+    "osenv": "0.0.3",
+    "eccjs": "git://github.com/dominictarr/eccjs.git#f575e740a1838e6ca483eb59837624952c24d497",
+    "blake2s": "~1.0.0",
+    "proquint-": "~1.1.0"
   }
 }

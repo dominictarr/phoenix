@@ -1,24 +1,61 @@
 #!/usr/bin/env node
 var nomnom = require('nomnom');
+var keys   = require('./js/common/keys');
 
 nomnom.command('init')
-	.help('Sets up phoenix')
-	.option('key', {
-		help: 'Your public key-hash (optional, only required if you have no ~/.phoenix/secret.name file)'
+	.help('Sets up phoenix.')
+	.option('forceNewKeypair', {
+		help: 'Overwrites your ~/.phoenix/secret.name file with a new keypair if it already exists.'
+	})
+	.callback(function(opts) {
+		// Setup keys
+		keys.create(opts.forceNewKeypair, function(err) {
+			if (err) {
+				console.error(err);
+				if (err.fatal) return;
+			}
+			// Setup database
+			// :TODO:
+			console.log('Ready.');
+		});
 	});
 
-nomnom.command('localhost')
-	.help('Runs the local, private application server')
+nomnom.command('webgui')
+	.help('Runs the private web-gui server.')
 	.callback(function(opts) {
 		require('./js/localhost').createServer(65000);
-		console.log('Listening on localhost:65000');
+		console.log('Listening privately on localhost:65000');
 	});
 
 nomnom.command('relay')
-	.help('Runs the public relay server')
+	.help('Runs the public relay server.')
 	.callback(function(opts) {
 		require('./js/relay').createServer(64000);
-		console.log('Listening on localhost:64000');
+		console.log('Listening publicly on localhost:64000');
+	});
+
+nomnom.command('follow')
+	.help('Starts following a feed.')
+	.callback(function(opts) {
+		console.log('Not yet implemented');
+	});
+
+nomnom.command('unfollow')
+	.help('Stops following a feed.')
+	.callback(function(opts) {
+		console.log('Not yet implemented');
+	});
+
+nomnom.command('post')
+	.help('Posts a message to the feed.')
+	.callback(function(opts) {
+		console.log('Not yet implemented');
+	});
+
+nomnom.command('sign')
+	.help('Creates a signature for a file using your private key.')
+	.callback(function(opts) {
+		console.log('Not yet implemented');
 	});
 
 nomnom.parse();
