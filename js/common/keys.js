@@ -15,10 +15,12 @@ try {
 	var keys = ecc.restore(k256, privateKey);
 	exports.private = keys.private;
 	exports.public  = keys.public;
+	exports.name    = bsum(keys.public);
 	exports.exist   = true;
 } catch (e) {
 	exports.private = null;
 	exports.public  = null;
+	exports.name    = null;
 	exports.exist   = false;
 }
 
@@ -57,8 +59,20 @@ exports.create = function(force, cb) {
 		} else {
 			exports.private = keys.private;
 			exports.public  = keys.public;
+			exports.name    = name;
 			exports.exist   = true;
 		}
 		cb(err);
 	});
+};
+
+exports.sign = function(buffer) {
+	var hash = crypto.createHash('sha256').update(buffer).digest();
+	return ecc.sign(k256, exports.private, hash);
+};
+
+exports.verify = function(buffer, sig, key) {
+	if (!key) key = exports.public;
+	var hash = crypto.createHash('sha256').update(buffer).digest();
+	return ecc.verify(k256, key, sig, hash);
 };

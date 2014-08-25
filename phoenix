@@ -1,61 +1,149 @@
 #!/usr/bin/env node
-var nomnom = require('nomnom');
-var keys   = require('./js/common/keys');
+var nomnom   = require('nomnom');
+var proquint = require('proquint-');
+var fs       = require('fs');
+var keys     = require('./js/common/keys');
+
+function namefileHelp() {
+	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run the \'init\' command.');
+}
+
+function init(opts) {
+	// Setup keys
+	keys.create(opts['force-new-keypair'], function(err) {
+		if (err) {
+			if (err.fatal) {
+				console.error(err.toString());
+				return;
+			}
+			console.error('Warning' + err.toString().slice(5));
+		}
+		// Setup database
+		// :TODO:
+		console.log('Ready.');
+	});
+}
+
+function webgui(opts) {
+	require('./js/localhost').createServer(65000);
+	console.log('Listening privately on localhost:65000');
+}
+
+function relay(opts) {
+	require('./js/relay').createServer(64000);
+	console.log('Listening publicly on localhost:64000');
+}
+
+function whoami(opts) {
+	if (keys.exist) {
+		console.log('You are: ' + proquint.encode(keys.name));
+		console.log('    hex: ' + keys.name.toString('hex'));
+	} else {
+		namefileHelp();
+	}
+}
+
+function sign(opts) {
+	console.log('Signing ' + opts.path);
+
+	if (!keys.exist) {
+		return namefileHelp();
+	}
+
+	var buffer;
+	try {
+		buffer = fs.readFileSync(opts.path);
+	} catch (e) {
+		console.error('Error: File not found');
+		return;
+	}
+
+	var sig = keys.sign(buffer);
+	console.log('Signature: ' + sig.toString('hex'));
+}
+
+function verify(opts) {
+	console.log('Verifying ' + opts.path);
+
+	var key = opts.key || keys.public;
+	if (!key) {
+		return namefileHelp();
+	}
+
+	var buffer;
+	try {
+		buffer = fs.readFileSync(opts.path);
+	} catch (e) {
+		console.error('Error: File not found');
+		return;
+	}
+
+	if (keys.verify(buffer, new Buffer(opts.sig, 'hex'), key)) {
+		console.log('Success: Signature checks out.');
+	} else {
+		console.log('Failure: Signature does not match.');
+	}
+}
 
 nomnom.command('init')
 	.help('Sets up phoenix.')
-	.option('forceNewKeypair', {
-		help: 'Overwrites your ~/.phoenix/secret.name file with a new keypair if it already exists.'
+	.option('force-new-keypair', {
+		flag: true,
+		help: 'Overwrites your ~/.scuttlebutt/secret.name file with a new keypair if it already exists.'
 	})
-	.callback(function(opts) {
-		// Setup keys
-		keys.create(opts.forceNewKeypair, function(err) {
-			if (err) {
-				console.error(err);
-				if (err.fatal) return;
-			}
-			// Setup database
-			// :TODO:
-			console.log('Ready.');
-		});
-	});
-
+	.callback(init);
 nomnom.command('webgui')
 	.help('Runs the private web-gui server.')
-	.callback(function(opts) {
-		require('./js/localhost').createServer(65000);
-		console.log('Listening privately on localhost:65000');
-	});
-
+	.callback(webgui);
 nomnom.command('relay')
 	.help('Runs the public relay server.')
+	.callback(relay);
+nomnom.command('whoami')
+	.help('Lists your profile.')
+	.callback(whoami);
+nomnom.command('post')
+	.help('Posts a message to your feed.')
 	.callback(function(opts) {
-		require('./js/relay').createServer(64000);
-		console.log('Listening publicly on localhost:64000');
+		console.log('Not yet implemented');
 	});
-
+nomnom.command('list')
+	.help('Lists the feeds you follow.')
+	.callback(function(opts) {
+		console.log('Not yet implemented');
+	});
 nomnom.command('follow')
 	.help('Starts following a feed.')
 	.callback(function(opts) {
 		console.log('Not yet implemented');
 	});
-
 nomnom.command('unfollow')
 	.help('Stops following a feed.')
 	.callback(function(opts) {
 		console.log('Not yet implemented');
 	});
-
-nomnom.command('post')
-	.help('Posts a message to the feed.')
-	.callback(function(opts) {
-		console.log('Not yet implemented');
-	});
-
 nomnom.command('sign')
-	.help('Creates a signature for a file using your private key.')
-	.callback(function(opts) {
-		console.log('Not yet implemented');
-	});
-
+	.help('Creates a signature for a file.')
+	.options({
+		path: {
+			position: 1,
+			required: true,
+			help: "File to sign.",
+		}
+	})
+	.callback(sign);
+nomnom.command('verify')
+	.help('Verifies a signature for a file.')
+	.options({
+		path: {
+			position: 1,
+			required: true,
+			help: 'File to verify.',
+		},
+		sig: {
+			position: 2,
+			required: true,
+			help: 'Signature to verify (hex-encoded).',
+		}
+	})
+	.callback(verify);
 nomnom.parse();
