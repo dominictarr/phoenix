@@ -1,13 +1,24 @@
 #!/usr/bin/env node
+var nomnom = require('nomnom');
 
-switch (process.argv[2]) {
-	case 'localhost':
+nomnom.command('init')
+	.help('Sets up phoenix')
+	.option('key', {
+		help: 'Your public key-hash (optional, only required if you have no ~/.phoenix/secret.name file)'
+	});
+
+nomnom.command('localhost')
+	.help('Runs the local, private application server')
+	.callback(function(opts) {
 		require('./js/localhost').createServer(65000);
 		console.log('Listening on localhost:65000');
-		break;
+	});
 
-	case 'relay':
+nomnom.command('relay')
+	.help('Runs the public relay server')
+	.callback(function(opts) {
 		require('./js/relay').createServer(64000);
 		console.log('Listening on localhost:64000');
-		break;
-}
+	});
+
+nomnom.parse();

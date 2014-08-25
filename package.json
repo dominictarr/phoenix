@@ -8,5 +8,11 @@
     "height": 310,
     "icon": "img/icon.png"
   },
-  "single-instance": true
+  "single-instance": true,
+  "dependencies": {
+    "level-sublevel": "~6.3.1",
+    "secure-scuttlebutt": "latest",
+    "nomnom": "1.8.0",
+    "osenv": "0.0.3"
+  }
 }
