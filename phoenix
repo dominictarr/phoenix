@@ -2,7 +2,9 @@
 var nomnom   = require('nomnom');
 var proquint = require('proquint-');
 var fs       = require('fs');
+var pull     = require('pull-stream');
 var keys     = require('./js/common/keys');
+var ssb      = require('./js/common/ssb');
 
 function namefileHelp() {
 	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run the \'init\' command.');
@@ -24,14 +26,11 @@ function init(opts) {
 	});
 }
 
-function webgui(opts) {
-	require('./js/localhost').createServer(65000);
-	console.log('Listening privately on localhost:65000');
-}
-
-function relay(opts) {
+function serve(opts) {
 	require('./js/relay').createServer(64000);
-	console.log('Listening publicly on localhost:64000');
+	console.log('Scuttlebutt relay.....listening publicly on localhost:64000');
+	require('./js/localhost').createServer(65000);
+	console.log('Web GUI...............listening privately on localhost:65000');
 }
 
 function whoami(opts) {
@@ -42,6 +41,48 @@ function whoami(opts) {
 		namefileHelp();
 	}
 }
+
+function list(opts) {
+	pull(
+		ssb.following(),
+		pull.collect(function(err, entries) {
+			// :TODO: nicknames
+			entries.forEach(function(entry) {
+				console.log('???  ' + entry.key);
+			});
+			console.log(entries.length + ' feed(s).');
+		})
+	);
+}
+
+function follow(opts) {
+	// Validate key
+	// :TODO:
+
+	// Add to follow list
+	ssb.follow(opts.key, function(err) {
+		if (err) {
+			console.error(err);
+		} else {
+			console.log('Ok.');
+		}
+	});
+}
+
+function unfollow(opts) {
+	// Remove from follow list
+	ssb.unfollow(opts.key, function(err) {
+		if (err) {
+			console.error(err);
+		} else {
+			console.log('Ok.');
+		}
+	});
+}
+
+/*
+Ok yeah, so now you'll have to
+*/
 
 function sign(opts) {
 	console.log('Signing ' + opts.path);
@@ -92,12 +133,9 @@ nomnom.command('init')
 		help: 'Overwrites your ~/.scuttlebutt/secret.name file with a new keypair if it already exists.'
 	})
 	.callback(init);
-nomnom.command('webgui')
-	.help('Runs the private web-gui server.')
-	.callback(webgui);
-nomnom.command('relay')
-	.help('Runs the public relay server.')
-	.callback(relay);
+nomnom.command('serve')
+	.help('Runs the relay and web-gui server.')
+	.callback(serve);
 nomnom.command('whoami')
 	.help('Lists your profile.')
 	.callback(whoami);
@@ -108,26 +146,47 @@ nomnom.command('post')
 	});
 nomnom.command('list')
 	.help('Lists the feeds you follow.')
+	.callback(list);
+nomnom.command('lookup')
+	.help('Looks up a feed by its nickname.')
+	.options({
+		name: {
+			position: 1,
+			required: true,
+			help: 'Nickname to lookup.',
+		}
+	})
 	.callback(function(opts) {
 		console.log('Not yet implemented');
+		console.log('8e5c1add8d7455b5ba055b2d141ac9238a5ba485f7a488146c646fd8135fe27f');
 	});
 nomnom.command('follow')
 	.help('Starts following a feed.')
-	.callback(function(opts) {
-		console.log('Not yet implemented');
-	});
+	.options({
+		key: {
+			position: 1,
+			required: true,
+			help: 'Public key to follow.'
+		}
+	})
+	.callback(follow);
 nomnom.command('unfollow')
 	.help('Stops following a feed.')
-	.callback(function(opts) {
-		console.log('Not yet implemented');
-	});
+	.options({
+		key: {
+			position: 1,
+			required: true,
+			help: 'Public key to unfollow.'
+		}
+	})
+	.callback(unfollow);
 nomnom.command('sign')
 	.help('Creates a signature for a file.')
 	.options({
 		path: {
 			position: 1,
 			required: true,
-			help: "File to sign.",
+			help: 'File to sign.',
 		}
 	})
 	.callback(sign);
@@ -143,6 +202,10 @@ nomnom.command('verify')
 			position: 2,
 			required: true,
 			help: 'Signature to verify (hex-encoded).',
+		},
+		key: {
+			position: 3,
+			help: 'Public key of the user who created the signature (defaults to yours).'
 		}
 	})
 	.callback(verify);

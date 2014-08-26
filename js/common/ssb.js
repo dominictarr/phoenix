@@ -1,2 +1,2 @@
-var ssb = require('secure-scuttlebutt');
-exports = ssb(require('./db'));
+var ssbCreate = require('secure-scuttlebutt/create');
+module.exports = ssbCreate(require('./config').dbpath);
