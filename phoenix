@@ -20,8 +20,6 @@ function init(opts) {
 			}
 			console.error('Warning' + err.toString().slice(5));
 		}
-		// Setup database
-		// :TODO:
 		console.log('Ready.');
 	});
 }
@@ -35,24 +33,93 @@ function serve(opts) {
 
 function whoami(opts) {
 	if (keys.exist) {
-		console.log('You are: ' + proquint.encode(keys.name));
-		console.log('    hex: ' + keys.name.toString('hex'));
+		console.log('You are:    ' + keys.name.toString('hex'));
+		console.log('Public key: ' + keys.public.toString('hex'));
 	} else {
 		namefileHelp();
 	}
 }
 
 function list(opts) {
+	function toHuman (msg) {
+		console.log (
+			//proquint.encodeCamelDash(msg.author).substring(0, 43) + ' / ' +
+			msg.author.toString('hex') + ' / ' +
+			msg.sequence + '\n' +
+			msg.type.toString('utf8') + ' : '+
+			new Date(msg.timestamp).toISOString() + '\n' +
+			( msg.type.toString('utf8') == 'init'
+			? msg.message.toString('hex') + '\n'
+			: msg.message.toString('utf8') + '\n' )
+		);
+	}
+	pull(
+		ssb.createFeedStream(),
+		pull.map(toHuman),
+		pull.drain()
+	);
+}
+
+function feeds(opts) {
 	pull(
 		ssb.following(),
 		pull.collect(function(err, entries) {
+			if (err) { return console.error(err); }
 			// :TODO: nicknames
-			entries.forEach(function(entry) {
-				console.log('???  ' + entry.key);
+			console.log ('  nickname  id');
+			entries.forEach(function(entry, i) {
+				console.log((i+1) + ' ???       ' + entry.key.toString('hex'));
 			});
-			console.log(entries.length + ' feed(s).');
 		})
 	);
+}
+
+function lookup(opts) {
+	var name = opts.name;
+
+	function output(entry) {
+		var id = entry.key;
+		if (opts.pubkey) {
+			ssb.getPublicKey(id, function(err, pubkey) {
+				if (err) { return console.error(err); }
+				console.log(pubkey.toString('hex'));
+			});
+		} else {
+			console.log(id.toString('hex'));
+		}
+	}
+
+	if (+name == name) {
+		// numeric
+		var id = (+name - 1);
+		pull(
+			ssb.following(),
+			pull.collect(function(err, entries) {
+				if (err) { return console.error(err); }
+				var entry = entries[id];
+				if (!entry) { return console.error('Invalid user number.'); }
+				output(entry);
+			})
+		);
+	} else {
+		// :TODO: names
+		console.log('Names are not yet implemented');
+	}
+}
+
+function post(opts) {
+	if (!keys.exist) {
+		return namefileHelp();
+	}
+
+	var feed = ssb.createFeed(keys);
+	feed.add('text', opts.text, function(err) {
+		if (err) {
+			console.error(err);
+		} else {
+			console.log('Ok.');
+		}
+	});
 }
 
 function follow(opts) {
@@ -60,7 +127,7 @@ function follow(opts) {
 	// :TODO:
 
 	// Add to follow list
-	ssb.follow(opts.key, function(err) {
+	ssb.follow(new Buffer(opts.key, 'hex'), function(err) {
 		if (err) {
 			console.error(err);
 		} else {
@@ -79,10 +146,6 @@ function unfollow(opts) {
 		}
 	});
 }
-
-/*
-Ok yeah, so now you'll have to
-*/
 
 function sign(opts) {
 	console.log('Signing ' + opts.path);
@@ -134,34 +197,43 @@ nomnom.command('init')
 	})
 	.callback(init);
 nomnom.command('serve')
-	.help('Runs the relay and web-gui server.')
+	.help('Runs the relay and web-gui servers.')
 	.callback(serve);
 nomnom.command('whoami')
 	.help('Lists your profile.')
 	.callback(whoami);
-nomnom.command('post')
-	.help('Posts a message to your feed.')
-	.callback(function(opts) {
-		console.log('Not yet implemented');
-	});
 nomnom.command('list')
-	.help('Lists the feeds you follow.')
+	.help('Lists the feed messages.')
 	.callback(list);
+nomnom.command('feeds')
+	.help('Lists the users you follow.')
+	.callback(feeds);
 nomnom.command('lookup')
-	.help('Looks up a feed by its nickname.')
+	.help('Looks up a user by a nickname.')
 	.options({
 		name: {
 			position: 1,
 			required: true,
-			help: 'Nickname to lookup.',
+			help: 'Nickname or user number to lookup.',
+		},
+		pubkey: {
+			flag: true,
+			help: 'Flag, output the user\'s public key rather than their id.'
 		}
 	})
-	.callback(function(opts) {
-		console.log('Not yet implemented');
-		console.log('8e5c1add8d7455b5ba055b2d141ac9238a5ba485f7a488146c646fd8135fe27f');
-	});
+	.callback(lookup);
+nomnom.command('post')
+	.help('Posts a message to your feed.')
+	.options({
+		text: {
+			position: 1,
+			required: true,
+			help: 'Message-text to post.'
+		}
+	})
+	.callback(post);
 nomnom.command('follow')
-	.help('Starts following a feed.')
+	.help('Starts following a user.')
 	.options({
 		key: {
 			position: 1,
@@ -171,7 +243,7 @@ nomnom.command('follow')
 	})
 	.callback(follow);
 nomnom.command('unfollow')
-	.help('Stops following a feed.')
+	.help('Stops following a user.')
 	.options({
 		key: {
 			position: 1,
