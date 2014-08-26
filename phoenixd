@@ -2,12 +2,15 @@
 var daemon = require("daemonize2").setup({
     main: "js/daemon.js",
     name: "phoenixd",
-    pidfile: "phoenixd.pid"
+    pidfile: "phoenixd.pid",
+    // args: ["64000", "65000"]
 });
 
 switch (process.argv[2]) {
     case "start":
         daemon.start();
+        console.log('Scuttlebutt relay.....listening publicly on localhost:64000');
+        console.log('Web GUI...............listening privately on localhost:65000');
         break;
 
     case "stop":

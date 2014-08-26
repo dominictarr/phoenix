@@ -6,6 +6,7 @@ var pull       = require('pull-stream');
 var prettydate = require('pretty-date');
 var keys       = require('./js/common/keys');
 var ssb        = require('./js/common/ssb');
+var netnodes   = require('./js/common/network-nodes');
 
 function namefileHelp() {
 	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run the \'init\' command.');
@@ -213,6 +214,38 @@ function verify(opts) {
 	}
 }
 
+function addNode(opts) {
+	var host = opts.host.split(':');
+	var addr = host[0];
+	var port = host[1] || 64000;
+
+	netnodes.add(addr, port, function(err) {
+		if (err) { return console.error(err); }
+		console.log('Ok.');
+	});
+}
+
+function delNode(opts) {
+	var host = opts.host.split(':');
+	var addr = host[0];
+	var port = host[1] || 64000;
+
+	netnodes.del(addr, port, function(err) {
+		if (err) { return console.error(err); }
+		console.log('Ok.');
+	});
+}
+
+function listNodes(opts) {
+	pull(
+		netnodes.createListStream(),
+		pull.through(function(node) {
+			console.log(node.key[0] + ':' + node.key[1]);
+		}),
+		pull.drain()
+	);
+}
+
 nomnom.script('phoenix');
 nomnom.nocommand().callback(list);
 nomnom.command('init')
@@ -310,4 +343,27 @@ nomnom.command('verify')
 		}
 	})
 	.callback(verify);
+nomnom.command('add-node')
+	.help('Manually adds a node to your replication network.')
+	.options({
+		host: {
+			position: 1,
+			required: true,
+			help: 'Address of the node (<address>[:port]).',
+		}
+	})
+	.callback(addNode);
+nomnom.command('del-node')
+	.help('Manually removes a node from your replication network.')
+	.options({
+		host: {
+			position: 1,
+			required: true,
+			help: 'Address of the node (<address>[:port]).',
+		}
+	})
+	.callback(delNode);
+nomnom.command('list-nodes')
+	.help('Lists the nodes in your replication network.')
+	.callback(listNodes);
 nomnom.parse();

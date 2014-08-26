@@ -20,6 +20,10 @@
     "proquint-": "~1.1.0",
     "pull-stream": "~2.24.0",
     "pretty-date": "0.2.0",
-    "daemonize2": "0.4.2"
+    "daemonize2": "0.4.2",
+    "bytewise": "~0.7.0",
+    "pull-level": "~1.1.10",
+    "http-duplex": "~0.0.2",
+    "pull-stream-to-stream": "~1.3.0"
   }
 }
