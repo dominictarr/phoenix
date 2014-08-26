@@ -1,13 +1,21 @@
 #!/usr/bin/env node
-var nomnom   = require('nomnom');
-var proquint = require('proquint-');
-var fs       = require('fs');
-var pull     = require('pull-stream');
-var keys     = require('./js/common/keys');
-var ssb      = require('./js/common/ssb');
+var nomnom     = require('nomnom');
+var proquint   = require('proquint-');
+var fs         = require('fs');
+var pull       = require('pull-stream');
+var prettydate = require('pretty-date');
+var keys       = require('./js/common/keys');
+var ssb        = require('./js/common/ssb');
 
 function namefileHelp() {
 	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run the \'init\' command.');
+}
+
+function padleft(width, str) {
+	if (str.length < width) {
+		return '                                        '.slice(0, width - str.length) + str;
+	}
+	return str;
 }
 
 function init(opts) {
@@ -41,10 +49,11 @@ function whoami(opts) {
 }
 
 function list(opts) {
-	function toHuman (msg) {
+	function toDetailed (msg) {
+		var author = msg.author.toString('hex');
 		console.log (
 			//proquint.encodeCamelDash(msg.author).substring(0, 43) + ' / ' +
-			msg.author.toString('hex') + ' / ' +
+			author.slice(0, 12) + '...' + author.slice(-4) + ' / ' +
 			msg.sequence + '\n' +
 			msg.type.toString('utf8') + ' : '+
 			new Date(msg.timestamp).toISOString() + '\n' +
@@ -53,9 +62,27 @@ function list(opts) {
 			: msg.message.toString('utf8') + '\n' )
 		);
 	}
+	function toSimple(msg) {
+		var author = msg.author.toString('hex');
+		var output =
+			author.slice(0, 12) + '...' + author.slice(-4) + ' | ' +
+			padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | '
+		;
+		switch (msg.type.toString('utf8')) {
+			case 'init':
+				output += '[Account created]';
+				break;
+			case 'text':
+				output += msg.message.toString('utf8');
+				break;
+			default:
+				output += msg.type.toString('utf8') + ' - ' + msg.message.toString('utf8');
+		}
+		console.log(output);
+	}
 	pull(
 		ssb.createFeedStream(),
-		pull.map(toHuman),
+		pull.map((opts.long) ? toDetailed : toSimple),
 		pull.drain()
 	);
 }
@@ -137,6 +164,8 @@ function follow(opts) {
 }
 
 function unfollow(opts) {
+	// :TODO: reference by number or name
+
 	// Remove from follow list
 	ssb.unfollow(opts.key, function(err) {
 		if (err) {
@@ -204,6 +233,12 @@ nomnom.command('whoami')
 	.callback(whoami);
 nomnom.command('list')
 	.help('Lists the feed messages.')
+	.options({
+		long: {
+			flag: true,
+			help: 'Flag, output more detailed information.'
+		}
+	})
 	.callback(list);
 nomnom.command('feeds')
 	.help('Lists the users you follow.')
