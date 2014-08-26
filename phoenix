@@ -28,15 +28,10 @@ function init(opts) {
 			}
 			console.error('Warning' + err.toString().slice(5));
 		}
-		console.log('Ready.');
+		console.log('Keypair created.');
+		console.log('You are:    ' + keys.name.toString('hex'));
+		console.log('Public key: ' + keys.public.toString('hex'));
 	});
-}
-
-function serve(opts) {
-	require('./js/relay').createServer(64000);
-	console.log('Scuttlebutt relay.....listening publicly on localhost:64000');
-	require('./js/localhost').createServer(65000);
-	console.log('Web GUI...............listening privately on localhost:65000');
 }
 
 function whoami(opts) {
@@ -218,6 +213,8 @@ function verify(opts) {
 	}
 }
 
+nomnom.script('phoenix');
+nomnom.nocommand().callback(list);
 nomnom.command('init')
 	.help('Sets up phoenix.')
 	.option('force-new-keypair', {
@@ -225,9 +222,6 @@ nomnom.command('init')
 		help: 'Overwrites your ~/.scuttlebutt/secret.name file with a new keypair if it already exists.'
 	})
 	.callback(init);
-nomnom.command('serve')
-	.help('Runs the relay and web-gui servers.')
-	.callback(serve);
 nomnom.command('whoami')
 	.help('Lists your profile.')
 	.callback(whoami);
