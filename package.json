@@ -24,6 +24,7 @@
     "bytewise": "~0.7.0",
     "pull-level": "~1.1.10",
     "http-duplex": "~0.0.2",
-    "pull-stream-to-stream": "~1.3.0"
+    "pull-stream-to-stream": "~1.3.0",
+    "celeri": "~0.3.3"
   }
 }

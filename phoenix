@@ -4,6 +4,7 @@ var proquint   = require('proquint-');
 var fs         = require('fs');
 var pull       = require('pull-stream');
 var prettydate = require('pretty-date');
+var celeri     = require('celeri');
 var keys       = require('./js/common/keys');
 var ssb        = require('./js/common/ssb');
 var netnodes   = require('./js/common/network-nodes');
@@ -17,6 +18,106 @@ function padleft(width, str) {
 		return '                                        '.slice(0, width - str.length) + str;
 	}
 	return str;
+}
+
+
+//see http://en.wikipedia.org/wiki/Box-drawing_characters
+
+celeri.drawTree = celeri.tree = function(tree, path, ops, tab) {
+	if(!ops) ops = {};
+	if (!path) path = [0];
+
+	// abort at end of path
+	if (!path.length) return;
+	path = path.slice(1);
+	var expanded_node = path.length ? path[0] : -1;
+	var last_node = (path.length == 0);
+
+	var parts = { };
+
+	if(ops.pretty) {
+		parts = {
+			pipe: '|',
+			tee: '┬',
+			dash: '─',
+			leftCorner: '└',
+			left: '├',
+			branch: utils.repeat('─', 1)
+		}
+
+	//plays a little more nicely with fonts such as terminus
+	} else {
+		parts = {
+			pipe: '|',
+			tee: '+',
+			dash: '-',
+			leftCorner: '+',
+			left: '|',
+			branch: utils.repeat('-', 1)
+		}
+	}
+
+	Structr.copy(ops.parts || {}, parts);
+
+	parts.tabs = utils.repeat(' ',parts.branch.length+1);
+
+	if(!tab) tab = '';
+
+	var n = utils.objectSize(tree),
+	i = 0,
+	printedBreak = false;
+
+
+	for(var index in tree) {
+
+		var expanded = (i == expanded_node);
+		var childrenOrValue = tree[index],
+		toc = typeof childrenOrValue,
+		toi = typeof index,
+		edge = i < n-1 ? parts.left : parts.leftCorner;
+
+
+		var value;
+		switch (toc) {
+			case 'function':
+				if (childrenOrValue.title && typeof childrenOrValue.title == 'string') {
+					value = childrenOrValue.title.grey;
+				} else {
+					value = 'Function'.grey;
+				}
+				break;
+
+			default:
+				value = (''+JSON.stringify(childrenOrValue)).grey;
+		}
+		var line = !isNaN(Number(index)) ?  value : (index.green + ': ' + value);
+
+
+		if (toc == 'object' && childrenOrValue && Object.keys(childrenOrValue).length) {
+			console.log('%s%s %s', tab, (edge + parts.branch + parts.tee).white, index + '...');
+		} else {
+			console.log('%s%s %s', tab, (edge + parts.branch + parts.dash).white, line);
+		}
+
+		if(toc == 'object' && expanded) {
+			printedBreak = celeri.drawTree(childrenOrValue, path, ops, n > 1 && i < n-1 ? tab + parts.pipe + parts.tabs.substr(1) : tab + parts.tabs);
+		}
+
+		 i++;
+	}
+
+
+	//add extra breaks for folders - a little more readable
+	if(!printedBreak) {
+		console.log('%s',tab);
+		printedBreak = true;
+	}
+
+	return printedBreak;
+};
+
+function commander(opts) {
+	celeri.drawTree(require('./js/apps'), [0, 0], { pretty: false });
 }
 
 function init(opts) {
@@ -247,7 +348,7 @@ function listNodes(opts) {
 }
 
 nomnom.script('phoenix');
-nomnom.nocommand().callback(list);
+nomnom.nocommand().callback(commander);
 nomnom.command('init')
 	.help('Sets up phoenix.')
 	.option('force-new-keypair', {

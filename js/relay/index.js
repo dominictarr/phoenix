@@ -17,6 +17,8 @@ function createServer(port) {
 	server.on('connect', function(req, stream, head) {
 		console.log('Received CONNECT, replicating');
 		stream.write('HTTP/1.1 200 Connection Established\r\n\r\n');
+		stream.on('error', console.log.bind(console, 'socket error'));
+		stream.on('end', console.log.bind(console, 'socket end'));
 		stream.pipe(toStream(ssb.createReplicationStream(function(err) { console.log('fin', err); }))).pipe(stream);
 	});
 	server.listen(port);
@@ -34,6 +36,7 @@ function createServer(port) {
 		req.on('connect', function(res, stream, head) {
 			console.log('Connected to ' + name + ', replicating');
 			stream.pipe(toStream(ssb.createReplicationStream(function(err) { console.log('fin', err); }))).pipe(stream);
+			stream.on('end', console.log.bind(console, 'socket end'));
 		});
 		req.on('error', function(e) {
 			console.log('Error connecting to ' + name + ': ' + e.message);
