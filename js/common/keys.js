@@ -26,7 +26,7 @@ try {
 
 exports.create = function(force, cb) {
 	if(exports.exist && !force) {
-		var err = new Error('Namefile already exists, use --force-new-keypair to overwrite it.');
+		var err = new Error('Keyfile already exists, use --force-new-keypair to overwrite it.');
 		err.fatal = false;
 		return cb(err);
 	}

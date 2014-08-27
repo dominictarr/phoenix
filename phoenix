@@ -20,19 +20,51 @@ function padleft(width, str) {
 	return str;
 }
 
-function init(opts) {
-	// Setup keys
-	keys.create(opts['force-new-keypair'], function(err) {
-		if (err) {
-			if (err.fatal) {
-				console.error(err.toString());
-				return;
-			}
-			console.error('Warning' + err.toString().slice(5));
+function padright(width, str) {
+	if (str.length < width) {
+		return str + '                                        '.slice(0, width - str.length);
+	}
+	return str;
+}
+
+function newuser(opts) {
+	var nicknameRE = /^[A-z][0-9A-z_-]*$/;
+	var nickname;
+	var rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
+	rl.question('Enter your nickname: ', function(input) {
+		if (!nicknameRE.test(input)) {
+			console.log('Letters, numbers, dashes and underscores only. Must start with a letter.');
+			return rl.close();
 		}
-		console.log('Keypair created.');
-		console.log('You are:    ' + keys.name.toString('hex'));
-		console.log('Public key: ' + keys.public.toString('hex'));
+		nickname = input;
+		rl.question('Your nickname will be \'' + nickname + '\'. Is that right? [y/N] ', function(input) {
+			rl.close();
+			if (input.toLowerCase() != 'y')
+				return console.log('Aborted.');
+
+			// Setup keys
+			keys.create(opts['force-new-keypair'], function(err) {
+				if (err) {
+					if (err.fatal) {
+						console.error(err.toString());
+						return;
+					}
+					console.error('Warning' + err.toString().slice(5));
+				} else {
+					console.log('Keypair created.');
+				}
+				apps.create('profile',{nickname: nickname}, function(err) {
+					if (err) return console.error('Failed to publish profile', err);
+					apps.buildCache(function(err) {
+						if (err) console.warn('Error building application cache. You may want to run the rebuild command.');
+						console.log('Profile message posted. You are: ' + nickname);
+						console.log('Hash id:    ' + keys.name.toString('hex'));
+						console.log('Public key: ' + keys.public.toString('hex'));
+						// process.exit();
+					});
+				});
+			});
+		});
 	});
 }
 
@@ -43,7 +75,7 @@ function rebuild(opts) {
 		apps.buildCache(function(err) {
 			if (err) console.error(err);
 			else console.log('Ok.');
-		})
+		});
 	});
 }
 
@@ -94,10 +126,12 @@ function feeds(opts) {
 		ssb.following(),
 		pull.collect(function(err, entries) {
 			if (err) { return console.error(err); }
-			// :TODO: nicknames
-			console.log ('  nickname  id');
+			console.log ('  nickname   id');
 			entries.forEach(function(entry, i) {
-				console.log((i+1) + ' ???       ' + entry.key.toString('hex'));
+				apps.get('profile').getProfile(entry.key, function(err, profile) {
+					var nickname = ((profile) ? profile.nickname : false) || '???';
+					console.log((i+1) + ' ' + padright(10, nickname) + ' ' + entry.key.toString('hex'));
+				});
 			});
 		})
 	);
@@ -106,8 +140,7 @@ function feeds(opts) {
 function lookup(opts) {
 	var name = opts.name;
 
-	function output(entry) {
-		var id = entry.key;
+	function output(id) {
 		if (opts.pubkey) {
 			apps.get('init').getPublicKey(id, function(err, pubkey) {
 				if (err) { return console.error(err); }
@@ -127,12 +160,15 @@ function lookup(opts) {
 				if (err) { return console.error(err); }
 				var entry = entries[id];
 				if (!entry) { return console.error('Invalid user number.'); }
-				output(entry);
+				output(entry.key);
 			})
 		);
 	} else {
-		// :TODO: names
-		console.log('Names are not yet implemented');
+		apps.get('profile').lookupByNickname(name, function(err, ids) {
+			if (ids.length > 1)
+				console.log(ids.length, 'matches');
+			ids.forEach(output);
+		});
 	}
 }
 
@@ -165,8 +201,6 @@ function follow(opts) {
 }
 
 function unfollow(opts) {
-	// :TODO: reference by number or name
-
 	// Remove from follow list
 	ssb.unfollow(opts.key, function(err) {
 		if (err) {
@@ -253,13 +287,13 @@ function listNodes(opts) {
 
 nomnom.script('phoenix');
 nomnom.nocommand().callback(list);
-nomnom.command('init')
-	.help('Sets up phoenix.')
+nomnom.command('newuser')
+	.help('Creates a new profile and feed.')
 	.option('force-new-keypair', {
 		flag: true,
 		help: 'Overwrites your ~/.scuttlebutt/secret.name file with a new keypair if it already exists.'
 	})
-	.callback(init);
+	.callback(newuser);
 nomnom.command('rebuild')
 	.help('Reconstructs the application cache from the message logs.')
 	.callback(rebuild);

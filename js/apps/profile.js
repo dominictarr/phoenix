@@ -11,10 +11,23 @@ module.exports = function(db) {
 		db.get([userid, 'profile'], cb);
 	};
 
+	api.lookupByNickname = function(nickname, cb) {
+		var ids = [];
+		nickname = nickname.toLowerCase();
+		db.createReadStream()
+			.on('data', function(item) {
+				if (item.value.nickname.toLowerCase() == nickname)
+					ids.push(item.key[0]);
+			})
+			.on('end', function() {
+				cb(null, ids);
+			});
+	};
+
 	api.create = function (prof, cb) {
 		if (!prof || !prof.nickname) return cb(new errors.BadInput({ schema: schema }));
 		// For now, only nickname
-		ssb.add('profile', JSON.stringify({nickname: prof.nickname}), cb);
+		cb(null, JSON.stringify({nickname: prof.nickname}));
 	};
 
 	function parse(data, cb) {

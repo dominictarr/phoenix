@@ -64,6 +64,7 @@ exports.buildCache = function(opts, cb) {
 				start = timestamps[type];
 			}
 		}
+		console.log(start, timestamps);
 
 		var createLogSink = pull.Sink(function (read) {
 			read(null, function next (end, logentry) {
