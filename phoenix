@@ -7,6 +7,7 @@ var prettydate = require('pretty-date');
 var keys       = require('./js/common/keys');
 var ssb        = require('./js/common/ssb');
 var netnodes   = require('./js/common/network-nodes');
+var apps       = require('./js/apps');
 
 function namefileHelp() {
 	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run the \'init\' command.');
@@ -35,6 +36,17 @@ function init(opts) {
 	});
 }
 
+function rebuild(opts) {
+	console.log('Clearing the cache...');
+	apps.clearCache(function() {
+		console.log('Rebuilding...');
+		apps.buildCache(function(err) {
+			if (err) console.error(err);
+			else console.log('Ok.');
+		})
+	});
+}
+
 function whoami(opts) {
 	if (keys.exist) {
 		console.log('You are:    ' + keys.name.toString('hex'));
@@ -59,22 +71,16 @@ function list(opts) {
 		);
 	}
 	function toSimple(msg) {
-		var author = msg.author.toString('hex');
-		var output =
-			author.slice(0, 12) + '...' + author.slice(-4) + ' | ' +
-			padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | '
-		;
-		switch (msg.type.toString('utf8')) {
-			case 'init':
-				output += '[Account created]';
-				break;
-			case 'text':
-				output += msg.message.toString('utf8');
-				break;
-			default:
-				output += msg.type.toString('utf8') + ' - ' + msg.message.toString('utf8');
-		}
-		console.log(output);
+		apps.render(msg, function(err, markdown) {
+			if (err) markdown = err.toString();
+			var author = msg.author.toString('hex');
+			var output =
+				author.slice(0, 12) + '...' + author.slice(-4) + ' | ' +
+				padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | ' +
+				markdown
+			;
+			console.log(output);
+		});
 	}
 	pull(
 		ssb.createFeedStream(),
@@ -103,7 +109,7 @@ function lookup(opts) {
 	function output(entry) {
 		var id = entry.key;
 		if (opts.pubkey) {
-			ssb.getPublicKey(id, function(err, pubkey) {
+			apps.get('init').getPublicKey(id, function(err, pubkey) {
 				if (err) { return console.error(err); }
 				console.log(pubkey.toString('hex'));
 			});
@@ -135,8 +141,7 @@ function post(opts) {
 		return namefileHelp();
 	}
 
-	var feed = ssb.createFeed(keys);
-	feed.add('text', opts.text, function(err) {
+	apps.create('text', opts.text, function(err) {
 		if (err) {
 			console.error(err);
 		} else {
@@ -255,6 +260,9 @@ nomnom.command('init')
 		help: 'Overwrites your ~/.scuttlebutt/secret.name file with a new keypair if it already exists.'
 	})
 	.callback(init);
+nomnom.command('rebuild')
+	.help('Reconstructs the application cache from the message logs.')
+	.callback(rebuild);
 nomnom.command('whoami')
 	.help('Lists your profile.')
 	.callback(whoami);
