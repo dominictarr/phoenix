@@ -115,9 +115,8 @@ function list(opts) {
 		});
 	}
 	pull(
-		ssb.createFeedStream(),
-		pull.map((opts.long) ? toDetailed : toSimple),
-		pull.drain()
+		ssb.createFeedStream({ tail: opts.tail }),
+		pull.drain((opts.long) ? toDetailed : toSimple)
 	);
 }
 
@@ -286,7 +285,18 @@ function listNodes(opts) {
 }
 
 nomnom.script('phoenix');
-nomnom.nocommand().callback(list);
+nomnom.nocommand()
+	.options({
+		long: {
+			flag: true,
+			help: 'Flag, output more detailed information.'
+		},
+		tail: {
+			flag: true,
+			help: 'Flag, keep output stream open.'
+		}
+	})
+	.callback(list);
 nomnom.command('newuser')
 	.help('Creates a new profile and feed.')
 	.option('force-new-keypair', {
@@ -306,6 +316,10 @@ nomnom.command('list')
 		long: {
 			flag: true,
 			help: 'Flag, output more detailed information.'
+		},
+		tail: {
+			flag: true,
+			help: 'Flag, keep output stream open.'
 		}
 	})
 	.callback(list);
