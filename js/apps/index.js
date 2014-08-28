@@ -1,9 +1,7 @@
-var db     = require('../common/db');
-var ssb    = require('../common/ssb');
 var pull   = require('pull-stream');
 var pl     = require('pull-level');
-var appsDB = db.sublevel('apps', { valueEncoding: 'json' });
-var lastDB = appsDB.sublevel('lst', { valueEncoding: 'json' });
+var ssb    = require('../common/ssb');
+var appsDB = require('../common/db').sublevel('apps', { valueEncoding: 'json' });
 
 var activeApps = {
 	init:    require('./init')(appsDB.sublevel('app-init'), { valueEncoding: 'json' }),
@@ -29,8 +27,8 @@ exports.create = function(type, data, cb) {
 };
 
 exports.clearCache = function(cb) {
-	clearDB(lastDB, function(err) {
-		if (err) return console.error('Error clearing apps/lastDB', err);
+	appsDB.del('syncstate', function(err) {
+		if (err) return console.error('Error clearing syncstate', err);
 		var n = 0;
 		for (var k in activeApps) {
 			clearDB(appsDB.sublevel('app-'+k), done);
@@ -51,12 +49,9 @@ exports.buildCache = function(opts, cb) {
 	opts = opts || {};
 
 	// Fetch sync positions for each app
-	pull(pl.read(lastDB), pull.collect(function (err, items) {
-		// Build into map
-		var timestamps = {};
-		(items||[]).forEach(function(item) { timestamps[item.key] = item.value; });
-
+	appsDB.get('syncstate', function (err, timestamps) {
 		// Initialize any new applications and decide where to start reading the log from
+		timestamps = timestamps || {};
 		var start = 1;
 		for (var type in activeApps) {
 			timestamps[type] = timestamps[type] || 1;
@@ -64,7 +59,6 @@ exports.buildCache = function(opts, cb) {
 				start = timestamps[type];
 			}
 		}
-		console.log(start, timestamps);
 
 		var createLogSink = pull.Sink(function (read) {
 			read(null, function next (end, logentry) {
@@ -91,13 +85,13 @@ exports.buildCache = function(opts, cb) {
 						console.error('app ' + type + ' error', err);
 					}
 
-					// Update lastdb
-					timestamps[type] = logentry.timestamp;
-					lastDB.put(type, logentry.timestamp, function(err) {
+					// Update syncstate
+					for (var k in timestamps) timestamps[k] = logentry.timestamp;
+					appsDB.put('syncstate', timestamps, function(err) {
 						if (err) {
 							// database error!
 							// :TODO: how do we live with this?
-							console.error('sync to lastdb error', err);
+							console.error('write to syncstate failed', err);
 						}
 						return read(null, next);
 					});
@@ -107,7 +101,7 @@ exports.buildCache = function(opts, cb) {
 
 		// Begin listening to the log
 		pull(ssb.createLogStream({ gt: start, tail: opts.tail }), createLogSink());
-	}));
+	});
 };
 
 function clearDB(db, cb) {
