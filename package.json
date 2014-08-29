@@ -15,7 +15,7 @@
     "secure-scuttlebutt": "latest",
     "nomnom": "1.8.0",
     "osenv": "0.0.3",
-    "eccjs": "git://github.com/dominictarr/eccjs.git#f575e740a1838e6ca483eb59837624952c24d497",
+    "eccjs": "git://github.com/dominictarr/eccjs.git#586f6d47507184a2efe84684ed0a30605cbc43a5",
     "blake2s": "~1.0.0",
     "proquint-": "~1.1.0",
     "pull-stream": "~2.24.1",
@@ -24,6 +24,7 @@
     "bytewise": "~0.7.0",
     "pull-level": "~1.1.10",
     "http-duplex": "~0.0.2",
-    "pull-stream-to-stream": "~1.3.0"
+    "pull-stream-to-stream": "~1.3.0",
+    "ssh2": "~0.3.6"
   }
 }
