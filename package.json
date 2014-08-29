@@ -1,4 +1,4 @@
-{
+  {
   "name": "phoenix",
   "main": "index.html",
   "window": {
@@ -18,7 +18,7 @@
     "eccjs": "git://github.com/dominictarr/eccjs.git#f575e740a1838e6ca483eb59837624952c24d497",
     "blake2s": "~1.0.0",
     "proquint-": "~1.1.0",
-    "pull-stream": "~2.24.0",
+    "pull-stream": "~2.24.1",
     "pretty-date": "0.2.0",
     "daemonize2": "0.4.2",
     "bytewise": "~0.7.0",

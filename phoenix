@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 var nomnom     = require('nomnom');
-var proquint   = require('proquint-');
 var fs         = require('fs');
 var pull       = require('pull-stream');
 var prettydate = require('pretty-date');
@@ -27,45 +26,55 @@ function padright(width, str) {
 	return str;
 }
 
-function newuser(opts) {
+function setup(opts) {
 	var nicknameRE = /^[A-z][0-9A-z_-]*$/;
 	var nickname;
 	var rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
-	rl.question('Enter your nickname: ', function(input) {
+
+	// :TODO: dont publish new profile if one already exists
+
+	// Setup profile
+	rl.question('Nickname? > ', handleNickname);
+	function handleNickname(input) {
 		if (!nicknameRE.test(input)) {
 			console.log('Letters, numbers, dashes and underscores only. Must start with a letter.');
 			return rl.close();
 		}
 		nickname = input;
-		rl.question('Your nickname will be \'' + nickname + '\'. Is that right? [y/N] ', function(input) {
-			rl.close();
-			if (input.toLowerCase() != 'y')
-				return console.log('Aborted.');
+		console.log('\nNickname is \'' + nickname + '\'');
+		rl.question('Publish? [y/N]> ', handlePublish);
+	}
+	function handlePublish(input) {
+		console.log('');
+		rl.close();
+		if (input.toLowerCase() != 'y')
+			return console.log('Aborted.');
 
-			// Setup keys
-			keys.create(opts['force-new-keypair'], function(err) {
-				if (err) {
-					if (err.fatal) {
-						console.error(err.toString());
-						return;
-					}
-					console.error('Warning' + err.toString().slice(5));
-				} else {
-					console.log('Keypair created.');
-				}
-				apps.create('profile',{nickname: nickname}, function(err) {
-					if (err) return console.error('Failed to publish profile', err);
-					apps.buildCache(function(err) {
-						if (err) console.warn('Error building application cache. You may want to run the rebuild command.');
-						console.log('Profile message posted. You are: ' + nickname);
-						console.log('Hash id:    ' + keys.name.toString('hex'));
-						console.log('Public key: ' + keys.public.toString('hex'));
-						// process.exit();
-					});
-				});
-			});
+		// Setup keys
+		keys.create(opts['force-new-keypair'], handleKeycreate);
+	}
+	function handleKeycreate(err) {
+		if (err && err.fatal)
+			return console.error(err.toString());
+
+		// Publish profile
+		apps.create('profile', {nickname: nickname}, handleProfpublish);
+	}
+	function handleProfpublish(err) {
+		if (err) return console.error('Failed to publish profile', err);
+
+		// Start phoenixd
+		var daemon = require("daemonize2").setup({
+			main: "js/daemon.js",
+			name: "phoenixd",
+			pidfile: "phoenixd.pid",
+			// args: ["64000", "65000"]
 		});
-	});
+		daemon.start();
+		daemon.on('started', function() {
+			console.log('Ok.');
+		});
+	}
 }
 
 function rebuild(opts) {
@@ -253,6 +262,9 @@ function verify(opts) {
 }
 
 function addNode(opts) {
+	if (!opts.host)
+		return listNodes(opts);
+
 	var host = opts.host.split(':');
 	var addr = host[0];
 	var port = host[1] || 64000;
@@ -286,32 +298,16 @@ function listNodes(opts) {
 
 nomnom.script('phoenix');
 nomnom.nocommand()
-	.options({
-		long: {
-			flag: true,
-			help: 'Flag, output more detailed information.'
-		},
-		tail: {
-			flag: true,
-			help: 'Flag, keep output stream open.'
-		}
-	})
 	.callback(list);
-nomnom.command('newuser')
+nomnom.command('setup')
 	.help('Creates a new profile and feed.')
 	.option('force-new-keypair', {
 		flag: true,
 		help: 'Overwrites your ~/.scuttlebutt/secret.name file with a new keypair if it already exists.'
 	})
-	.callback(newuser);
-nomnom.command('rebuild')
-	.help('Reconstructs the application cache from the message logs.')
-	.callback(rebuild);
-nomnom.command('whoami')
-	.help('Lists your profile.')
-	.callback(whoami);
-nomnom.command('list')
-	.help('Lists the feed messages.')
+	.callback(setup);
+nomnom.command('feed')
+	.help('Shows the feed messages (default action).')
 	.options({
 		long: {
 			flag: true,
@@ -326,20 +322,6 @@ nomnom.command('list')
 nomnom.command('feeds')
 	.help('Lists the users you follow.')
 	.callback(feeds);
-nomnom.command('lookup')
-	.help('Looks up a user by a nickname.')
-	.options({
-		name: {
-			position: 1,
-			required: true,
-			help: 'Nickname or user number to lookup.',
-		},
-		pubkey: {
-			flag: true,
-			help: 'Flag, output the user\'s public key rather than their id.'
-		}
-	})
-	.callback(lookup);
 nomnom.command('post')
 	.help('Posts a message to your feed.')
 	.options({
@@ -350,6 +332,9 @@ nomnom.command('post')
 		}
 	})
 	.callback(post);
+nomnom.command('whoami')
+	.help('Shows your profile.')
+	.callback(whoami);
 nomnom.command('follow')
 	.help('Starts following a user.')
 	.options({
@@ -370,7 +355,21 @@ nomnom.command('unfollow')
 		}
 	})
 	.callback(unfollow);
-nomnom.command('sign')
+nomnom.command('lookup')
+	.help('Looks up a user\'s profile by their nickname.')
+	.options({
+		name: {
+			position: 1,
+			required: true,
+			help: 'Nickname or user number to lookup.',
+		},
+		pubkey: {
+			flag: true,
+			help: 'Flag, output the user\'s public key rather than their id.'
+		}
+	})
+	.callback(lookup);
+/*nomnom.command('sign')
 	.help('Creates a signature for a file.')
 	.options({
 		path: {
@@ -398,28 +397,27 @@ nomnom.command('verify')
 			help: 'Public key of the user who created the signature (defaults to yours).'
 		}
 	})
-	.callback(verify);
-nomnom.command('add-node')
-	.help('Manually adds a node to your replication network.')
+	.callback(verify);*/
+nomnom.command('sync')
+	.help('Adds a server to your replication network.')
 	.options({
 		host: {
 			position: 1,
-			required: true,
-			help: 'Address of the node (<address>[:port]).',
+			help: 'Address of the server (<address>[:port]).',
 		}
 	})
 	.callback(addNode);
-nomnom.command('del-node')
-	.help('Manually removes a node from your replication network.')
+nomnom.command('unsync')
+	.help('Removes a server from your replication network.')
 	.options({
 		host: {
 			position: 1,
 			required: true,
-			help: 'Address of the node (<address>[:port]).',
+			help: 'Address of the server (<address>[:port]).',
 		}
 	})
 	.callback(delNode);
-nomnom.command('list-nodes')
-	.help('Lists the nodes in your replication network.')
-	.callback(listNodes);
+nomnom.command('rebuild')
+	.help('Reconstructs the application cache from the message logs.')
+	.callback(rebuild);
 nomnom.parse();
