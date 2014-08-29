@@ -1,0 +1,122 @@
+#!/usr/bin/env node
+var nomnom     = require('nomnom');
+var ssh2       = require('ssh2');
+
+var deploySteps = [
+	'rm -Rf ~/phoenix; git clone https://github.com/pfraze/phoenix.git ~/phoenix',
+	'cd ~/phoenix && npm install',
+	'echo "KEY_TODO" > ~/phoenix/.relay-members',
+	'cd ~/phoenix && node ./phoenixd start'
+];
+var deployErrors = [
+	'Failed to clone phoenix repo.',
+	'Failed to install dependencies.',
+	'Failed to write your public key into the allowed relay users.',
+	'Failed to start the phoenix daemon.'
+];
+
+function deploy(opts) {
+	var dest = /^(.*)@(.*)(?:\:(.*))?$/.exec(opts.dest);
+	if (!dest)
+		return console.error('Destination must include the ssh user and hostname (eg bob@host.com)');
+
+	var connInfo = {
+		username: dest[1],
+		host: dest[2],
+		port: dest[3] || 22,
+		password: undefined
+	};
+
+	var conn = new ssh2();
+	process.stdout.write('Password: ');
+	getPassword(function(pass) {
+		connInfo.password = pass;
+		conn.connect(connInfo);
+	});
+	conn.on('ready', function() {
+		console.log('Established ssh connection with ' + connInfo.host + ':' + connInfo.port + '.');
+		sshDoAll(deploySteps, deployErrors, function() {
+			console.log('');
+			console.log('Access granted:');
+			console.log('- "Member." You can sync anybody\'s feed to ' + connInfo.host + '.');
+			console.log('- "Syncing." Background-syncing with ' + connInfo.host + '.');
+			console.log('Ok.');
+		});
+	});
+	conn.on('error', function(err) {
+		console.error('Failed to establish ssh connection with ' + connInfo.host + ':' + connInfo.port + '.');
+		console.error(err.toString());
+	});
+
+	function sshDoAll(cmds, errors, cb) {
+		next();
+		function next() {
+			var cmd = cmds.shift();
+			var errMsg = errors.shift();
+			sshDo(cmd, function(err) {
+				if (err) return conn.end(), console.error(errMsg);
+				if (cmds.length) next();
+				else conn.end(), cb();
+			});
+		}
+	}
+	function sshDo(cmd, cb) {
+		console.log('> ', cmd);
+		conn.exec(cmd, function(err, stream) {
+			if (err) throw err;
+			stream
+				.on('exit', function(code, signal) {
+					if (code !== 0) {
+						cb(new Error('Process exited with error code ' + code));
+					}
+					cb();
+				})
+				.on('data', function(data) {
+					process.stdout.write(data);
+				})
+				.stderr.on('data', function(data) {
+					process.stderr.write(data);
+				});
+		});
+	}
+}
+
+function getPassword(cb) {
+	var stdin = process.openStdin();
+	process.stdin.resume();
+	process.stdin.setEncoding('utf8');
+	process.stdin.setRawMode(true);
+	var password = '';
+	process.stdin.on('data', function (char) {
+		char = char + "";
+
+		switch (char) {
+			case "\n": case "\r": case "\u0004":
+				// They've finished typing their password
+				process.stdin.setRawMode(false);
+				stdin.pause();
+				console.log('');
+				cb(password);
+				break;
+			case "\u0003":
+				// Ctrl C
+				console.log('\nCancelled');
+				process.exit();
+				break;
+			default:
+				password += char;
+				break;
+		}
+	});
+}
+
+nomnom.script('phoenix-relay');
+nomnom.command('deploy')
+	.help('Deploys the relay software over ssh.')
+	.option('dest', {
+		position: 1,
+		required: true,
+		help: 'The user and domain of your SSH destination (eg bob@server.com).'
+	})
+	.callback(deploy);
+nomnom.parse();
