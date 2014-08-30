@@ -2,6 +2,7 @@
 var nomnom     = require('nomnom');
 var ssh2       = require('ssh2');
 var keys       = require('./js/common/keys');
+var netnodes   = require('./js/common/network-nodes');
 
 var deploySteps = [
 	'cd ~/phoenix && node ~/phoenix/phoenixd stop',
@@ -53,7 +54,13 @@ function deploy(opts) {
 			console.log('Access granted:');
 			console.log('- "Member." You can sync anybody\'s feed to ' + connInfo.host + '.');
 			console.log('- "Syncing." Background-syncing with ' + connInfo.host + '.');
-			console.log('Ok.');
+			netnodes.add(connInfo.host, 64000, function(err) {
+				if (err) {
+					console.error('Failed to store '+ connInfo.host + ':64000 into your server-table.');
+					console.error('Try again by calling \'phoenix sync ' + connInfo.host + ':64000\'');
+				}
+				console.log('Ok.');
+			});
 		});
 	});
 	conn.on('error', function(err) {

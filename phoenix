@@ -267,7 +267,7 @@ function addNode(opts) {
 
 	var host = opts.host.split(':');
 	var addr = host[0];
-	var port = host[1] || 64000;
+	var port = +host[1] || 64000;
 
 	netnodes.add(addr, port, function(err) {
 		if (err) { return console.error(err); }
@@ -278,9 +278,12 @@ function addNode(opts) {
 function delNode(opts) {
 	var host = opts.host.split(':');
 	var addr = host[0];
-	var port = host[1] || 64000;
+	var port = +host[1] || 64000;
+
+	console.log('Removing', addr, port);
 
 	netnodes.del(addr, port, function(err) {
+		console.log(arguments);
 		if (err) { return console.error(err); }
 		console.log('Ok.');
 	});
