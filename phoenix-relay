@@ -4,16 +4,18 @@ var ssh2       = require('ssh2');
 var keys       = require('./js/common/keys');
 
 var deploySteps = [
-	'cd ~/.scuttlebutt || mkdir ~/.scuttlebutt',
 	'cd ~/phoenix && node ~/phoenix/phoenixd stop',
+	'cd ~/.scuttlebutt && rm -Rf ~/.scuttlebutt',
+	'mkdir ~/.scuttlebutt',
 	'rm -Rf ~/phoenix; git clone https://github.com/pfraze/phoenix.git ~/phoenix',
 	'cd ~/phoenix && npm install',
 	'echo "' + keys.name.toString('hex') + '" > ~/phoenix/.relay-members',
 	'cd ~/phoenix && node ./phoenixd start'
 ];
 var deployErrors = [
-	'Failed to create a user-configuration directory.',
 	false,
+	false,
+	'Failed to create a user-configuration directory.',
 	'Failed to clone phoenix repo.',
 	'Failed to install dependencies.',
 	'Failed to write your public key into the allowed relay users.',

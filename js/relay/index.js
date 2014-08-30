@@ -58,6 +58,7 @@ function loadMembersFile() {
 		if (err || !data) return;
 		data = data.replace(/\r/g, '').split('\n');
 		data.forEach(function (key) {
+			if (!key) return;
 			try {
 				key = new Buffer(key, 'hex');
 			} catch (e) {
