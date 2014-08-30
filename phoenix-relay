@@ -6,25 +6,35 @@ var netnodes   = require('./js/common/network-nodes');
 
 var deploySteps = [
 	'cd ~/phoenix && node ~/phoenix/phoenixd stop',
-	'cd ~/.scuttlebutt && rm -Rf ~/.scuttlebutt',
-	'mkdir ~/.scuttlebutt',
-	'rm -Rf ~/phoenix; git clone https://github.com/pfraze/phoenix.git ~/phoenix',
+
+	'cd ~/.phoenix && rm -Rf ~/.phoenix',
+	'mkdir ~/.phoenix',
+
+	'rm -Rf ~/phoenix',
+	'git clone https://github.com/pfraze/phoenix.git ~/phoenix',
 	'cd ~/phoenix && npm install',
+
 	'echo "' + keys.name.toString('hex') + '" > ~/phoenix/.relay-members',
+
 	'cd ~/phoenix && node ./phoenixd start'
 ];
 var deployErrors = [
 	false,
+
 	false,
 	'Failed to create a user-configuration directory.',
+
+	false,
 	'Failed to clone phoenix repo.',
 	'Failed to install dependencies.',
+
 	'Failed to write your public key into the allowed relay users.',
+
 	'Failed to start the phoenix daemon.'
 ];
 
 function namefileHelp() {
-	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run \'phoenix setup\' first.');
+	console.log('You don\'t have a ~/.phoenix/secret.name yet; run \'phoenix setup\' first.');
 }
 
 function deploy(opts) {
