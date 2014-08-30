@@ -9,7 +9,7 @@ var netnodes   = require('./js/common/network-nodes');
 var apps       = require('./js/apps');
 
 function namefileHelp() {
-	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run \'phoenix setup\' first.');
+	console.log('You don\'t have a ~/.phoenix/secret.name yet; run \'phoenix setup\' first.');
 }
 
 function padleft(width, str) {
@@ -330,7 +330,7 @@ nomnom.command('setup')
 	.help('Creates a new profile and feed.')
 	.option('force-new-keypair', {
 		flag: true,
-		help: 'Overwrites your ~/.scuttlebutt/secret.name file with a new keypair if it already exists.'
+		help: 'Overwrites your ~/.phoenix/secret.name file with a new keypair if it already exists.'
 	})
 	.callback(setup);
 nomnom.command('feed')
