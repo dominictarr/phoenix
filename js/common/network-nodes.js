@@ -14,3 +14,4 @@ exports.createListStream = function(cb, opts) {
 exports.get = function(addr, port, cb) {
 	netNodesDB.get([addr, port], cb);
 };
+exports.db = netNodesDB;

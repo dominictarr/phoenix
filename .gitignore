@@ -1,5 +1,6 @@
 phoenix.lnk
 .sass-cache
 node_modules
-phoenixd.pid
+phoenix-relay.pid
+phoenix-relay.log
 .relay-members

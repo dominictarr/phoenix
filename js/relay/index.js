@@ -54,7 +54,6 @@ function createServer(port) {
 
 function loadMembersFile() {
 	fs.readFile(path.join(__dirname, '../../.relay-members'), 'utf8', function(err, data) {
-		console.log(err, data);
 		if (err || !data) return;
 		data = data.replace(/\r/g, '').split('\n');
 		data.forEach(function (key) {

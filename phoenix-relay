@@ -1,43 +1,44 @@
-#!/usr/bin/env node
+#!/usr/bin/env nodejs
 var nomnom     = require('nomnom');
 var ssh2       = require('ssh2');
-var keys       = require('./js/common/keys');
-var netnodes   = require('./js/common/network-nodes');
-
-var deploySteps = [
-	'cd ~/phoenix && node ~/phoenix/phoenixd stop',
-
-	'cd ~/.phoenix && rm -Rf ~/.phoenix',
-	'mkdir ~/.phoenix',
-
-	'rm -Rf ~/phoenix',
-	'git clone https://github.com/pfraze/phoenix.git ~/phoenix',
-	'cd ~/phoenix && npm install',
-
-	'echo "' + keys.name.toString('hex') + '" > ~/phoenix/.relay-members',
-
-	'cd ~/phoenix && node ./phoenixd start'
-];
-var deployErrors = [
-	false,
-
-	false,
-	'Failed to create a user-configuration directory.',
-
-	false,
-	'Failed to clone phoenix repo.',
-	'Failed to install dependencies.',
-
-	'Failed to write your public key into the allowed relay users.',
-
-	'Failed to start the phoenix daemon.'
-];
 
 function namefileHelp() {
 	console.log('You don\'t have a ~/.phoenix/secret.name yet; run \'phoenix setup\' first.');
 }
 
 function deploy(opts) {
+	var keys       = require('./js/common/keys');
+	var netnodes   = require('./js/common/network-nodes');
+
+	var deploySteps = [
+		'cd ~/phoenix && node ~/phoenix/phoenix-relay stop',
+
+		'cd ~/.phoenix && rm -Rf ~/.phoenix',
+		'mkdir ~/.phoenix',
+
+		'rm -Rf ~/phoenix',
+		'git clone https://github.com/pfraze/phoenix.git ~/phoenix',
+		'cd ~/phoenix && npm install',
+
+		'echo "' + keys.name.toString('hex') + '" > ~/phoenix/.relay-members',
+
+		'cd ~/phoenix && node ./phoenix-relay start -d'
+	];
+	var deployErrors = [
+		false,
+
+		false,
+		'Failed to create a user-configuration directory.',
+
+		false,
+		'Failed to clone phoenix repo.',
+		'Failed to install dependencies.',
+
+		'Failed to write your public key into the allowed relay users.',
+
+		'Failed to start the phoenix relay daemon.'
+	];
+
 	if (!keys.exist) return namefileHelp();
 
 	var dest = /^(.*)@(.*)(?:\:(.*))?$/.exec(opts.dest);
@@ -141,6 +142,31 @@ function getPassword(cb) {
 	});
 }
 
+function start(opts) {
+	if (opts.daemon) {
+		var daemon = require("daemonize2").setup({
+			main: "js/daemon.js",
+			name: "phoenix-relay",
+			pidfile: "phoenix-relay.pid",
+			argv: [opts.port, "0"]
+		});
+		daemon.start();
+	} else {
+		var relayPort = opts.port || 64000;
+		require('./js/relay').createServer(relayPort);
+		console.log('Scuttlebutt relay.....listening publicly on localhost:' + relayPort);
+	}
+}
+
+function stop(opts) {
+	var daemon = require("daemonize2").setup({
+		main: "js/daemon.js",
+		name: "phoenix-relay",
+		pidfile: "phoenix-relay.pid",
+	});
+	daemon.stop();
+}
+
 nomnom.script('phoenix-relay');
 nomnom.command('deploy')
 	.help('Deploys the relay software over ssh.')
@@ -150,4 +176,21 @@ nomnom.command('deploy')
 		help: 'The user and domain of your SSH destination (eg bob@server.com).'
 	})
 	.callback(deploy);
+nomnom.command('start')
+	.help('Starts the relay service.')
+	.options({
+		daemon: {
+			flag: true,
+			abbr: 'd',
+			help: 'Run the relay in the background as a daemon.'
+		},
+		port: {
+			abbr: 'p',
+			help: 'Sets the port to accept connections on.'
+		}
+	})
+	.callback(start);
+nomnom.command('stop')
+	.help('Stops the relay daemon if it\'s active.')
+	.callback(stop);
 nomnom.parse();
