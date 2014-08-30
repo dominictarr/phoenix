@@ -17,7 +17,7 @@ module.exports = function(db) {
 	};
 
 	api.render = function(msg, cb) {
-		cb(null, 'Account created');
+		cb(null, '// Account created');
 	};
 
 	return api;

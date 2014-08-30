@@ -12,7 +12,7 @@ module.exports = function(db) {
 	};
 
 	api.render = function(msg, cb) {
-		cb(null, '> ' + msg.message);
+		cb(null, msg.message);
 	};
 
 	return api;

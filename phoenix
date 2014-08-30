@@ -115,15 +115,20 @@ function list(opts) {
 		);
 	}
 	function toSimple(msg) {
-		apps.render(msg, function(err, markdown) {
-			if (err) markdown = err.toString();
-			var author = msg.author.toString('hex');
-			var output =
-				author.slice(0, 12) + '...' + author.slice(-4) + ' | ' +
-				padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | ' +
-				markdown
-			;
-			console.log(output);
+		apps.get('profile').getProfile(msg.author, function(err, profile) {
+			if (err) return console.error(err);
+			var nickname = (profile) ? profile.nickname : '???';
+			apps.render(msg, function(err, markdown) {
+				if (err) markdown = err.toString();
+				var author = msg.author.toString('hex');
+				var output =
+					author.slice(0, 4) + ' | ' +
+					padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | ' +
+					padleft(10, nickname) + ' | ' +
+					markdown
+				;
+				console.log(output);
+			});
 		});
 	}
 	pull(
@@ -290,7 +295,7 @@ function verify(opts) {
 
 function addNode(opts) {
 	if (!opts.host)
-		return listNodes(opts);
+		return syncNodes(opts);
 
 	var host = opts.host.split(':');
 	var addr = host[0];
@@ -316,7 +321,7 @@ function delNode(opts) {
 	});
 }
 
-function listNodes(opts) {
+function syncNodes(opts) {
 	// Establish connections
 	function connectOut(node) {
 		var host = node.key;
@@ -334,6 +339,7 @@ function listNodes(opts) {
 				if (err) console.error(err);
 				else console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
 			}))).pipe(stream);
+			// :TODO: spit out some metrics, like # of new messages
 		});
 		req.on('error', function(e) {
 			console.log(name + ' failed, ' + e.message);

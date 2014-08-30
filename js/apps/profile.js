@@ -48,7 +48,7 @@ module.exports = function(db) {
 	api.render = function(msg, cb) {
 		parse(msg, function(err, profile) {
 			if (err) return cb(err);
-			cb(null, 'Is now known as **' + profile.nickname + '**');
+			cb(null, '// Is now known as **' + profile.nickname + '**');
 		});
 	};
 
