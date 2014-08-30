@@ -1,8 +1,10 @@
 #!/usr/bin/env node
 var nomnom     = require('nomnom');
 var fs         = require('fs');
+var http       = require('http');
 var pull       = require('pull-stream');
 var prettydate = require('pretty-date');
+var toStream   = require('pull-stream-to-stream');
 var keys       = require('./js/common/keys');
 var ssb        = require('./js/common/ssb');
 var netnodes   = require('./js/common/network-nodes');
@@ -315,11 +317,32 @@ function delNode(opts) {
 }
 
 function listNodes(opts) {
+	// Establish connections
+	function connectOut(node) {
+		var host = node.key;
+		if ((host[0] == 'localhost' || host[0] == '127.0.0.1') && host[1] == port)
+			return; // skip self
+
+		var startTs = +(new Date());
+		var name = host[0] + ':' + host[1];
+		console.log(name + ' connecting.');
+
+		var req = http.request({ method: 'CONNECT', hostname: host[0], port: host[1], path: '/' });
+		req.on('connect', function(res, stream, head) {
+			console.log(name + ' syncing.');
+			stream.pipe(toStream(ssb.createReplicationStream(function(err) {
+				if (err) console.error(err);
+				else console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
+			}))).pipe(stream);
+		});
+		req.on('error', function(e) {
+			console.log(name + ' failed, ' + e.message);
+		});
+		req.end();
+	}
 	pull(
 		netnodes.createListStream(),
-		pull.through(function(node) {
-			console.log(node.key[0] + ':' + node.key[1]);
-		}),
+		pull.through(connectOut),
 		pull.drain()
 	);
 }

@@ -9,6 +9,8 @@
 var relayPort  = /*process.argv[2] ||*/ 64000;
 var webguiPort = /*process.argv[3] ||*/ 65000;
 
+require('./apps').buildCache({ tail: true });
+
 if (relayPort != 0) {
 	require('./relay').createServer(relayPort);
 	console.log('Scuttlebutt relay.....listening publicly on localhost:' + relayPort);
@@ -18,8 +20,6 @@ if (webguiPort != 0) {
 	require('./localhost').createServer(webguiPort);
 	console.log('Web GUI...............listening privately on localhost:' + webguiPort);
 }
-
-require('./apps').buildCache({ tail: true });
 
 function onException(e) {
 	console.log('Uncaught Exception: ' + e.toString());
