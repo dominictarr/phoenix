@@ -88,7 +88,7 @@ function deploy(opts) {
 			stream
 				.on('exit', function(code, signal) {
 					if (code !== 0) {
-						cb(new Error('Process exited with error code ' + code));
+						return cb(new Error('Process exited with error code ' + code));
 					}
 					cb();
 				})

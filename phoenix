@@ -58,6 +58,7 @@ function setup(opts) {
 			return console.error(err.toString());
 
 		// Publish profile
+		ssb.createUserFeed();
 		apps.create('profile', {nickname: nickname}, handleProfpublish);
 	}
 	function handleProfpublish(err) {
