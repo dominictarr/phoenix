@@ -123,6 +123,7 @@ function list(opts) {
 				var author = msg.author.toString('hex');
 				var output =
 					author.slice(0, 4) + ' | ' +
+					padleft(3, ' '+msg.sequence) + ' | ' +
 					padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | ' +
 					padleft(10, nickname) + ' | ' +
 					markdown
@@ -130,6 +131,9 @@ function list(opts) {
 				console.log(output);
 			});
 		});
+	}
+	if (!opts.long) {
+		console.log('user   seq   time             nickname     message');
 	}
 	pull(
 		ssb.createFeedStream({ tail: opts.tail }),
