@@ -9,6 +9,9 @@ var ssb      = require('../common/ssb');
 var netnodes = require('../common/network-nodes');
 
 function createServer(port) {
+	// Sync config
+	loadMembersFile();
+
 	// Start server
 	var server = http.createServer(function (req, res) {
 		function serve404(err) {  res.writeHead(404); res.end('Not found'); }
@@ -47,6 +50,24 @@ function createServer(port) {
 	);
 
 	return server;
+}
+
+function loadMembersFile() {
+	fs.readFile(path.join(__dirname, '../../.relay-members'), 'utf8', function(err, data) {
+		console.log(err, data);
+		if (err || !data) return;
+		data = data.replace(/\r/g, '').split('\n');
+		data.forEach(function (key) {
+			try {
+				key = new Buffer(key, 'hex');
+			} catch (e) {
+				console.error('Bad value found in .relay-members file.');
+				console.error(e);
+				return;
+			}
+			ssb.follow(key);
+		});
+	});
 }
 
 module.exports = {

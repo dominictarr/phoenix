@@ -9,7 +9,7 @@ var netnodes   = require('./js/common/network-nodes');
 var apps       = require('./js/apps');
 
 function namefileHelp() {
-	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run the \'init\' command.');
+	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run \'phoenix setup\' first.');
 }
 
 function padleft(width, str) {

@@ -1,21 +1,32 @@
 #!/usr/bin/env node
 var nomnom     = require('nomnom');
 var ssh2       = require('ssh2');
+var keys       = require('./js/common/keys');
 
 var deploySteps = [
+	'cd ~/.scuttlebutt || mkdir ~/.scuttlebutt',
+	'cd ~/phoenix && node ~/phoenix/phoenixd stop',
 	'rm -Rf ~/phoenix; git clone https://github.com/pfraze/phoenix.git ~/phoenix',
 	'cd ~/phoenix && npm install',
-	'echo "KEY_TODO" > ~/phoenix/.relay-members',
+	'echo "' + keys.name.toString('hex') + '" > ~/phoenix/.relay-members',
 	'cd ~/phoenix && node ./phoenixd start'
 ];
 var deployErrors = [
+	'Failed to create a user-configuration directory.',
+	false,
 	'Failed to clone phoenix repo.',
 	'Failed to install dependencies.',
 	'Failed to write your public key into the allowed relay users.',
 	'Failed to start the phoenix daemon.'
 ];
 
+function namefileHelp() {
+	console.log('You don\'t have a ~/.scuttlebutt/secret.name yet; run \'phoenix setup\' first.');
+}
+
 function deploy(opts) {
+	if (!keys.exist) return namefileHelp();
+
 	var dest = /^(.*)@(.*)(?:\:(.*))?$/.exec(opts.dest);
 	if (!dest)
 		return console.error('Destination must include the ssh user and hostname (eg bob@host.com)');
@@ -53,8 +64,9 @@ function deploy(opts) {
 		function next() {
 			var cmd = cmds.shift();
 			var errMsg = errors.shift();
+			var ignoreFailure = (errMsg === false);
 			sshDo(cmd, function(err) {
-				if (err) return conn.end(), console.error(errMsg);
+				if (err && !ignoreFailure) return conn.end(), console.error(errMsg);
 				if (cmds.length) next();
 				else conn.end(), cb();
 			});
