@@ -1,4 +1,14 @@
-var log = require('fs').createWriteStream(require('path').join(__dirname, '../phoenix-relay.log'), {'flags': 'a'});
+var config = require('./common/config');
+
+// Configure
+var directory  = process.argv[2] || false;
+var relayPort  = +process.argv[3];
+var webguiPort = +process.argv[4];
+if (directory != '0') {
+	config.setup(directory);
+}
+
+var log = require('fs').createWriteStream(require('path').join(config.sbhome, './phoenix-relay.log'), {'flags': 'a'});
 process.__defineGetter__('stdout', function() { return log; });
 process.__defineGetter__('stderr', function() { return log; });
 process.on('uncaughtException', onException);
@@ -7,8 +17,6 @@ process.on('uncaughtException', onException);
 console.log('');
 console.log(process.argv);
 
-var relayPort  = +process.argv[2];
-var webguiPort = +process.argv[3];
 
 require('./apps').buildCache({ tail: true });
 

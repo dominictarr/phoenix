@@ -1,6 +1,7 @@
 #!/usr/bin/env nodejs
 var nomnom     = require('nomnom');
 var ssh2       = require('ssh2');
+var path       = require('path');
 
 function namefileHelp() {
 	console.log('You don\'t have a ~/.phoenix/secret.name yet; run \'phoenix setup\' first.');
@@ -143,15 +144,24 @@ function getPassword(cb) {
 }
 
 function start(opts) {
+	var config = require('./js/common/config');
+	if (opts.directory) {
+		// Setup the directory for storing our data
+		opts.directory = path.join(__dirname, opts.directory);
+		config.setup(opts.directory);
+	}
+
 	if (opts.daemon) {
+		// Daemon-mode
 		var daemon = require("daemonize2").setup({
 			main: "js/daemon.js",
 			name: "phoenix-relay",
-			pidfile: "phoenix-relay.pid",
-			argv: [opts.port, "0"]
+			pidfile: path.join(config.sbhome, "./phoenix-relay.pid"),
+			argv: [opts.directory || "0", opts.port || "64000", "0"]
 		});
 		daemon.start();
 	} else {
+		// FG mode
 		var relayPort = opts.port || 64000;
 		require('./js/relay').createServer(relayPort);
 		console.log('Scuttlebutt relay.....listening publicly on localhost:' + relayPort);
@@ -159,10 +169,19 @@ function start(opts) {
 }
 
 function stop(opts) {
+	var config = require('./js/common/config');
+	if (opts.directory) {
+		// Setup the directory for storing our data
+		opts.directory = path.join(__dirname, opts.directory);
+		config.setup(opts.directory);
+	}
+
+	console.log(config.sbhome);
+
 	var daemon = require("daemonize2").setup({
 		main: "js/daemon.js",
 		name: "phoenix-relay",
-		pidfile: "phoenix-relay.pid",
+		pidfile: path.join(config.sbhome, "./phoenix-relay.pid"),
 	});
 	daemon.stop();
 }
@@ -179,6 +198,10 @@ nomnom.command('deploy')
 nomnom.command('start')
 	.help('Starts the relay service.')
 	.options({
+		directory: {
+			position: 1,
+			help: 'The directory to store data and configuration in (default ~/.phoenix).'
+		},
 		daemon: {
 			flag: true,
 			abbr: 'd',
@@ -192,5 +215,11 @@ nomnom.command('start')
 	.callback(start);
 nomnom.command('stop')
 	.help('Stops the relay daemon if it\'s active.')
+	.options({
+		directory: {
+			position: 1,
+			help: 'The directory to store data and configuration in (default ~/.phoenix).'
+		}
+	})
 	.callback(stop);
 nomnom.parse();
