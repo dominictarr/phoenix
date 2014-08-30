@@ -315,7 +315,6 @@ function delNode(opts) {
 	console.log('Removing', addr, port);
 
 	netnodes.del(addr, port, function(err) {
-		console.log(arguments);
 		if (err) { return console.error(err); }
 		console.log('Ok.');
 	});
@@ -323,6 +322,7 @@ function delNode(opts) {
 
 function syncNodes(opts) {
 	// Establish connections
+	var m = 0, n = 0;
 	function connectOut(node) {
 		var host = node.key;
 		if ((host[0] == 'localhost' || host[0] == '127.0.0.1') && host[1] == port)
@@ -331,6 +331,7 @@ function syncNodes(opts) {
 		var startTs = +(new Date());
 		var name = host[0] + ':' + host[1];
 		console.log(name + ' connecting.');
+		n++;
 
 		var req = http.request({ method: 'CONNECT', hostname: host[0], port: host[1], path: '/' });
 		req.on('connect', function(res, stream, head) {
@@ -338,6 +339,7 @@ function syncNodes(opts) {
 			stream.pipe(toStream(ssb.createReplicationStream(function(err) {
 				if (err) console.error(err);
 				else console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
+				if (++m == n) onSynced();
 			}))).pipe(stream);
 			// :TODO: spit out some metrics, like # of new messages
 		});
@@ -345,6 +347,13 @@ function syncNodes(opts) {
 			console.log(name + ' failed, ' + e.message);
 		});
 		req.end();
+	}
+	function onSynced() {
+		console.log('Fast-forwarding application cache.');
+		require('./js/apps').buildCache(function(err) {
+			if (err) { return console.error(err); }
+			console.log('Ok.');
+		});
 	}
 	pull(
 		netnodes.createListStream(),
