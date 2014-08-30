@@ -209,14 +209,38 @@ function follow(opts) {
 }
 
 function unfollow(opts) {
-	// Remove from follow list
-	ssb.unfollow(opts.key, function(err) {
-		if (err) {
-			console.error(err);
-		} else {
-			console.log('Ok.');
-		}
-	});
+	var name = opts.name;
+
+	function doit(key) {
+		// Remove from follow list
+		ssb.unfollow(key, function(err) {
+			if (err) {
+				console.error(err);
+			} else {
+				console.log('Ok.');
+			}
+		});
+	}
+
+	if (+name == name) {
+		// numeric
+		var id = (+name - 1);
+		pull(
+			ssb.following(),
+			pull.collect(function(err, entries) {
+				if (err) { return console.error(err); }
+				var entry = entries[id];
+				if (!entry) { return console.error('Invalid user number.'); }
+				doit(entry.key);
+			})
+		);
+	} else {
+		apps.get('profile').lookupByNickname(name, function(err, ids) {
+			if (ids.length > 1)
+				console.log(ids.length, 'matches');
+			ids.forEach(doit);
+		});
+	}
 }
 
 function sign(opts) {
@@ -351,10 +375,10 @@ nomnom.command('follow')
 nomnom.command('unfollow')
 	.help('Stops following a user.')
 	.options({
-		key: {
+		name: {
 			position: 1,
 			required: true,
-			help: 'Public key to unfollow.'
+			help: 'Nickname or user number to unfollow.',
 		}
 	})
 	.callback(unfollow);
