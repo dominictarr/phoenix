@@ -303,7 +303,7 @@ function addNode(opts) {
 
 	netnodes.add(addr, port, function(err) {
 		if (err) { return console.error(err); }
-		console.log('Ok.');
+		syncNodes(opts);
 	});
 }
 
