@@ -329,9 +329,6 @@ function syncNodes(opts) {
 	var m = 0, n = 0;
 	function connectOut(node) {
 		var host = node.key;
-		if ((host[0] == 'localhost' || host[0] == '127.0.0.1') && host[1] == port)
-			return; // skip self
-
 		var startTs = +(new Date());
 		var name = host[0] + ':' + host[1];
 		console.log(name + ' connecting.');
