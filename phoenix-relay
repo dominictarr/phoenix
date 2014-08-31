@@ -148,11 +148,14 @@ function start(opts) {
 
 	if (opts.daemon) {
 		// Daemon-mode
+		var argv = [opts.port || "64000", "0"];
+		if (opts.config)
+			argv.push('--config'), argv.push(opts.config);
 		var daemon = require("daemonize2").setup({
 			main: "js/daemon.js",
 			name: "phoenix-relay",
 			pidfile: path.join(config.datadir, "./phoenix-relay.pid"),
-			argv: [opts.port || "64000", "0"]
+			argv: argv
 		});
 		daemon.start();
 	} else {
