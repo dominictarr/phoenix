@@ -2,46 +2,14 @@
 var nomnom     = require('nomnom');
 var ssh2       = require('ssh2');
 var path       = require('path');
+var prpc       = require('phoenix-rpc');
+var cfg        = require('./js/common/config');
 
 function namefileHelp() {
 	console.log('You don\'t have a ~/.phoenix/secret.name yet; run \'phoenix setup\' first.');
 }
 
 function deploy(opts) {
-	var keys       = require('./js/common/keys');
-	var netnodes   = require('./js/common/network-nodes');
-
-	var deploySteps = [
-		'cd ~/phoenix && node ~/phoenix/phoenix-relay stop',
-
-		'cd ~/.phoenix && rm -Rf ~/.phoenix',
-		'mkdir ~/.phoenix',
-
-		'rm -Rf ~/phoenix',
-		'git clone https://github.com/pfraze/phoenix.git ~/phoenix',
-		'cd ~/phoenix && npm install',
-
-		'echo "' + keys.name.toString('hex') + '" > ~/phoenix/.relay-members',
-
-		'cd ~/phoenix && node ./phoenix-relay start -d'
-	];
-	var deployErrors = [
-		false,
-
-		false,
-		'Failed to create a user-configuration directory.',
-
-		false,
-		'Failed to clone phoenix repo.',
-		'Failed to install dependencies.',
-
-		'Failed to write your public key into the allowed relay users.',
-
-		'Failed to start the phoenix relay daemon.'
-	];
-
-	if (!keys.exist) return namefileHelp();
-
 	var dest = /^(.*)@(.*)(?:\:(.*))?$/.exec(opts.dest);
 	if (!dest)
 		return console.error('Destination must include the ssh user and hostname (eg bob@host.com)');
@@ -53,65 +21,105 @@ function deploy(opts) {
 		password: undefined
 	};
 
-	var conn = new ssh2();
-	process.stdout.write('Password: ');
-	getPassword(function(pass) {
-		connInfo.password = pass;
-		conn.connect(connInfo);
-	});
-	conn.on('ready', function() {
-		console.log('Established ssh connection with ' + connInfo.host + ':' + connInfo.port + '.');
-		sshDoAll(deploySteps, deployErrors, function() {
-			console.log('');
-			console.log('Access granted:');
-			console.log('- "Member." You can sync anybody\'s feed to ' + connInfo.host + '.');
-			console.log('- "Syncing." Background-syncing with ' + connInfo.host + '.');
-			netnodes.add(connInfo.host, 64000, function(err) {
-				if (err) {
-					console.error('Failed to store '+ connInfo.host + ':64000 into your server-table.');
-					console.error('Try again by calling \'phoenix sync ' + connInfo.host + ':64000\'');
-				}
-				console.log('Ok.');
-			});
-		});
-	});
-	conn.on('error', function(err) {
-		console.error('Failed to establish ssh connection with ' + connInfo.host + ':' + connInfo.port + '.');
-		console.error(err.toString());
-	});
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
 
-	function sshDoAll(cmds, errors, cb) {
-		next();
-		function next() {
-			var cmd = cmds.shift();
-			var errMsg = errors.shift();
-			var ignoreFailure = (errMsg === false);
-			sshDo(cmd, function(err) {
-				if (err && !ignoreFailure) return conn.end(), console.error(errMsg);
-				if (cmds.length) next();
-				else conn.end(), cb();
+		backend.getKeys(function(err, keys) {
+			if (err) return console.error(err), backend.close();
+			if (!keys.exist) return namefileHelp(), backend.close();
+
+			var deploySteps = [
+				'cd ~/phoenix && node ~/phoenix/phoenix-relay stop',
+
+				// 'cd ~/.phoenix && rm -Rf ~/.phoenix',
+				// 'mkdir ~/.phoenix',
+
+				'rm -Rf ~/phoenix',
+				'git clone https://github.com/pfraze/phoenix.git ~/phoenix',
+				'cd ~/phoenix && npm install',
+
+				'echo "' + (new Buffer(keys.name)).toString('hex') + '" > ~/phoenix/.relay-members',
+
+				'cd ~/phoenix && node ./phoenix-relay start -d'
+			];
+			var deployErrors = [
+				false,
+
+				// false,
+				// 'Failed to create a user-configuration directory.',
+
+				false,
+				'Failed to clone phoenix repo.',
+				'Failed to install dependencies.',
+
+				'Failed to write your public key into the allowed relay users.',
+
+				'Failed to start the phoenix relay daemon.'
+			];
+
+			var conn = new ssh2();
+			process.stdout.write('Password: ');
+			getPassword(function(pass) {
+				connInfo.password = pass;
+				conn.connect(connInfo);
 			});
-		}
-	}
-	function sshDo(cmd, cb) {
-		console.log('> ', cmd);
-		conn.exec(cmd, function(err, stream) {
-			if (err) throw err;
-			stream
-				.on('exit', function(code, signal) {
-					if (code !== 0) {
-						return cb(new Error('Process exited with error code ' + code));
-					}
-					cb();
-				})
-				.on('data', function(data) {
-					process.stdout.write(data);
-				})
-				.stderr.on('data', function(data) {
-					process.stderr.write(data);
+			conn.on('ready', function() {
+				console.log('Established ssh connection with ' + connInfo.host + ':' + connInfo.port + '.');
+				sshDoAll(deploySteps, deployErrors, function() {
+					console.log('');
+					console.log('Access granted:');
+					console.log('- "Member." You can sync anybody\'s feed to ' + connInfo.host + '.');
+					console.log('- "Syncing." Background-syncing with ' + connInfo.host + '.');
+					backend.addNode(connInfo.host, 64000, function(err) {
+						if (err) {
+							console.error('Failed to store '+ connInfo.host + ' into your server-table.');
+							console.error('Try again by calling \'phoenix sync ' + connInfo.host + '\'');
+						}
+						console.log('Ok.');
+						backend.close();
+					});
 				});
+			});
+			conn.on('error', function(err) {
+				console.error('Failed to establish ssh connection with ' + connInfo.host + ':' + connInfo.port + '.');
+				console.error(err.toString());
+				backend.close();
+			});
+
+			function sshDoAll(cmds, errors, cb) {
+				next();
+				function next() {
+					var cmd = cmds.shift();
+					var errMsg = errors.shift();
+					var ignoreFailure = (errMsg === false);
+					sshDo(cmd, function(err) {
+						if (err && !ignoreFailure) return conn.end(), backend.close(), console.error(errMsg);
+						if (cmds.length) next();
+						else conn.end(), cb();
+					});
+				}
+			}
+			function sshDo(cmd, cb) {
+				console.log('> ', cmd);
+				conn.exec(cmd, function(err, stream) {
+					if (err) throw err;
+					stream
+						.on('exit', function(code, signal) {
+							if (code !== 0) {
+								return cb(new Error('Process exited with error code ' + code));
+							}
+							cb();
+						})
+						.on('data', function(data) {
+							process.stdout.write(data);
+						})
+						.stderr.on('data', function(data) {
+							process.stderr.write(data);
+						});
+				});
+			}
 		});
-	}
+	});
 }
 
 function getPassword(cb) {
@@ -144,8 +152,6 @@ function getPassword(cb) {
 }
 
 function start(opts) {
-	var config = require('./js/common/config');
-
 	if (opts.daemon) {
 		// Daemon-mode
 		var argv = [opts.port || "64000", "0"];
@@ -154,7 +160,7 @@ function start(opts) {
 		var daemon = require("daemonize2").setup({
 			main: "js/daemon.js",
 			name: "phoenix-relay",
-			pidfile: path.join(config.datadir, "./phoenix-relay.pid"),
+			pidfile: path.join(cfg.datadir, "./phoenix-relay.pid"),
 			argv: argv
 		});
 		daemon.start();
@@ -167,12 +173,10 @@ function start(opts) {
 }
 
 function stop(opts) {
-	var config = require('./js/common/config');
-
 	var daemon = require("daemonize2").setup({
 		main: "js/daemon.js",
 		name: "phoenix-relay",
-		pidfile: path.join(config.datadir, "./phoenix-relay.pid"),
+		pidfile: path.join(cfg.datadir, "./phoenix-relay.pid"),
 	});
 	daemon.stop();
 }

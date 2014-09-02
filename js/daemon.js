@@ -13,8 +13,8 @@ process.on('uncaughtException', onException);
 console.log('');
 console.log(process.argv);
 
-// Start listening to db changes
-require('./apps').buildCache({ tail: true });
+// Start listening to db changes :TODO:
+// require('./apps').buildCache({ tail: true });
 
 // Start relay service
 if (relayPort !== 0) {

@@ -4,7 +4,7 @@ var fs       = require('fs');
 
 // Read cfg
 var cfg = require('rc')('phoenix', {
-	datadir: path.join(osenv.home(), '.phoenix')
+	datadir: './.phoenix'
 });
 
 // Handle relative paths

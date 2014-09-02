@@ -5,10 +5,10 @@ var http       = require('http');
 var pull       = require('pull-stream');
 var prettydate = require('pretty-date');
 var toStream   = require('pull-stream-to-stream');
-var keys       = require('./js/common/keys');
-var ssb        = require('./js/common/ssb');
-var netnodes   = require('./js/common/network-nodes');
-var apps       = require('./js/apps');
+var toPull     = require('stream-to-pull-stream');
+var prpc       = require('phoenix-rpc');
+// var apps       = require('./js/apps');
+var cfg        = require('./js/common/config');
 
 function namefileHelp() {
 	console.log('You don\'t have a secret.name yet; run \'phoenix setup\' first.');
@@ -35,51 +35,45 @@ function setup(opts) {
 
 	// :TODO: dont publish new profile if one already exists
 
-	// Setup profile
-	rl.question('Nickname? > ', handleNickname);
-	function handleNickname(input) {
-		if (!nicknameRE.test(input)) {
-			console.log('Letters, numbers, dashes and underscores only. Must start with a letter.');
-			return rl.close();
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
+
+		// Setup profile
+		rl.question('Nickname? > ', handleNickname);
+		function handleNickname(input) {
+			if (!nicknameRE.test(input)) {
+				console.log('Letters, numbers, dashes and underscores only. Must start with a letter.');
+				return rl.close(), backend.close();
+			}
+			nickname = input;
+			console.log('\nNickname is \'' + nickname + '\'');
+			rl.question('Publish? [y/N]> ', handlePublish);
 		}
-		nickname = input;
-		console.log('\nNickname is \'' + nickname + '\'');
-		rl.question('Publish? [y/N]> ', handlePublish);
-	}
-	function handlePublish(input) {
-		console.log('');
-		rl.close();
-		if (input.toLowerCase() != 'y')
-			return console.log('Aborted.');
+		function handlePublish(input) {
+			console.log('');
+			rl.close();
+			if (input.toLowerCase() != 'y')
+				return console.log('Aborted.'), backend.close();
 
-		// Setup keys
-		keys.create(opts['force-new-keypair'], handleKeycreate);
-	}
-	function handleKeycreate(err) {
-		if (err && err.fatal)
-			return console.error(err.toString());
+			// Setup keys
+			backend.createKeys(opts['force-new-keypair'], handleKeycreate);
+		}
+		function handleKeycreate(err) {
+			if (err && err.fatal)
+				return console.error(err.toString()), backend.close();
 
-		// Publish profile
-		ssb.createUserFeed();
-		apps.create('profile', {nickname: nickname}, handleProfpublish);
-	}
-	function handleProfpublish(err) {
-		if (err) return console.error('Failed to publish profile', err);
-
-		// Start phoenixd
-		var daemon = require("daemonize2").setup({
-			main: "js/daemon.js",
-			name: "phoenixd",
-			pidfile: "phoenixd.pid",
-			// args: ["64000", "65000"]
-		});
-		daemon.start();
-		daemon.on('started', function() {
+			// Publish profile :TODO:
+			/*apps.create('profile', {nickname: nickname}, handleProfpublish);
+		}
+		function handleProfpublish(err) {
+			if (err) return console.error('Failed to publish profile', err);*/
 			console.log('Ok.');
-		});
-	}
+			console.log('In the future, we\'ll give you usage instructions here.'); // :TODO:
+			backend.close();
+		}
+	});
 }
-
+/*
 function rebuild(opts) {
 	console.log('Clearing the cache...');
 	apps.clearCache(function() {
@@ -89,15 +83,23 @@ function rebuild(opts) {
 			else console.log('Ok.');
 		});
 	});
-}
+}*/
 
 function whoami(opts) {
-	if (keys.exist) {
-		console.log('You are:    ' + keys.name.toString('hex'));
-		console.log('Public key: ' + keys.public.toString('hex'));
-	} else {
-		namefileHelp();
-	}
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
+
+		backend.getKeys(function(err, keys) {
+			if (err) return console.error(err), backend.close()
+			if (keys.exist) {
+				console.log('You are:    ' + new Buffer(keys.name).toString('hex'));
+				console.log('Public key: ' + new Buffer(keys.public).toString('hex'));
+			} else {
+				namefileHelp();
+			}
+			backend.close();
+		});
+	});
 }
 
 function list(opts) {
@@ -115,11 +117,12 @@ function list(opts) {
 		);
 	}
 	function toSimple(msg) {
-		apps.get('profile').getProfile(msg.author, function(err, profile) {
-			if (err) return console.error(err);
-			var nickname = (profile) ? profile.nickname : '???';
-			apps.render(msg, function(err, markdown) {
-				if (err) markdown = err.toString();
+		// apps.get('profile').getProfile(msg.author, function(err, profile) { :TODO:
+			// if (err) return console.error(err);
+			var nickname = '???';//(profile) ? profile.nickname : '???';
+			// apps.render(msg, function(err, markdown) { :TODO:
+				// if (err) markdown = err.toString();
+				var markdown = (msg.type.toString() == 'init') ? ('Account created: ' + msg.message.toString('hex').slice(0,16) + '...') : msg.message.toString();
 				var author = msg.author.toString('hex');
 				var output =
 					author.slice(0, 4) + ' | ' +
@@ -129,35 +132,42 @@ function list(opts) {
 					markdown
 				;
 				console.log(output);
-			});
-		});
+			// });
+		// });
 	}
 	if (!opts.long) {
 		console.log('user   seq   time             nickname     message');
 	}
-	pull(
-		ssb.createFeedStream({ tail: opts.tail }),
-		pull.drain((opts.long) ? toDetailed : toSimple)
-	);
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
+		pull(
+			toPull(backend.createFeedStream({ tail: opts.tail })),
+			pull.drain((opts.long) ? toDetailed : toSimple, backend.close.bind(backend))
+		);
+	});
 }
 
 function feeds(opts) {
-	pull(
-		ssb.following(),
-		pull.collect(function(err, entries) {
-			if (err) { return console.error(err); }
-			console.log ('  nickname   id');
-			entries.forEach(function(entry, i) {
-				apps.get('profile').getProfile(entry.key, function(err, profile) {
-					var nickname = ((profile) ? profile.nickname : false) || '???';
-					console.log((i+1) + ' ' + padright(10, nickname) + ' ' + entry.key.toString('hex'));
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
+		pull(
+			toPull(backend.following()),
+			pull.collect(function(err, entries) {
+				if (err) { return console.error(err); }
+				console.log ('  nickname   id');
+				entries.forEach(function(entry, i) {
+					// apps.get('profile').getProfile(entry.key, function(err, profile) { :TODO:
+						var nickname = /*((profile) ? profile.nickname : false) ||*/ '???';
+						console.log((i+1) + ' ' + padright(10, nickname) + ' ' + entry.key.toString('hex'));
+					// });
 				});
-			});
-		})
-	);
+				backend.close();
+			})
+		);
+	});
 }
 
-function lookup(opts) {
+/*function lookup(opts) {
 	var name = opts.name;
 
 	function output(id) {
@@ -190,72 +200,95 @@ function lookup(opts) {
 			ids.forEach(output);
 		});
 	}
-}
+}*/
 
 function post(opts) {
-	if (!keys.exist) {
-		return namefileHelp();
-	}
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
 
-	apps.create('text', opts.text, function(err) {
+		backend.getKeys(function(err, keys) {
+			if (err) return console.error(err), backend.close();
+			if (!keys.exist) return namefileHelp(), backend.close();
+			backend.addMessage('text', opts.text, function(err) {
+				if (err) console.error(err);
+				else console.log('Ok.');
+				backend.close();
+			});
+		});
+	});
+	
+
+	// :TODO:
+	/*apps.create('text', opts.text, function(err) {
 		if (err) {
 			console.error(err);
 		} else {
 			console.log('Ok.');
 		}
-	});
+	});*/
 }
 
 function follow(opts) {
-	// Validate key
-	// :TODO:
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
+		// Validate key
+		// :TODO:
 
-	// Add to follow list
-	ssb.follow(new Buffer(opts.key, 'hex'), function(err) {
-		if (err) {
-			console.error(err);
-		} else {
-			console.log('Ok.');
-		}
-	});
-}
-
-function unfollow(opts) {
-	var name = opts.name;
-
-	function doit(key) {
-		// Remove from follow list
-		ssb.unfollow(key, function(err) {
+		// Add to follow list
+		backend.follow(new Buffer(opts.key, 'hex'), function(err) {
 			if (err) {
 				console.error(err);
 			} else {
 				console.log('Ok.');
 			}
+			backend.close();
 		});
-	}
-
-	if (+name == name) {
-		// numeric
-		var id = (+name - 1);
-		pull(
-			ssb.following(),
-			pull.collect(function(err, entries) {
-				if (err) { return console.error(err); }
-				var entry = entries[id];
-				if (!entry) { return console.error('Invalid user number.'); }
-				doit(entry.key);
-			})
-		);
-	} else {
-		apps.get('profile').lookupByNickname(name, function(err, ids) {
-			if (ids.length > 1)
-				console.log(ids.length, 'matches');
-			ids.forEach(doit);
-		});
-	}
+	});
 }
 
-function sign(opts) {
+function unfollow(opts) {
+	var name = opts.name;
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
+
+		function doit(key) {
+			// Remove from follow list
+			backend.unfollow(key, function(err) {
+				if (err) {
+					console.error(err);
+				} else {
+					console.log('Ok.');
+				}
+				backend.close();
+			});
+		}
+
+		if (+name == name) {
+			// numeric
+			var id = (+name - 1);
+			pull(
+				toPull(backend.following()),
+				pull.collect(function(err, entries) {
+					if (err) { return console.error(err); }
+					var entry = entries[id];
+					if (!entry) { return console.error('Invalid user number.'); }
+					doit(entry.key);
+				})
+			);
+		} else {
+			console.log('Sorry, names got de-implemented.');
+			backend.close();
+			// :TODO:
+			/*apps.get('profile').lookupByNickname(name, function(err, ids) {
+				if (ids.length > 1)
+					console.log(ids.length, 'matches');
+				ids.forEach(doit);
+			});*/
+		}
+	});
+}
+
+/*function sign(opts) {
 	console.log('Signing ' + opts.path);
 
 	if (!keys.exist) {
@@ -295,40 +328,48 @@ function verify(opts) {
 	} else {
 		console.log('Failure: Signature does not match.');
 	}
-}
+}*/
 
 function addNode(opts) {
-	if (!opts.host)
-		return syncNodes(opts);
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
 
-	var host = opts.host.split(':');
-	var addr = host[0];
-	var port = +host[1] || 64000;
+		if (!opts.host)
+			return syncNodes(opts, backend);
 
-	netnodes.add(addr, port, function(err) {
-		if (err) { return console.error(err); }
-		syncNodes(opts);
+		var host = opts.host.split(':');
+		var addr = host[0];
+		var port = +host[1] || 64000;
+
+		backend.addNode(addr, port, function(err) {
+			if (err) console.error(err), backend.close();
+			else syncNodes(opts, backend);
+		});
 	});
 }
 
 function delNode(opts) {
-	var host = opts.host.split(':');
-	var addr = host[0];
-	var port = +host[1] || 64000;
+	prpc.createServerOrConnect(cfg, function(err, backend) {
+		if (err) return console.error(err);
+	
+		var host = opts.host.split(':');
+		var addr = host[0];
+		var port = +host[1] || 64000;
 
-	console.log('Removing', addr, port);
+		console.log('Removing', addr, port);
 
-	netnodes.del(addr, port, function(err) {
-		if (err) { return console.error(err); }
-		console.log('Ok.');
+		backend.delNode(addr, port, function(err) {
+			if (err) console.error(err);
+			else console.log('Ok.');
+			backend.close();
+		});
 	});
 }
 
-function syncNodes(opts) {
+function syncNodes(opts, backend) {
 	// Establish connections
 	var m = 0, n = 0;
-	function connectOut(node) {
-		var host = node.key;
+	function connectOut(host) {
 		var startTs = +(new Date());
 		var name = host[0] + ':' + host[1];
 		console.log(name + ' connecting.');
@@ -337,11 +378,19 @@ function syncNodes(opts) {
 		var req = http.request({ method: 'CONNECT', hostname: host[0], port: host[1], path: '/' });
 		req.on('connect', function(res, stream, head) {
 			console.log(name + ' syncing.');
+			var rs = backend.createReplicationStream();
+			stream.pipe(rs).pipe(stream);
+			stream.on('end', function() {
+				console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
+				if (++m == n) onSynced();
+			});
+			/*
+			:TODO: old version below with proper end() cb
 			stream.pipe(toStream(ssb.createReplicationStream(function(err) {
 				if (err) console.error(err);
 				else console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
 				if (++m == n) onSynced();
-			}))).pipe(stream);
+			}))).pipe(stream);*/
 			// :TODO: spit out some metrics, like # of new messages
 		});
 		req.on('error', function(e) {
@@ -350,24 +399,27 @@ function syncNodes(opts) {
 		req.end();
 	}
 	function onSynced() {
+		console.log('Ok');
+		backend.close();
+		/* :TODO:
 		console.log('Fast-forwarding application cache.');
-		require('./js/apps').buildCache(function(err) {
+		require('./js/apps').buildCache(function(err) { 
 			if (err) { return console.error(err); }
 			console.log('Ok.');
-		});
+		});*/
 	}
-	pull(
-		netnodes.createListStream(),
-		pull.through(connectOut),
-		pull.drain()
-	);
+	backend.getNodes(function(err, nodes) {
+		if (err) return console.error(err), backend.close();
+		if (nodes.length === 0) return console.log('No remote nodes known.\nOk.'), backend.close();
+		nodes.forEach(connectOut);
+	});
 }
 
 nomnom.script('phoenix')
 	.option('config', {
 		help: 'Sets the config-file (default ./.phoenixrc)'
 	});
-nomnom.nocommand()
+ nomnom.nocommand()
 	.callback(list);
 nomnom.command('setup')
 	.help('Creates a new profile and feed.')
@@ -425,7 +477,7 @@ nomnom.command('unfollow')
 		}
 	})
 	.callback(unfollow);
-nomnom.command('lookup')
+/*nomnom.command('lookup')
 	.help('Looks up a user\'s profile by their nickname.')
 	.options({
 		name: {
@@ -438,7 +490,7 @@ nomnom.command('lookup')
 			help: 'Flag, output the user\'s public key rather than their id.'
 		}
 	})
-	.callback(lookup);
+	.callback(lookup);*/
 /*nomnom.command('sign')
 	.help('Creates a signature for a file.')
 	.options({
@@ -487,7 +539,7 @@ nomnom.command('unsync')
 		}
 	})
 	.callback(delNode);
-nomnom.command('rebuild')
+/*nomnom.command('rebuild')
 	.help('Reconstructs the application cache from the message logs.')
-	.callback(rebuild);
+	.callback(rebuild);*/
 nomnom.parse();
