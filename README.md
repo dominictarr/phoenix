@@ -1,6 +1,8 @@
 Phoenix v1
 ==========
 
+![phoenix](phoenix.png)
+
 ## License
 
 Copyright (c) 2014 Dominic Tarr and Paul Frazee
