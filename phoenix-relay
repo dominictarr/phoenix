@@ -2,8 +2,8 @@
 var nomnom     = require('nomnom');
 var ssh2       = require('ssh2');
 var path       = require('path');
-var prpc       = require('phoenix-rpc');
 var cfg        = require('./js/common/config');
+var connect    = require('./js/backend');
 
 function namefileHelp() {
 	console.log('You don\'t have a ~/.phoenix/secret.name yet; run \'phoenix setup\' first.');
@@ -21,7 +21,7 @@ function deploy(opts) {
 		password: undefined
 	};
 
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 
 		backend.getKeys(function(err, keys) {

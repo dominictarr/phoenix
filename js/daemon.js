@@ -1,10 +1,10 @@
-var config = require('./common/config');
+var cfg     = require('./common/config');
 
 // Configure
 var relayPort  = +process.argv[2];
 var webguiPort = +process.argv[3];
 
-var log = require('fs').createWriteStream(require('path').join(config.datadir, './phoenix-relay.log'), {'flags': 'a'});
+var log = require('fs').createWriteStream(require('path').join(cfg.datadir, './phoenix-relay.log'), {'flags': 'a'});
 process.__defineGetter__('stdout', function() { return log; });
 process.__defineGetter__('stderr', function() { return log; });
 process.on('uncaughtException', onException);

@@ -4,11 +4,10 @@ var path     = require('path');
 var hduplex  = require('http-duplex');
 var toStream = require('pull-stream-to-stream');
 var pull     = require('pull-stream');
-var prpc     = require('phoenix-rpc');
-var cfg      = require('../common/config');
+var connect  = require('../backend');
 
 function createServer(port) {
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 
 		// Sync config

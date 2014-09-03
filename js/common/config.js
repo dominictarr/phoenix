@@ -4,7 +4,8 @@ var fs       = require('fs');
 
 // Read cfg
 var cfg = require('rc')('phoenix', {
-	datadir: './.phoenix'
+	datadir: './.phoenix',
+	rpcport: 64050
 });
 
 // Handle relative paths

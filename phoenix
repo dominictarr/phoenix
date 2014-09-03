@@ -6,9 +6,8 @@ var pull       = require('pull-stream');
 var prettydate = require('pretty-date');
 var toStream   = require('pull-stream-to-stream');
 var toPull     = require('stream-to-pull-stream');
-var prpc       = require('phoenix-rpc');
 // var apps       = require('./js/apps');
-var cfg        = require('./js/common/config');
+var connect    = require('./js/backend');
 
 function namefileHelp() {
 	console.log('You don\'t have a secret.name yet; run \'phoenix setup\' first.');
@@ -35,7 +34,7 @@ function setup(opts) {
 
 	// :TODO: dont publish new profile if one already exists
 
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 
 		// Setup profile
@@ -86,7 +85,7 @@ function rebuild(opts) {
 }*/
 
 function whoami(opts) {
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 
 		backend.getKeys(function(err, keys) {
@@ -138,7 +137,7 @@ function list(opts) {
 	if (!opts.long) {
 		console.log('user   seq   time             nickname     message');
 	}
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 		pull(
 			toPull(backend.createFeedStream({ tail: opts.tail })),
@@ -148,7 +147,7 @@ function list(opts) {
 }
 
 function feeds(opts) {
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 		pull(
 			toPull(backend.following()),
@@ -203,7 +202,7 @@ function feeds(opts) {
 }*/
 
 function post(opts) {
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 
 		backend.getKeys(function(err, keys) {
@@ -229,7 +228,7 @@ function post(opts) {
 }
 
 function follow(opts) {
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 		// Validate key
 		// :TODO:
@@ -248,7 +247,7 @@ function follow(opts) {
 
 function unfollow(opts) {
 	var name = opts.name;
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 
 		function doit(key) {
@@ -331,7 +330,7 @@ function verify(opts) {
 }*/
 
 function addNode(opts) {
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 
 		if (!opts.host)
@@ -349,7 +348,7 @@ function addNode(opts) {
 }
 
 function delNode(opts) {
-	prpc.createServerOrConnect(cfg, function(err, backend) {
+	connect(function(err, backend) {
 		if (err) return console.error(err);
 	
 		var host = opts.host.split(':');
