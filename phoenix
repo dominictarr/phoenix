@@ -6,7 +6,6 @@ var pull       = require('pull-stream');
 var prettydate = require('pretty-date');
 var toStream   = require('pull-stream-to-stream');
 var toPull     = require('stream-to-pull-stream');
-// var apps       = require('./js/apps');
 var connect    = require('./js/backend');
 
 function namefileHelp() {
@@ -72,11 +71,11 @@ function setup(opts) {
 			if (err && err.fatal)
 				return console.error(err.toString()), backend.close();
 
-			// Publish profile :TODO:
-			/*apps.create('profile', {nickname: nickname}, handleProfpublish);
+			// Publish profile
+			backend.profile_setNickname(nickname, handleProfpublish);
 		}
 		function handleProfpublish(err) {
-			if (err) return console.error('Failed to publish profile', err);*/
+			if (err) return console.error('Failed to publish profile', err);
 			console.log('Ok.');
 			introHelp();
 			backend.close();
@@ -113,49 +112,59 @@ function whoami(opts) {
 }
 
 function list(opts) {
-	var hadMessages = false;
-	function toDetailed (msg) {
-		hadMessages = true;
-		var author = msg.author.toString('hex');
-		console.log (
-			//proquint.encodeCamelDash(msg.author).substring(0, 43) + ' / ' +
-			author.slice(0, 12) + '...' + author.slice(-4) + ' / ' +
-			msg.sequence + '\n' +
-			msg.type.toString('utf8') + ' : '+
-			new Date(msg.timestamp).toISOString() + '\n' +
-			( msg.type.toString('utf8') == 'init'
-			? msg.message.toString('hex') + '\n'
-			: msg.message.toString('utf8') + '\n' )
-		);
-	}
-	function toSimple(msg) {
-		if (!hadMessages) console.log('user   seq   time             nickname     message');
-		hadMessages = true;
-		// apps.get('profile').getProfile(msg.author, function(err, profile) { :TODO:
-			// if (err) return console.error(err);
-			var nickname = '???';//(profile) ? profile.nickname : '???';
-			// apps.render(msg, function(err, markdown) { :TODO:
-				// if (err) markdown = err.toString();
-				var markdown = (msg.type.toString() == 'init') ? ('Account created: ' + msg.message.toString('hex').slice(0,16) + '...') : msg.message.toString();
-				var author = msg.author.toString('hex');
-				var output =
-					author.slice(0, 4) + ' | ' +
-					padleft(3, ' '+msg.sequence) + ' | ' +
-					padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | ' +
-					padleft(10, nickname) + ' | ' +
-					markdown
-				;
-				console.log(output);
-			// });
-		// });
-	}
 	connect(function(err, backend) {
 		if (err) return console.error(err);
+
+		var profiles = {};
+		function fetchProfile(msg, cb) {
+			var id = msg.author.toString('hex');
+			if (profiles[id]) {
+				msg.nickname = profiles[id].nickname;
+				return cb(null, msg);
+			}
+			backend.profile_getProfile(id, function(err, profile) {
+				if (err) return console.error(err), cb(err);
+				msg.nickname = (profile) ? profile.nickname : '???';
+				profiles[id] = profile;
+				cb(null, msg);
+			});
+		}
+
+		var hadMessages = false;
+		function toDetailed (msg) {
+			hadMessages = true;
+			var author = msg.author.toString('hex');
+			console.log (
+				//proquint.encodeCamelDash(msg.author).substring(0, 43) + ' / ' +
+				author.slice(0, 12) + '...' + author.slice(-4) + ' / ' +
+				msg.sequence + '\n' +
+				msg.type.toString('utf8') + ' : '+
+				new Date(msg.timestamp).toISOString() + '\n' +
+				( msg.type.toString('utf8') == 'init'
+				? msg.message.toString('hex') + '\n'
+				: msg.message.toString('utf8') + '\n' )
+			);
+		}
+		function toSimple(msg) {
+			if (!hadMessages) console.log('user   seq   time             nickname     message');
+			hadMessages = true;
+			var markdown = (msg.type.toString() == 'init') ? ('Account created: ' + msg.message.toString('hex').slice(0,16) + '...') : msg.message.toString();
+			var author = msg.author.toString('hex');
+			var output =
+				author.slice(0, 4) + ' | ' +
+				padleft(3, ' '+msg.sequence) + ' | ' +
+				padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | ' +
+				padleft(10, msg.nickname) + ' | ' +
+				markdown
+			;
+			console.log(output);
+		}
 
 		backend.getKeys(function(err, keys) {
 			if (keys.exist) {
 				pull(
 					toPull(backend.createFeedStream({ tail: opts.tail })),
+					pull.asyncMap(fetchProfile),
 					pull.drain((opts.long) ? toDetailed : toSimple, function() {
 						if (!hadMessages) {
 							console.log('No messages in your feed.');
@@ -176,16 +185,30 @@ function list(opts) {
 function feeds(opts) {
 	connect(function(err, backend) {
 		if (err) return console.error(err);
+
+		var profiles = {};
+		function fetchProfile(entry, cb) {
+			var id = entry.key.toString('hex');
+			if (profiles[id]) {
+				entry.nickname = profiles[id].nickname;
+				return cb(null, entry);
+			}
+			backend.profile_getProfile(id, function(err, profile) {
+				if (err) return console.error(err), cb(err);
+				entry.nickname = (profile) ? profile.nickname : '???';
+				profiles[id] = profile;
+				cb(null, entry);
+			});
+		}
+
 		pull(
 			toPull(backend.following()),
+			pull.asyncMap(fetchProfile),
 			pull.collect(function(err, entries) {
 				if (err) { return console.error(err); }
 				console.log ('  nickname   id');
 				entries.forEach(function(entry, i) {
-					// apps.get('profile').getProfile(entry.key, function(err, profile) { :TODO:
-						var nickname = /*((profile) ? profile.nickname : false) ||*/ '???';
-						console.log((i+1) + ' ' + padright(10, nickname) + ' ' + entry.key.toString('hex'));
-					// });
+					console.log((i+1) + ' ' + padright(10, entry.nickname) + ' ' + entry.key.toString('hex'));
 				});
 				backend.close();
 			})
@@ -235,23 +258,13 @@ function post(opts) {
 		backend.getKeys(function(err, keys) {
 			if (err) return console.error(err), backend.close();
 			if (!keys.exist) return namefileHelp(), backend.close();
-			backend.addMessage('text', opts.text, function(err) {
+			backend.text_post(opts.text, function(err) {
 				if (err) console.error(err);
 				else console.log('Ok.');
 				backend.close();
 			});
 		});
 	});
-	
-
-	// :TODO:
-	/*apps.create('text', opts.text, function(err) {
-		if (err) {
-			console.error(err);
-		} else {
-			console.log('Ok.');
-		}
-	});*/
 }
 
 function follow(opts) {
@@ -302,14 +315,17 @@ function unfollow(opts) {
 				})
 			);
 		} else {
-			console.log('Sorry, names got de-implemented.');
-			backend.close();
-			// :TODO:
-			/*apps.get('profile').lookupByNickname(name, function(err, ids) {
-				if (ids.length > 1)
-					console.log(ids.length, 'matches');
-				ids.forEach(doit);
-			});*/
+			backend.profile_lookupByNickname(name, function(err, ids) {
+				if (ids.length === 0)
+					console.log('No users nicknamed '+name+' found.')
+				else {
+					if (ids.length > 1)
+						console.log(ids.length, 'matches');
+					ids.forEach(doit);
+					console.log('Ok.');
+				}
+				backend.close();
+			});
 		}
 	});
 }

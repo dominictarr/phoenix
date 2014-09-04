@@ -10,24 +10,16 @@
   },
   "single-instance": true,
   "dependencies": {
-    "level": "~0.18.0",
-    "level-sublevel": "~6.3.1",
-    "secure-scuttlebutt": "latest",
     "nomnom": "1.8.0",
     "osenv": "0.0.3",
-    "eccjs": "git://github.com/dominictarr/eccjs.git#586f6d47507184a2efe84684ed0a30605cbc43a5",
-    "blake2s": "~1.0.0",
-    "proquint-": "~1.1.0",
     "pull-stream": "~2.24.1",
     "pretty-date": "0.2.0",
     "daemonize2": "0.4.2",
-    "bytewise": "~0.7.0",
-    "pull-level": "~1.1.10",
     "http-duplex": "~0.0.2",
     "pull-stream-to-stream": "~1.3.0",
     "stream-to-pull-stream": "~1.4.1",
     "ssh2": "~0.3.6",
     "rc": "~0.5.1",
-    "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#d5e4218467949a8b9394eff8547e588870a4a1ba"
+    "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#a870b68ccf46952f28233e769a3a1b7c5cc07d04"
   }
 }
