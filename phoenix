@@ -78,7 +78,7 @@ function setup(opts) {
 		function handleProfpublish(err) {
 			if (err) return console.error('Failed to publish profile', err);*/
 			console.log('Ok.');
-			console.log('In the future, we\'ll give you usage instructions here.'); // :TODO:
+			introHelp();
 			backend.close();
 		}
 	});
