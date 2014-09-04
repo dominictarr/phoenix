@@ -1,354 +1,6 @@
 #!/usr/bin/env nodejs
 var nomnom     = require('nomnom');
-var fs         = require('fs');
-var http       = require('http');
-var pull       = require('pull-stream');
-var prettydate = require('pretty-date');
-var toStream   = require('pull-stream-to-stream');
-var toPull     = require('stream-to-pull-stream');
-var connect    = require('./js/backend');
 
-function namefileHelp() {
-	console.log('You don\'t have a secret.name yet; run \'phoenix setup\' first.');
-}
-
-function introHelp() {
-	console.log('');
-	console.log('Getting started:');
-	console.log('');
-	console.log(' - Follow feeds with \'phoenix add <public key>\'');
-	console.log(' - Post messages with \'phoenix post "<your message>"\'');
-	console.log(' - Add hosts to your network with \'phoenix sync <host address>\'');
-	console.log(' - Get more help with \'phoenix -h\'');
-	console.log('');
-}
-
-function padleft(width, str) {
-	if (str.length < width) {
-		return '                                        '.slice(0, width - str.length) + str;
-	}
-	return str;
-}
-
-function padright(width, str) {
-	if (str.length < width) {
-		return str + '                                        '.slice(0, width - str.length);
-	}
-	return str;
-}
-
-function setup(opts) {
-	var nicknameRE = /^[A-z][0-9A-z_-]*$/;
-	var nickname;
-	var rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
-
-	// :TODO: dont publish new profile if one already exists
-
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-
-		// Setup profile
-		rl.question('Nickname? > ', handleNickname);
-		function handleNickname(input) {
-			if (!nicknameRE.test(input)) {
-				console.log('Letters, numbers, dashes and underscores only. Must start with a letter.');
-				return rl.close(), backend.close();
-			}
-			nickname = input;
-			console.log('\nNickname is \'' + nickname + '\'');
-			rl.question('Publish? [y/N]> ', handlePublish);
-		}
-		function handlePublish(input) {
-			console.log('');
-			rl.close();
-			if (input.toLowerCase() != 'y')
-				return console.log('Aborted.'), backend.close();
-
-			// Setup keys
-			backend.createKeys(opts['force-new-keypair'], handleKeycreate);
-		}
-		function handleKeycreate(err) {
-			if (err && err.fatal)
-				return console.error(err.toString()), backend.close();
-
-			// Publish profile
-			backend.profile_setNickname(nickname, handleProfpublish);
-		}
-		function handleProfpublish(err) {
-			if (err) return console.error('Failed to publish profile', err);
-			console.log('Ok.');
-			introHelp();
-			backend.close();
-		}
-	});
-}
-/*
-function rebuild(opts) {
-	console.log('Clearing the cache...');
-	apps.clearCache(function() {
-		console.log('Rebuilding...');
-		apps.buildCache(function(err) {
-			if (err) console.error(err);
-			else console.log('Ok.');
-		});
-	});
-}*/
-
-function whoami(opts) {
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-
-		backend.getKeys(function(err, keys) {
-			if (err) return console.error(err), backend.close()
-			if (keys.exist) {
-				console.log('You are:    ' + new Buffer(keys.name).toString('hex'));
-				console.log('Public key: ' + new Buffer(keys.public).toString('hex'));
-			} else {
-				namefileHelp();
-			}
-			backend.close();
-		});
-	});
-}
-
-function list(opts) {
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-
-		var profiles = {};
-		function fetchProfile(msg, cb) {
-			var id = msg.author.toString('hex');
-			if (profiles[id]) {
-				msg.nickname = profiles[id].nickname;
-				return cb(null, msg);
-			}
-			backend.profile_getProfile(id, function(err, profile) {
-				if (err) return console.error(err), cb(err);
-				msg.nickname = (profile) ? profile.nickname : '???';
-				profiles[id] = profile;
-				cb(null, msg);
-			});
-		}
-
-		var hadMessages = false;
-		function toDetailed (msg) {
-			hadMessages = true;
-			var author = msg.author.toString('hex');
-			console.log (
-				//proquint.encodeCamelDash(msg.author).substring(0, 43) + ' / ' +
-				author.slice(0, 12) + '...' + author.slice(-4) + ' / ' +
-				msg.sequence + '\n' +
-				msg.type.toString('utf8') + ' : '+
-				new Date(msg.timestamp).toISOString() + '\n' +
-				( msg.type.toString('utf8') == 'init'
-				? msg.message.toString('hex') + '\n'
-				: msg.message.toString('utf8') + '\n' )
-			);
-		}
-		function toSimple(msg) {
-			if (!hadMessages) console.log('user   seq   time             nickname     message');
-			hadMessages = true;
-			var markdown = (msg.type.toString() == 'init') ? ('Account created: ' + msg.message.toString('hex').slice(0,16) + '...') : msg.message.toString();
-			var author = msg.author.toString('hex');
-			var output =
-				author.slice(0, 4) + ' | ' +
-				padleft(3, ' '+msg.sequence) + ' | ' +
-				padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | ' +
-				padleft(10, msg.nickname) + ' | ' +
-				markdown
-			;
-			console.log(output);
-		}
-
-		backend.getKeys(function(err, keys) {
-			if (keys.exist) {
-				pull(
-					toPull(backend.createFeedStream({ tail: opts.tail })),
-					pull.asyncMap(fetchProfile),
-					pull.drain((opts.long) ? toDetailed : toSimple, function() {
-						if (!hadMessages) {
-							console.log('No messages in your feed.');
-							introHelp();
-						}
-						backend.close();
-					})
-				);
-			} else {
-				console.log('This appears to be your first time using Phoenix (no keyfile found). Running setup.')
-				backend.close();
-				setup(opts);
-			}
-		})
-	});
-}
-
-function feeds(opts) {
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-
-		var profiles = {};
-		function fetchProfile(entry, cb) {
-			var id = entry.key.toString('hex');
-			if (profiles[id]) {
-				entry.nickname = profiles[id].nickname;
-				return cb(null, entry);
-			}
-			backend.profile_getProfile(id, function(err, profile) {
-				if (err) return console.error(err), cb(err);
-				entry.nickname = (profile) ? profile.nickname : '???';
-				profiles[id] = profile;
-				cb(null, entry);
-			});
-		}
-
-		pull(
-			toPull(backend.following()),
-			pull.asyncMap(fetchProfile),
-			pull.collect(function(err, entries) {
-				if (err) { return console.error(err); }
-				console.log ('  nickname   id');
-				entries.forEach(function(entry, i) {
-					console.log((i+1) + ' ' + padright(10, entry.nickname) + ' ' + entry.key.toString('hex'));
-				});
-				backend.close();
-			})
-		);
-	});
-}
-
-function lookup(opts) {
-	var name = opts.name;
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-
-		function output(id, cb) {
-			if (opts.pubkey) {
-				backend.getPublicKey(id, function(err, pubkey) {
-					if (err) { return cb(err); }
-					console.log(new Buffer(pubkey).toString('hex'));
-					cb(null);
-				});
-			} else {
-				console.log(new Buffer(id).toString('hex'));
-				cb(null);
-			}
-		}
-
-		if (+name == name) {
-			// numeric
-			var id = (+name - 1);
-			pull(
-				ssb.following(),
-				pull.collect(function(err, entries) {
-					if (err) { return console.error(err); }
-					var entry = entries[id];
-					if (!entry) { return console.error('Invalid user number.'); }
-					output(entry.key, function(err) {
-						if (err) console.error(err)
-						else console.log('Ok.')
-						backend.close()
-					});
-				})
-			);
-		} else {
-			backend.profile_lookupByNickname(name, function(err, ids) {
-				if (ids.length === 0)
-					return console.log('No users nicknamed '+name+' found.'), backend.close()
-				if (ids.length > 1)
-					console.log(ids.length, 'matches');
-				var n=0;
-				ids.forEach(function(id) {
-					output(id, function(err) {
-						if (err) return n = -1, backend.close(), console.error(err)
-						if (++n == ids.length) {
-							console.log('Ok.')
-							backend.close()
-						}
-					})
-				});
-			});
-		}
-	})
-}
-
-function post(opts) {
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-
-		backend.getKeys(function(err, keys) {
-			if (err) return console.error(err), backend.close();
-			if (!keys.exist) return namefileHelp(), backend.close();
-			backend.text_post(opts.text, function(err) {
-				if (err) console.error(err);
-				else console.log('Ok.');
-				backend.close();
-			});
-		});
-	});
-}
-
-function follow(opts) {
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-		// Validate key
-		// :TODO:
-
-		// Add to follow list
-		backend.follow(new Buffer(opts.key, 'hex'), function(err) {
-			if (err) {
-				console.error(err);
-			} else {
-				console.log('Ok.');
-			}
-			backend.close();
-		});
-	});
-}
-
-function unfollow(opts) {
-	var name = opts.name;
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-
-		function doit(key) {
-			// Remove from follow list
-			backend.unfollow(key, function(err) {
-				if (err) {
-					console.error(err);
-				} else {
-					console.log('Ok.');
-				}
-				backend.close();
-			});
-		}
-
-		if (+name == name) {
-			// numeric
-			var id = (+name - 1);
-			pull(
-				toPull(backend.following()),
-				pull.collect(function(err, entries) {
-					if (err) { return console.error(err); }
-					var entry = entries[id];
-					if (!entry) { return console.error('Invalid user number.'); }
-					doit(entry.key);
-				})
-			);
-		} else {
-			backend.profile_lookupByNickname(name, function(err, ids) {
-				if (ids.length === 0)
-					console.log('No users nicknamed '+name+' found.')
-				else {
-					if (ids.length > 1)
-						console.log(ids.length, 'matches');
-					ids.forEach(doit);
-					console.log('Ok.');
-				}
-				backend.close();
-			});
-		}
-	});
-}
 
 /*function sign(opts) {
 	console.log('Signing ' + opts.path);
@@ -392,104 +44,19 @@ function verify(opts) {
 	}
 }*/
 
-function addNode(opts) {
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-
-		if (!opts.host)
-			return syncNodes(opts, backend);
-
-		var host = opts.host.split(':');
-		var addr = host[0];
-		var port = +host[1] || 64000;
-
-		backend.addNode(addr, port, function(err) {
-			if (err) console.error(err), backend.close();
-			else syncNodes(opts, backend);
-		});
-	});
-}
-
-function delNode(opts) {
-	connect(function(err, backend) {
-		if (err) return console.error(err);
-	
-		var host = opts.host.split(':');
-		var addr = host[0];
-		var port = +host[1] || 64000;
-
-		console.log('Removing', addr, port);
-
-		backend.delNode(addr, port, function(err) {
-			if (err) console.error(err);
-			else console.log('Ok.');
-			backend.close();
-		});
-	});
-}
-
-function syncNodes(opts, backend) {
-	// Establish connections
-	var m = 0, n = 0;
-	function connectOut(host) {
-		var startTs = +(new Date());
-		var name = host[0] + ':' + host[1];
-		console.log(name + ' connecting.');
-		n++;
-
-		var req = http.request({ method: 'CONNECT', hostname: host[0], port: host[1], path: '/' });
-		req.on('connect', function(res, stream, head) {
-			console.log(name + ' syncing.');
-			var rs = backend.createReplicationStream();
-			stream.pipe(rs).pipe(stream);
-			stream.on('end', function() {
-				console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
-				if (++m == n) onSynced();
-			});
-			/*
-			:TODO: old version below with proper end() cb
-			stream.pipe(toStream(ssb.createReplicationStream(function(err) {
-				if (err) console.error(err);
-				else console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
-				if (++m == n) onSynced();
-			}))).pipe(stream);*/
-			// :TODO: spit out some metrics, like # of new messages
-		});
-		req.on('error', function(e) {
-			console.log(name + ' failed, ' + e.message);
-		});
-		req.end();
-	}
-	function onSynced() {
-		console.log('Ok');
-		backend.close();
-		/* :TODO:
-		console.log('Fast-forwarding application cache.');
-		require('./js/apps').buildCache(function(err) { 
-			if (err) { return console.error(err); }
-			console.log('Ok.');
-		});*/
-	}
-	backend.getNodes(function(err, nodes) {
-		if (err) return console.error(err), backend.close();
-		if (nodes.length === 0) return console.log('No remote nodes known.\nOk.'), backend.close();
-		nodes.forEach(connectOut);
-	});
-}
-
 nomnom.script('phoenix')
 	.option('config', {
 		help: 'Sets the config-file (default ./.phoenixrc)'
 	});
  nomnom.nocommand()
-	.callback(list);
+	.callback(require('./js/cli/core').list);
 nomnom.command('setup')
 	.help('Creates a new profile and feed.')
 	.option('force-new-keypair', {
 		flag: true,
 		help: 'Overwrites your secret.name file with a new keypair if it already exists.'
 	})
-	.callback(setup);
+	.callback(require('./js/cli/core').setup);
 nomnom.command('feed')
 	.help('Shows the feed messages (default action).')
 	.options({
@@ -502,10 +69,10 @@ nomnom.command('feed')
 			help: 'Flag, keep output stream open.'
 		}
 	})
-	.callback(list);
+	.callback(require('./js/cli/core').list);
 nomnom.command('feeds')
 	.help('Lists the users you follow.')
-	.callback(feeds);
+	.callback(require('./js/cli/feeds').feeds);
 nomnom.command('post')
 	.help('Posts a message to your feed.')
 	.options({
@@ -515,10 +82,10 @@ nomnom.command('post')
 			help: 'Message-text to post.'
 		}
 	})
-	.callback(post);
+	.callback(require('./js/cli/core').post);
 nomnom.command('whoami')
 	.help('Shows your profile.')
-	.callback(whoami);
+	.callback(require('./js/cli/feeds').whoami);
 nomnom.command('follow')
 	.help('Starts following a user.')
 	.options({
@@ -528,7 +95,7 @@ nomnom.command('follow')
 			help: 'Public key to follow.'
 		}
 	})
-	.callback(follow);
+	.callback(require('./js/cli/feeds').follow);
 nomnom.command('unfollow')
 	.help('Stops following a user.')
 	.options({
@@ -538,7 +105,7 @@ nomnom.command('unfollow')
 			help: 'Nickname or user number to unfollow.',
 		}
 	})
-	.callback(unfollow);
+	.callback(require('./js/cli/feeds').unfollow);
 nomnom.command('lookup')
 	.help('Looks up a user\'s profile by their nickname.')
 	.options({
@@ -552,7 +119,7 @@ nomnom.command('lookup')
 			help: 'Flag, output the user\'s public key rather than their id.'
 		}
 	})
-	.callback(lookup);
+	.callback(require('./js/cli/feeds').lookup);
 nomnom.command('verify')
 	.help('Verifies a user account by an in-person or over-the-phone exchange.')
 	.options({
@@ -600,7 +167,7 @@ nomnom.command('sync')
 			help: 'Address of the server (<address>[:port]).',
 		}
 	})
-	.callback(addNode);
+	.callback(require('./js/cli/netnodes').addNode);
 nomnom.command('unsync')
 	.help('Removes a server from your replication network.')
 	.options({
@@ -610,7 +177,7 @@ nomnom.command('unsync')
 			help: 'Address of the server (<address>[:port]).',
 		}
 	})
-	.callback(delNode);
+	.callback(require('./js/cli/netnodes').delNode);
 /*nomnom.command('rebuild')
 	.help('Reconstructs the application cache from the message logs.')
 	.callback(rebuild);*/
