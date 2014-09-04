@@ -553,6 +553,16 @@ nomnom.command('lookup')
 		}
 	})
 	.callback(lookup);
+nomnom.command('verify')
+	.help('Verifies a user account by an in-person or over-the-phone exchange.')
+	.options({
+		nickname: {
+			position: 1,
+			required: true,
+			help: 'Nickname or user number to verify.',
+		}
+	})
+	.callback(require('./js/cli/trust').verify);
 /*nomnom.command('sign')
 	.help('Creates a signature for a file.')
 	.options({
