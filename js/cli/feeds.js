@@ -20,8 +20,8 @@ exports.whoami = function(opts) {
 		backend.getKeys(function(err, keys) {
 			if (err) return console.error(err), backend.close()
 			if (keys.exist) {
-				console.log('You are:    ' + new Buffer(keys.name).toString('hex'));
-				console.log('Public key: ' + new Buffer(keys.public).toString('hex'));
+				console.log('You are:    ' + keys.name.toString('hex'));
+				console.log('Public key: ' + keys.public.toString('hex'));
 			} else {
 				namefileHelp();
 			}
@@ -41,8 +41,8 @@ exports.feeds = function(opts) {
 				entry.nickname = profiles[id].nickname;
 				return cb(null, entry);
 			}
-			backend.profile_getProfile(id, function(err, profile) {
-				if (err) return console.error(err), cb(err);
+			backend.profile_getProfile(entry.key, function(err, profile) {
+				if (err && !err.notFound) return console.error(err), cb(err);
 				entry.nickname = (profile) ? profile.nickname : '???';
 				profiles[id] = profile;
 				cb(null, entry);
@@ -73,11 +73,11 @@ exports.lookup = function(opts) {
 			if (opts.pubkey) {
 				backend.getPublicKey(id, function(err, pubkey) {
 					if (err) { return cb(err); }
-					console.log(new Buffer(pubkey).toString('hex'));
+					console.log(pubkey.toString('hex'));
 					cb(null);
 				});
 			} else {
-				console.log(new Buffer(id).toString('hex'));
+				console.log(id.toString('hex'));
 				cb(null);
 			}
 		}

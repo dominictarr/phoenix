@@ -16,9 +16,10 @@ exports.verify = function(opts) {
 				return console.log('No users nicknamed ' + nickname + ' found.'), rl.close(), backend.close()
 			if (ids.length > 1) {
 				console.log(ids.length, 'matches');
-				return rl.close(), backend.close() // :TODO: disambiguate
+				// :TODO: disambiguation for multiple matches
+				return rl.close(), backend.close()
 			}
-			hash = new Buffer(ids[0]).toString('hex')
+			hash = ids[0].toString('hex')
 			
 			console.log('Verifying \'' + nickname + '\' (' + hash + ').')
 			console.log('')

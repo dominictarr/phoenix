@@ -82,7 +82,7 @@ exports.list = function(opts) {
 				msg.nickname = profiles[id].nickname;
 				return cb(null, msg);
 			}
-			backend.profile_getProfile(id, function(err, profile) {
+			backend.profile_getProfile(msg.author, function(err, profile) {
 				if (err) return console.error(err), cb(err);
 				msg.nickname = (profile) ? profile.nickname : '???';
 				profiles[id] = profile;
