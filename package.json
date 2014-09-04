@@ -20,6 +20,6 @@
     "stream-to-pull-stream": "~1.4.1",
     "ssh2": "~0.3.6",
     "rc": "~0.5.1",
-    "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#a870b68ccf46952f28233e769a3a1b7c5cc07d04"
+    "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#edc958be22f18f310a476f60b2b2d3ee596b638c"
   }
 }

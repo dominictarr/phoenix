@@ -216,40 +216,60 @@ function feeds(opts) {
 	});
 }
 
-/*function lookup(opts) {
+function lookup(opts) {
 	var name = opts.name;
+	connect(function(err, backend) {
+		if (err) return console.error(err);
 
-	function output(id) {
-		if (opts.pubkey) {
-			apps.get('init').getPublicKey(id, function(err, pubkey) {
-				if (err) { return console.error(err); }
-				console.log(pubkey.toString('hex'));
-			});
-		} else {
-			console.log(id.toString('hex'));
+		function output(id, cb) {
+			if (opts.pubkey) {
+				backend.getPublicKey(id, function(err, pubkey) {
+					if (err) { return cb(err); }
+					console.log(new Buffer(pubkey).toString('hex'));
+					cb(null);
+				});
+			} else {
+				console.log(new Buffer(id).toString('hex'));
+				cb(null);
+			}
 		}
-	}
 
-	if (+name == name) {
-		// numeric
-		var id = (+name - 1);
-		pull(
-			ssb.following(),
-			pull.collect(function(err, entries) {
-				if (err) { return console.error(err); }
-				var entry = entries[id];
-				if (!entry) { return console.error('Invalid user number.'); }
-				output(entry.key);
-			})
-		);
-	} else {
-		apps.get('profile').lookupByNickname(name, function(err, ids) {
-			if (ids.length > 1)
-				console.log(ids.length, 'matches');
-			ids.forEach(output);
-		});
-	}
-}*/
+		if (+name == name) {
+			// numeric
+			var id = (+name - 1);
+			pull(
+				ssb.following(),
+				pull.collect(function(err, entries) {
+					if (err) { return console.error(err); }
+					var entry = entries[id];
+					if (!entry) { return console.error('Invalid user number.'); }
+					output(entry.key, function(err) {
+						if (err) console.error(err)
+						else console.log('Ok.')
+						backend.close()
+					});
+				})
+			);
+		} else {
+			backend.profile_lookupByNickname(name, function(err, ids) {
+				if (ids.length === 0)
+					return console.log('No users nicknamed '+name+' found.'), backend.close()
+				if (ids.length > 1)
+					console.log(ids.length, 'matches');
+				var n=0;
+				ids.forEach(function(id) {
+					output(id, function(err) {
+						if (err) return n = -1, backend.close(), console.error(err)
+						if (++n == ids.length) {
+							console.log('Ok.')
+							backend.close()
+						}
+					})
+				});
+			});
+		}
+	})
+}
 
 function post(opts) {
 	connect(function(err, backend) {
@@ -519,7 +539,7 @@ nomnom.command('unfollow')
 		}
 	})
 	.callback(unfollow);
-/*nomnom.command('lookup')
+nomnom.command('lookup')
 	.help('Looks up a user\'s profile by their nickname.')
 	.options({
 		name: {
@@ -532,7 +552,7 @@ nomnom.command('unfollow')
 			help: 'Flag, output the user\'s public key rather than their id.'
 		}
 	})
-	.callback(lookup);*/
+	.callback(lookup);
 /*nomnom.command('sign')
 	.help('Creates a signature for a file.')
 	.options({
