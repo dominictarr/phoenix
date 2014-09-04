@@ -13,6 +13,17 @@ function namefileHelp() {
 	console.log('You don\'t have a secret.name yet; run \'phoenix setup\' first.');
 }
 
+function introHelp() {
+	console.log('');
+	console.log('Getting started:');
+	console.log('');
+	console.log(' - Follow feeds with \'phoenix add <public key>\'');
+	console.log(' - Post messages with \'phoenix post "<your message>"\'');
+	console.log(' - Add hosts to your network with \'phoenix sync <host address>\'');
+	console.log(' - Get more help with \'phoenix -h\'');
+	console.log('');
+}
+
 function padleft(width, str) {
 	if (str.length < width) {
 		return '                                        '.slice(0, width - str.length) + str;
@@ -102,7 +113,9 @@ function whoami(opts) {
 }
 
 function list(opts) {
+	var hadMessages = false;
 	function toDetailed (msg) {
+		hadMessages = true;
 		var author = msg.author.toString('hex');
 		console.log (
 			//proquint.encodeCamelDash(msg.author).substring(0, 43) + ' / ' +
@@ -116,6 +129,8 @@ function list(opts) {
 		);
 	}
 	function toSimple(msg) {
+		if (!hadMessages) console.log('user   seq   time             nickname     message');
+		hadMessages = true;
 		// apps.get('profile').getProfile(msg.author, function(err, profile) { :TODO:
 			// if (err) return console.error(err);
 			var nickname = '???';//(profile) ? profile.nickname : '???';
@@ -134,15 +149,27 @@ function list(opts) {
 			// });
 		// });
 	}
-	if (!opts.long) {
-		console.log('user   seq   time             nickname     message');
-	}
 	connect(function(err, backend) {
 		if (err) return console.error(err);
-		pull(
-			toPull(backend.createFeedStream({ tail: opts.tail })),
-			pull.drain((opts.long) ? toDetailed : toSimple, backend.close.bind(backend))
-		);
+
+		backend.getKeys(function(err, keys) {
+			if (keys.exist) {
+				pull(
+					toPull(backend.createFeedStream({ tail: opts.tail })),
+					pull.drain((opts.long) ? toDetailed : toSimple, function() {
+						if (!hadMessages) {
+							console.log('No messages in your feed.');
+							introHelp();
+						}
+						backend.close();
+					})
+				);
+			} else {
+				console.log('This appears to be your first time using Phoenix (no keyfile found). Running setup.')
+				backend.close();
+				setup(opts);
+			}
+		})
 	});
 }
 
