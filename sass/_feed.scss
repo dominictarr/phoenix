@@ -1,6 +1,6 @@
 #feedpage {
 	form {
-		margin: 0;
+		margin: 1em 0 0;
 		padding: 0;
 		textarea {
 			font-size: 15px;
@@ -12,6 +12,8 @@
 }
 
 .feed {
+	margin-top: 1em;
+
 	.avatar {
 		width: 85px;
 		a img {

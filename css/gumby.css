@@ -1722,8 +1722,8 @@ table.rounded thead th, table.rounded thead td, table.rounded caption + tbody tr
 
 .ie9 .radio.checked i, .ie9 .checkbox.checked i { top: 0; }
 
-#nav { margin: 0; background: none; }
-#nav .navbar-inner { max-width: 1074px; margin: 0 auto; }
+#nav { min-height: initial; margin: 0.6em 0 0; background: none; }
+#nav .navbar-inner { max-width: 940px; margin: 0 auto; }
 #nav .btn:first-child { margin-left: 40px; }
 #nav img { position: absolute; top: 0; left: 0; height: 95px; }
 
@@ -1731,10 +1731,11 @@ table.rounded thead th, table.rounded thead td, table.rounded caption + tbody tr
 .pubkey-modal .pubkey::before { content: 'Public Key'; display: inline-block; position: absolute; top: -0.9em; padding: 0 1em; margin-left: 2em; background: white; }
 .pubkey-modal code { font-family: consolas, monospace; background: #eee; }
 
-#feedpage form { margin: 0; padding: 0; }
+#feedpage form { margin: 1em 0 0; padding: 0; }
 #feedpage form textarea { font-size: 15px; }
 #feedpage p { font-size: 15px; }
 
+.feed { margin-top: 1em; }
 .feed .avatar { width: 85px; }
 .feed .avatar a img { border-radius: 50%; width: 64px; height: 64px; vertical-align: middle; }
 .feed .content { padding: 12px; }
@@ -1754,7 +1755,7 @@ table.rounded thead th, table.rounded thead td, table.rounded caption + tbody tr
 .profile .profile-avatar a { color: #555; font-size: 17.6px; font-size: 1.1rem; line-height: 1.625em; font-family: "Roboto"; font-weight: 400; }
 .profile .profile-avatar a:hover { color: #888; }
 .profile .profile-avatar a img { border-radius: 50%; width: 128px; height: 128px; }
-.profile .profile-summary { margin-left: 170px; text-align: left; }
+.profile .profile-summary { /*margin-left: 170px;*/ text-align: left; }
 .profile .profile-summary h2 { padding-bottom: 0; }
 .profile .profile-summary h3 { padding-top: 0; }
 .profile .profile-data .label.none { background: transparent; border: 0; color: #555555; }
