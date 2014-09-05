@@ -1,5 +1,6 @@
-var connect    = require('../backend');
-var http       = require('http');
+var http    = require('http');
+var prpc    = require('phoenix-rpc');
+var connect = require('../backend');
 
 exports.addNode = function(opts) {
 	connect(function(err, backend) {
@@ -37,7 +38,7 @@ exports.delNode = function(opts) {
 	});
 }
 
-exports.syncNodes = function(opts, backend) {
+exports.syncNodes = function(opts, localBackend) {
 	// Establish connections
 	var m = 0, n = 0;
 	function connectOut(host) {
@@ -47,12 +48,18 @@ exports.syncNodes = function(opts, backend) {
 		n++;
 
 		var req = http.request({ method: 'CONNECT', hostname: host[0], port: host[1], path: '/' });
-		req.on('connect', function(res, stream, head) {
+		req.on('connect', function(res, conn, head) {
 			console.log(name + ' syncing.');
-			var rs = backend.createReplicationStream();
-			stream.pipe(rs).pipe(stream);
-			stream.on('end', function() {
+
+			var remoteBackend = prpc.client();
+			remoteBackend.pipe(conn).pipe(remoteBackend);
+
+			var rsRemote = remoteBackend.createReplicationStream();
+			var rsLocal = localBackend.createReplicationStream();
+			rsLocal.pipe(rsRemote).pipe(rsLocal);
+			rsRemote.on('end', function() {
 				console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
+				conn.end()
 				if (++m == n) onSynced();
 			});
 			/*
@@ -71,7 +78,7 @@ exports.syncNodes = function(opts, backend) {
 	}
 	function onSynced() {
 		console.log('Ok');
-		backend.close();
+		localBackend.close();
 		/* :TODO:
 		console.log('Fast-forwarding application cache.');
 		require('./js/apps').buildCache(function(err) { 
@@ -79,9 +86,9 @@ exports.syncNodes = function(opts, backend) {
 			console.log('Ok.');
 		});*/
 	}
-	backend.getNodes(function(err, nodes) {
-		if (err) return console.error(err), backend.close();
-		if (nodes.length === 0) return console.log('No remote nodes known.\nOk.'), backend.close();
+	localBackend.getNodes(function(err, nodes) {
+		if (err) return console.error(err), localBackend.close();
+		if (nodes.length === 0) return console.log('No remote nodes known.\nOk.'), localBackend.close();
 		nodes.forEach(connectOut);
 	});
 }

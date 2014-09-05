@@ -18,7 +18,7 @@ module.exports = function(cb) {
 				var clientstream = prpc.client();
 				clientstream.pipe(netstream).pipe(clientstream);
 				clientstream.api.close = function() { server.close(); clientstream.end(); netstream.end(); };
-				cb(null, clientstream.api);
+				cb(null, clientstream.api, clientstream);
 			})
 		});
 	});

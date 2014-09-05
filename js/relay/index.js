@@ -4,7 +4,10 @@ var path     = require('path');
 var hduplex  = require('http-duplex');
 var toStream = require('pull-stream-to-stream');
 var pull     = require('pull-stream');
+var prpc     = require('phoenix-rpc');
 var connect  = require('../backend');
+
+var allowedMethods = ['createReplicationStream']
 
 function createServer(port) {
 	connect(function(err, backend) {
@@ -18,48 +21,12 @@ function createServer(port) {
 			function serve404(err) {  res.writeHead(404); res.end('Not found'); }
 			fs.createReadStream(path.join(__dirname, '../../README.md')).on('error', serve404).pipe(res);
 		});
-		server.on('connect', function(req, stream, head) {
-			console.log('Received CONNECT, replicating');
-			stream.write('HTTP/1.1 200 Connection Established\r\n\r\n');
-			stream.pipe(backend.createReplicationStream()).pipe(stream);
+		server.on('connect', function(req, conn, head) {
+			console.log('Received CONNECT');
+			conn.write('HTTP/1.1 200 Connection Established\r\n\r\n');
+			conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn);
 		});
 		server.listen(port);
-
-		// Establish connections
-		function connectOut(host) {
-			if ((host[0] == 'localhost' || host[0] == '127.0.0.1') && host[1] == port)
-				return; // skip self
-
-			var startTs = +(new Date());
-			var name = host[0] + ':' + host[1];
-			console.log('Connecting to ' + name);
-
-			var req = http.request({ method: 'CONNECT', hostname: host[0], port: host[1], path: '/' });
-			req.on('connect', function(res, stream, head) {
-				console.log('Connected to ' + name + ', replicating');
-				var rs = backend.createReplicationStream();
-				stream.pipe(rs).pipe(stream);
-				stream.on('end', function() {
-					console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
-				});
-				/*
-				:TODO: old version below with proper end() cb
-				stream.pipe(toStream(ssb.createReplicationStream(function(err) {
-					if (err) console.error(err);
-					else console.log(name + ' synced. (' + (+(new Date()) - startTs) + 'ms)');
-					if (++m == n) onSynced();
-				}))).pipe(stream);*/
-			});
-			req.on('error', function(e) {
-				console.log('Error connecting to ' + name + ': ' + e.message);
-			});
-			req.end();
-		}
-
-		backend.getNodes(function(err, nodes) {
-			if (err) return console.error(err), backend.close();
-			nodes.forEach(connectOut);
-		});
 
 		function onExit() { backend.close(); process.exit(); }
 		process.on('SIGINT', onExit).on('SIGTERM', onExit);
