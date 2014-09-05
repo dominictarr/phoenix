@@ -51,10 +51,10 @@ exports.syncNodes = function(opts, localBackend) {
 		req.on('connect', function(res, conn, head) {
 			console.log(name + ' syncing.');
 
-			var remoteBackend = prpc.client();
-			remoteBackend.pipe(conn).pipe(remoteBackend);
+			var remoteRpcStream = prpc.client();
+			remoteRpcStream.pipe(conn).pipe(remoteRpcStream);
 
-			var rsRemote = remoteBackend.createReplicationStream();
+			var rsRemote = remoteRpcStream.api.createReplicationStream();
 			var rsLocal = localBackend.createReplicationStream();
 			rsLocal.pipe(rsRemote).pipe(rsLocal);
 			rsRemote.on('end', function() {
