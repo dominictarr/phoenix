@@ -194,7 +194,7 @@ nomnom.command('deploy')
 	})
 	.callback(deploy);
 nomnom.command('start')
-	.help('Starts the relay service.')
+	.help('Starts the relay server.')
 	.options({
 		daemon: {
 			flag: true,

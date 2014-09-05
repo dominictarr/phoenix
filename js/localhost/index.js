@@ -9,19 +9,19 @@ function createServer(port) {
 		function serve404() {  res.writeHead(404); res.end('Not found'); }
 		if (req.url == '/' || req.url == '/index.html') {
 			res.writeHead(200, {'Content-Type': 'text/html'});
-			return read('feeds.html').on('error', serve404).pipe(res);
+			return read('html/feeds.html').on('error', serve404).pipe(res);
 		}
 		if (pathStarts('/profile/')) {
 			res.writeHead(200, {'Content-Type': 'text/html'});
-			return read('profile.html').on('error', serve404).pipe(res);
+			return read('html/profile.html').on('error', serve404).pipe(res);
 		}
 		if (pathStarts('/search/')) {
 			res.writeHead(200, {'Content-Type': 'text/html'});
-			return read('search.html').on('error', serve404).pipe(res);
+			return read('html/search.html').on('error', serve404).pipe(res);
 		}
 		if (pathStarts('/decrypt')) {
 			res.writeHead(200, {'Content-Type': 'text/html'});
-			return read('decrypt.html').on('error', serve404).pipe(res);
+			return read('html/decrypt.html').on('error', serve404).pipe(res);
 		}
 		if (pathStarts('/js/')) {
 			res.writeHead(200, {'Content-Type': 'application/javascript'});

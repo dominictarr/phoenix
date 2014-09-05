@@ -1,0 +1,59 @@
+#!/usr/bin/env nodejs
+var nomnom     = require('nomnom');
+var ssh2       = require('ssh2');
+var path       = require('path');
+var cfg        = require('./js/common/config');
+var connect    = require('./js/backend');
+
+function start(opts) {
+  if (opts.daemon) {
+    // Daemon-mode
+    var argv = ["0", opts.port || "64000"];
+    if (opts.config)
+      argv.push('--config'), argv.push(opts.config);
+    var daemon = require("daemonize2").setup({
+      main: "js/daemon.js",
+      name: "phoenix-relay",
+      pidfile: path.join(cfg.datadir, "./phoenix-relay.pid"),
+      argv: argv
+    });
+    daemon.start();
+  } else {
+    // FG mode
+    var webPort = opts.port || 65000;
+    require('./js/localhost').createServer(webPort);
+    console.log('Phoenix web server.....listening privately on localhost:' + webPort);
+  }
+}
+
+function stop(opts) {
+  var daemon = require("daemonize2").setup({
+    main: "js/daemon.js",
+    name: "phoenix-web",
+    pidfile: path.join(cfg.datadir, "./phoenix-web.pid"),
+  });
+  daemon.stop();
+}
+
+nomnom.script('phoenix-web')
+  .option('config', {
+    help: 'Sets the config-file (default ./.phoenixrc)'
+  });
+nomnom.command('start')
+  .help('Starts the web server.')
+  .options({
+    daemon: {
+      flag: true,
+      abbr: 'd',
+      help: 'Run the web-server in the background as a daemon.'
+    },
+    port: {
+      abbr: 'p',
+      help: 'Sets the port to accept connections on.'
+    }
+  })
+  .callback(start);
+nomnom.command('stop')
+  .help('Stops the web daemon if it\'s active.')
+  .callback(stop);
+nomnom.parse();

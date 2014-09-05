@@ -18,7 +18,7 @@ function createServer(port) {
 
 		// Start server
 		var server = http.createServer(function (req, res) {
-			function serve404(err) {  res.writeHead(404); res.end('Not found'); }
+			function serve404(err) { res.writeHead(404); res.end('Not found'); }
 			fs.createReadStream(path.join(__dirname, '../../README.md')).on('error', serve404).pipe(res);
 		});
 		server.on('connect', function(req, conn, head) {
