@@ -3,9 +3,9 @@ var path = require('path')
 var msgpack = require('msgpack')
 
 function createHandler(divisor,noun){
-  return function(diff){
+  return function(diff, useAgo){
     var n = Math.floor(diff/divisor);
-    return "" + n + noun;
+    return "" + n + noun + ((useAgo) ? ' ago' : '');
   }
 }
 
@@ -17,15 +17,15 @@ var formatters = [
   { threshold: 172800,   handler: function(){ return      "yesterday" } },
   { threshold: 604800,   handler: createHandler(86400,    "d") },
   { threshold: 2592000,  handler: createHandler(604800,   "w") },
-  { threshold: 31536000, handler: createHandler(2592000,  "m") },
+  { threshold: 31536000, handler: createHandler(2592000,  "mo") },
   { threshold: Infinity, handler: createHandler(31536000, "y") }
 ];
 
-exports.prettydate = function (date) {
+exports.prettydate = function (date, useAgo) {
   var diff = (((new Date()).getTime() - date.getTime()) / 1000);
   for( var i=0; i<formatters.length; i++ ){
     if( diff < formatters[i].threshold ){
-      return formatters[i].handler(diff);
+      return formatters[i].handler(diff, useAgo);
     }
   }
   throw new Error("exhausted all formatter options, none found"); //should never be reached

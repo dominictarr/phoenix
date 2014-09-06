@@ -12,6 +12,7 @@ function createServer(port) {
 		if (err) return console.error(err);
 		var server = http.createServer(function (req, res) {
 			function pathStarts(v) { return req.url.indexOf(v) === 0; }
+			function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
 			function read(file) { return fs.createReadStream(path.join(__dirname, '../../' + file)); }
 			function serve404() {  res.writeHead(404); res.end('Not found'); }
 			if (req.url == '/' || req.url == '/index.html') {
@@ -20,6 +21,8 @@ function createServer(port) {
 				return feed.get(req, res, backend);
 			}
 			if (pathStarts('/profile/')) {
+				if (pathEnds('/pubkey'))
+					return profile.getPubkey(req, res, backend);
 				return profile.get(req, res, backend);
 			}
 			if (pathStarts('/js/')) {

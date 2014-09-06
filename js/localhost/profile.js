@@ -10,7 +10,8 @@ function renderPage(req, res, backend, ctx) {
     var n = 0
     var fetchProfile = util.profileFetcher(backend)
 
-    var id = new Buffer(req.url.slice('/profile/'.length), 'hex')
+    ctx.id = req.url.slice('/profile/'.length)
+    var id = new Buffer(ctx.id, 'hex')
     fetchProfile({ key: id }, function(err, profile) {
       if (err && err.notFound) return res.writeHead(404), res.end();
       else if (err) return console.error(err), res.writeHead(500), res.end();
@@ -21,7 +22,11 @@ function renderPage(req, res, backend, ctx) {
         pull.collect(function (err, entries) {
           if (err) { return console.error(err), res.writeHead(500).end() }
           ctx.feed_entries = entries
-            .map(function(msg) { msg.nickname = profile.nickname; return util.renderMsg(msg) })
+            .map(function(msg) {
+              if (!ctx.joindate) ctx.joindate = util.prettydate(new Date(msg.timestamp), true)
+              msg.nickname = profile.nickname;
+              return util.renderMsg(msg)
+            })
             .reverse()
             .join('')
           
@@ -35,4 +40,15 @@ function renderPage(req, res, backend, ctx) {
 
 exports.get = function(req, res, backend) {
   renderPage(req, res, backend, { error: '' })
+}
+
+exports.getPubkey = function(req, res, backend) {
+  var id = new Buffer(req.url.slice('/profile/'.length, -('/pubkey'.length)), 'hex')
+  backend.getPublicKey(id, function(err, pubkey) {
+    if (err && err.notFound) return res.writeHead(404), res.end();
+    else if (err) return console.error(err), res.writeHead(500), res.end();
+     
+    res.writeHead(200, {'Content-Type': 'text/plain'})
+    res.end(pubkey.toString('hex'))
+  })
 }
