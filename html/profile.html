@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Profile: alice // Phoenix</title>
+    <title>Profile: {nickname} // Phoenix</title>
   <link rel="stylesheet" href="/css/gumby.css">
   </head>
   <body>
@@ -16,8 +16,8 @@
     <div class="row">
       <div class="five columns push_seven">
         <div class="profile-summary">
-          <h2>Alice</h2>
-          <h3><small>Joined August 18, 2014</small></h3>
+          <h2>{nickname}</h2>
+          <h3 class="hide"><small>Joined August 18, 2014</small></h3>
           <p>
             <span class="btn default ttip long" data-tooltip="Receive updates from this user"><a href="#">Follow</a></span>
             <a href="#">Public Key</a>
@@ -27,30 +27,7 @@
       <div class="seven columns pull_five">
         <table class="feed">
           <tbody>
-            <tr>
-              <td><p>Alice <small>35m</small></p></td>
-              <td class="content">
-                <p>How do I follow my grandson?</p>
-              </td>
-            </tr>
-            <tr>
-              <td><p>Alice <small>1h</small></p></td>
-              <td class="content">
-                <p>Follow Tim Howard</p>
-              </td>
-            </tr>
-            <tr>
-              <td><p>Alice <small>1h</small></p></td>
-              <td class="content">
-                <p>Follow timmy</p>
-              </td>
-            </tr>
-            <tr>
-              <td><p>Alice <small>2h</small></p></td>
-              <td class="content">
-                <p><strong><small>Account created</small></strong></p>
-              </td>
-            </tr>
+            {feed_entries}
           </tbody>
         </table>
       </div>

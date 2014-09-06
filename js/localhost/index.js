@@ -5,6 +5,7 @@ var concat  = require('concat-stream')
 var connect = require('../backend')
 
 var feed = require('./feed')
+var profile = require('./profile')
 
 function createServer(port) {
 	connect(function (err, backend) {
@@ -19,8 +20,7 @@ function createServer(port) {
 				return feed.get(req, res, backend);
 			}
 			if (pathStarts('/profile/')) {
-				res.writeHead(200, {'Content-Type': 'text/html'});
-				return read('html/profile.html').on('error', serve404).pipe(res);
+				return profile.get(req, res, backend);
 			}
 			if (pathStarts('/js/')) {
 				res.writeHead(200, {'Content-Type': 'application/javascript'});
