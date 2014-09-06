@@ -73,7 +73,7 @@ function renderMsg(msg) {
   }
 
   return '<tr>' +
-    '<td class="content"> ' + msg.nickname + ' <small>' +  prettydate.format(new Date(msg.timestamp)) + '</small></p>' +
+    '<td class="content"><p><strong>' + msg.nickname + '</strong> <small>' +  prettydate.format(new Date(msg.timestamp)) + '</small></p>' +
     '<p>' + content + '</p></td>' +
   '</tr>';
 }
@@ -102,7 +102,7 @@ function renderPage(req, res, backend, ctx) {
       pull.asyncMap(fetchProfile),
       pull.collect(function (err, entries) {
         if (err) { return console.error(err), res.writeHead(500).end() }
-        ctx.friends = entries.map(function(entry) { return '<a href="/prof/'+entry.key.toString('hex')+'">'+entry.nickname+'</a><br>'; }).join('')
+        ctx.friends = entries.map(function(entry) { return '<a href="/profile/'+entry.key.toString('hex')+'">'+entry.nickname+'</a><br>'; }).join('')
         if (++n == 2) finish()
       })
     )
@@ -129,7 +129,7 @@ exports.post = function(req, res, backend) {
     }
 
     function serve(err) {
-      renderPage(req, res, backend, { error: err.toString() })
+      renderPage(req, res, backend, { error: (err) ? err.toString() : '' })
     }
   }))
 }

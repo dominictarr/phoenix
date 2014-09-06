@@ -1732,7 +1732,7 @@ table.rounded thead th, table.rounded thead td, table.rounded caption + tbody tr
 .pubkey-modal code { font-family: consolas, monospace; background: #eee; }
 
 #feedpage form { margin: 1em 0 0; padding: 0; }
-#feedpage form textarea { font-size: 15px; }
+#feedpage form textarea { font-size: 15px; line-height: 1.5em; transition: none; padding: 8px 10px; }
 #feedpage p { font-size: 15px; }
 
 .feed { margin-top: 1em; }
