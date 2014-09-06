@@ -15,7 +15,7 @@ function renderPage(req, res, backend, ctx) {
       ctx.nodes = nodes
         .map(function(node) { return '<tr><td>' +
             '<h3><a href="http://'+node[0]+'" target="_blank">' + node[0] + '</a></h3>' +
-            '<p><span class="small btn default"><a href="#">Remove</a></span></p>' +
+            '<form class="del-form" action="/network/del/'+node[0]+':'+node[1]+'" method="POST"><span class="small btn default"><button>Remove</button></span></form>' +
           '</td></tr>'
         })
         .join('')
@@ -45,4 +45,14 @@ exports.post = function(req, res, backend) {
       renderPage(req, res, backend, { error: (err) ? err.toString() : '' })
     }
   }))
+}
+
+exports.deleteNode = function(req, res, backend) {
+  var addr = req.url.slice('/network/del/'.length)
+  addr = addr.split(':')
+  backend.delNode(addr[0], +addr[1] || 64000, serve)
+  function serve(err) {
+    res.writeHead(303, {'Location': '/network'})
+    res.end()
+  }
 }
