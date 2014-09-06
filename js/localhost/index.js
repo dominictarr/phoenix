@@ -14,7 +14,9 @@ function createServer(port) {
 			function read(file) { return fs.createReadStream(path.join(__dirname, '../../' + file)); }
 			function serve404() {  res.writeHead(404); res.end('Not found'); }
 			if (req.url == '/' || req.url == '/index.html') {
-				return read('html/feeds.html').on('error', serve404).pipe(concat(feed.render(req, res, backend)));
+				if (req.method == 'POST')
+					return feed.post(req, res, backend)
+				return feed.get(req, res, backend);
 			}
 			if (pathStarts('/profile/')) {
 				res.writeHead(200, {'Content-Type': 'text/html'});

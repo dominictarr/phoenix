@@ -49,7 +49,7 @@ body { background: white; font-family: Verdana, Geneva, sans-serif; font-weight:
 
 html, body { height: 100%; }
 
-.hide { display: none; }
+.hide { display: none !important; }
 
 .hide.active, .show { display: block; }
 
