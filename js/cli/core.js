@@ -83,7 +83,7 @@ exports.list = function(opts) {
 				return cb(null, msg);
 			}
 			backend.profile_getProfile(msg.author, function(err, profile) {
-				if (err) return console.error(err), cb(err);
+				if (err && !err.notFound) return console.error(err), cb(err);
 				msg.nickname = (profile) ? profile.nickname : '???';
 				profiles[id] = profile;
 				cb(null, msg);

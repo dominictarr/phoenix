@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <title>Phenix</title>
+  <title>Phoenix</title>
   <link rel="stylesheet" href="/css/gumby.css">
   </head>
   <body>
   <div class="navbar twelve columns" id="nav">
     <div class="navbar-inner">
-      <strong>phenix</strong>
+      <strong>phoenix</strong>
       <a href="/">news</a> /
       <a href="/profile/">profile</a>
     </div>
@@ -17,6 +17,26 @@
     <div class="eight columns">
       <table class="feed">
         <tbody>
+          {feed_entries}
+        </tbody>
+      </table>
+    </div>
+    <div class="four columns">
+      <form>
+        <div class="field"><textarea class="input textarea" placeholder="Publish..." rows="1"></textarea></div>
+      </form>
+      <a href="/profile/">Bob</a><br>
+      <a href="/profile/">David</a>
+    </div>
+  </div>
+
+  <script src="js/jquery-2.1.1.min.js"></script>
+  <script src="js/modernizr-2.6.2.min.js"></script>
+  <script src="js/gumby.min.js"></script>
+  </body>
+</html>
+
+<script type="text/html">
           <tr>
             <td><p>David <small>10m</small></p></td>
             <td class="content">
@@ -59,50 +79,6 @@
               <p>Follow timmy</p>
             </td>
           </tr>
-        </tbody>
-      </table>
-    </div>
-    <div class="four columns">
-      <form>
-        <div class="field"><textarea class="input textarea" placeholder="Publish..." rows="1"></textarea></div>
-      </form>
-      <a href="/profile/">Bob</a><br>
-      <a href="/profile/">David</a>
-    </div>
-  </div>
-
-  <script src="js/jquery-2.1.1.min.js"></script>
-  <script src="js/modernizr-2.6.2.min.js"></script>
-  <script src="js/gumby.min.js"></script>
-  </body>
-</html>
-
-<script type="text/html">
-          <tr>
-            <td class="content">
-              <p><small><strong>Alice</strong> 35 minutes ago</small></p>
-              <p>How do I follow my grandson?</p>
-            </td>
-          </tr>
-          <tr>
-            <td class="content">
-              <p><small><strong>Bob</strong>  1 hour ago</small> </p>
-              <p>Trees in the springtime. <a href="#">http://www.smbc-comics.com/?id=3449</a></p>
-            </td>
-          </tr>
-          <tr>
-            <td class="content">
-              <p><small><strong>Alice</strong> 1 hour ago</small></p>
-              <p>Follow Tim Howard</p>
-            </td>
-          </tr>
-          <tr>
-            <td class="content">
-              <p><small><strong>Alice</strong> 1 hour ago</small></p>
-              <p>Follow timmy</p>
-            </td>
-          </tr>
-
 
       <table class="feed">
         <tbody>
