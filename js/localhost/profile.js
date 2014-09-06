@@ -6,6 +6,7 @@ var concat = require('concat-stream')
 var util = require('./util')
 
 function renderPage(req, res, backend, ctx) {
+  ctx.cuser_id = backend.local.user.name.toString('hex')
   util.read('html/profile.html').on('error', util.serve404(res)).pipe(concat(function(html) {
     var n = 0
     var fetchProfile = util.profileFetcher(backend)

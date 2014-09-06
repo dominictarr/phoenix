@@ -11,6 +11,13 @@ var network = require('./network')
 function createServer(port) {
 	connect(function (err, backend) {
 		if (err) return console.error(err);
+
+		backend.local = { user: null }
+		backend.getKeys(function(err, keys) {
+			if (err) throw err
+			backend.local.user = keys
+		})
+
 		var server = http.createServer(function (req, res) {
 			function pathStarts(v) { return req.url.indexOf(v) === 0; }
 			function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
@@ -38,7 +45,14 @@ function createServer(port) {
 				return read(req.url).on('error', serve404).pipe(res);
 			}
 			if (pathStarts('/img/')) {
-				res.writeHead(200, {'Content-Type': 'image/png'});
+				if (pathEnds('jpg') || pathEnds('jpeg'))
+					res.writeHead(200, {'Content-Type': 'image/jpeg'});
+				else if (pathEnds('gif'))
+					res.writeHead(200, {'Content-Type': 'image/gif'});
+				else if (pathEnds('ico'))
+					res.writeHead(200, {'Content-Type': 'image/x-icon'});
+				else
+					res.writeHead(200, {'Content-Type': 'image/png'});
 				return read(req.url).on('error', serve404).pipe(res);
 			}
 			if (pathStarts('/fonts/')) {
