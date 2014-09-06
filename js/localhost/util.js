@@ -52,6 +52,15 @@ exports.profileFetcher = function(backend) {
   }
 }
 
+var renderPlain =
+exports.renderPlain = function(str) {
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/(\r\n|\n)/g, '<br>')
+}
+
 exports.renderCtx = function(html, ctx) {
   for (var k in ctx)
     html = html.replace(RegExp('{'+k+'}', 'gi'), ctx[k])
@@ -62,13 +71,13 @@ exports.renderMsg = function(msg) {
   var content;
   switch (msg.type.toString()) {
     case 'init': content = '<strong><small>Account created</small></strong>'; break
-    case 'text': content = msgpack.unpack(msg.message).plain; break
-    case 'profile': content = '<strong><small>Is now known as ' + msgpack.unpack(msg.message).nickname + '</small></strong>'; break
-    default: content = '<em>Unknown message type: ' + msg.type.toString(); break
+    case 'text': content = renderPlain(msgpack.unpack(msg.message).plain); break
+    case 'profile': content = '<strong><small>Is now known as ' + renderPlain(msgpack.unpack(msg.message).nickname) + '</small></strong>'; break
+    default: content = '<em>Unknown message type: ' + renderPlain(msg.type.toString()); break
   }
 
   return '<tr>' +
-    '<td class="content"><p><strong>' + msg.nickname + '</strong> <small>' +  exports.prettydate(new Date(msg.timestamp)) + '</small></p>' +
+    '<td class="content"><p><strong>' + renderPlain(msg.nickname) + '</strong> <small>' +  exports.prettydate(new Date(msg.timestamp)) + '</small></p>' +
     '<p>' + content + '</p></td>' +
   '</tr>';
 }
