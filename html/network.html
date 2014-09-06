@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Network // Phoenix</title>
+  <link rel="stylesheet" href="/css/gumby.css">
+  </head>
+  <body>
+  <div class="navbar twelve columns" id="nav">
+    <div class="navbar-inner">
+      <strong>phoenix</strong>
+      <a href="/">latest</a> <small>/</small>
+      <a href="/profile/">profile</a> <small>/</small>
+      <a href="/network">network</a>
+    </div>
+  </div>
+  <div if="profilepage" class="profile">
+    <div class="row">
+      <div class="five columns push_seven">
+        <br>
+        <p>Last synced 5m ago</p>
+        <p><span class="btn default medium"><a href="#">Sync</a></span></p>
+      </div>
+      <div class="seven columns pull_five">
+        <table class="feed">
+          {nodes}
+        </table>
+        <p><img src="/img/logo.png"/><strong><small>Who's cooking chicken?</small></strong></p>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/jquery-2.1.1.min.js"></script>
+  <script src="/js/modernizr-2.6.2.min.js"></script>
+  <script src="/js/gumby.min.js"></script>
+  </body>
+</html>

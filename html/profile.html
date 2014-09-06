@@ -8,8 +8,9 @@
   <div class="navbar twelve columns" id="nav">
     <div class="navbar-inner">
       <strong>phoenix</strong>
-      <a href="/">latest</a> /
-      <a href="/profile/">profile</a>
+      <a href="/">latest</a> <small>/</small>
+      <a href="/profile/">profile</a> <small>/</small>
+      <a href="/network">network</a>
     </div>
   </div>
   <div if="profilepage" class="profile">
@@ -28,9 +29,9 @@
         <table class="feed">
           <tbody>
             {feed_entries}
-            <tr><td><p style="margin:0"><img src="/img/logo.png"/><strong><small>This person seams neat!</small></strong></p></td></tr>
           </tbody>
         </table>
+        <p><img src="/img/logo.png"/><strong><small>Is it hot in here?</small></strong></p>
       </div>
     </div>
   </div>

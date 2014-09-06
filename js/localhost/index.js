@@ -6,6 +6,7 @@ var connect = require('../backend')
 
 var feed = require('./feed')
 var profile = require('./profile')
+var network = require('./network')
 
 function createServer(port) {
 	connect(function (err, backend) {
@@ -18,12 +19,15 @@ function createServer(port) {
 			if (req.url == '/' || req.url == '/index.html') {
 				if (req.method == 'POST')
 					return feed.post(req, res, backend)
-				return feed.get(req, res, backend);
+				return feed.get(req, res, backend)
 			}
 			if (pathStarts('/profile/')) {
 				if (pathEnds('/pubkey'))
-					return profile.getPubkey(req, res, backend);
-				return profile.get(req, res, backend);
+					return profile.getPubkey(req, res, backend)
+				return profile.get(req, res, backend)
+			}
+			if (pathStarts('/network')) {
+				return network.get(req, res, backend)
 			}
 			if (pathStarts('/js/')) {
 				res.writeHead(200, {'Content-Type': 'application/javascript'});
