@@ -13,18 +13,18 @@
       <a href="/network">network</a>
     </div>
   </div>
-  <div if="profilepage" class="profile">
+  <div id="networkpage">
     <div class="row">
       <div class="five columns push_seven">
         <br>
-        <p>Last synced 5m ago</p>
+        <p>Last synced {last_sync}</p>
         <p>
-          <span class="btn default medium"><a href="#">Sync</a></span>
-          <span class="btn default medium"><a class="add-btn" href="#">Add...</a></span>
+          <span class="btn default medium"><button form="sync-form">Sync</button></span>
+          <span class="btn default medium"><button class="add-btn">Add...</button></span>
         </p>
       </div>
       <div class="seven columns pull_five">
-        <table class="feed">
+        <table class="nodes">
           {nodes}
         </table>
         <p><img src="/img/logo.png"/><strong><small>Who's cooking chicken?</small></strong></p>
@@ -33,6 +33,7 @@
   </div>
 
   <form id="add-form" action="/network" method="POST"><input type="hidden" name="address"></form>
+  <form id="sync-form" action="/network/sync" method="POST"><input type="hidden" name="redirect" value="/network"></form>
 
   <script src="/js/jquery-2.1.1.min.js"></script>
   <script src="/js/modernizr-2.6.2.min.js"></script>

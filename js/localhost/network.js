@@ -4,6 +4,9 @@ var pull = require('pull-stream')
 var toPull = require('stream-to-pull-stream')
 var concat = require('concat-stream')
 var util = require('./util')
+var sync = require('../common/sync')
+
+var lastSync = 0
 
 function renderPage(req, res, backend, ctx) {
   ctx.cuser_id = backend.local.user.name.toString('hex')
@@ -19,6 +22,8 @@ function renderPage(req, res, backend, ctx) {
           '</td></tr>'
         })
         .join('')
+
+      ctx.last_sync = (lastSync) ? util.prettydate(lastSync, true) : '--'
       
       res.writeHead(200, {'Content-Type': 'text/html'})
       res.end(util.renderCtx(html.toString(), ctx))
@@ -44,6 +49,22 @@ exports.post = function(req, res, backend) {
     function serve(err) {
       renderPage(req, res, backend, { error: (err) ? err.toString() : '' })
     }
+  }))
+}
+
+exports.sync = function(req, res, backend) {
+  req.pipe(concat(function(form) {
+
+    var location = '/network'
+    var form = require('querystring').parse(form.toString())
+    if (form && form.redirect && (form.redirect == '/' || /^\/[^\/]/.test(form.redirect))) // must be a relative url
+      location = form.redirect
+
+    sync(backend, function() {
+      lastSync = new Date()
+      res.writeHead(303, {'Location': location})
+      res.end()
+    })
   }))
 }
 

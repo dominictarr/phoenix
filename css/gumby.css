@@ -1769,6 +1769,11 @@ table.rounded thead th, table.rounded thead td, table.rounded caption + tbody tr
 .profiles .profile .profile-avatar { float: none; }
 .profiles .profile .label { font-size: 1rem; font-weight: normal; line-height: 29px; height: 30px; }
 
+.nodes { margin-top: 1em; }
+.nodes form { margin: 0 0; padding: 0; }
+.nodes h3 { padding-top: 0; }
+.nodes td { padding: 10px 14px; }
+
 .nomargin { margin: 0 !important; }
 
 .nopadding { padding: 0 !important; }
