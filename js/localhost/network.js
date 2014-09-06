@@ -29,3 +29,20 @@ function renderPage(req, res, backend, ctx) {
 exports.get = function(req, res, backend) {
   renderPage(req, res, backend, { error: '' })
 }
+
+exports.post = function(req, res, backend) {
+  req.pipe(concat(function(form) {
+
+    var form = require('querystring').parse(form.toString())
+    if (form && form.address) {
+      var addr = form.address.split(':');
+      backend.addNode(addr[0], +addr[1] || 64000, serve)
+    } else {
+      serve(new Error('Cant post an empty message'))
+    }
+
+    function serve(err) {
+      renderPage(req, res, backend, { error: (err) ? err.toString() : '' })
+    }
+  }))
+}

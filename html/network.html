@@ -20,7 +20,7 @@
         <p>Last synced 5m ago</p>
         <p>
           <span class="btn default medium"><a href="#">Sync</a></span>
-          <span class="btn default medium"><a href="#">Add...</a></span>
+          <span class="btn default medium"><a class="add-btn" href="#">Add...</a></span>
         </p>
       </div>
       <div class="seven columns pull_five">
@@ -32,8 +32,11 @@
     </div>
   </div>
 
+  <form id="add-form" action="/network" method="POST"><input type="hidden" name="address"></form>
+
   <script src="/js/jquery-2.1.1.min.js"></script>
   <script src="/js/modernizr-2.6.2.min.js"></script>
   <script src="/js/gumby.min.js"></script>
+  <script src="/js/web/network.js"></script>
   </body>
 </html>

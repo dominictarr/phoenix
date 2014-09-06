@@ -34,6 +34,8 @@ function createServer(port) {
 				return profile.get(req, res, backend)
 			}
 			if (pathStarts('/network')) {
+				if (req.method == 'POST')
+					return network.post(req, res, backend)
 				return network.get(req, res, backend)
 			}
 			if (pathStarts('/js/')) {
