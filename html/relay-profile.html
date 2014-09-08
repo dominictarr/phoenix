@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Profile: {nickname} // {host} // Phoenix</title>
+  <link rel="stylesheet" href="/css/gumby.css">
+  </head>
+  <body>
+  <div class="navbar twelve columns" id="nav">
+    <div class="navbar-inner">
+      <strong>{host}</strong>
+    </div>
+  </div>
+  <div id="profilepage" class="profile">
+    <div class="row">
+      <div class="five columns push_seven">
+        <div class="profile-summary">
+          <h2>{nickname}</h2>
+          <h3><small>joined {joindate}</small></h3>
+          <p>
+            <span class="btn default ttip long hide" data-tooltip="Receive updates from this user"><a href="#">Follow</a></span>
+            <a href="/profile/{id}/pubkey">Public Key</a>
+          </p>
+        </div>
+      </div>
+      <div class="seven columns pull_five">
+        <table class="feed">
+          <tbody>
+            {feed_entries}
+          </tbody>
+        </table>
+        <div class="mascot"><img src="/img/logo.png"/><strong><small>{host} is a part of the <a href="#">Phoenix Distributed Network</a>!</small></strong></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/js/jquery-2.1.1.min.js"></script>
+  <script src="/js/modernizr-2.6.2.min.js"></script>
+  <script src="/js/gumby.min.js"></script>
+  </body>
+</html>

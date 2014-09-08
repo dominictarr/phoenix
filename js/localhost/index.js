@@ -38,6 +38,8 @@ function createServer(port) {
 					return network.deleteNode(req, res, backend)
 				if (req.method == 'POST' && req.url == '/network/sync')
 					return network.sync(req, res, backend)
+				// if (req.url.length > '/network/'.length)
+					// return network.getNode(req, res, backend)
 				if (req.method == 'POST')
 					return network.post(req, res, backend)
 				return network.get(req, res, backend)

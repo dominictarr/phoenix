@@ -3,7 +3,7 @@ var path = require('path')
 var pull = require('pull-stream')
 var toPull = require('stream-to-pull-stream')
 var concat = require('concat-stream')
-var util = require('./util')
+var util = require('../common/util')
 
 function renderPage(req, res, backend, ctx) {
   ctx.cuser_id = backend.local.user.name.toString('hex')
@@ -21,7 +21,7 @@ function renderPage(req, res, backend, ctx) {
       pull(
         toPull(backend.createHistoryStream(id, 0)),
         pull.collect(function (err, entries) {
-          if (err) { return console.error(err), res.writeHead(500).end() }
+          if (err) { return console.error(err), res.writeHead(500), res.end() }
           ctx.feed_entries = entries
             .map(function(msg) {
               if (!ctx.joindate) ctx.joindate = util.prettydate(new Date(msg.timestamp), true)
