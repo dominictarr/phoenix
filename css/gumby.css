@@ -1786,3 +1786,5 @@ table.alignkeyright tr td:first-child { text-align: right; }
 hr { border-width: 1px; }
 
 .label + .value.default { border: 1px solid #f2f2f2; font-size: 12px; font-size: 0.75rem; padding: 0 10px; display: inline-block; }
+
+.mascot img { width: 86px; }
