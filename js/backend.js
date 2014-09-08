@@ -3,8 +3,8 @@ var prpc = require('phoenix-rpc');
 var cfg  = require('./common/config');
 
 module.exports = function(cb) {
-	var clientstream = prpc.client();
 	var netstream = net.connect(+cfg.rpcport, function() {
+		var clientstream = prpc.client();
 		clientstream.pipe(netstream).pipe(clientstream);
 		clientstream.api.close = function() { clientstream.end(); netstream.end(); };
 		cb(null, clientstream.api);
