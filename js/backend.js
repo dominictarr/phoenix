@@ -26,7 +26,10 @@ module.exports = function(cb) {
 
 function createServer(cb) {
 	// Create server
-	var server = net.createServer(function (s) { s.pipe(prpc.server(cfg)).pipe(s); });
+	var server = net.createServer(function (s) {
+		s.on('error', function(err) { console.error('RPC server connection error', err) })
+		s.pipe(prpc.server(cfg)).pipe(s);
+	});
 	server.on('listening', function() { cb(null, server); });
 	server.on('error', cb);
 	server.listen(+cfg.rpcport, 'localhost');
