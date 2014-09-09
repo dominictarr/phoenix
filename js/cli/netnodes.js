@@ -1,14 +1,13 @@
 var http    = require('http');
 var prpc    = require('phoenix-rpc');
 var connect = require('../backend');
-var sync    = require('../common/sync')
 
 exports.addNode = function(opts) {
 	connect(function(err, backend) {
 		if (err) return console.error(err);
 
 		if (!opts.host)
-			return sync(backend, onSynced);
+			return backend.syncNetwork(onSynced);
 
 		var host = opts.host.split(':');
 		var addr = host[0];
@@ -16,11 +15,22 @@ exports.addNode = function(opts) {
 
 		backend.addNode(addr, port, function(err) {
 			if (err) console.error(err), backend.close();
-			else sync(backend, onSynced);
+			else backend.syncNetwork(onSynced);
 		});
 
-		function onSynced() {
-			console.log('Ok');
+		function onSynced(err, results) {
+			if (err)
+				console.error(err)
+			else {
+				for (var host in results) {
+					var result = results[host]
+					if (result.error)
+						console.log(host, 'error:', result.msg)
+					else
+						console.log(host, 'synced in', result.elapsed, 'ms')
+				}
+				console.log('Ok');
+			}
 			backend.close();
 		}
 	});

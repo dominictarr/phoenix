@@ -6,7 +6,6 @@ var toPull = require('stream-to-pull-stream')
 var concat = require('concat-stream')
 var prpc = require('phoenix-rpc')
 var util = require('../common/util')
-var sync = require('../common/sync')
 
 var tmpThing = require('./tmp')
 
@@ -64,7 +63,8 @@ exports.sync = function(req, res, backend) {
     if (form && form.redirect && (form.redirect == '/' || /^\/[^\/]/.test(form.redirect))) // must be a relative url
       location = form.redirect
 
-    sync(backend, function() {
+    backend.syncNetwork(function(err) {
+      if (err) return res.writeHead(500), res.end(err)
       tmpThing.lastSync = new Date()
       res.writeHead(303, {'Location': location})
       res.end()

@@ -18,6 +18,10 @@ function createServer(port) {
 			backend.local.userid = keys.name
 			backend.local.userpubkey = keys.public
 		})
+		backend.getSyncState(function(err, state) {
+			if (state && state.lastSync)
+				require('./tmp').lastSync = new Date(state.lastSync)
+		})
 
 		var server = http.createServer(function (req, res) {
 			function pathStarts(v) { return req.url.indexOf(v) === 0; }
