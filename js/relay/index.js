@@ -25,10 +25,11 @@ function createServer(port) {
 			function serve404(err) { res.writeHead(404); res.end('Not found') }
 
 			// Routes
-			if (pathStarts('/profile/'))
+			if (pathStarts('/profile/')) {
 				if (pathEnds('/pubkey'))
 					return getPubkey(req, res, backend)
 				return getProfile(req, res, backend)
+			}
 			if (pathStarts('/js/')) {
 				res.writeHead(200, {'Content-Type': 'application/javascript'});
 				return read(req.url).on('error', serve404).pipe(res);
@@ -77,7 +78,7 @@ function getHomepage(req, res, backend) {
   util.read('html/relay-home.html').on('error', util.serve404(res)).pipe(concat(function(html) {
 
     // Pull profiles
-    var ctx = { host: 'todo.com' }
+    var ctx = { host: require('os').hostname() }
     var fetchProfile = util.profileFetcher(backend)
     pull(
       toPull(backend.following()),
@@ -101,7 +102,7 @@ function getProfile(req, res, backend) {
     var fetchProfile = util.profileFetcher(backend)
 
     var id
-    var ctx = { host: 'todo.com' }
+    var ctx = { host: require('os').hostname() }
     ctx.id = req.url.slice('/profile/'.length)
     try { id = new Buffer(ctx.id, 'hex') }
     catch (e) { return res.writeHead(404), res.end() }
