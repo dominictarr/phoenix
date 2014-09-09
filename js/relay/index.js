@@ -16,6 +16,9 @@ function createServer(port) {
 
 		// Read config
 		loadMembersFile(backend)
+    
+    // Setup periodic syncs
+    require('../common/background-sync')(backend, 1000 * 60 * 15)
 
 		// Start server
 		var server = http.createServer(function (req, res) {

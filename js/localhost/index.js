@@ -12,6 +12,7 @@ function createServer(port) {
 	connect(function (err, backend) {
 		if (err) return console.error(err);
 
+		// Pull state from the backend
 		backend.local = { userid: null }
 		backend.getKeys(function(err, keys) {
 			if (err) throw err
@@ -23,6 +24,10 @@ function createServer(port) {
 				require('./tmp').lastSync = new Date(state.lastSync)
 		})
 
+		// Setup periodic syncs
+		require('../common/background-sync')(backend, 1000 * 60 * 15)
+
+		// Create HTTP server
 		var server = http.createServer(function (req, res) {
 			function pathStarts(v) { return req.url.indexOf(v) === 0; }
 			function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
