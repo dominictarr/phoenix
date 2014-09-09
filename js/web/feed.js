@@ -13,4 +13,11 @@ $(function() {
       $target.attr('rows', 1)
     }
   }
+
+  $('.add-btn').on('click', function() {
+    var token = prompt('Public key or introduction token of the user.')
+    if (!token) return
+    $('#add-form [name=token]').val(token)
+    $('#add-form').submit()
+  })
 })

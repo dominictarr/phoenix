@@ -12,10 +12,11 @@ function createServer(port) {
 	connect(function (err, backend) {
 		if (err) return console.error(err);
 
-		backend.local = { user: null }
+		backend.local = { userid: null }
 		backend.getKeys(function(err, keys) {
 			if (err) throw err
-			backend.local.user = keys
+			backend.local.userid = keys.name
+			backend.local.userpubkey = keys.public
 		})
 
 		var server = http.createServer(function (req, res) {
@@ -23,16 +24,26 @@ function createServer(port) {
 			function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
 			function read(file) { return fs.createReadStream(path.join(__dirname, '../../' + file)); }
 			function serve404() {  res.writeHead(404); res.end('Not found'); }
+			
+			// Homepage
 			if (req.url == '/' || req.url == '/index.html') {
 				if (req.method == 'POST')
 					return feed.post(req, res, backend)
 				return feed.get(req, res, backend)
 			}
+			
+			// Profiles
 			if (pathStarts('/profile/')) {
 				if (pathEnds('/pubkey'))
 					return profile.getPubkey(req, res, backend)
 				return profile.get(req, res, backend)
 			}
+			if (req.url == '/intro-token')
+				return profile.getIntroToken(req, res, backend)
+			if (req.url == '/feeds' && req.method == 'POST')
+				return profile.addFeed(req, res, backend)
+
+			// Network nodes
 			if (pathStarts('/network')) {
 				if (req.method == 'POST' && pathStarts('/network/del/'))
 					return network.deleteNode(req, res, backend)
@@ -44,6 +55,8 @@ function createServer(port) {
 					return network.post(req, res, backend)
 				return network.get(req, res, backend)
 			}
+
+			// Assets
 			if (pathStarts('/js/')) {
 				res.writeHead(200, {'Content-Type': 'application/javascript'});
 				return read(req.url).on('error', serve404).pipe(res);

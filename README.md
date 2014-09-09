@@ -1,7 +1,7 @@
 Phoenix v1
 ==========
 
-![phoenix](phoenix.png)
+![phoenix](phoenix.png) **It's distributed!**
 
 ## License
 

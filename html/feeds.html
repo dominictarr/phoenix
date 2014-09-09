@@ -11,6 +11,7 @@
       <a href="/">latest</a> <small>/</small>
       <a href="/profile/{cuser_id}">profile</a> <small>/</small>
       <a href="/network">network</a>
+      <a href="/intro-token" class="pull_right">intro token</a>
     </div>
   </div>
 
@@ -29,12 +30,17 @@
         <div class="field"><textarea name="plain" class="input textarea" placeholder="Publish..." rows="1"></textarea></div>
         <div class="btn primary medium"><button>Post</button></div>
       </form>
-      <p><span class="btn default medium"><button form="sync-form">Sync</button></span></p>
+      <p>Last synced {last_sync}</p>
+      <p>
+        <span class="btn default medium"><button form="sync-form">Sync</button></span>
+        <span class="btn default medium"><button class="add-btn">Add feed...</button></span>
+      </p>
       {friends}
     </div>
   </div>
 
   <form id="sync-form" action="/network/sync" method="POST"><input type="hidden" name="redirect" value="/"></form>
+  <form id="add-form" action="/feeds" method="POST"><input type="hidden" name="token"></form>
 
   <script src="js/jquery-2.1.1.min.js"></script>
   <script src="js/modernizr-2.6.2.min.js"></script>

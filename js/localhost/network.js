@@ -8,12 +8,12 @@ var prpc = require('phoenix-rpc')
 var util = require('../common/util')
 var sync = require('../common/sync')
 
-var lastSync = 0
+var tmpThing = require('./tmp')
 
 // Network Page
 
 function renderNetworkPage(req, res, backend, ctx) {
-  ctx.cuser_id = backend.local.user.name.toString('hex')
+  ctx.cuser_id = backend.local.userid.toString('hex')
   util.read('html/network.html').on('error', util.serve404(res)).pipe(concat(function(html) {
     
     backend.getNodes(function(err, nodes) {
@@ -27,7 +27,7 @@ function renderNetworkPage(req, res, backend, ctx) {
         })
         .join('')
 
-      ctx.last_sync = (lastSync) ? util.prettydate(lastSync, true) : '--'
+      ctx.last_sync = (tmpThing.lastSync) ? util.prettydate(tmpThing.lastSync, true) : '--'
       
       res.writeHead(200, {'Content-Type': 'text/html'})
       res.end(util.renderCtx(html.toString(), ctx))
@@ -65,7 +65,7 @@ exports.sync = function(req, res, backend) {
       location = form.redirect
 
     sync(backend, function() {
-      lastSync = new Date()
+      tmpThing.lastSync = new Date()
       res.writeHead(303, {'Location': location})
       res.end()
     })
@@ -75,7 +75,7 @@ exports.sync = function(req, res, backend) {
 // Node Page
 /*
 function renderNodePage(req, res, backend, ctx) {
-  ctx.cuser_id = backend.local.user.name.toString('hex')
+  ctx.cuser_id = backend.local.userid.toString('hex')
   util.read('html/network-node.html').on('error', util.serve404(res)).pipe(concat(function(html) {
     var hostParts = ctx.host.split(':')
 

@@ -5,8 +5,11 @@ var toPull = require('stream-to-pull-stream')
 var concat = require('concat-stream')
 var util = require('../common/util')
 
+var tmpThing = require('./tmp')
+
 function renderPage(req, res, backend, ctx) {
-  ctx.cuser_id = backend.local.user.name.toString('hex')
+  ctx.cuser_id = backend.local.userid.toString('hex')
+  ctx.last_sync = (tmpThing.lastSync) ? util.prettydate(tmpThing.lastSync, true) : '--'
 
   util.read('html/feeds.html').on('error', util.serve404(res)).pipe(concat(function(html) {
     var n = 0
