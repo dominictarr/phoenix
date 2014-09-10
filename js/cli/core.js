@@ -2,6 +2,7 @@ var connect    = require('../backend');
 var prettydate = require('pretty-date');
 var pull       = require('pull-stream');
 var toPull     = require('stream-to-pull-stream');
+var msgpack    = require('msgpack')
 
 function padleft(width, str) {
 	if (str.length < width) {
@@ -18,10 +19,12 @@ function introHelp() {
 	console.log('');
 	console.log('Getting started:');
 	console.log('');
-	console.log(' - Follow feeds with \'phoenix add <public key>\'');
-	console.log(' - Post messages with \'phoenix post "<your message>"\'');
-	console.log(' - Add hosts to your network with \'phoenix sync <host address>\'');
-	console.log(' - Get more help with \'phoenix -h\'');
+	console.log(' - Follow feeds with \'./phoenix add <public key>\'');
+	console.log(' - Post messages with \'./phoenix post "<your message>"\'');
+	console.log(' - Add hosts to your network with \'./phoenix sync <host address>\'');
+	console.log(' - Get more help with \'./phoenix -h\'');
+	console.log('')
+	console.log('Or, use the web interface with \'./phoenix-web start\'')
 	console.log('');
 }
 
@@ -108,14 +111,20 @@ exports.list = function(opts) {
 		function toSimple(msg) {
 			if (!hadMessages) console.log('user   seq   time             nickname     message');
 			hadMessages = true;
-			var markdown = (msg.type.toString() == 'init') ? ('Account created: ' + msg.message.toString('hex').slice(0,16) + '...') : msg.message.toString();
+			var content = ''
+			switch (msg.type.toString()) {
+				case 'init': content = 'Account created: ' + msg.message.toString('hex').slice(0,16) + '...'; break
+				case 'profile': content = 'Now known as ' + msgpack.unpack(msg.message).nickname; break
+				case 'text': content = msgpack.unpack(msg.message).plain; break
+				default: content = msg.message.toString()
+			}
 			var author = msg.author.toString('hex');
 			var output =
 				author.slice(0, 4) + ' | ' +
 				padleft(3, ' '+msg.sequence) + ' | ' +
 				padleft(14, prettydate.format(new Date(msg.timestamp))) + ' | ' +
 				padleft(10, msg.nickname) + ' | ' +
-				markdown
+				content
 			;
 			console.log(output);
 		}
