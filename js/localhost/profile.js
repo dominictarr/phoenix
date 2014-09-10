@@ -91,12 +91,15 @@ exports.addFeed = function(req, res, backend) {
 }
 
 exports.getIntroToken = function(req, res, backend) {
+  var id = req.url.slice('/profile/'.length, -('/intro-token'.length))
+  if (!id) return res.writeHead(404), res.end()
+
   // :TODO: it's not actually accurate that the user might be at all of these ndoes
   //        Get an accurate list!
   backend.getNodes(function(err, nodes) {
     if (err) return console.error(err), res.writeHead(500), res.end();
 
     res.writeHead(200, {'Content-Type': 'application/json'})
-    res.end(JSON.stringify({id: backend.local.userid.toString('hex'), relays: nodes}))  
+    res.end(JSON.stringify({id: id, relays: nodes}))  
   })
 }

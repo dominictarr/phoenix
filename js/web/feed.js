@@ -15,7 +15,7 @@ $(function() {
   }
 
   $('.add-btn').on('click', function() {
-    var token = prompt('Public key or introduction token of the user.')
+    var token = prompt('Introduction token of the user:')
     if (!token) return
     $('#add-form [name=token]').val(token)
     $('#add-form').submit()

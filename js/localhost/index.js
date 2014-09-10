@@ -45,10 +45,10 @@ function createServer(port) {
 			if (pathStarts('/profile/')) {
 				if (pathEnds('/pubkey'))
 					return profile.getPubkey(req, res, backend)
+				if (pathEnds('/intro-token'))
+					return profile.getIntroToken(req, res, backend)
 				return profile.get(req, res, backend)
 			}
-			if (req.url == '/intro-token')
-				return profile.getIntroToken(req, res, backend)
 			if (req.url == '/feeds' && req.method == 'POST')
 				return profile.addFeed(req, res, backend)
 
