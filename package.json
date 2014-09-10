@@ -22,6 +22,7 @@
     "rc": "~0.5.1",
     "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#72739a3da0cbe436507357a3c5adcc49c18e7b3d",
     "concat-stream": "~1.4.6",
-    "msgpack": "~0.2.4"
+    "msgpack": "~0.2.4",
+    "open": "~0.0.5"
   }
 }

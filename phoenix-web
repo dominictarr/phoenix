@@ -2,6 +2,7 @@
 var nomnom     = require('nomnom');
 var ssh2       = require('ssh2');
 var path       = require('path');
+var open       = require("open");
 var cfg        = require('./js/common/config');
 var connect    = require('./js/backend');
 
@@ -23,6 +24,12 @@ function start(opts) {
     var webPort = opts.port || 65000;
     require('./js/localhost').createServer(webPort);
     console.log('Phoenix web server.....listening privately on localhost:' + webPort);
+  }
+
+  if (!opts.dontopen) {
+    setTimeout(function() {
+      open('http://localhost:' + (opts.port || 65000))
+    }, 500)
   }
 }
 
@@ -50,6 +57,11 @@ nomnom.command('start')
     port: {
       abbr: 'p',
       help: 'Sets the port to accept connections on.'
+    },
+    'dontopen': {
+      flag: true,
+      abbr: 'n',
+      help: 'Don\'t open the page in the browser once the server starts.'
     }
   })
   .callback(start);
