@@ -1,4 +1,4 @@
-#!/usr/bin/env nodejs
+#!/usr/bin/env node
 var nomnom     = require('nomnom');
 var ssh2       = require('ssh2');
 var path       = require('path');
