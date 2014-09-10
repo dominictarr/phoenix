@@ -11,7 +11,7 @@ function padleft(width, str) {
 }
 
 function namefileHelp() {
-	console.log('You don\'t have a secret.name yet; run \'phoenix setup\' first.');
+	console.log('You don\'t have a profile yet. Run \'node phoenix setup\' first.');
 }
 
 function introHelp() {

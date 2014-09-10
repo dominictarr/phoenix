@@ -16,6 +16,13 @@ function createServer(port) {
 		backend.local = { userid: null }
 		backend.getKeys(function(err, keys) {
 			if (err) throw err
+			if (!keys.exist) {
+				console.log('')
+				console.log('  No profile found.')
+				console.log('  Please run "node phoenix setup" first.')
+				console.log('')
+				process.exit(0)
+			}
 			backend.local.userid = keys.name
 			backend.local.userpubkey = keys.public
 		})
