@@ -7,8 +7,6 @@ var concat = require('concat-stream')
 var prpc = require('phoenix-rpc')
 var util = require('../common/util')
 
-var tmpThing = require('./tmp')
-
 // Network Page
 
 function renderNetworkPage(req, res, backend, ctx) {
@@ -26,7 +24,7 @@ function renderNetworkPage(req, res, backend, ctx) {
         })
         .join('')
 
-      ctx.last_sync = (tmpThing.lastSync) ? util.prettydate(tmpThing.lastSync, true) : '--'
+      ctx.last_sync = (backend.local.lastSync) ? util.prettydate(backend.local.lastSync, true) : '--'
       
       res.writeHead(200, {'Content-Type': 'text/html'})
       res.end(util.renderCtx(html.toString(), ctx))
@@ -65,7 +63,7 @@ exports.sync = function(req, res, backend) {
 
     backend.syncNetwork(function(err) {
       if (err) return res.writeHead(500), res.end(err)
-      tmpThing.lastSync = new Date()
+      backend.local.lastSync = new Date()
       res.writeHead(303, {'Location': location})
       res.end()
     })

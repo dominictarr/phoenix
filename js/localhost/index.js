@@ -13,7 +13,7 @@ function createServer(port) {
 		if (err) return console.error(err);
 
 		// Pull state from the backend
-		backend.local = { userid: null }
+		backend.local = { userid: null, userpubkey: null, lastSync: null }
 		backend.getKeys(function(err, keys) {
 			if (err) throw err
 			if (!keys.exist) {
@@ -28,7 +28,7 @@ function createServer(port) {
 		})
 		backend.getSyncState(function(err, state) {
 			if (state && state.lastSync)
-				require('./tmp').lastSync = new Date(state.lastSync)
+				backend.local.lastSync = new Date(state.lastSync)
 		})
 
 		// Setup periodic syncs
