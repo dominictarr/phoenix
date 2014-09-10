@@ -13,7 +13,7 @@ function createServer(port) {
 		if (err) return console.error(err);
 
 		// Pull state from the backend
-		backend.local = { userid: null, userpubkey: null, lastSync: null }
+		backend.local = { userid: null, userpubkey: null, lastSync: null, lastSyncResults: null }
 		backend.getKeys(function(err, keys) {
 			if (err) throw err
 			if (!keys.exist) {

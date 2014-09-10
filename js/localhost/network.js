@@ -17,9 +17,18 @@ function renderNetworkPage(req, res, backend, ctx) {
       if (err) return console.error(err), res.writeHead(500), res.end();
 
       ctx.nodes = nodes
-        .map(function(node) { return '<tr><td>' +
+        .map(function(node) {
+          var result = (backend.local.lastSyncResults) ? backend.local.lastSyncResults[node[0]+':'+node[1]] : false
+          if (result) {
+            if (result.error) result = '<span>Failed to connect to server</span>'
+            else result = '<span>Synced in '+result.elapsed+' ms</span>'
+          } else {
+            result = ''
+          }
+          return '<tr><td>' +
             '<h3><a href="http://'+node[0]+':'+node[1]+'">' + node[0] + '</a></h3>' +
             '<form class="del-form" action="/network/del/'+node[0]+':'+node[1]+'" method="POST"><span class="small btn default"><button>Remove</button></span></form>' +
+            result +
           '</td></tr>'
         })
         .join('')
@@ -61,9 +70,11 @@ exports.sync = function(req, res, backend) {
     if (form && form.redirect && (form.redirect == '/' || /^\/[^\/]/.test(form.redirect))) // must be a relative url
       location = form.redirect
 
-    backend.syncNetwork(function(err) {
+    backend.syncNetwork(function(err, results) {
       if (err) return res.writeHead(500), res.end(err)
       backend.local.lastSync = new Date()
+      if (Object.keys(results).length)
+        backend.local.lastSyncResults = results
       res.writeHead(303, {'Location': location})
       res.end()
     })
