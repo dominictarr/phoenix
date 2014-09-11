@@ -20,7 +20,7 @@
     "stream-to-pull-stream": "~1.4.1",
     "ssh2": "~0.3.6",
     "rc": "~0.5.1",
-    "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#391eefc5287c4cb3a4d55f3eac778ff690edc688",
+    "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#dc5776bb19df88d40e28b52662641e583a1691d6",
     "concat-stream": "~1.4.6",
     "msgpack": "~0.2.4",
     "open": "~0.0.5"

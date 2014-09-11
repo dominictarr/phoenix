@@ -73,7 +73,7 @@ exports.sync = function(req, res, backend) {
     backend.syncNetwork(function(err, results) {
       if (err) return res.writeHead(500), res.end(err)
       backend.local.lastSync = new Date()
-      if (Object.keys(results).length)
+      if (results && Object.keys(results).length)
         backend.local.lastSyncResults = results
       res.writeHead(303, {'Location': location})
       res.end()
