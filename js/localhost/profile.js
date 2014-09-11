@@ -18,23 +18,40 @@ function renderPage(req, res, backend, ctx) {
       else if (err) return console.error(err), res.writeHead(500), res.end();
 
       ctx.nickname = profile.nickname
-      pull(
-        toPull(backend.createHistoryStream(id, 0)),
-        pull.collect(function (err, entries) {
-          if (err) { return console.error(err), res.writeHead(500), res.end() }
-          ctx.feed_entries = entries
-            .map(function(msg) {
-              if (!ctx.joindate) ctx.joindate = util.prettydate(new Date(msg.timestamp), true)
-              msg.nickname = profile.nickname;
-              return util.renderMsg(msg)
-            })
-            .reverse()
-            .join('')
-          
-          res.writeHead(200, {'Content-Type': 'text/html'})
-          res.end(util.renderCtx(html.toString(), ctx))
+
+      if (ctx.cuser_id != ctx.id) {
+        backend.isFollowing(id, function(err) {
+          var isFollowing = !err
+          if (isFollowing)
+            ctx.follow = '<p><span class="btn default medium"><button form="follow-form" name="action" value="remove">Unfollow</button></span></p>'
+          else
+            ctx.follow = '<p><span class="btn default medium"><button form="follow-form" name="action" value="add">Follow</button></span></p>'
+          getFeed()
         })
-      )
+      } else {
+        ctx.follow = ''
+        getFeed()
+      }
+
+      function getFeed() {
+        pull(
+          toPull(backend.createHistoryStream(id, 0)),
+          pull.collect(function (err, entries) {
+            if (err) { return console.error(err), res.writeHead(500), res.end() }
+            ctx.feed_entries = entries
+              .map(function(msg) {
+                if (!ctx.joindate) ctx.joindate = util.prettydate(new Date(msg.timestamp), true)
+                msg.nickname = profile.nickname;
+                return util.renderMsg(msg)
+              })
+              .reverse()
+              .join('')
+            
+            res.writeHead(200, {'Content-Type': 'text/html'})
+            res.end(util.renderCtx(html.toString(), ctx))
+          })
+        )
+      }
     })
   }))
 }
@@ -54,42 +71,6 @@ exports.getPubkey = function(req, res, backend) {
   })
 }
 
-exports.addFeed = function(req, res, backend) {
-  req.pipe(concat(function(form) {
-
-    var form = require('querystring').parse(form.toString())
-    if (form && form.token) {
-      // Try as an intro token
-      try {
-        var token = JSON.parse(form.token)
-        if (!token.id) return res.writeHead(422), res.end('Bad token -- the id field is required')
-
-        // Follow
-        var id = new Buffer(token.id, 'hex')
-        if (id.length != 32) return res.writeHead(422), res.end('Bad token -- the id must be 32 hex-encoded bytes')
-        backend.follow(id, function(err) {
-          if (err) return res.writeHead(500), res.end('Internal error while trying to add this feed')
-
-          if (!token.relays || token.relays.length === 0) {
-            // Done
-            res.writeHead(303, {'Location': '/'})
-            res.end()
-          }
-
-          backend.addNodes(token.relays, function(err) {
-            if (err) return res.writeHead(500), res.end('Successfully followed the user, but failed to add their relays to your network. You may have trouble getting the user\'s feed')
-            res.writeHead(303, {'Location': '/'})
-            res.end()
-          })
-        })
-        return
-
-      } catch (e) {}
-    }
-    return res.writeHead(422), res.end('Bad input -- must be a valid intro token')
-  }))
-}
-
 exports.getIntroToken = function(req, res, backend) {
   var id = req.url.slice('/profile/'.length, -('/intro-token'.length))
   if (!id) return res.writeHead(404), res.end()
@@ -102,4 +83,55 @@ exports.getIntroToken = function(req, res, backend) {
     res.writeHead(200, {'Content-Type': 'application/json'})
     res.end(JSON.stringify({id: id, relays: nodes}))  
   })
+}
+
+exports.updateFeeds = function(req, res, backend) {
+  req.pipe(concat(function(form) {
+
+    var form, token, id
+    try {
+      form = require('querystring').parse(form.toString())
+      token = JSON.parse(form.token)
+      if (!token.id) return res.writeHead(422), res.end('Bad token -- the id field is required')
+      id = new Buffer(token.id, 'hex')
+      if (id.length != 32) return res.writeHead(422), res.end('Bad token -- the id must be 32 hex-encoded bytes')
+    } catch (e) {
+      return res.writeHead(422), res.end('Bad input -- must be a valid intro token')
+    }
+
+    var location = '/'
+    if (form.redirect && (form.redirect == '/' || /^\/[^\/]/.test(form.redirect))) // must be a relative url
+      location = form.redirect
+
+    switch (form.action) {
+      case 'add':
+        backend.follow(id, function(err) {
+          if (err) return res.writeHead(500), res.end('Internal error while trying to add this feed')
+
+          if (!token.relays || token.relays.length === 0) {
+            // Done
+            res.writeHead(303, {'Location': location})
+            res.end()
+            return
+          }
+
+          backend.addNodes(token.relays, function(err) {
+            if (err) return res.writeHead(500), res.end('Successfully followed the user, but failed to add their relays to your network. You may have trouble getting the user\'s feed')
+            res.writeHead(303, {'Location': location})
+            res.end()
+          })
+        })
+        break
+      case 'remove':
+        backend.unfollow(id, function(err) {
+          if (err) return console.error(err), res.writeHead(500), res.end();
+
+          res.writeHead(303, {'Location': location})
+          res.end()
+        })
+        break
+      default:
+        return res.writeHead(422), res.end('Bad input -- action must be add or remove')
+    }
+  }))
 }

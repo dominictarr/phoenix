@@ -19,10 +19,8 @@
         <div class="profile-summary">
           <h2>{nickname}</h2>
           <h3><small>joined {joindate}</small></h3>
-          <p>
-            <span class="btn default ttip long hide" data-tooltip="Receive updates from this user"><a href="#">Follow</a></span>
-            <a href="/profile/{id}/intro-token">Intro Token</a>
-          </p>
+          {follow}
+          <p><a href="/profile/{id}/intro-token">Intro Token</a></p>
         </div>
       </div>
       <div class="seven columns pull_five">
@@ -95,6 +93,11 @@
         </div>
       </div>
     </div>
+
+  <form id="follow-form" action="/feeds" method="POST">
+    <input type="hidden" name="redirect" value="/profile/{id}">
+    <input type="hidden" name="token" value='{"id":"{id}"}'>
+  </form>
 
   <script src="/js/jquery-2.1.1.min.js"></script>
   <script src="/js/modernizr-2.6.2.min.js"></script>

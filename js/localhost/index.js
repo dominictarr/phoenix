@@ -54,10 +54,12 @@ function createServer(port) {
 					return profile.getPubkey(req, res, backend)
 				if (pathEnds('/intro-token'))
 					return profile.getIntroToken(req, res, backend)
+				if (pathEnds('/follow') && req.method == 'POST')
+					return profile.follow(req, res, backend)
 				return profile.get(req, res, backend)
 			}
 			if (req.url == '/feeds' && req.method == 'POST')
-				return profile.addFeed(req, res, backend)
+				return profile.updateFeeds(req, res, backend)
 
 			// Network nodes
 			if (pathStarts('/network')) {

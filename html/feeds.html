@@ -40,7 +40,11 @@
   </div>
 
   <form id="sync-form" action="/network/sync" method="POST"><input type="hidden" name="redirect" value="/"></form>
-  <form id="add-form" action="/feeds" method="POST"><input type="hidden" name="token"></form>
+  <form id="add-form" action="/feeds" method="POST">
+    <input type="hidden" name="token">
+    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="redirect" value="/">
+  </form>
 
   <script src="js/jquery-2.1.1.min.js"></script>
   <script src="js/modernizr-2.6.2.min.js"></script>
