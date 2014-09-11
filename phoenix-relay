@@ -28,34 +28,56 @@ function deploy(opts) {
 			if (err) return console.error(err), backend.close();
 			if (!keys.exist) return namefileHelp(), backend.close();
 
-			var deploySteps = [
-				'cd ~/phoenix && node ~/phoenix/phoenix-relay stop',
+			var deploySteps, deployErrors
+			if (opts.reinstall) {
+				deploySteps = [
+					'cd ~/phoenix && node ~/phoenix/phoenix-relay stop',
+					'rm -Rf ~/phoenix',
+					'git clone https://github.com/pfraze/phoenix.git ~/phoenix',
+					'cd ~/phoenix && npm install',
+					'echo "' + (new Buffer(keys.name)).toString('hex') + '" > ~/phoenix/.relay-members',
+					'cd ~/phoenix && node ./phoenix-relay start -d'
+				];
+				deployErrors = [
+					false,
+					false,
+					'Failed to clone phoenix repo.',
+					'Failed to install dependencies.',
+					'Failed to write your public key into the relay userlist.',
+					'Failed to start the phoenix relay daemon.'
+				];
+			} else if (opts.update) {
+				deploySteps = [
+					'cd ~/phoenix',
+					'cd ~/phoenix && git pull',
+					'cd ~/phoenix && npm install',
+					'node ~/phoenix/phoenix-relay stop',
+					'node ~/phoenix/phoenix-relay start -d'
+				];
+				deployErrors = [
+					'Deployment not found. Run without --update.',
+					'Failed to pull latest version',
+					'Failed to update dependencies.',
+					false,
+					'Failed to start the phoenix relay daemon.'
+				];
+			} else {
+				deploySteps = [
+					'mkdir ~/phoenix',
+					'git clone https://github.com/pfraze/phoenix.git ~/phoenix',
+					'cd ~/phoenix && npm install',
+					'echo "' + (new Buffer(keys.name)).toString('hex') + '" > ~/phoenix/.relay-members',
+					'cd ~/phoenix && node ./phoenix-relay start -d'
+				];
+				deployErrors = [
+					'Already deployed. Run with --update or --reinstall.',
+					'Failed to clone phoenix repo.',
+					'Failed to install dependencies.',
+					'Failed to write your public key into the allowed relay users.',
+					'Failed to start the phoenix relay daemon.'
+				];
 
-				// 'cd ~/.phoenix && rm -Rf ~/.phoenix',
-				// 'mkdir ~/.phoenix',
-
-				'rm -Rf ~/phoenix',
-				'git clone https://github.com/pfraze/phoenix.git ~/phoenix',
-				'cd ~/phoenix && npm install',
-
-				'echo "' + (new Buffer(keys.name)).toString('hex') + '" > ~/phoenix/.relay-members',
-
-				'cd ~/phoenix && node ./phoenix-relay start -d'
-			];
-			var deployErrors = [
-				false,
-
-				// false,
-				// 'Failed to create a user-configuration directory.',
-
-				false,
-				'Failed to clone phoenix repo.',
-				'Failed to install dependencies.',
-
-				'Failed to write your public key into the allowed relay users.',
-
-				'Failed to start the phoenix relay daemon.'
-			];
+			}
 
 			var conn = new ssh2();
 			process.stdout.write('Password: ');
@@ -66,6 +88,10 @@ function deploy(opts) {
 			conn.on('ready', function() {
 				console.log('Established ssh connection with ' + connInfo.host + ':' + connInfo.port + '.');
 				sshDoAll(deploySteps, deployErrors, function() {
+					if (opts.update) {
+						console.log('\nOk.')
+						return backend.close()
+					}
 					console.log('');
 					console.log('Access granted:');
 					console.log('- "Member." You can sync anybody\'s feed to ' + connInfo.host + '.');
@@ -187,10 +213,20 @@ nomnom.script('phoenix-relay')
 	});
 nomnom.command('deploy')
 	.help('Deploys the relay software over ssh.')
-	.option('dest', {
-		position: 1,
-		required: true,
-		help: 'The user and domain of your SSH destination (eg bob@server.com).'
+	.options({
+		dest: {
+			position: 1,
+			required: true,
+			help: 'The user and domain of your SSH destination (eg bob@server.com).'
+		},
+		reinstall: {
+			flag: true,
+			help: 'Deletes the existing deployment and all of its configuration, then installs a fresh copy.'
+		},
+		update: {
+			flag: true,
+			help: 'Preserves the existing configuration and updates the software.'
+		}
 	})
 	.callback(deploy);
 nomnom.command('start')
