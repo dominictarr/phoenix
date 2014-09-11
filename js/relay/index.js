@@ -15,6 +15,7 @@ function createServer(port) {
 		if (err) return console.error(err)
 
 		// Read config
+    backend.local = { relayPort: port }
 		loadMembersFile(backend)
     
     // Setup periodic syncs
@@ -31,6 +32,8 @@ function createServer(port) {
 			if (pathStarts('/profile/')) {
 				if (pathEnds('/pubkey'))
 					return getPubkey(req, res, backend)
+        if (pathEnds('/intro-token'))
+          return getIntroToken(req, res, backend)
 				return getProfile(req, res, backend)
 			}
 			if (pathStarts('/js/')) {
@@ -145,6 +148,15 @@ function getPubkey(req, res, backend) {
     res.end(pubkey.toString('hex'))
   })
 }
+
+function getIntroToken(req, res, backend) {
+  var id = req.url.slice('/profile/'.length, -('/intro-token'.length))
+  if (!id) return res.writeHead(404), res.end()
+
+  res.writeHead(200, {'Content-Type': 'application/json'})
+  res.end(JSON.stringify({id: id, relays: [[require('os').hostname(), backend.local.relayPort]]}))  
+}
+
 
 function loadMembersFile(backend) {
 	fs.readFile(path.join(__dirname, '../../.relay-members'), 'utf8', function(err, data) {
