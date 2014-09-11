@@ -13,9 +13,6 @@ process.on('uncaughtException', onException);
 console.log('');
 console.log(process.argv);
 
-// Start listening to db changes :TODO:
-// require('./apps').buildCache({ tail: true });
-
 // Start relay service
 if (relayPort !== 0) {
 	require('./relay').createServer(relayPort || 64000);
@@ -24,7 +21,8 @@ if (relayPort !== 0) {
 
 // Start webgui service
 if (webguiPort !== 0) {
-	require('./localhost').createServer(webguiPort || 65000);
+  var opts = { ws: (process.argv.indexOf('--ws') != -1) }
+	require('./localhost').createServer(webguiPort || 65000, opts);
 	console.log('Web GUI...............listening privately on localhost:' + (webguiPort || 65000));
 }
 

@@ -9,20 +9,22 @@ var connect    = require('./js/backend');
 function start(opts) {
   if (opts.daemon) {
     // Daemon-mode
-    var argv = ["0", opts.port || "64000"];
+    var argv = ["0", opts.port || "65000"];
     if (opts.config)
       argv.push('--config'), argv.push(opts.config);
+    if (opts.ws)
+      argv.push('--ws')
     var daemon = require("daemonize2").setup({
       main: "js/daemon.js",
-      name: "phoenix-relay",
-      pidfile: path.join(cfg.datadir, "./phoenix-relay.pid"),
+      name: "phoenix-web",
+      pidfile: path.join(cfg.datadir, "./phoenix-web.pid"),
       argv: argv
     });
     daemon.start();
   } else {
     // FG mode
     var webPort = opts.port || 65000;
-    require('./js/localhost').createServer(webPort);
+    require('./js/localhost').createServer(webPort, opts);
     console.log('Phoenix web server.....listening privately on localhost:' + webPort);
   }
 
@@ -58,10 +60,14 @@ nomnom.command('start')
       abbr: 'p',
       help: 'Sets the port to accept connections on.'
     },
-    'dontopen': {
+    dontopen: {
       flag: true,
       abbr: 'n',
       help: 'Don\'t open the page in the browser once the server starts.'
+    },
+    ws: {
+      flag: true,
+      help: 'Open the websocket interface (under development, not recommended).'
     }
   })
   .callback(start);
