@@ -5,11 +5,9 @@ Phoenix v1
 
 ![screenshot](img/readme-screenshot1.png)
 
-Social feeds without ads, fees, or .coms.
+Social feeds without ads or owners.
 
-Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)).
-
-This is an early prototype - your feedback is appreciated!
+Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Relay servers optionally aggregate and redistribute the feeds.
 
 ## Getting Started
 
