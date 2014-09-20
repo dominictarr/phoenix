@@ -1,7 +1,14 @@
 $(function() {
   $('form.publisher textarea').on('keyup', togglePostBtn)
   togglePostBtn({ target: $('form.publisher textarea') })
+
+
   function togglePostBtn(e) {
+    //ctrl-enter to post when inside textarea
+    console.log(e.keyCode, e.ctrlKey)
+    if(e.keyCode == 13 && e.ctrlKey)
+      return $('form.publisher button').click()
+
     var $target = $(e.target);
     var str = $target.val() || ''
     console.log('got', str)
