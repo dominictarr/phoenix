@@ -1,14 +1,5 @@
   {
   "name": "phoenix",
-  "main": "index.html",
-  "window": {
-    "toolbar": false,
-    "frame": true,
-    "width": 570,
-    "height": 310,
-    "icon": "img/icon.png"
-  },
-  "single-instance": true,
   "dependencies": {
     "nomnom": "1.8.0",
     "osenv": "0.0.3",
