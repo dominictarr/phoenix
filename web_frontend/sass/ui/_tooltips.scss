@@ -1,0 +1,16 @@
+/* Tooltips */
+
+.ttip {
+	@include tooltip($tt-min-width, $tt-bgcolor, $tt-fgcolor, $tt-position, $tt-align);
+	cursor: pointer;
+}
+
+.ttip:after, .ttip:before {
+	@include respond(portrait-tablets) {
+		display: none;
+	}
+}
+
+.ttip.long:after {
+	min-width: 250px;
+}
