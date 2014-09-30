@@ -58,7 +58,7 @@ exports.renderPlain = function(str) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
-    .replace(/(\r\n|\n)/g, '<br>')
+    // .replace(/(\r\n|\n)/g, '<br>') // interferes with markdown
 }
 
 exports.renderCtx = function(html, ctx) {
