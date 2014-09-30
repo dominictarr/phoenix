@@ -1,6 +1,6 @@
 var http    = require('http');
 var prpc    = require('phoenix-rpc');
-var connect = require('../backend');
+var connect = require('../lib/backend');
 
 exports.addNode = function(opts) {
 	connect(function(err, backend) {

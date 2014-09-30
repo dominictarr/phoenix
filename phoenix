@@ -45,18 +45,19 @@ function verify(opts) {
 }*/
 
 nomnom.script('phoenix')
+	.nocolors()
 	.option('config', {
 		help: 'Sets the config-file (default ./.phoenixrc)'
 	});
  nomnom.nocommand()
-	.callback(require('./js/cli/core').list);
+	.callback(require('./cli_tool/core').list);
 nomnom.command('setup')
 	.help('Creates a new profile and feed.')
 	.option('force-new-keypair', {
 		flag: true,
 		help: 'Overwrites your secret.name file with a new keypair if it already exists.'
 	})
-	.callback(require('./js/cli/core').setup);
+	.callback(require('./cli_tool/core').setup);
 nomnom.command('feed')
 	.help('Shows the feed messages (default action).')
 	.options({
@@ -69,10 +70,10 @@ nomnom.command('feed')
 			help: 'Flag, keep output stream open.'
 		}
 	})
-	.callback(require('./js/cli/core').list);
+	.callback(require('./cli_tool/core').list);
 nomnom.command('feeds')
 	.help('Lists the users you follow.')
-	.callback(require('./js/cli/feeds').feeds);
+	.callback(require('./cli_tool/feeds').feeds);
 nomnom.command('post')
 	.help('Posts a message to your feed.')
 	.options({
@@ -82,10 +83,10 @@ nomnom.command('post')
 			help: 'Message-text to post.'
 		}
 	})
-	.callback(require('./js/cli/core').post);
+	.callback(require('./cli_tool/core').post);
 nomnom.command('whoami')
 	.help('Shows your profile.')
-	.callback(require('./js/cli/feeds').whoami);
+	.callback(require('./cli_tool/feeds').whoami);
 nomnom.command('follow')
 	.help('Starts following a user.')
 	.options({
@@ -95,7 +96,7 @@ nomnom.command('follow')
 			help: 'Public key to follow.'
 		}
 	})
-	.callback(require('./js/cli/feeds').follow);
+	.callback(require('./cli_tool/feeds').follow);
 nomnom.command('unfollow')
 	.help('Stops following a user.')
 	.options({
@@ -105,7 +106,7 @@ nomnom.command('unfollow')
 			help: 'Nickname or user number to unfollow.',
 		}
 	})
-	.callback(require('./js/cli/feeds').unfollow);
+	.callback(require('./cli_tool/feeds').unfollow);
 nomnom.command('lookup')
 	.help('Looks up a user\'s profile by their nickname.')
 	.options({
@@ -119,7 +120,7 @@ nomnom.command('lookup')
 			help: 'Flag, output the user\'s public key rather than their id.'
 		}
 	})
-	.callback(require('./js/cli/feeds').lookup);
+	.callback(require('./cli_tool/feeds').lookup);
 /*nomnom.command('verify')
 	.help('Verifies a user account by an in-person or over-the-phone exchange.')
 	.options({
@@ -129,7 +130,7 @@ nomnom.command('lookup')
 			help: 'Nickname or user number to verify.',
 		}
 	})
-	.callback(require('./js/cli/trust').verify);
+	.callback(require('./cli_tool/trust').verify);
 nomnom.command('sign')
 	.help('Creates a signature for a file.')
 	.options({
@@ -167,7 +168,7 @@ nomnom.command('sync')
 			help: 'Address of the server (<address>[:port]).',
 		}
 	})
-	.callback(require('./js/cli/netnodes').addNode);
+	.callback(require('./cli_tool/netnodes').addNode);
 nomnom.command('unsync')
 	.help('Removes a server from your replication network.')
 	.options({
@@ -177,7 +178,7 @@ nomnom.command('unsync')
 			help: 'Address of the server (<address>[:port]).',
 		}
 	})
-	.callback(require('./js/cli/netnodes').delNode);
+	.callback(require('./cli_tool/netnodes').delNode);
 /*nomnom.command('rebuild')
 	.help('Reconstructs the application cache from the message logs.')
 	.callback(rebuild);*/

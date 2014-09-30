@@ -1,4 +1,4 @@
-var connect    = require('../backend');
+var connect    = require('../lib/backend');
 
 exports.verify = function(opts) {
 	var rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });

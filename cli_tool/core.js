@@ -1,4 +1,4 @@
-var connect    = require('../backend');
+var connect    = require('../lib/backend');
 var prettydate = require('pretty-date');
 var pull       = require('pull-stream');
 var toPull     = require('stream-to-pull-stream');
