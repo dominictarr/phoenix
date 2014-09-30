@@ -1,5 +1,48 @@
 var connect    = require('../lib/backend');
 
+
+/*function sign(opts) {
+	console.log('Signing ' + opts.path);
+
+	if (!keys.exist) {
+		return namefileHelp();
+	}
+
+	var buffer;
+	try {
+		buffer = fs.readFileSync(opts.path);
+	} catch (e) {
+		console.error('Error: File not found');
+		return;
+	}
+
+	var sig = keys.sign(buffer);
+	console.log('Signature: ' + sig.toString('hex'));
+}
+
+function verify(opts) {
+	console.log('Verifying ' + opts.path);
+
+	var key = opts.key || keys.public;
+	if (!key) {
+		return namefileHelp();
+	}
+
+	var buffer;
+	try {
+		buffer = fs.readFileSync(opts.path);
+	} catch (e) {
+		console.error('Error: File not found');
+		return;
+	}
+
+	if (keys.verify(buffer, new Buffer(opts.sig, 'hex'), key)) {
+		console.log('Success: Signature checks out.');
+	} else {
+		console.log('Failure: Signature does not match.');
+	}
+}*/
+
 exports.verify = function(opts) {
 	var rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
 

@@ -2,48 +2,6 @@
 var nomnom     = require('nomnom');
 
 
-/*function sign(opts) {
-	console.log('Signing ' + opts.path);
-
-	if (!keys.exist) {
-		return namefileHelp();
-	}
-
-	var buffer;
-	try {
-		buffer = fs.readFileSync(opts.path);
-	} catch (e) {
-		console.error('Error: File not found');
-		return;
-	}
-
-	var sig = keys.sign(buffer);
-	console.log('Signature: ' + sig.toString('hex'));
-}
-
-function verify(opts) {
-	console.log('Verifying ' + opts.path);
-
-	var key = opts.key || keys.public;
-	if (!key) {
-		return namefileHelp();
-	}
-
-	var buffer;
-	try {
-		buffer = fs.readFileSync(opts.path);
-	} catch (e) {
-		console.error('Error: File not found');
-		return;
-	}
-
-	if (keys.verify(buffer, new Buffer(opts.sig, 'hex'), key)) {
-		console.log('Success: Signature checks out.');
-	} else {
-		console.log('Failure: Signature does not match.');
-	}
-}*/
-
 nomnom.script('phoenix')
 	.nocolors()
 	.option('config', {
@@ -179,7 +137,30 @@ nomnom.command('unsync')
 		}
 	})
 	.callback(require('./cli_tool/netnodes').delNode);
-/*nomnom.command('rebuild')
-	.help('Reconstructs the application cache from the message logs.')
-	.callback(rebuild);*/
+nomnom.command('serve')
+  .help('Starts the web server.')
+  .options({
+    daemon: {
+      flag: true,
+      abbr: 'd',
+      help: 'Run the web-server in the background as a daemon.'
+    },
+    port: {
+      abbr: 'p',
+      help: 'Sets the port to accept connections on.'
+    },
+    dontopen: {
+      flag: true,
+      abbr: 'n',
+      help: 'Don\'t open the page in the browser once the server starts.'
+    },
+    ws: {
+      flag: true,
+      help: 'Open the websocket interface (under development, not recommended).'
+    }
+  })
+  .callback(require('./cli_tool/http-server').start);
+nomnom.command('killserver')
+  .help('Stops the web-server daemon if it\'s active.')
+  .callback(require('./cli_tool/http-server').stop);
 nomnom.parse();
