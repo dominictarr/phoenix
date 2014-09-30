@@ -15,7 +15,8 @@
     "concat-stream": "~1.4.6",
     "msgpack": "~0.2.4",
     "open": "~0.0.5",
-    "shoe": "~0.0.15",
-    "through": "~2.3.4"
+    "through": "~2.3.4",
+    "ws": "~0.4.32",
+    "websocket-stream": "~1.0.2"
   }
 }

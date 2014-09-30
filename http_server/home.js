@@ -1,10 +1,11 @@
-var http    = require('http');
-var fs      = require('fs');
-var path    = require('path');
-var concat  = require('concat-stream')
-var shoe    = require('shoe');
-var prpc    = require('phoenix-rpc')
-var connect = require('../lib/backend')
+var http     = require('http');
+var fs       = require('fs');
+var path     = require('path');
+var concat   = require('concat-stream')
+var WSServer = require('ws').Server
+var WSStream = require('websocket-stream')
+var prpc     = require('phoenix-rpc')
+var connect  = require('../lib/backend')
 
 // var feed = require('./feed')
 // var profile = require('./profile')
@@ -67,20 +68,15 @@ function createServer(port, opts) {
 
     // Install the websocket host
     if (opts.ws) {
-      var sock = shoe(function (conn) {
-        var through = require('through')
+      var wss = new WSServer({server: server, path: '/ws'})
+      wss.on('connection', function(ws) {
+        console.log('WS: new websocket client connected')
+        var conn = WSStream(ws)
+        conn.on('error', function(err) { console.log('WS ERROR', err) })
         // :TODO: proper perms
-        // :TODO: remove base64 conversions with a binary websocket
         var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
-        conn
-          .pipe(through(function(chunk) { this.queue(new Buffer(chunk, 'base64')) }))
-          .pipe(prpc.proxy(backend, allowedMethods))
-          .pipe(through(function(chunk) { this.queue(chunk.toString('base64')) }))
-          .pipe(conn)
-        conn.on('log', console.log.bind(console, 'WS'))
-      });
-      sock.install(server, '/ws');
-      sock.on('log', console.log.bind(console, 'WS'))
+        conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
+      })
     }
   })
 }
