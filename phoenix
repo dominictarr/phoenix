@@ -140,14 +140,21 @@ nomnom.command('unsync')
 nomnom.command('serve')
   .help('Starts the web server.')
   .options({
+    pub: {
+      flag: true,
+      abbr: 'p',
+    	help: 'Run the pub server in addition to the home server (advanced feature).'
+    },
     daemon: {
       flag: true,
       abbr: 'd',
-      help: 'Run the web-server in the background as a daemon.'
+      help: 'Run the server in the background as a daemon.'
     },
-    port: {
-      abbr: 'p',
-      help: 'Sets the port to accept connections on.'
+    homeport: {
+      help: 'Sets the port for the home server.'
+    },
+    pubport: {
+    	help: 'Sets the port for the pub server.'
     },
     dontopen: {
       flag: true,
@@ -163,4 +170,22 @@ nomnom.command('serve')
 nomnom.command('killserver')
   .help('Stops the web-server daemon if it\'s active.')
   .callback(require('./cli_tool/http-server').stop);
+nomnom.command('deploy')
+  .help('Deploys the phoenix pub server over ssh to a remote host.')
+  .options({
+    dest: {
+      position: 1,
+      required: true,
+      help: 'The user and domain of your SSH destination (eg bob@server.com).'
+    },
+    reinstall: {
+      flag: true,
+      help: 'Deletes the existing deployment and all of its configuration, then installs a fresh copy.'
+    },
+    update: {
+      flag: true,
+      help: 'Preserves the existing configuration and updates the software.'
+    }
+  })
+  .callback(require('./cli_tool/deploy').deploy);
 nomnom.parse();

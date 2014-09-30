@@ -4,9 +4,12 @@ var cfg     = require('../lib/config');
 var connect = require('../lib/backend');
 
 exports.start = function(opts) {
+  var homePort = opts.homeport || 65000
+  var pubPort = (opts.pub) ? (opts.pubport || 64000) : 0
+
   if (opts.daemon) {
     // Daemon-mode
-    var argv = ["0", opts.port || "65000"];
+    var argv = [''+pubPort, ''+homePort];
     if (opts.config)
       argv.push('--config'), argv.push(opts.config);
     if (opts.ws)
@@ -20,14 +23,18 @@ exports.start = function(opts) {
     daemon.start();
   } else {
     // FG mode
-    var webPort = opts.port || 65000;
-    require('../http_server/private').createServer(webPort, opts);
-    console.log('Phoenix Home Server....listening privately on localhost:' + webPort);
+    require('../http_server/home').createServer(homePort, opts);
+    console.log('Phoenix Home Server....listening privately on localhost:' + homePort);
+
+    if (opts.pub) {
+      require('../http_server/pub').createServer(pubPort, opts);
+      console.log('Phoenix Pub Server.....listening publicly on localhost:' + pubPort);
+    }
   }
 
   if (!opts.dontopen) {
     setTimeout(function() {
-      open('http://localhost:' + (opts.port || 65000))
+      open('http://localhost:' + homePort)
     }, 500)
   }
 }

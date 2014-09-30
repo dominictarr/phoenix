@@ -48,7 +48,7 @@ function createServer(port, opts) {
       // Static asset routes
       if (req.url == '/' || req.url == '/index.html') {
         type('text/html')
-        return serve('html/index.html')
+        return serve('html/home.html')
       }
       if (pathEnds('jpg'))        type('image/jpeg')
       else if (pathEnds('jpeg'))  type('image/jpeg')
