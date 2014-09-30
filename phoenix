@@ -170,7 +170,7 @@ nomnom.command('serve')
 nomnom.command('killserver')
   .help('Stops the web-server daemon if it\'s active.')
   .callback(require('./cli_tool/http-server').stop);
-nomnom.command('deploy')
+/*nomnom.command('deploy')
   .help('Deploys the phoenix pub server over ssh to a remote host.')
   .options({
     dest: {
@@ -187,5 +187,5 @@ nomnom.command('deploy')
       help: 'Preserves the existing configuration and updates the software.'
     }
   })
-  .callback(require('./cli_tool/deploy').deploy);
+  .callback(require('./cli_tool/deploy').deploy);*/
 nomnom.parse();
