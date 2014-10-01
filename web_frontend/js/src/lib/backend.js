@@ -2,7 +2,10 @@ var WSStream = require('websocket-stream')
 var prpc = require('phoenix-rpc')
 var through = require('through')
 
-exports.connect = function(cb) {
+var existingClient
+exports.connect = function() {
+  if (existingClient) return existingClient
+
   var conn = WSStream('ws://' + window.location.host + '/ws')
   conn.on('error', function(e) { console.error('WS ERROR', e) })
   
@@ -11,6 +14,7 @@ exports.connect = function(cb) {
     .pipe(through(function(chunk) { this.queue(toBuffer(chunk)) }))
     .pipe(conn)
     .pipe(client)
+  existingClient = client
   return client
 }
 

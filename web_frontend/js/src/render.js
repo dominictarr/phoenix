@@ -20,7 +20,7 @@ function render(state) {
 
   return h('.homeapp.container', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
-    mercury.partial(header, state.currentUserId),
+    mercury.partial(header, state.user.idStr),
     page
   ])
 }
@@ -28,14 +28,14 @@ function render(state) {
 // Common Components
 // =================
 
-function header(currentUserId) {
+function header(uId) {
   var sep = function() { return h('small', ' / ') }
   return h('.nav-header', [
     h('strong', 'phoenix'),
     sep(), a('#/', 'latest'),
-    sep(), a('#/profile/' + currentUserId, 'profile'),
+    sep(), a('#/profile/' + uId, 'profile'),
     sep(), a('#/network', 'network'),
-    a('#/profile/' + currentUserId + '/intro-token', 'your intro token', { className: 'pull-right' })
+    a('#/profile/' + uId + '/intro-token', 'your intro token', { className: 'pull-right' })
   ])
 }
 
@@ -60,8 +60,10 @@ function mascot(quote) {
   ])
 }
 
-function feed(feed) {
-  return h('table.feed', feed.map(message).reverse())
+function feed(feed, rev) {
+  var messages = feed.map(message)
+  if (rev) messages.reverse()
+  return h('table.feed', messages)
 }
 
 function message(msg) {
@@ -107,7 +109,7 @@ function profileLinks(profiles) {
 }
 
 function profileLink(profile) {
-  return h('div', a('/#/profile/'+profile.id.toString('hex'), profile.nickname))
+  return h('div', a('/#/profile/'+profile.idStr, profile.nickname || '???'))
 }
 
 // Profile Page
@@ -122,7 +124,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', [
-    h('.col-xs-8', [feed(profile.feed), mercury.partial(mascot, 'Is it hot in here?')]),
+    h('.col-xs-8', [feed(profile.feed, true), mercury.partial(mascot, 'Is it hot in here?')]),
     h('.col-xs-4', [mercury.partial(profileControls, profile)])
   ])
 }
@@ -133,7 +135,7 @@ function profileControls(profile) {
     h('h2', profile.nickname),
     h('h3', h('small', 'joined '+profile.joinDate)),
     h('p', followBtn),
-    h('p', a('/profile/'+profile.id+'/intro-token', 'Intro Token'))
+    h('p', a('/profile/'+profile.idStr+'/intro-token', 'Intro Token'))
   ])
 }
 

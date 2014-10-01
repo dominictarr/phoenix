@@ -5,6 +5,16 @@ module.exports = {
 }
 
 function setRoute(state, route) {
-  state.route.set(route.substr(2) || 'feed')
+  route = route.substr(2) || 'feed'
+  if (route.indexOf('profile/') === 0) {
+    var profid = route.slice(8)
+    state.fetchProfileFeed(profid)
+  }
+  else if (route == 'network') {
+    state.fetchServers()
+  }
+  else {
+    state.fetchFeed()
+  }
+  state.route.set(route)
 }
-
