@@ -1,24 +1,31 @@
-var WSStream = require('websocket-stream')
-var prpc = require('phoenix-rpc')
-var through = require('through')
+var document = require('global/document')
+var window = require('global/window')
+var mercury = require('mercury')
 
-var client = connectToAPI()
-client.api.getKeys(function(err, keys) {
-  console.log(keys)
-})
+var Input = require('./input.js')
+var State = require('./state.js')
+var Render = require('./render.js')
+var Update = require('./update.js')
+var backend = require('./lib/backend')
 
-function connectToAPI(cb) {
-  var conn = WSStream('ws://' + window.location.host + '/ws')
-  conn.on('error', function(e) { console.error('WS ERROR', e) })
-  
-  var client = prpc.client()
-  client
-    .pipe(through(function(chunk) { this.queue(toBuffer(chunk)) }))
-    .pipe(conn)
-    .pipe(client)
-  return client
+// :DEBUG:
+// var client = backend.connect()
+// client.api.getKeys(function(err, keys) {
+//   console.log(keys)
+// })
+
+// init app
+var state = createApp()
+mercury.app(document.body, state, Render)
+
+module.exports = createApp
+function createApp() {
+  var events = Input()
+  var state = window.state = State.homeApp(events)
+  wireUpEvents(state, events)
+  return state
 }
 
-function toBuffer(chunk) {
-  return (Buffer.isBuffer(chunk)) ? chunk : new Buffer(chunk)
+function wireUpEvents(state, events) {
+  events.setRoute(Update.setRoute.bind(null, state))
 }
