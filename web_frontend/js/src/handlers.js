@@ -1,4 +1,4 @@
-var State = require("./state.js")
+var models = require('./models')
 
 module.exports = {
   setRoute: setRoute

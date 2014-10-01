@@ -11849,14 +11849,48 @@ if (WebSocket) ws.prototype = WebSocket.prototype;
 },{}],214:[function(require,module,exports){
 module.exports=require(48)
 },{"/home/pfrazee/phoenix/node_modules/mercury/node_modules/observ-struct/node_modules/xtend/index.js":48}],215:[function(require,module,exports){
+var window = require('global/window')
+var HashRouter = require('hash-router')
+var Event = require('geval')
+var mercury = require('mercury')
+
+module.exports = createEvents
+function createEvents() {
+  var events = mercury.input([ /* todo */ ])
+  events.setRoute = EventRouter()
+  return events
+}
+
+function EventRouter() {
+  var router = HashRouter()
+  window.addEventListener('hashchange', router)
+
+  return Event(function (emit) {
+    router.on('hash', emit)
+  })
+}
+
+},{"geval":3,"global/window":5,"hash-router":6,"mercury":10}],216:[function(require,module,exports){
+var models = require('./models')
+
+module.exports = {
+  setRoute: setRoute
+}
+
+function setRoute(state, route) {
+  state.route.set(route.substr(2) || 'feed')
+}
+
+
+},{"./models":219}],217:[function(require,module,exports){
 var document = require('global/document')
 var window = require('global/window')
 var mercury = require('mercury')
 
-var Input = require('./input.js')
-var State = require('./state.js')
-var Render = require('./render.js')
-var Update = require('./update.js')
+var createEvents = require('./events.js')
+var models = require('./models.js')
+var render = require('./render.js')
+var handlers = require('./handlers.js')
 var backend = require('./lib/backend')
 
 // :DEBUG:
@@ -11867,17 +11901,17 @@ var backend = require('./lib/backend')
 
 // init app
 var state = createApp()
-mercury.app(document.body, state, Render)
+mercury.app(document.body, state, render)
 
 module.exports = createApp
 function createApp() {
-  var events = Input()
+  var events = createEvents()
 
 
   var initState = {
     currentUserId: 'foo'
   }
-  var state = window.state = State.homeApp(events, initState)
+  var state = window.state = models.homeApp(events, initState)
 
   // :DEBUG:
   var ms = [
@@ -11904,26 +11938,26 @@ function createApp() {
       authorNickname: 'bob'
     }
   ]
-  state.feed.push(State.message(ms[0]))
-  state.feed.push(State.message(ms[1]))
-  state.feed.push(State.message(ms[2]))
-  state.feed.push(State.message(ms[3]))
-  state.profiles.push(State.profile({
+  state.feed.push(models.message(ms[0]))
+  state.feed.push(models.message(ms[1]))
+  state.feed.push(models.message(ms[2]))
+  state.feed.push(models.message(ms[3]))
+  state.profiles.push(models.profile({
     id: 'foo',
     nickname: 'pfraze',
     feed: ms.slice(0,3)
   }))
-  state.profiles.push(State.profile({
+  state.profiles.push(models.profile({
     id: 'bar',
     nickname: 'bob',
     feed: ms.slice(3)
   }))
   state.profileMap.set({ foo: 0, bar: 1 })
-  state.servers.push(State.server({
+  state.servers.push(models.server({
     hostname: 'foo.com',
     port: 80
   }))
-  state.servers.push(State.server({
+  state.servers.push(models.server({
     hostname: 'bar.com',
     port: 65000
   }))
@@ -11933,31 +11967,9 @@ function createApp() {
 }
 
 function wireUpEvents(state, events) {
-  events.setRoute(Update.setRoute.bind(null, state))
+  events.setRoute(handlers.setRoute.bind(null, state))
 }
-},{"./input.js":216,"./lib/backend":217,"./render.js":218,"./state.js":219,"./update.js":220,"global/document":4,"global/window":5,"mercury":10}],216:[function(require,module,exports){
-var window = require('global/window')
-var HashRouter = require('hash-router')
-var Event = require('geval')
-var mercury = require('mercury')
-
-module.exports = createInput
-function createInput() {
-  var events = mercury.input([ /* todo */ ])
-  events.setRoute = EventRouter()
-  return events
-}
-
-function EventRouter() {
-  var router = HashRouter()
-  window.addEventListener('hashchange', router)
-
-  return Event(function (emit) {
-    router.on('hash', emit)
-  })
-}
-
-},{"geval":3,"global/window":5,"hash-router":6,"mercury":10}],217:[function(require,module,exports){
+},{"./events.js":215,"./handlers.js":216,"./lib/backend":218,"./models.js":219,"./render.js":220,"global/document":4,"global/window":5,"mercury":10}],218:[function(require,module,exports){
 (function (Buffer){
 var WSStream = require('websocket-stream')
 var prpc = require('phoenix-rpc')
@@ -11979,7 +11991,106 @@ function toBuffer(chunk) {
   return (Buffer.isBuffer(chunk)) ? chunk : new Buffer(chunk)
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":224,"phoenix-rpc":112,"through":186,"websocket-stream":187}],218:[function(require,module,exports){
+},{"buffer":224,"phoenix-rpc":112,"through":186,"websocket-stream":187}],219:[function(require,module,exports){
+// var cuid = require('cuid')
+var extend = require('xtend')
+var mercury = require('mercury')
+
+module.exports = {
+  homeApp: homeApp,
+  message: message,
+  profile: profile,
+  server: server
+}
+
+// Models
+// ======
+var defaults = {
+  homeApp: {
+    route: '',
+    feed: [],
+    profiles: [],
+    profileMap: {},
+    servers: [],
+    currentUserId: '',
+    lastSync: ''
+  },
+  message: {
+    type: '',
+    timestamp: 0,
+    author: null,
+    authorNickame: '',
+    message: null
+  },
+  profile: {
+    id: null,
+    nickname: '',
+    joinDate: '',
+    feed: []
+  },
+  server: {
+    hostname: '',
+    port: '',
+    url: ''
+  }
+}
+
+// Constructors
+// ============
+
+function homeApp(events, initialState) {
+  var state = extend(defaults.homeApp, initialState)
+
+  var profileMap = {}
+  state.profiles.forEach(function(prof, i) {
+    profileMap[prof.id.toString('hex')] = i
+  })
+
+  return mercury.struct({
+    route:         mercury.value(state.route),
+    feed:          mercury.array(state.feed.map(message)),
+    profiles:      mercury.array(state.profiles.map(profile)),
+    profileMap:    mercury.value(profileMap),
+    servers:       mercury.array(state.servers.map(server)),
+    currentUserId: mercury.value(state.currentUserId),
+    lastSync:      mercury.value(state.lastSync),
+    events:        events
+  })
+}
+
+function message(initialState) {
+  var state = extend(defaults.message, initialState)
+
+  return mercury.struct({
+    type:           state.type,
+    timestamp:      state.timestamp,
+    author:         state.author,
+    authorNickname: state.authorNickname,
+    message:        state.message
+  })
+}
+
+function profile(initialState) {
+  var state = extend(defaults.profile, initialState)
+
+  return mercury.struct({
+    id:       state.id,
+    nickname: state.nickname,
+    joinDate: state.joinDate,
+    feed:     mercury.array(state.feed.map(message))
+  })
+}
+
+function server(initialState) {
+  var state = extend(defaults.server, initialState)
+
+  return mercury.struct({
+    hostname: state.hostname,
+    port:     state.port,
+    url:      'http://' + state.hostname + ':' + state.port
+  })
+}
+},{"mercury":10,"xtend":214}],220:[function(require,module,exports){
 var mercury = require('mercury')
 var h = require('mercury').h
 var util = require('../../../lib/util')
@@ -12163,249 +12274,7 @@ function a(href, text, opts) {
 function img(src) {
   return h('img', { src: src })
 }
-
-// Reference :TODO: remove
-// =======================
-/*
-function header(field, events) {
-  return h('header#header.header', {
-    'ev-event': [
-      mercury.changeEvent(events.setTodoField),
-      mercury.submitEvent(events.add)
-    ]
-  }, [
-    h('h1', 'Todos'),
-    h('input#new-todo.new-todo', {
-      placeholder: 'What needs to be done?',
-      autofocus: true,
-      value: field.text,
-      name: 'newTodo'
-    })
-  ])
-}
-
-function mainSection(todos, route, events) {
-  var allCompleted = todos.every(function (todo) {
-    return todo.completed
-  })
-  var visibleTodos = todos.filter(function (todo) {
-    return route === 'completed' && todo.completed ||
-      route === 'active' && !todo.completed ||
-      route === 'all'
-  })
-
-  return h('section#main.main', { hidden: !todos.length }, [
-    h('input#toggle-all.toggle-all', {
-      type: 'checkbox',
-      name: 'toggle',
-      checked: allCompleted,
-      'ev-change': mercury.valueEvent(events.toggleAll)
-    }),
-    h('label', { htmlFor: 'toggle-all' }, 'Mark all as complete'),
-    h('ul#todo-list.todolist', visibleTodos.map(function (todo) {
-      return todoItem(todo, events)
-    }))
-  ])
-}
-
-function todoItem(todo, events) {
-  var className = (todo.completed ? 'completed ' : ') +
-    (todo.editing ? 'editing' : ')
-
-  return h('li', { className: className, key: todo.id }, [
-    h('.view', [
-      h('input.toggle', {
-        type: 'checkbox',
-        checked: todo.completed,
-        'ev-change': mercury.event(events.toggle, {
-          id: todo.id,
-          completed: !todo.completed
-        })
-      }),
-      h('label', {
-        'ev-dblclick': mercury.event(events.startEdit, {
-          id: todo.id 
-        })
-      }, todo.title),
-      h('button.destroy', {
-        'ev-click': mercury.event(events.destroy, { id: todo.id })
-      })
-    ]),
-    h('input.edit', {
-      value: todo.title,
-      name: 'title',
-      // when we need an RPC invocation we add a 
-      // custom mutable operation into the tree to be
-      // invoked at patch time
-      'ev-focus': todo.editing ? doMutableFocus() : null,
-      'ev-keydown': mercury.keyEvent(events.cancelEdit, ESCAPE, {
-        id: todo.id
-      }),
-      'ev-event': mercury.submitEvent(events.finishEdit, {
-        id: todo.id
-      }),
-      'ev-blur': mercury.valueEvent(events.finishEdit, { id: todo.id })
-    })
-  ])
-}
-
-function statsSection(todos, route, events) {
-  var todosLeft = todos.filter(function (todo) {
-    return !todo.completed
-  }).length
-  var todosCompleted = todos.length - todosLeft
-
-  return h('footer#footer.footer', { hidden: !todos.length }, [
-    h('span#todo-count.todo-count', [
-      h('strong', String(todosLeft)),
-      todosLeft === 1 ? ' item' : ' items',
-      ' left'
-    ]),
-    h('ul#filters.filters', [
-      link('#/', 'All', route === 'all'),
-      link('#/active', 'Active', route === 'active'),
-      link('#/completed', 'Completed', route === 'completed')
-    ]),
-    h('button.clear-completed#clear-completed', {
-      hidden: todosCompleted === 0,
-      'ev-click': mercury.event(events.clearCompleted)
-    }, 'Clear completed (' + String(todosCompleted) + ')')
-  ])
-}
-
-function link(uri, text, isSelected) {
-  return h('li', [
-    h('a', { className: isSelected ? 'selected' : '', href: uri }, text)
-  ])
-}
-
-function infoFooter() {
-  return h('footer#info.info', [
-    h('p', 'Double-click to edit a todo'),
-    h('p', [
-      'Written by ',
-      h('a', { href: 'https://github.com/Raynos' }, 'Raynos')
-    ]),
-    h('p', [
-      'Part of ',
-      h('a', { href: 'http://todomvc.com' }, 'TodoMVC')
-    ])
-  ])
-}
-*/
-},{"../../../lib/util":1,"mercury":10}],219:[function(require,module,exports){
-// var cuid = require('cuid')
-var extend = require('xtend')
-var mercury = require('mercury')
-
-module.exports = {
-  homeApp: homeApp,
-  message: message,
-  profile: profile,
-  server: server
-}
-
-// Models
-// ======
-var HomeApp = {
-  route: '',
-  feed: [],
-  profiles: [],
-  profileMap: {},
-  servers: [],
-  currentUserId: '',
-  lastSync: ''
-}
-
-var Message = {
-  type: '',
-  timestamp: 0,
-  author: null,
-  authorNickame: '',
-  message: null
-}
-
-var Profile = {
-  id: null,
-  nickname: '',
-  joinDate: '',
-  feed: []
-}
-
-var Server = {
-  hostname: '',
-  port: '',
-  url: ''
-}
-
-// Constructors
-// ============
-
-function homeApp(events, initialState) {
-  var state = extend(HomeApp, initialState)
-
-  var profileMap = {}
-  state.profiles.forEach(function(prof, i) {
-    profileMap[prof.id.toString('hex')] = i
-  })
-
-  return mercury.struct({
-    route: mercury.value(state.route),
-    feed: mercury.array(state.feed.map(message)),
-    profiles: mercury.array(state.profiles.map(profile)),
-    profileMap: mercury.value(profileMap),
-    servers: mercury.array(state.servers.map(server)),
-    currentUserId: mercury.value(state.currentUserId),
-    lastSync: mercury.value(state.lastSync),
-    events: events
-  })
-}
-
-function message(initialState) {
-  var state = extend(Message, initialState)
-
-  return mercury.struct({
-    type: state.type,
-    timestamp: state.timestamp,
-    author: state.author,
-    authorNickname: state.authorNickname,
-    message: state.message
-  })
-}
-
-function profile(initialState) {
-  var state = extend(Profile, initialState)
-
-  return mercury.struct({
-    id: state.id,
-    nickname: state.nickname,
-    joinDate: state.joinDate,
-    feed: mercury.array(state.feed.map(message))
-  })
-}
-
-function server(initialState) {
-  var state = extend(Server, initialState)
-
-  return mercury.struct({
-    hostname: state.hostname,
-    port: state.port,
-    url: 'http://' + state.hostname + ':' + state.port
-  })
-}
-},{"mercury":10,"xtend":214}],220:[function(require,module,exports){
-var State = require("./state.js")
-
-module.exports = {
-  setRoute: setRoute
-}
-
-function setRoute(state, route) {
-  state.route.set(route.substr(2) || 'feed')
-}
-
-
-},{"./state.js":219}],221:[function(require,module,exports){
+},{"../../../lib/util":1,"mercury":10}],221:[function(require,module,exports){
 
 },{}],222:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
@@ -18021,4 +17890,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":263,"_process":244,"inherits":241}]},{},[215]);
+},{"./support/isBuffer":263,"_process":244,"inherits":241}]},{},[217]);

@@ -2,10 +2,10 @@ var document = require('global/document')
 var window = require('global/window')
 var mercury = require('mercury')
 
-var Input = require('./input.js')
-var State = require('./state.js')
-var Render = require('./render.js')
-var Update = require('./update.js')
+var createEvents = require('./events.js')
+var models = require('./models.js')
+var render = require('./render.js')
+var handlers = require('./handlers.js')
 var backend = require('./lib/backend')
 
 // :DEBUG:
@@ -16,17 +16,17 @@ var backend = require('./lib/backend')
 
 // init app
 var state = createApp()
-mercury.app(document.body, state, Render)
+mercury.app(document.body, state, render)
 
 module.exports = createApp
 function createApp() {
-  var events = Input()
+  var events = createEvents()
 
 
   var initState = {
     currentUserId: 'foo'
   }
-  var state = window.state = State.homeApp(events, initState)
+  var state = window.state = models.homeApp(events, initState)
 
   // :DEBUG:
   var ms = [
@@ -53,26 +53,26 @@ function createApp() {
       authorNickname: 'bob'
     }
   ]
-  state.feed.push(State.message(ms[0]))
-  state.feed.push(State.message(ms[1]))
-  state.feed.push(State.message(ms[2]))
-  state.feed.push(State.message(ms[3]))
-  state.profiles.push(State.profile({
+  state.feed.push(models.message(ms[0]))
+  state.feed.push(models.message(ms[1]))
+  state.feed.push(models.message(ms[2]))
+  state.feed.push(models.message(ms[3]))
+  state.profiles.push(models.profile({
     id: 'foo',
     nickname: 'pfraze',
     feed: ms.slice(0,3)
   }))
-  state.profiles.push(State.profile({
+  state.profiles.push(models.profile({
     id: 'bar',
     nickname: 'bob',
     feed: ms.slice(3)
   }))
   state.profileMap.set({ foo: 0, bar: 1 })
-  state.servers.push(State.server({
+  state.servers.push(models.server({
     hostname: 'foo.com',
     port: 80
   }))
-  state.servers.push(State.server({
+  state.servers.push(models.server({
     hostname: 'bar.com',
     port: 65000
   }))
@@ -82,5 +82,5 @@ function createApp() {
 }
 
 function wireUpEvents(state, events) {
-  events.setRoute(Update.setRoute.bind(null, state))
+  events.setRoute(handlers.setRoute.bind(null, state))
 }

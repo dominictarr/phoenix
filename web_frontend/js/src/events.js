@@ -3,8 +3,8 @@ var HashRouter = require('hash-router')
 var Event = require('geval')
 var mercury = require('mercury')
 
-module.exports = createInput
-function createInput() {
+module.exports = createEvents
+function createEvents() {
   var events = mercury.input([ /* todo */ ])
   events.setRoute = EventRouter()
   return events
