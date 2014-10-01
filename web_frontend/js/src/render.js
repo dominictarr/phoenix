@@ -1,49 +1,169 @@
 var mercury = require('mercury')
 var h = require('mercury').h
+var util = require('../../../lib/util')
 
 module.exports = render
 
-// Main Components
-// ===============
+// Layout
+// ======
 
 function render(state) {
+  var page
+  if (state.route == 'network') {
+    page = networkPage(state)
+  } else if (state.route.indexOf('profile/') === 0) {
+    var profid = state.route.slice(8)
+    page = profilePage(state, profid)
+  } else {
+    page = feedPage(state)
+  }
+
   return h('.homeapp.container', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
     mercury.partial(header, state.currentUserId),
-    h('.feedpage.row', [
-      h('.col-xs-8', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
-      h('.col-xs-4', [mercury.partial(feedControls), mercury.partial(profileLinks, state.profiles)])
-    ])
+    page
   ])
 }
+
+// Common Components
+// =================
 
 function header(currentUserId) {
   var sep = function() { return h('small', ' / ') }
   return h('.nav-header', [
     h('strong', 'phoenix'),
-    sep(), a('/', 'latest'),
-    sep(), a('/profile/' + currentUserId, 'profile'),
-    sep(), a('/network', 'network'),
-    a('/profile/' + currentUserId + '/intro-token', 'your intro token', { className: 'pull-right' })
+    sep(), a('#/', 'latest'),
+    sep(), a('#/profile/' + currentUserId, 'profile'),
+    sep(), a('#/network', 'network'),
+    a('#/profile/' + currentUserId + '/intro-token', 'your intro token', { className: 'pull-right' })
   ])
 }
 
-function feed(feed) {
-  return h('div', 'feed todo')
+function notfound(what, suggestion) {
+  return h('div', [
+    h('h3', 'Sorry, '+what+' was not found.' + (suggestion || '')),
+    h('p', h('small', 'here\'s a cuddly kitty to help you through this trying time')),
+    randomcat()
+  ])
 }
 
-function feedControls() {
-  return h('div', 'feed controls todo')  
-}
-
-function profileLinks(profiles) {
-  return h('div', 'profile links todo')  
+var cats = ['goingdown', 'hophop', 'huuhuuu', 'pillow-spin', 'shred', 'tailbites', 'woahwoah']
+function randomcat() {
+  var cat = cats[Math.round(Math.random() * 7)] || cats[0]
+  return img('/img/loading/'+cat+'.gif')
 }
 
 function mascot(quote) {
   return h('.class', [
     img('/img/logo.png'),
     h('strong', [h('small', quote)])
+  ])
+}
+
+function feed(feed) {
+  return h('table.feed', feed.map(message).reverse())
+}
+
+function message(msg) {
+  var content;
+  switch (msg.type.toString()) {
+    case 'init': content = h('strong', h('small', 'Account created')); break
+    case 'text': content = util.escapePlain(msg.message.plain); break
+    case 'profile': content = h('strong', h('small', 'Is now known as ' + util.escapePlain(msg.message.nickname))); break
+    default: content = h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString())); break
+  }
+
+  return h('tr', [
+    h('td.content', [
+      h('p', [h('strong', util.escapePlain(msg.authorNickname)), h('small', util.prettydate(new Date(msg.timestamp)))]),
+      h('p', content)
+    ])
+  ])
+}
+
+// Feed Page
+// =========
+
+function feedPage(state) {
+  return h('.feed-page.row', [
+    h('.col-xs-8', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
+    h('.col-xs-4', [mercury.partial(feedControls, state.lastSync), mercury.partial(profileLinks, state.profiles)])
+  ])
+}
+
+function feedControls(lastSync) {
+  return h('.feed-ctrls', [
+    h('form.feed-publish', [
+      h('div', h('textarea.form-control', { name: 'plain', placeholder: 'Publish...', rows: 1 })),
+      h('button.btn.btn-default', 'Post')
+    ]),
+    h('p', 'Last synced '+lastSync),
+    h('p', [h('button.btn.btn-default', 'Sync'), h('button.btn.btn-default', 'Add feed...')])
+  ])
+}
+
+function profileLinks(profiles) {
+  return h('div', profiles.map(profileLink))
+}
+
+function profileLink(profile) {
+  return h('div', a('/#/profile/'+profile.id.toString('hex'), profile.nickname))
+}
+
+// Profile Page
+// ============
+
+function profilePage(state, profid) {
+  var profi = state.profileMap[profid]
+  var profile = (typeof profi != 'undefined') ? state.profiles[profi] : undefined
+  if (!profile) {
+    return h('.profile-page.row', [
+      h('.col-xs-8', [notfound('that user')])
+    ])
+  }
+  return h('.profile-page.row', [
+    h('.col-xs-8', [feed(profile.feed), mercury.partial(mascot, 'Is it hot in here?')]),
+    h('.col-xs-4', [mercury.partial(profileControls, profile)])
+  ])
+}
+
+function profileControls(profile) {
+  var followBtn = h('button.btn.btn-default', 'Follow')
+  return h('.profile-ctrls', [
+    h('h2', profile.nickname),
+    h('h3', h('small', 'joined '+profile.joinDate)),
+    h('p', followBtn),
+    h('p', a('/profile/'+profile.id+'/intro-token', 'Intro Token'))
+  ])
+}
+
+// Network Page
+// ============
+
+function networkPage(state) {
+  return h('.network-page.row', [
+    h('.col-xs-8', [pubservers(state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
+    h('.col-xs-4', [mercury.partial(networkControls, state.lastSync)])
+  ])
+}
+
+function pubservers(servers) {
+  return h('table.servers', servers.map(server))
+}
+
+function server(server) {
+  return h('tr', [
+    h('td.content', [
+      h('h3', a(server.url, server.hostname)),
+      h('p', h('button.btn.btn-default', 'Remove'))
+    ])
+  ])
+}
+
+function networkControls(lastSync) {
+  return h('.network-ctrls', [
+    h('p', 'Last synced '+lastSync),
+    h('p', [h('button.btn.btn-default', 'Sync'), h('button.btn.btn-default', 'Add host...')])
   ])
 }
 
