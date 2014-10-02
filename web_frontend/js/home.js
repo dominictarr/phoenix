@@ -12704,6 +12704,7 @@ function createHomeApp(events, initialState) {
             pull.drain(function (m) {
               m.authorNickname = profile.nickname
               m = createMessage(m)
+              if (m.type == 'init') profile.joinDate.set(util.prettydate(new Date(m.timestamp), true))
               if (m) profile.feed.push(m)
             }, done())
           )
@@ -12795,6 +12796,7 @@ function createMessage(initialState) {
 function createProfile(initialState) {
   var state = extend(defaults.profile, initialState)
   state.feed = mercury.array(state.feed.map(createMessage))
+  state.joinDate = mercury.value(state.joinDate)
   state.isFollowing = mercury.value(state.isFollowing)
   return mercury.struct(state)
 }
