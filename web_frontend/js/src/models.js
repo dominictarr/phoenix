@@ -272,6 +272,29 @@ function createHomeApp(events, initialState) {
     client.api.text_post(str, cb)
   }
 
+  // begins following a feed
+  ha.addFeed = function(token, cb) {
+    if (typeof token == 'string') {
+      try { token = JSON.parse(token) }
+      catch (e) { return cb(new Error('Bad intro token - must be valid JSON')) }
+    }
+
+    // start following the id
+    var id = new Buffer(token.id, 'hex')
+    if (!id) return cb(new Error('Bad intro token - invalid ID'))
+    client.api.follow(id, function(err) {
+      if (err) return cb(err)
+
+      // load the profile into the local cache, if possible
+      ha.fetchProfile(id)
+
+      // add their relays
+      if (!token.relays || token.relays.length === 0)        
+        return
+      client.api.addNodes(token.relays, cb)
+    })
+  }
+
   return ha
 }
 
@@ -282,8 +305,10 @@ function createMessage(initialState) {
     state.authorStr = (new Buffer(state.author)).toString('hex')
     state.message = msgpack.decode(new Buffer(state.message))
   } catch(e) {
-    console.log('Bad message encoding', state)
-    return null
+    if (state.type != 'init') { // :TODO: may need to remove in the future? not sure if the init message with go msgpack
+      console.log('Bad message encoding', state)
+      return null
+    }
   }
   return mercury.struct(state)
 }

@@ -45,6 +45,24 @@ exports.submitPublishForm = function(state, data) {
   }, 100)
 }
 
+exports.addFeed = function(state) {
+  var token = prompt('Introduction token of the user:')
+  if (!token) return
+  state.addFeed(token, function(err) {
+    if (err) alert(err.toString())
+  })
+}
+
+exports.showIntroToken = function(state, data) {
+  state.fetchServers(function() {
+    // :TODO: it's not actually accurate that the user might be at all of these ndoes
+    //        Get an accurate list!
+    var servers = state.servers().map(function(s) { return [s.hostname, s.port] })
+    var t = JSON.stringify({id: data.id, relays: servers})
+    prompt('Intro Token', t)
+  })
+}
+
 /*
 1: the setTimeout hack in submitPublishForm()
 Basically, we need the `state.publishForm.textFieldValue.set(data.publishText)` to run its course

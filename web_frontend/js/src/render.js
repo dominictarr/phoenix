@@ -21,7 +21,7 @@ function render(state) {
 
   return h('.homeapp.container', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
-    mercury.partial(header, state.user.idStr),
+    mercury.partial(header, state.events, state.user.idStr),
     page
   ])
 }
@@ -29,14 +29,14 @@ function render(state) {
 // Common Components
 // =================
 
-function header(uId) {
+function header(events, uId) {
   var sep = function() { return h('small', ' / ') }
   return h('.nav-header', [
     h('strong', 'phoenix'),
     sep(), a('#/', 'latest'),
     sep(), a('#/profile/' + uId, 'profile'),
     sep(), a('#/network', 'network'),
-    a('#/profile/' + uId + '/intro-token', 'your intro token', { className: 'pull-right' })
+    a('#', 'your intro token', { className: 'pull-right', 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }) })
   ])
 }
 
@@ -108,7 +108,10 @@ function feedControls(events, publishForm, lastSync) {
       h('button.btn.btn-default', 'Post')
     ]),
     h('p', 'Last synced '+lastSync),
-    h('p', [h('button.btn.btn-default', 'Sync'), h('button.btn.btn-default', 'Add feed...')])
+    h('p', [
+      h('button.btn.btn-default', 'Sync'),
+      h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add feed...')
+    ])
   ])
 }
 
@@ -133,17 +136,17 @@ function profilePage(state, profid) {
   }
   return h('.profile-page.row', [
     h('.col-xs-8', [feed(profile.feed, true), mercury.partial(mascot, 'Is it hot in here?')]),
-    h('.col-xs-4', [mercury.partial(profileControls, profile)])
+    h('.col-xs-4', [mercury.partial(profileControls, state.events, profile)])
   ])
 }
 
-function profileControls(profile) {
+function profileControls(events, profile) {
   var followBtn = h('button.btn.btn-default', 'Follow')
   return h('.profile-ctrls', [
     h('h2', profile.nickname),
     h('h3', h('small', 'joined '+profile.joinDate)),
     h('p', followBtn),
-    h('p', a('/profile/'+profile.idStr+'/intro-token', 'Intro Token'))
+    h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }) }))
   ])
 }
 

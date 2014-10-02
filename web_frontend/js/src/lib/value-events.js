@@ -2,6 +2,8 @@ var extend = require('xtend')
 var BaseEvent = require('value-event/base-event')
 var getFormData = require('form-data-set/element')
 
+exports.click = require('value-event/click')
+
 exports.ctrlEnter = BaseEvent(function (e) {
   if (e.keyCode != 13 || !e.ctrlKey)
     return

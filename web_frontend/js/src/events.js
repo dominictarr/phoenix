@@ -9,7 +9,11 @@ function createEvents() {
     // feed page publish form
     'updatePublishFormTextField',
     'setPublishFormTextField',
-    'submitPublishForm'
+    'submitPublishForm',
+
+    // common buttons
+    'addFeed',
+    'showIntroToken'
   ])
   events.setRoute = EventRouter()
   return events
