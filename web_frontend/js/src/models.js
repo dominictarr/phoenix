@@ -234,8 +234,8 @@ function createHomeApp(events, initialState) {
         // fetch isFollowing state
         if (ha.user.idStr() != idStr) {
           var cb2 = done()
-          client.api.isFollowing(idStr, function(err) {
-            profile.isFollowing(!err)
+          client.api.isFollowing(util.toBuffer(profid), function(err) {
+            profile.isFollowing.set(!err)
             cb2()
           })
         }
@@ -281,18 +281,34 @@ function createHomeApp(events, initialState) {
     }
 
     // start following the id
-    var id = new Buffer(token.id, 'hex')
+    var id = util.toBuffer(token.id)
     if (!id) return cb(new Error('Bad intro token - invalid ID'))
     client.api.follow(id, function(err) {
       if (err) return cb(err)
 
       // load the profile into the local cache, if possible
-      ha.fetchProfile(id)
+      ha.fetchProfile(id, function(err, profile) {
+        if (profile)
+          profile.isFollowing.set(true)
+      })
 
       // add their relays
       if (!token.relays || token.relays.length === 0)        
         return
       client.api.addNodes(token.relays, cb)
+    })
+  }
+
+  // stops following a feed
+  ha.removeFeed = function(id, cb) {
+    var id = util.toBuffer(id)
+    client.api.unfollow(util.toBuffer(id), function(err) {
+      if (err) return cb(err)
+      ha.fetchProfile(id, function(err, profile) {
+        if (profile)
+          profile.isFollowing.set(false)
+        cb()
+      })
     })
   }
 

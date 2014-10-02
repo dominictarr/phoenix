@@ -13,7 +13,9 @@ function createEvents() {
 
     // common buttons
     'addFeed',
-    'showIntroToken'
+    'showIntroToken',
+    'follow',
+    'unfollow'
   ])
   events.setRoute = EventRouter()
   return events

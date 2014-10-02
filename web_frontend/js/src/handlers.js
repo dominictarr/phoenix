@@ -63,6 +63,18 @@ exports.showIntroToken = function(state, data) {
   })
 }
 
+exports.follow = function(state, data) {
+  state.addFeed({id: data.id}, function(err) {
+    if (err) alert(err.toString())
+  })
+}
+
+exports.unfollow = function(state, data) {
+  state.removeFeed(data.id, function(err) {
+    if (err) alert(err.toString())
+  })
+}
+
 /*
 1: the setTimeout hack in submitPublishForm()
 Basically, we need the `state.publishForm.textFieldValue.set(data.publishText)` to run its course

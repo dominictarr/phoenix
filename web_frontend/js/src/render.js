@@ -141,7 +141,9 @@ function profilePage(state, profid) {
 }
 
 function profileControls(events, profile) {
-  var followBtn = h('button.btn.btn-default', 'Follow')
+  var followBtn = (profile.isFollowing) ?
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Unfollow') :
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Follow')
   return h('.profile-ctrls', [
     h('h2', profile.nickname),
     h('h3', h('small', 'joined '+profile.joinDate)),
