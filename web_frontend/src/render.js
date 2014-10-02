@@ -1,6 +1,6 @@
 var mercury = require('mercury')
 var h = require('mercury').h
-var util = require('../../../lib/util')
+var util = require('../../lib/util')
 var valueEvents = require('./lib/value-events')
 
 module.exports = render

@@ -7,7 +7,7 @@ var msgpack = require('msgpack-js')
 var multicb = require('multicb')
 
 var backend = require('./lib/backend')
-var util = require('../../../lib/util')
+var util = require('../../lib/util')
 
 module.exports = {
   homeApp: createHomeApp,

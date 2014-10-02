@@ -12534,7 +12534,7 @@ var msgpack = require('msgpack-js')
 var multicb = require('multicb')
 
 var backend = require('./lib/backend')
-var util = require('../../../lib/util')
+var util = require('../../lib/util')
 
 module.exports = {
   homeApp: createHomeApp,
@@ -12915,10 +12915,10 @@ function createServer(initialState) {
   return mercury.struct(state)
 }
 }).call(this,require("buffer").Buffer)
-},{"../../../lib/util":1,"./lib/backend":258,"buffer":265,"mercury":13,"msgpack-js":115,"multicb":129,"pull-stream":204,"stream-to-pull-stream":210,"xtend":254}],261:[function(require,module,exports){
+},{"../../lib/util":1,"./lib/backend":258,"buffer":265,"mercury":13,"msgpack-js":115,"multicb":129,"pull-stream":204,"stream-to-pull-stream":210,"xtend":254}],261:[function(require,module,exports){
 var mercury = require('mercury')
 var h = require('mercury').h
-var util = require('../../../lib/util')
+var util = require('../../lib/util')
 var valueEvents = require('./lib/value-events')
 
 module.exports = render
@@ -13124,7 +13124,7 @@ function a(href, text, opts) {
 function img(src) {
   return h('img', { src: src })
 }
-},{"../../../lib/util":1,"./lib/value-events":259,"mercury":13}],262:[function(require,module,exports){
+},{"../../lib/util":1,"./lib/value-events":259,"mercury":13}],262:[function(require,module,exports){
 
 },{}],263:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
