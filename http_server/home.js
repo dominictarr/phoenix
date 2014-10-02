@@ -7,10 +7,6 @@ var WSStream = require('websocket-stream')
 var prpc     = require('phoenix-rpc')
 var connect  = require('../lib/backend')
 
-// var feed = require('./feed')
-// var profile = require('./profile')
-// var network = require('./network')
-
 function createServer(port, opts) {
   connect(function (err, backend) {
     if (err) return console.error(err);
