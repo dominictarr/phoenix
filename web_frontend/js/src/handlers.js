@@ -75,6 +75,35 @@ exports.unfollow = function(state, data) {
   })
 }
 
+exports.sync = function(state) {
+  state.isSyncing.set(true)
+  state.client.api.syncNetwork(function(err, results) {
+    state.isSyncing.set(false)
+    if (err) return res.writeHead(500), res.end(err)
+    state.lastSync.set(new Date())
+    // :TODO:
+    // if (results && Object.keys(results).length)
+      // backend.local.lastSyncResults = results
+    if (state.route() == 'feed')
+      state.fetchFeed()
+  })
+}
+
+exports.addServer = function(state) {
+  var address = prompt('Address of the server (address[:port]).')
+  if (!address) return
+  state.addServer(address, function(err) {
+    if (err) alert(err.toString())
+  })
+}
+
+exports.removeServer = function(state, data) {
+  if (!confirm('Are you sure you want to remove this server?')) return
+  state.removeServer([data.hostname, data.port], function(err) {
+    if (err) alert(err.toString())
+  })
+}
+
 /*
 1: the setTimeout hack in submitPublishForm()
 Basically, we need the `state.publishForm.textFieldValue.set(data.publishText)` to run its course

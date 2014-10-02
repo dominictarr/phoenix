@@ -11,11 +11,16 @@ function createEvents() {
     'setPublishFormTextField',
     'submitPublishForm',
 
+    // network page
+    'addServer',
+    'removeServer',
+
     // common buttons
     'addFeed',
     'showIntroToken',
     'follow',
-    'unfollow'
+    'unfollow',
+    'sync'
   ])
   events.setRoute = EventRouter()
   return events

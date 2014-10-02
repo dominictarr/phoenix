@@ -12293,11 +12293,16 @@ function createEvents() {
     'setPublishFormTextField',
     'submitPublishForm',
 
+    // network page
+    'addServer',
+    'removeServer',
+
     // common buttons
     'addFeed',
     'showIntroToken',
     'follow',
-    'unfollow'
+    'unfollow',
+    'sync'
   ])
   events.setRoute = EventRouter()
   return events
@@ -12386,6 +12391,35 @@ exports.follow = function(state, data) {
 
 exports.unfollow = function(state, data) {
   state.removeFeed(data.id, function(err) {
+    if (err) alert(err.toString())
+  })
+}
+
+exports.sync = function(state) {
+  state.isSyncing.set(true)
+  state.client.api.syncNetwork(function(err, results) {
+    state.isSyncing.set(false)
+    if (err) return res.writeHead(500), res.end(err)
+    state.lastSync.set(new Date())
+    // :TODO:
+    // if (results && Object.keys(results).length)
+      // backend.local.lastSyncResults = results
+    if (state.route() == 'feed')
+      state.fetchFeed()
+  })
+}
+
+exports.addServer = function(state) {
+  var address = prompt('Address of the server (address[:port]).')
+  if (!address) return
+  state.addServer(address, function(err) {
+    if (err) alert(err.toString())
+  })
+}
+
+exports.removeServer = function(state, data) {
+  if (!confirm('Are you sure you want to remove this server?')) return
+  state.removeServer([data.hostname, data.port], function(err) {
     if (err) alert(err.toString())
   })
 }
@@ -12532,7 +12566,8 @@ var defaults = {
       pubkey: null,
       pubkeyStr: ''
     },
-    lastSync: ''
+    lastSync: '',
+    isSyncing: false
   },
   message: {
     author: null,
@@ -12591,11 +12626,13 @@ function createHomeApp(events, initialState) {
       pubkey:    mercury.value(state.user.pubkey),
       pubkeyStr: mercury.value(state.user.pubkeyStr)
     }),
-    lastSync:   mercury.value(state.lastSync)
+    lastSync:   mercury.value(state.lastSync),
+    isSyncing:  mercury.value(state.isSyncing)
   })
 
   // load data from the backend
   var client = backend.connect()
+  ha.client = client
   // session
   client.api.getKeys(function(err, keys) {
     if (err) throw err
@@ -12603,6 +12640,10 @@ function createHomeApp(events, initialState) {
     ha.user.idStr.set(util.toHexString(keys.name))
     ha.user.pubkey.set(util.toBuffer(keys.public))
     ha.user.pubkeyStr.set(util.toHexString(keys.public))
+  })
+  client.api.getSyncState(function(err, state) {
+    if (state && state.lastSync)
+      ha.lastSync.set(new Date(state.lastSync))
   })
   // followed profiles
   pull(toPull(client.api.following()), pull.drain(function (entry) { ha.fetchProfile(entry.key) }))
@@ -12805,6 +12846,43 @@ function createHomeApp(events, initialState) {
     })
   }
 
+  // adds a server to the network table
+  ha.addServer = function(addr, cb) {
+    if (typeof addr == 'string')
+      addr = addr.split(':')
+    if (!addr[0]) return cb(new Error('Invalid address'))
+    addr[1] = +addr[1] || 64000
+    
+    client.api.addNode(addr[0], addr[1], function(err) {
+      if (err) return cb(err)
+      ha.servers.push(createServer({ hostname: addr[0], port: addr[1] }))
+    })
+  }
+
+  // removes a server from the network table
+  ha.removeServer = function(addr, cb) {
+    if (typeof addr == 'string')
+      addr = addr.split(':')
+    if (!addr[0]) return cb(new Error('Invalid address'))
+    addr[1] = +addr[1] || 64000
+
+    client.api.delNode(addr[0], addr[1], function(err) {
+      if (err) return cb(err)
+
+      // find and remove from the local cache
+      for (var i=0; i < ha.servers.getLength(); i++) {
+        var s = ha.servers.get(i)
+        if (s.hostname == addr[0] && s.port == addr[1]) {
+          ha.servers.splice(i, 1)
+          break
+        }
+      }
+      cb()
+    })
+  }
+
+
+
   return ha
 }
 
@@ -12924,17 +13002,27 @@ function message(msg) {
   ])
 }
 
+function syncButton(events, isSyncing) {
+  if (isSyncing) {
+    return h('button.btn.btn-default', { disabled: true }, 'Syncing...')
+  }
+  return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync')
+}
+
 // Feed Page
 // =========
 
 function feedPage(state) {
   return h('.feed-page.row', [
     h('.col-xs-8', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
-    h('.col-xs-4', [feedControls(state.events, state.publishForm, state.lastSync), mercury.partial(profileLinks, state.profiles)])
+    h('.col-xs-4', [feedControls(state), mercury.partial(profileLinks, state.profiles)])
   ])
 }
 
-function feedControls(events, publishForm, lastSync) {
+function feedControls(state) {
+  var events = state.events
+  var publishForm = state.publishForm
+  var lastSync = state.lastSync
   return h('.feed-ctrls', [
     h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
       h('div', h('textarea.form-control', {
@@ -12947,9 +13035,9 @@ function feedControls(events, publishForm, lastSync) {
       })),
       h('button.btn.btn-default', 'Post')
     ]),
-    h('p', 'Last synced '+lastSync),
+    h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [
-      h('button.btn.btn-default', 'Sync'),
+      syncButton(events, state.isSyncing),
       h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add feed...')
     ])
   ])
@@ -12997,28 +13085,28 @@ function profileControls(events, profile) {
 
 function networkPage(state) {
   return h('.network-page.row', [
-    h('.col-xs-8', [pubservers(state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
-    h('.col-xs-4', [mercury.partial(networkControls, state.lastSync)])
+    h('.col-xs-8', [pubservers(state.events, state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
+    h('.col-xs-4', [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)])
   ])
 }
 
-function pubservers(servers) {
-  return h('table.servers', servers.map(server))
+function pubservers(events, servers) {
+  return h('table.servers', servers.map(server.bind(null, events)))
 }
 
-function server(server) {
+function server(events, server) {
   return h('tr', [
     h('td.content', [
       h('h3', a(server.url, server.hostname)),
-      h('p', h('button.btn.btn-default', 'Remove'))
+      h('p', h('button.btn.btn-default', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'Remove'))
     ])
   ])
 }
 
-function networkControls(lastSync) {
+function networkControls(events, lastSync, isSyncing) {
   return h('.network-ctrls', [
-    h('p', 'Last synced '+lastSync),
-    h('p', [h('button.btn.btn-default', 'Sync'), h('button.btn.btn-default', 'Add host...')])
+    h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
+    h('p', [syncButton(events, isSyncing), h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
   ])
 }
 

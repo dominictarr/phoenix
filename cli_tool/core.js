@@ -2,7 +2,7 @@ var connect    = require('../lib/backend');
 var prettydate = require('pretty-date');
 var pull       = require('pull-stream');
 var toPull     = require('stream-to-pull-stream');
-var msgpack    = require('msgpack')
+var msgpack    = require('msgpack-js')
 
 function padleft(width, str) {
 	if (str.length < width) {
@@ -114,8 +114,8 @@ exports.list = function(opts) {
 			var content = ''
 			switch (msg.type.toString()) {
 				case 'init': content = 'Account created: ' + msg.message.toString('hex').slice(0,16) + '...'; break
-				case 'profile': content = 'Now known as ' + msgpack.unpack(msg.message).nickname; break
-				case 'text': content = msgpack.unpack(msg.message).plain; break
+				case 'profile': content = 'Now known as ' + msgpack.decode(msg.message).nickname; break
+				case 'text': content = msgpack.decode(msg.message).plain; break
 				default: content = msg.message.toString()
 			}
 			var author = msg.author.toString('hex');

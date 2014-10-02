@@ -84,17 +84,27 @@ function message(msg) {
   ])
 }
 
+function syncButton(events, isSyncing) {
+  if (isSyncing) {
+    return h('button.btn.btn-default', { disabled: true }, 'Syncing...')
+  }
+  return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync')
+}
+
 // Feed Page
 // =========
 
 function feedPage(state) {
   return h('.feed-page.row', [
     h('.col-xs-8', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
-    h('.col-xs-4', [feedControls(state.events, state.publishForm, state.lastSync), mercury.partial(profileLinks, state.profiles)])
+    h('.col-xs-4', [feedControls(state), mercury.partial(profileLinks, state.profiles)])
   ])
 }
 
-function feedControls(events, publishForm, lastSync) {
+function feedControls(state) {
+  var events = state.events
+  var publishForm = state.publishForm
+  var lastSync = state.lastSync
   return h('.feed-ctrls', [
     h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
       h('div', h('textarea.form-control', {
@@ -107,9 +117,9 @@ function feedControls(events, publishForm, lastSync) {
       })),
       h('button.btn.btn-default', 'Post')
     ]),
-    h('p', 'Last synced '+lastSync),
+    h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [
-      h('button.btn.btn-default', 'Sync'),
+      syncButton(events, state.isSyncing),
       h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add feed...')
     ])
   ])
@@ -157,28 +167,28 @@ function profileControls(events, profile) {
 
 function networkPage(state) {
   return h('.network-page.row', [
-    h('.col-xs-8', [pubservers(state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
-    h('.col-xs-4', [mercury.partial(networkControls, state.lastSync)])
+    h('.col-xs-8', [pubservers(state.events, state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
+    h('.col-xs-4', [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)])
   ])
 }
 
-function pubservers(servers) {
-  return h('table.servers', servers.map(server))
+function pubservers(events, servers) {
+  return h('table.servers', servers.map(server.bind(null, events)))
 }
 
-function server(server) {
+function server(events, server) {
   return h('tr', [
     h('td.content', [
       h('h3', a(server.url, server.hostname)),
-      h('p', h('button.btn.btn-default', 'Remove'))
+      h('p', h('button.btn.btn-default', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'Remove'))
     ])
   ])
 }
 
-function networkControls(lastSync) {
+function networkControls(events, lastSync, isSyncing) {
   return h('.network-ctrls', [
-    h('p', 'Last synced '+lastSync),
-    h('p', [h('button.btn.btn-default', 'Sync'), h('button.btn.btn-default', 'Add host...')])
+    h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
+    h('p', [syncButton(events, isSyncing), h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
   ])
 }
 

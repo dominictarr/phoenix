@@ -39,7 +39,8 @@ var defaults = {
       pubkey: null,
       pubkeyStr: ''
     },
-    lastSync: ''
+    lastSync: '',
+    isSyncing: false
   },
   message: {
     author: null,
@@ -98,11 +99,13 @@ function createHomeApp(events, initialState) {
       pubkey:    mercury.value(state.user.pubkey),
       pubkeyStr: mercury.value(state.user.pubkeyStr)
     }),
-    lastSync:   mercury.value(state.lastSync)
+    lastSync:   mercury.value(state.lastSync),
+    isSyncing:  mercury.value(state.isSyncing)
   })
 
   // load data from the backend
   var client = backend.connect()
+  ha.client = client
   // session
   client.api.getKeys(function(err, keys) {
     if (err) throw err
@@ -110,6 +113,10 @@ function createHomeApp(events, initialState) {
     ha.user.idStr.set(util.toHexString(keys.name))
     ha.user.pubkey.set(util.toBuffer(keys.public))
     ha.user.pubkeyStr.set(util.toHexString(keys.public))
+  })
+  client.api.getSyncState(function(err, state) {
+    if (state && state.lastSync)
+      ha.lastSync.set(new Date(state.lastSync))
   })
   // followed profiles
   pull(toPull(client.api.following()), pull.drain(function (entry) { ha.fetchProfile(entry.key) }))
@@ -311,6 +318,43 @@ function createHomeApp(events, initialState) {
       })
     })
   }
+
+  // adds a server to the network table
+  ha.addServer = function(addr, cb) {
+    if (typeof addr == 'string')
+      addr = addr.split(':')
+    if (!addr[0]) return cb(new Error('Invalid address'))
+    addr[1] = +addr[1] || 64000
+    
+    client.api.addNode(addr[0], addr[1], function(err) {
+      if (err) return cb(err)
+      ha.servers.push(createServer({ hostname: addr[0], port: addr[1] }))
+    })
+  }
+
+  // removes a server from the network table
+  ha.removeServer = function(addr, cb) {
+    if (typeof addr == 'string')
+      addr = addr.split(':')
+    if (!addr[0]) return cb(new Error('Invalid address'))
+    addr[1] = +addr[1] || 64000
+
+    client.api.delNode(addr[0], addr[1], function(err) {
+      if (err) return cb(err)
+
+      // find and remove from the local cache
+      for (var i=0; i < ha.servers.getLength(); i++) {
+        var s = ha.servers.get(i)
+        if (s.hostname == addr[0] && s.port == addr[1]) {
+          ha.servers.splice(i, 1)
+          break
+        }
+      }
+      cb()
+    })
+  }
+
+
 
   return ha
 }
