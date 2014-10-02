@@ -62,18 +62,16 @@ function createServer(port, opts) {
     });
     server.listen(port, '127.0.0.1');
 
-    // Install the websocket host
-    if (opts.ws) {
-      var wss = new WSServer({server: server, path: '/ws'})
-      wss.on('connection', function(ws) {
-        console.log('WS: new websocket client connected')
-        var conn = WSStream(ws)
-        conn.on('error', function(err) { console.log('WS ERROR', err) })
-        // :TODO: proper perms
-        var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
-        conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
-      })
-    }
+    // Setup the websocket host
+    var wss = new WSServer({server: server, path: '/ws'})
+    wss.on('connection', function(ws) {
+      console.log('WS: new websocket client connected')
+      var conn = WSStream(ws)
+      conn.on('error', function(err) { console.log('WS ERROR', err) })
+      // :TODO: proper perms
+      var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
+      conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
+    })
   })
 }
 

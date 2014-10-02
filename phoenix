@@ -160,10 +160,6 @@ nomnom.command('serve')
       flag: true,
       abbr: 'n',
       help: 'Don\'t open the page in the browser once the server starts.'
-    },
-    ws: {
-      flag: true,
-      help: 'Open the websocket interface (under development, not recommended).'
     }
   })
   .callback(require('./cli_tool/http-server').start);

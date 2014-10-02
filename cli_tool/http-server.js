@@ -12,8 +12,6 @@ exports.start = function(opts) {
     var argv = [''+pubPort, ''+homePort];
     if (opts.config)
       argv.push('--config'), argv.push(opts.config);
-    if (opts.ws)
-      argv.push('--ws')
     var daemon = require("daemonize2").setup({
       main: "../http_server/daemon.js",
       name: "phoenix-server",
