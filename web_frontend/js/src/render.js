@@ -1,6 +1,7 @@
 var mercury = require('mercury')
 var h = require('mercury').h
 var util = require('../../../lib/util')
+var valueEvents = require('./lib/value-events')
 
 module.exports = render
 
@@ -89,14 +90,21 @@ function message(msg) {
 function feedPage(state) {
   return h('.feed-page.row', [
     h('.col-xs-8', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
-    h('.col-xs-4', [mercury.partial(feedControls, state.lastSync), mercury.partial(profileLinks, state.profiles)])
+    h('.col-xs-4', [feedControls(state.events, state.publishForm, state.lastSync), mercury.partial(profileLinks, state.profiles)])
   ])
 }
 
-function feedControls(lastSync) {
+function feedControls(events, publishForm, lastSync) {
   return h('.feed-ctrls', [
-    h('form.feed-publish', [
-      h('div', h('textarea.form-control', { name: 'plain', placeholder: 'Publish...', rows: 1 })),
+    h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
+      h('div', h('textarea.form-control', {
+        name: 'publishText',
+        placeholder: 'Publish...',
+        rows: publishForm.textFieldRows,
+        value: publishForm.textFieldValue,
+        'ev-change': mercury.valueEvent(events.setPublishFormTextField),
+        'ev-keyup': mercury.valueEvent(events.updatePublishFormTextField)
+      })),
       h('button.btn.btn-default', 'Post')
     ]),
     h('p', 'Last synced '+lastSync),

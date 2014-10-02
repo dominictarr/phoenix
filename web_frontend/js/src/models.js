@@ -21,7 +21,14 @@ module.exports = {
 
 var defaults = {
   homeApp: {
+    // gui state
     route: '',
+    publishForm: {
+      textFieldValue: '',
+      textFieldRows: 1
+    },
+
+    // app data
     feed: [],
     profiles: [],
     profileMap: {},
@@ -74,19 +81,24 @@ function createHomeApp(events, initialState) {
 
   // create object
   var ha = mercury.struct({
-    route:      mercury.value(state.route),
-    feed:       mercury.array(state.feed.map(createMessage)),
-    profiles:   mercury.array(state.profiles.map(createProfile)),
-    profileMap: mercury.value(profileMap),
-    servers:    mercury.array(state.servers.map(createServer)),
-    user:       mercury.struct({
+    route:       mercury.value(state.route),
+    publishForm: mercury.struct({
+      textFieldValue: mercury.value(state.publishForm.textFieldValue),
+      textFieldRows:  mercury.value(state.publishForm.textFieldRows)
+    }),
+    events:      events,
+
+    feed:        mercury.array(state.feed.map(createMessage)),
+    profiles:    mercury.array(state.profiles.map(createProfile)),
+    profileMap:  mercury.value(profileMap),
+    servers:     mercury.array(state.servers.map(createServer)),
+    user:        mercury.struct({
       id:        mercury.value(state.user.id),
       idStr:     mercury.value(state.user.idStr),
       pubkey:    mercury.value(state.user.pubkey),
       pubkeyStr: mercury.value(state.user.pubkeyStr)
     }),
-    lastSync:   mercury.value(state.lastSync),
-    events:     events
+    lastSync:   mercury.value(state.lastSync)
   })
 
   // load data from the backend
@@ -131,8 +143,7 @@ function createHomeApp(events, initialState) {
     // load from cache
     var profi = pm[idStr]
     var profile = (typeof profi != 'undefined') ? this.profiles.get(profi) : undefined
-    if (profile) return console.log('using cache', idStr), cb(null, profile)
-    console.log('actually fetching', idStr)
+    if (profile) return cb(null, profile)
 
     // try to load from backend
     fetchProfileQueue(idStr, cb, function(cbs) {
@@ -153,15 +164,23 @@ function createHomeApp(events, initialState) {
 
   // loads the full feed
   var fetchFeedQueue = util.queue().bind(null, 'feed')
-  ha.fetchFeed = function(cb) {
+  ha.fetchFeed = function(opts, cb) {
+    if (!cb && typeof opts == 'function') {
+      cb = opts
+      opts = 0
+    }
+    if (!opts) opts = {}
+
     fetchFeedQueue(cb, function(cbs) {
-      // stop if not empty :TODO: see if there are any new
-      if (ha.feed.getLength())
-        return cbs(null, ha.feed())
+      // do we have a local cache?
+      if (opts.refresh && ha.feed.getLength()) {
+        ha.feed.splice(0, ha.feed.getLength()) // clear it out
+      }
 
       // fetch feed stream
+      // :TODO: start from where we currently are if there are already messages in the feed
       pull(
-        toPull(client.api.createFeedStream({reverse: true})),
+        toPull(client.api.createFeedStream()),
         pull.asyncMap(function(m, cb) {
           ha.fetchProfile(m.author, function(err, profile) {
             if (err) console.error('Error loading profile for message', err, m)
@@ -171,10 +190,22 @@ function createHomeApp(events, initialState) {
         }),
         pull.drain(function (m) {
           m = createMessage(m)
-          if (m) ha.feed.push(m)
+          if (messageIsCached(m)) return // :TODO: remove this once we only pull new messages
+          if (m) ha.feed.unshift(m)
         }, function() { cbs(null, ha.feed()) })
       )
     })
+  }
+
+  // temporary helper to check if we already have the message in our feed cache
+  function messageIsCached(a) {
+    if (!a) return false
+    for (var i=0; i < ha.feed.getLength(); i++) {
+      var b = ha.feed.get(i)
+      if (a.authorStr == b.authorStr && a.sequence == b.sequence)
+        return true
+    }
+    return false
   }
 
   // loads the profile's feed (from the backend or cache)
@@ -233,6 +264,12 @@ function createHomeApp(events, initialState) {
         cbs(null, ha.servers())
       })
     })
+  }
+
+  // posts to the feed
+  ha.publishText = function(str, cb) {
+    if (!str.trim()) return cb(new Error('Can not post an empty string to the feed'))
+    client.api.text_post(str, cb)
   }
 
   return ha

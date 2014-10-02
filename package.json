@@ -23,6 +23,9 @@
     "geval": "~2.1.1",
     "hash-router": "~0.4.0",
     "xtend": "~3.0.0",
-    "multicb": "~0.0.2"
+    "multicb": "~0.0.2",
+    "value-event": "~3.2.0",
+    "form-data-set": "~1.1.1",
+    "dom-walk": "~0.1.0"
   }
 }

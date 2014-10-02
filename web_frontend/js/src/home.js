@@ -8,12 +8,6 @@ var render = require('./render.js')
 var handlers = require('./handlers.js')
 var backend = require('./lib/backend')
 
-// :DEBUG:
-// var client = backend.connect()
-// client.api.getKeys(function(err, keys) {
-//   console.log(keys)
-// })
-
 // init app
 var state = createApp()
 mercury.app(document.body, state, render)
@@ -28,5 +22,7 @@ function createApp() {
 }
 
 function wireUpEvents(state, events) {
-  events.setRoute(handlers.setRoute.bind(null, state))
+  for (var k in handlers) {
+    events[k](handlers[k].bind(null, state))
+  }
 }

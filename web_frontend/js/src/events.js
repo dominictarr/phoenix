@@ -5,7 +5,12 @@ var mercury = require('mercury')
 
 module.exports = createEvents
 function createEvents() {
-  var events = mercury.input([ /* todo */ ])
+  var events = mercury.input([
+    // feed page publish form
+    'updatePublishFormTextField',
+    'setPublishFormTextField',
+    'submitPublishForm'
+  ])
   events.setRoute = EventRouter()
   return events
 }
