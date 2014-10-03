@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Phoenix</title>
+    <link rel="stylesheet" href="/css/gumby.css">
+    <link rel="shortcut icon" type="image/png" href="/img/icon.png" />
+  </head>
+  <body>
+  <div class="navbar twelve columns" id="nav">
+    <div class="navbar-inner">
+      <strong>phoenix</strong>
+      <a href="/">latest</a> <small>/</small>
+      <a href="/profile/{cuser_id}">profile</a> <small>/</small>
+      <a href="/network">network</a>
+      <a href="/profile/{cuser_id}/intro-token" class="pull_right">your intro token</a>
+    </div>
+  </div>
+
+  <div class="row" id="feedpage">
+    <div class="eight columns">
+      {error}
+      <table class="feed">
+        <tbody>
+          {feed_entries}
+        </tbody>
+      </table>
+      <div class="mascot"><img src="/img/logo.png"/><strong><small>Dont let life get you down!</small></strong></div>
+    </div>
+    <div class="four columns">
+      <div class="js-preview-panel"></div>
+      <form class="publisher" action="/" method="POST">
+        <div class="field"><textarea name="plain" class="input textarea" placeholder="Publish..." rows="1"></textarea></div>
+        <div class="btn primary medium"><button>Post</button></div>
+      </form>
+      <p>Last synced {last_sync}</p>
+      <p>
+        <span class="btn default medium"><button form="sync-form">Sync</button></span>
+        <span class="btn default medium"><button class="add-btn">Add feed...</button></span>
+      </p>
+      {friends}
+    </div>
+  </div>
+
+  <form id="sync-form" action="/network/sync" method="POST"><input type="hidden" name="redirect" value="/"></form>
+  <form id="add-form" action="/feeds" method="POST">
+    <input type="hidden" name="token">
+    <input type="hidden" name="action" value="add">
+    <input type="hidden" name="redirect" value="/">
+  </form>
+
+  <script src="js/jquery-2.1.1.min.js"></script>
+  <script src="js/modernizr-2.6.2.min.js"></script>
+  <script src="js/markdown.js"></script>
+  <script src="js/gumby.min.js"></script>
+  <script src="js/web/feed.js"></script>
+  </body>
+</html>
