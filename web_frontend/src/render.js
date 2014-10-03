@@ -20,10 +20,10 @@ function render(state) {
     page = feedPage(state)
   }
 
-  return h('.homeapp.container', { 'style': { 'visibility': 'hidden' } }, [
+  return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
     mercury.partial(header, state.events, state.user.idStr),
-    page
+    h('.container', page)
   ])
 }
 
@@ -31,13 +31,18 @@ function render(state) {
 // =================
 
 function header(events, uId) {
-  var sep = function() { return h('small', ' / ') }
-  return h('.nav-header', [
-    h('strong', 'phoenix'),
-    sep(), a('#/', 'latest'),
-    sep(), a('#/profile/' + uId, 'profile'),
-    sep(), a('#/network', 'network'),
-    a('#', 'your intro token', { className: 'pull-right', 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }) })
+  return h('.nav.navbar.navbar-default', [
+    h('.container', [
+      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
+      h('ul.nav.navbar-nav', [
+        h('li', a('#/', 'latest')),
+        h('li', a('#/profile/' + uId, 'profile')),
+        h('li', a('#/network', 'network'))
+      ]),
+      h('ul.nav.navbar-nav.navbar-right', [
+        h('li', a('#', 'your intro token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }, { preventDefault: true }) }))
+      ])
+    ])
   ])
 }
 
@@ -65,7 +70,7 @@ function mascot(quote) {
 function feed(feed, rev) {
   var messages = feed.map(message)
   if (rev) messages.reverse()
-  return h('table.feed', messages)
+  return h('.feed', messages)
 }
 
 function message(msg) {
@@ -77,11 +82,9 @@ function message(msg) {
     default: content = h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString())); break
   }
 
-  return h('tr', [
-    h('td.content', [
-      h('p', [h('strong', util.escapePlain(msg.authorNickname)), h('small', util.prettydate(new Date(msg.timestamp)))]),
-      content
-    ])
+  return h('.panel.panel-default', [
+    h('.panel-heading', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
+    h('.panel-body', content)
   ])
 }
 
@@ -97,8 +100,8 @@ function syncButton(events, isSyncing) {
 
 function feedPage(state) {
   return h('.feed-page.row', [
-    h('.col-xs-8', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
-    h('.col-xs-4', [feedControls(state), mercury.partial(profileLinks, state.profiles)])
+    h('.col-xs-7', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
+    h('.col-xs-5', [feedControls(state), mercury.partial(profileLinks, state.profiles)])
   ])
 }
 
@@ -107,21 +110,30 @@ function feedControls(state) {
   var publishForm = state.publishForm
   var lastSync = state.lastSync
   return h('.feed-ctrls', [
-    h('div.feed-preview', new widgets.Markdown(publishForm.preview)),
-    h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
-      h('div', h('textarea.form-control', {
-        name: 'publishText',
-        placeholder: 'Publish...',
-        rows: publishForm.textFieldRows,
-        value: publishForm.textFieldValue,
-        'ev-change': mercury.valueEvent(events.setPublishFormTextField),
-        'ev-keyup': mercury.valueEvent(events.updatePublishFormTextField)
-      })),
-      h('button.btn.btn-default', 'Post')
+    h('.panel.panel-default', [
+      h('.panel-body', [
+        h('div.feed-preview', new widgets.Markdown(publishForm.preview)),
+      ])
+    ]),
+    h('.panel.panel-default', [
+      h('.panel-body', [
+        h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
+          h('p', h('textarea.form-control', {
+            name: 'publishText',
+            placeholder: 'Publish...',
+            rows: publishForm.textFieldRows,
+            value: publishForm.textFieldValue,
+            'ev-change': mercury.valueEvent(events.setPublishFormTextField),
+            'ev-keyup': mercury.valueEvent(events.updatePublishFormTextField)
+          })),
+          h('button.btn.btn-default', 'Post')
+        ])
+      ])
     ]),
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [
       syncButton(events, state.isSyncing),
+      ' ',
       h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add feed...')
     ])
   ])
@@ -143,12 +155,12 @@ function profilePage(state, profid) {
   var profile = (typeof profi != 'undefined') ? state.profiles[profi] : undefined
   if (!profile) {
     return h('.profile-page.row', [
-      h('.col-xs-8', [notfound('that user')])
+      h('.col-xs-7', [notfound('that user')])
     ])
   }
   return h('.profile-page.row', [
-    h('.col-xs-8', [feed(profile.feed, true), mercury.partial(mascot, 'Is it hot in here?')]),
-    h('.col-xs-4', [mercury.partial(profileControls, state.events, profile)])
+    h('.col-xs-7', [feed(profile.feed, true), mercury.partial(mascot, 'Is it hot in here?')]),
+    h('.col-xs-5', [mercury.partial(profileControls, state.events, profile)])
   ])
 }
 
@@ -160,7 +172,7 @@ function profileControls(events, profile) {
     h('h2', profile.nickname),
     h('h3', h('small', 'joined '+profile.joinDate)),
     h('p', followBtn),
-    h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }) }))
+    h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
   ])
 }
 
@@ -169,18 +181,18 @@ function profileControls(events, profile) {
 
 function networkPage(state) {
   return h('.network-page.row', [
-    h('.col-xs-8', [pubservers(state.events, state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
-    h('.col-xs-4', [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)])
+    h('.col-xs-7', [pubservers(state.events, state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
+    h('.col-xs-5', [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)])
   ])
 }
 
 function pubservers(events, servers) {
-  return h('table.servers', servers.map(server.bind(null, events)))
+  return h('.servers', servers.map(server.bind(null, events)))
 }
 
 function server(events, server) {
-  return h('tr', [
-    h('td.content', [
+  return h('.panel.panel-default', [
+    h('.panel-body', [
       h('h3', a(server.url, server.hostname)),
       h('p', h('button.btn.btn-default', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'Remove'))
     ])
@@ -190,7 +202,7 @@ function server(events, server) {
 function networkControls(events, lastSync, isSyncing) {
   return h('.network-ctrls', [
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
-    h('p', [syncButton(events, isSyncing), h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
+    h('p', [syncButton(events, isSyncing), ' ', h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
   ])
 }
 
