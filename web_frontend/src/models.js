@@ -25,7 +25,8 @@ var defaults = {
     route: '',
     publishForm: {
       textFieldValue: '',
-      textFieldRows: 1
+      textFieldRows: 1,
+      preview: ''
     },
 
     // app data
@@ -85,7 +86,8 @@ function createHomeApp(events, initialState) {
     route:       mercury.value(state.route),
     publishForm: mercury.struct({
       textFieldValue: mercury.value(state.publishForm.textFieldValue),
-      textFieldRows:  mercury.value(state.publishForm.textFieldRows)
+      textFieldRows:  mercury.value(state.publishForm.textFieldRows),
+      preview:        mercury.value(state.preview)
     }),
     events:      events,
 
@@ -209,8 +211,9 @@ function createHomeApp(events, initialState) {
     if (!a) return false
     for (var i=0; i < ha.feed.getLength(); i++) {
       var b = ha.feed.get(i)
-      if (a.authorStr == b.authorStr && a.sequence == b.sequence)
+      if (util.toHexString(a.signature) == util.toHexString(b.signature)) {
         return true
+      }
     }
     return false
   }

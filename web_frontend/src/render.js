@@ -1,7 +1,8 @@
-var mercury = require('mercury')
-var h = require('mercury').h
-var util = require('../../lib/util')
+var mercury     = require('mercury')
+var h           = require('mercury').h
+var util        = require('../../lib/util')
 var valueEvents = require('./lib/value-events')
+var widgets     = require('./lib/widgets')
 
 module.exports = render
 
@@ -71,7 +72,7 @@ function message(msg) {
   var content;
   switch (msg.type.toString()) {
     case 'init': content = h('strong', h('small', 'Account created')); break
-    case 'text': content = util.escapePlain(msg.message.plain); break
+    case 'text': content = new widgets.Markdown(util.escapePlain(msg.message.plain)); break
     case 'profile': content = h('strong', h('small', 'Is now known as ' + util.escapePlain(msg.message.nickname))); break
     default: content = h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString())); break
   }
@@ -79,7 +80,7 @@ function message(msg) {
   return h('tr', [
     h('td.content', [
       h('p', [h('strong', util.escapePlain(msg.authorNickname)), h('small', util.prettydate(new Date(msg.timestamp)))]),
-      h('p', content)
+      content
     ])
   ])
 }
@@ -106,6 +107,7 @@ function feedControls(state) {
   var publishForm = state.publishForm
   var lastSync = state.lastSync
   return h('.feed-ctrls', [
+    h('div.feed-preview', new widgets.Markdown(publishForm.preview)),
     h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
       h('div', h('textarea.form-control', {
         name: 'publishText',

@@ -18,6 +18,7 @@ exports.setRoute = function(state, route) {
 exports.updatePublishFormTextField = function(state, data) {
   // expand/contract field if there's content in there
   state.publishForm.textFieldRows.set((data.publishText) ? 3 : 1)
+  state.publishForm.preview.set(data.publishText)
 }
 
 exports.setPublishFormTextField = function(state, data) {
@@ -42,6 +43,7 @@ exports.submitPublishForm = function(state, data) {
     // reset the form
     state.publishForm.textFieldValue.set('')
     state.publishForm.textFieldRows.set(1)
+    state.publishForm.preview.set('')
   }, 100)
 }
 
