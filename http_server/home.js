@@ -60,7 +60,7 @@ function createServer(port, opts) {
         return serve(req.url)
       serve404();
     });
-    server.listen(port, '127.0.0.1');
+    server.listen(port, '127.0.0.1')
 
     // Setup the websocket host
     var wss = new WSServer({server: server, path: '/ws'})
@@ -72,6 +72,9 @@ function createServer(port, opts) {
       var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
       conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
     })
+
+    function onExit() { backend.close(); process.exit() }
+    process.on('SIGINT', onExit).on('SIGTERM', onExit)
   })
 }
 

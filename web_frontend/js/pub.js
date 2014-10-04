@@ -14011,414 +14011,6 @@ if (WebSocket) ws.prototype = WebSocket.prototype;
 },{}],256:[function(require,module,exports){
 module.exports=require(53)
 },{"/home/pfrazee/phoenix/node_modules/mercury/node_modules/observ-struct/node_modules/xtend/index.js":53}],257:[function(require,module,exports){
-var document = require('global/document')
-var window = require('global/window')
-var mercury = require('mercury')
-
-var models = require('./lib/models.js')
-var bus = require('./lib/business.js')
-var createEvents = require('./home/events.js')
-var render = require('./home/render.js')
-var handlers = require('./home/handlers.js')
-
-// init app
-var state = createApp()
-mercury.app(document.body, state, render)
-handlers.setRoute(state, window.location.hash)
-
-module.exports = createApp
-function createApp() {
-  var events = createEvents()
-  var state = window.state = models.homeApp(events)
-  bus.setupHomeApp(state)
-  wireUpEvents(state, events)
-  return state
-}
-
-function wireUpEvents(state, events) {
-  for (var k in handlers) {
-    events[k](handlers[k].bind(null, state))
-  }
-}
-},{"./home/events.js":258,"./home/handlers.js":259,"./home/render.js":260,"./lib/business.js":261,"./lib/models.js":262,"global/document":7,"global/window":8,"mercury":15}],258:[function(require,module,exports){
-var window = require('global/window')
-var HashRouter = require('hash-router')
-var Event = require('geval')
-var mercury = require('mercury')
-
-module.exports = createEvents
-function createEvents() {
-  var events = mercury.input([
-    // feed page publish form
-    'updatePublishFormTextField',
-    'setPublishFormTextField',
-    'submitPublishForm',
-
-    // network page
-    'addServer',
-    'removeServer',
-
-    // common buttons
-    'addFeed',
-    'showIntroToken',
-    'follow',
-    'unfollow',
-    'sync'
-  ])
-  events.setRoute = EventRouter()
-  return events
-}
-
-function EventRouter() {
-  var router = HashRouter()
-  window.addEventListener('hashchange', router)
-
-  return Event(function (emit) {
-    router.on('hash', emit)
-  })
-}
-
-},{"geval":6,"global/window":8,"hash-router":9,"mercury":15}],259:[function(require,module,exports){
-var models = require('../lib/models')
-var bus = require('../lib/business')
-
-exports.setRoute = function(state, route) {
-  route = route.substr(2) || 'feed'
-  if (route.indexOf('profile/') === 0) {
-    var profid = route.slice(8)
-    bus.fetchProfileFeed(state, profid)
-  }
-  else if (route == 'network') {
-    bus.fetchServers(state)
-  }
-  else {
-    bus.fetchFeed(state)
-  }
-  state.route.set(route)
-}
-
-exports.updatePublishFormTextField = function(state, data) {
-  // expand/contract field if there's content in there
-  state.publishForm.textFieldRows.set((data.publishText) ? 3 : 1)
-  state.publishForm.preview.set(data.publishText)
-}
-
-exports.setPublishFormTextField = function(state, data) {
-  // update internal data
-  state.publishForm.textFieldValue.set(data.publishText)
-}
-
-exports.submitPublishForm = function(state, data) {
-  // update textarea
-  state.publishForm.textFieldValue.set(data.publishText)
-  var str = (state.publishForm.textFieldValue()).trim()
-  if (!str) return
-
-  // make the post
-  bus.publishText(state, str, function(err) {
-    if (err) throw err // :TODO: put in gui
-    bus.fetchFeed(state) // pull down the update
-  })
-
-  // this horrifying setTimeout hack is explained at [1]
-  setTimeout(function() {
-    // reset the form
-    state.publishForm.textFieldValue.set('')
-    state.publishForm.textFieldRows.set(1)
-    state.publishForm.preview.set('')
-  }, 100)
-}
-
-exports.addFeed = function(state) {
-  var token = prompt('Introduction token of the user:')
-  if (!token) return
-  bus.addFeed(state, token, function(err) {
-    if (err) alert(err.toString())
-  })
-}
-
-exports.showIntroToken = function(state, data) {
-  bus.fetchServers(state, function() {
-    // :TODO: it's not actually accurate that the user might be at all of these ndoes
-    //        Get an accurate list!
-    var servers = state.servers().map(function(s) { return [s.hostname, s.port] })
-    var t = JSON.stringify({id: data.id, relays: servers})
-    prompt('Intro Token', t)
-  })
-}
-
-exports.follow = function(state, data) {
-  bus.addFeed(state, {id: data.id}, function(err) {
-    if (err) alert(err.toString())
-  })
-}
-
-exports.unfollow = function(state, data) {
-  bus.removeFeed(state, data.id, function(err) {
-    if (err) alert(err.toString())
-  })
-}
-
-exports.sync = function(state) {
-  state.isSyncing.set(true)
-  bus.client.api.syncNetwork(function(err, results) {
-    state.isSyncing.set(false)
-    if (err) return res.writeHead(500), res.end(err)
-    state.lastSync.set(new Date())
-    // :TODO:
-    // if (results && Object.keys(results).length)
-      // backend.local.lastSyncResults = results
-    if (state.route() == 'feed')
-      bus.fetchFeed(state)
-  })
-}
-
-exports.addServer = function(state) {
-  var address = prompt('Address of the server (address[:port]).')
-  if (!address) return
-  bus.addServer(state, address, function(err) {
-    if (err) alert(err.toString())
-  })
-}
-
-exports.removeServer = function(state, data) {
-  if (!confirm('Are you sure you want to remove this server?')) return
-  bus.removeServer(state, [data.hostname, data.port], function(err) {
-    if (err) alert(err.toString())
-  })
-}
-
-/*
-1: the setTimeout hack in submitPublishForm()
-Basically, we need the `state.publishForm.textFieldValue.set(data.publishText)` to run its course
-before we can call `state.publishForm.textFieldValue.set('')` and have an effect. This wouldn't be
-an issue if the textarea's change event always fired before the submit event, but, because we trigger
-with ctrl+enter and are trying not to much directly with the DOM events (Mercury-land) this is our solution.
-*/
-},{"../lib/business":261,"../lib/models":262}],260:[function(require,module,exports){
-var mercury     = require('mercury')
-var h           = require('mercury').h
-var util        = require('../../../lib/util')
-var valueEvents = require('../lib/value-events')
-var widgets     = require('../lib/widgets')
-
-module.exports = render
-
-// Layout
-// ======
-
-function render(state) {
-  var page
-  if (state.route == 'network') {
-    page = networkPage(state)
-  } else if (state.route.indexOf('profile/') === 0) {
-    var profid = state.route.slice(8)
-    page = profilePage(state, profid)
-  } else {
-    page = feedPage(state)
-  }
-
-  return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
-    stylesheet('/css/home.css'),
-    mercury.partial(header, state.events, state.user.idStr),
-    h('.container', page)
-  ])
-}
-
-// Common Components
-// =================
-
-function header(events, uId) {
-  return h('.nav.navbar.navbar-default', [
-    h('.container', [
-      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
-      h('ul.nav.navbar-nav', [
-        h('li', a('#/', 'latest')),
-        h('li', a('#/profile/' + uId, 'profile')),
-        h('li', a('#/network', 'network'))
-      ]),
-      h('ul.nav.navbar-nav.navbar-right', [
-        h('li', a('#', 'your intro token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }, { preventDefault: true }) }))
-      ])
-    ])
-  ])
-}
-
-function notfound(what, suggestion) {
-  return h('div', [
-    h('h3', 'Sorry, '+what+' was not found.' + (suggestion || '')),
-    h('p', h('small', 'here\'s a cuddly kitty to help you through this trying time')),
-    randomcat()
-  ])
-}
-
-var cats = ['goingdown', 'hophop', 'huuhuuu', 'pillow-spin', 'shred', 'tailbites', 'woahwoah']
-function randomcat() {
-  var cat = cats[Math.round(Math.random() * 7)] || cats[0]
-  return img('/img/loading/'+cat+'.gif')
-}
-
-function mascot(quote) {
-  return h('.class', [
-    img('/img/logo.png'),
-    h('strong', [h('small', quote)])
-  ])
-}
-
-function feed(feed, rev) {
-  var messages = feed.map(message)
-  if (rev) messages.reverse()
-  return h('.feed', messages)
-}
-
-function message(msg) {
-  var content;
-  switch (msg.type.toString()) {
-    case 'init': content = h('strong', h('small', 'Account created')); break
-    case 'text': content = new widgets.Markdown(util.escapePlain(msg.message.plain)); break
-    case 'profile': content = h('strong', h('small', 'Is now known as ' + util.escapePlain(msg.message.nickname))); break
-    default: content = h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString())); break
-  }
-
-  return h('.panel.panel-default', [
-    h('.panel-heading', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
-    h('.panel-body', content)
-  ])
-}
-
-function syncButton(events, isSyncing) {
-  if (isSyncing) {
-    return h('button.btn.btn-default', { disabled: true }, 'Syncing...')
-  }
-  return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync')
-}
-
-// Feed Page
-// =========
-
-function feedPage(state) {
-  return h('.feed-page.row', [
-    h('.col-xs-7', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
-    h('.col-xs-5', [feedControls(state), mercury.partial(profileLinks, state.profiles)])
-  ])
-}
-
-function feedControls(state) {
-  var events = state.events
-  var publishForm = state.publishForm
-  var lastSync = state.lastSync
-  return h('.feed-ctrls', [
-    h('.panel.panel-default', [
-      h('.panel-body', [
-        h('div.feed-preview', new widgets.Markdown(publishForm.preview)),
-      ])
-    ]),
-    h('.panel.panel-default', [
-      h('.panel-body', [
-        h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
-          h('p', h('textarea.form-control', {
-            name: 'publishText',
-            placeholder: 'Publish...',
-            rows: publishForm.textFieldRows,
-            value: publishForm.textFieldValue,
-            'ev-change': mercury.valueEvent(events.setPublishFormTextField),
-            'ev-keyup': mercury.valueEvent(events.updatePublishFormTextField)
-          })),
-          h('button.btn.btn-default', 'Post')
-        ])
-      ])
-    ]),
-    h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
-    h('p', [
-      syncButton(events, state.isSyncing),
-      ' ',
-      h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add feed...')
-    ])
-  ])
-}
-
-function profileLinks(profiles) {
-  return h('div', profiles.map(profileLink))
-}
-
-function profileLink(profile) {
-  return h('div', a('/#/profile/'+profile.idStr, profile.nickname || '???'))
-}
-
-// Profile Page
-// ============
-
-function profilePage(state, profid) {
-  var profi = state.profileMap[profid]
-  var profile = (typeof profi != 'undefined') ? state.profiles[profi] : undefined
-  if (!profile) {
-    return h('.profile-page.row', [
-      h('.col-xs-7', [notfound('that user')])
-    ])
-  }
-  return h('.profile-page.row', [
-    h('.col-xs-7', [feed(profile.feed, true), mercury.partial(mascot, 'Is it hot in here?')]),
-    h('.col-xs-5', [mercury.partial(profileControls, state.events, profile)])
-  ])
-}
-
-function profileControls(events, profile) {
-  var followBtn = (profile.isFollowing) ?
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Unfollow') :
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Follow')
-  return h('.profile-ctrls', [
-    h('h2', profile.nickname),
-    h('h3', h('small', 'joined '+profile.joinDate)),
-    h('p', followBtn),
-    h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
-  ])
-}
-
-// Network Page
-// ============
-
-function networkPage(state) {
-  return h('.network-page.row', [
-    h('.col-xs-7', [pubservers(state.events, state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
-    h('.col-xs-5', [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)])
-  ])
-}
-
-function pubservers(events, servers) {
-  return h('.servers', servers.map(server.bind(null, events)))
-}
-
-function server(events, server) {
-  return h('.panel.panel-default', [
-    h('.panel-body', [
-      h('h3', a(server.url, server.hostname)),
-      h('p', h('button.btn.btn-default', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'Remove'))
-    ])
-  ])
-}
-
-function networkControls(events, lastSync, isSyncing) {
-  return h('.network-ctrls', [
-    h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
-    h('p', [syncButton(events, isSyncing), ' ', h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
-  ])
-}
-
-// Helpers
-// =======
-
-function stylesheet(href) {
-  return h('link', { rel: 'stylesheet', href: href })
-}
-function a(href, text, opts) {
-  opts = opts || {}
-  opts.href = href
-  return h('a', opts, text)
-}
-function img(src) {
-  return h('img', { src: src })
-}
-},{"../../../lib/util":1,"../lib/value-events":263,"../lib/widgets":264,"mercury":15}],261:[function(require,module,exports){
 (function (Buffer){
 var WSStream = require('websocket-stream')
 var prpc = require('phoenix-rpc')
@@ -14586,7 +14178,7 @@ exports.fetchProfileFeed = function(state, profid, cb) {
       }
 
       // fetch isFollowing state
-      if (state.user.idStr() != idStr) {
+      if (state.user && state.user.idStr() != idStr) {
         var cb2 = done()
         client.api.isFollowing(util.toBuffer(profid), function(err) {
           profile.isFollowing.set(!err)
@@ -14707,7 +14299,7 @@ exports.removeServer = function(state, addr, cb) {
   })
 }
 }).call(this,require("buffer").Buffer)
-},{"../../../lib/util":1,"./models":262,"buffer":268,"multicb":131,"phoenix-rpc":132,"pull-stream":206,"stream-to-pull-stream":212,"through":214,"websocket-stream":229}],262:[function(require,module,exports){
+},{"../../../lib/util":1,"./models":258,"buffer":268,"multicb":131,"phoenix-rpc":132,"pull-stream":206,"stream-to-pull-stream":212,"through":214,"websocket-stream":229}],258:[function(require,module,exports){
 (function (Buffer){
 // var cuid = require('cuid')
 var extend = require('xtend')
@@ -14872,7 +14464,7 @@ function createServer(initialState) {
   return mercury.struct(state)
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":268,"mercury":15,"msgpack-js":117,"xtend":256}],263:[function(require,module,exports){
+},{"buffer":268,"mercury":15,"msgpack-js":117,"xtend":256}],259:[function(require,module,exports){
 var extend = require('xtend')
 var BaseEvent = require('value-event/base-event')
 var getFormData = require('form-data-set/element')
@@ -14909,7 +14501,7 @@ exports.submit = BaseEvent(function (e) {
   return data;
 })
 
-},{"form-data-set/element":3,"value-event/base-event":215,"value-event/click":216,"xtend":256}],264:[function(require,module,exports){
+},{"form-data-set/element":3,"value-event/base-event":215,"value-event/click":216,"xtend":256}],260:[function(require,module,exports){
 var util  = require('../../../lib/util')
 var mdlib = require('markdown').markdown
 
@@ -14928,7 +14520,219 @@ Markdown.prototype.init = function () {
 Markdown.prototype.update = function (prev, elem) {
   elem.innerHTML = mdlib.toHTML(util.escapePlain(this.rawtext))
 }
-},{"../../../lib/util":1,"markdown":13}],265:[function(require,module,exports){
+},{"../../../lib/util":1,"markdown":13}],261:[function(require,module,exports){
+var document = require('global/document')
+var window = require('global/window')
+var mercury = require('mercury')
+
+var models = require('./lib/models.js')
+var bus = require('./lib/business.js')
+var createEvents = require('./pub/events.js')
+var render = require('./pub/render.js')
+var handlers = require('./pub/handlers.js')
+
+// init app
+var state = createApp()
+mercury.app(document.body, state, render)
+handlers.setRoute(state, window.location.hash)
+
+module.exports = createApp
+function createApp() {
+  var events = createEvents()
+  var state = window.state = models.pubApp(events)
+  bus.setupPubApp(state)
+  wireUpEvents(state, events)
+  return state
+}
+
+function wireUpEvents(state, events) {
+  for (var k in handlers) {
+    events[k](handlers[k].bind(null, state))
+  }
+}
+},{"./lib/business.js":257,"./lib/models.js":258,"./pub/events.js":262,"./pub/handlers.js":263,"./pub/render.js":264,"global/document":7,"global/window":8,"mercury":15}],262:[function(require,module,exports){
+var window = require('global/window')
+var HashRouter = require('hash-router')
+var Event = require('geval')
+var mercury = require('mercury')
+
+module.exports = createEvents
+function createEvents() {
+  var events = mercury.input([
+    // common buttons
+    'showIntroToken',
+  ])
+  events.setRoute = EventRouter()
+  return events
+}
+
+function EventRouter() {
+  var router = HashRouter()
+  window.addEventListener('hashchange', router)
+
+  return Event(function (emit) {
+    router.on('hash', emit)
+  })
+}
+
+},{"geval":6,"global/window":8,"hash-router":9,"mercury":15}],263:[function(require,module,exports){
+var models = require('../lib/models')
+var bus = require('../lib/business')
+
+exports.setRoute = function(state, route) {
+  route = route.substr(2) || 'feed'
+  if (route.indexOf('profile/') === 0) {
+    var profid = route.slice(8)
+    bus.fetchProfileFeed(state, profid)
+  }
+  state.route.set(route)
+}
+
+exports.showIntroToken = function(state, data) {
+  var t = JSON.stringify({id: data.id, relays: []}) // :TODO: relays
+  prompt('Intro Token', t)
+}
+},{"../lib/business":257,"../lib/models":258}],264:[function(require,module,exports){
+var mercury     = require('mercury')
+var h           = require('mercury').h
+var util        = require('../../../lib/util')
+var valueEvents = require('../lib/value-events')
+var widgets     = require('../lib/widgets')
+
+module.exports = render
+
+// Layout
+// ======
+
+function render(state) {
+  var page
+  if (state.route.indexOf('profile/') === 0) {
+    var profid = state.route.slice(8)
+    page = profilePage(state, profid)
+  } else {
+    page = membersPage(state)
+  }
+
+  return h('.pubapp', { 'style': { 'visibility': 'hidden' } }, [
+    stylesheet('/css/pub.css'),
+    mercury.partial(header),
+    h('.container', page)
+  ])
+}
+
+// Common Components
+// =================
+
+function header(events, uId) {
+  return h('.nav.navbar.navbar-default', [
+    h('.container', [
+      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
+      h('ul.nav.navbar-nav', [
+        h('li', a('#/', 'members'))
+      ])
+    ])
+  ])
+}
+
+function notfound(what, suggestion) {
+  return h('div', [
+    h('h3', 'Sorry, '+what+' was not found.' + (suggestion || '')),
+    h('p', h('small', 'here\'s a cuddly kitty to help you through this trying time')),
+    randomcat()
+  ])
+}
+
+var cats = ['goingdown', 'hophop', 'huuhuuu', 'pillow-spin', 'shred', 'tailbites', 'woahwoah']
+function randomcat() {
+  var cat = cats[Math.round(Math.random() * 7)] || cats[0]
+  return img('/img/loading/'+cat+'.gif')
+}
+
+function mascot(quote) {
+  return h('.class', [
+    img('/img/logo.png'),
+    h('strong', [h('small', quote)])
+  ])
+}
+
+function feed(feed, rev) {
+  var messages = feed.map(message)
+  if (rev) messages.reverse()
+  return h('.feed', messages)
+}
+
+function message(msg) {
+  var content;
+  switch (msg.type.toString()) {
+    case 'init': content = h('strong', h('small', 'Account created')); break
+    case 'text': content = new widgets.Markdown(util.escapePlain(msg.message.plain)); break
+    case 'profile': content = h('strong', h('small', 'Is now known as ' + util.escapePlain(msg.message.nickname))); break
+    default: content = h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString())); break
+  }
+
+  return h('.panel.panel-default', [
+    h('.panel-heading', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
+    h('.panel-body', content)
+  ])
+}
+
+// Members Page
+// ============
+
+function membersPage(state) {
+  return h('.members-page.row', [
+    h('.col-xs-7', [members(state.profiles), mercury.partial(mascot, 'Welcome to the phoenix network!')])
+  ])
+}
+
+function members(profiles) {
+  return h('div', profiles.map(member))
+}
+
+function member(profile) {
+  return h('h3', a('/#/profile/'+profile.idStr, profile.nickname || '???'))
+}
+
+// Profile Page
+// ============
+
+function profilePage(state, profid) {
+  var profi = state.profileMap[profid]
+  var profile = (typeof profi != 'undefined') ? state.profiles[profi] : undefined
+  if (!profile) {
+    return h('.profile-page.row', [
+      h('.col-xs-7', [notfound('that user')])
+    ])
+  }
+  return h('.profile-page.row', [
+    h('.col-xs-7', [feed(profile.feed, true), mercury.partial(mascot, 'Is it hot in here?')]),
+    h('.col-xs-5', [mercury.partial(profileControls, state.events, profile)])
+  ])
+}
+
+function profileControls(events, profile) {
+  return h('.profile-ctrls', [
+    h('h2', profile.nickname),
+    h('h3', h('small', 'joined '+profile.joinDate)),
+    h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
+  ])
+}
+
+// Helpers
+// =======
+
+function stylesheet(href) {
+  return h('link', { rel: 'stylesheet', href: href })
+}
+function a(href, text, opts) {
+  opts = opts || {}
+  opts.href = href
+  return h('a', opts, text)
+}
+function img(src) {
+  return h('img', { src: src })
+}
+},{"../../../lib/util":1,"../lib/value-events":259,"../lib/widgets":260,"mercury":15}],265:[function(require,module,exports){
 
 },{}],266:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
@@ -20544,4 +20348,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":307,"_process":288,"inherits":285}]},{},[257]);
+},{"./support/isBuffer":307,"_process":288,"inherits":285}]},{},[261]);

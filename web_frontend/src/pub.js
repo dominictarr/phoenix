@@ -4,9 +4,9 @@ var mercury = require('mercury')
 
 var models = require('./lib/models.js')
 var bus = require('./lib/business.js')
-var createEvents = require('./home/events.js')
-var render = require('./home/render.js')
-var handlers = require('./home/handlers.js')
+var createEvents = require('./pub/events.js')
+var render = require('./pub/render.js')
+var handlers = require('./pub/handlers.js')
 
 // init app
 var state = createApp()
@@ -16,8 +16,8 @@ handlers.setRoute(state, window.location.hash)
 module.exports = createApp
 function createApp() {
   var events = createEvents()
-  var state = window.state = models.homeApp(events)
-  bus.setupHomeApp(state)
+  var state = window.state = models.pubApp(events)
+  bus.setupPubApp(state)
   wireUpEvents(state, events)
   return state
 }

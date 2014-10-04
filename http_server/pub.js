@@ -4,6 +4,8 @@ var path     = require('path')
 var pull     = require('pull-stream')
 var toPull   = require('stream-to-pull-stream')
 var concat   = require('concat-stream')
+var WSServer = require('ws').Server
+var WSStream = require('websocket-stream')
 var prpc     = require('phoenix-rpc')
 var connect  = require('../lib/backend')
 var util     = require('../lib/util')
@@ -56,6 +58,17 @@ function createServer(port) {
 			conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
 		})
 		server.listen(port)
+
+    // Setup the websocket host
+    var wss = new WSServer({server: server, path: '/ws'})
+    wss.on('connection', function(ws) {
+      console.log('WS: new websocket client connected')
+      var conn = WSStream(ws)
+      conn.on('error', function(err) { console.log('WS ERROR', err) })
+      // :TODO: proper perms
+      var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
+      conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
+    })
 
 		function onExit() { backend.close(); process.exit() }
 		process.on('SIGINT', onExit).on('SIGTERM', onExit)
