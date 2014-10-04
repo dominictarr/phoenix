@@ -11,7 +11,7 @@ exports.addNode = function(opts) {
 
 		var host = opts.host.split(':');
 		var addr = host[0];
-		var port = +host[1] || 64000;
+		var port = +host[1] || 80;
 
 		backend.addNode(addr, port, function(err) {
 			if (err) console.error(err), backend.close();
@@ -42,7 +42,7 @@ exports.delNode = function(opts) {
 	
 		var host = opts.host.split(':');
 		var addr = host[0];
-		var port = +host[1] || 64000;
+		var port = +host[1] || 80;
 
 		console.log('Removing', addr, port);
 

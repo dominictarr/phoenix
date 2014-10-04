@@ -15,8 +15,8 @@ console.log(process.argv);
 
 // Start pub service
 if (pubPort !== 0) {
-  require('./pub').createServer(pubPort || 64000);
-  console.log('Phoenix Pub Server.....listening publicly on localhost:' + (pubPort || 64000));
+  require('./pub').createServer(pubPort || 80);
+  console.log('Phoenix Pub Server.....listening publicly on localhost:' + (pubPort || 80));
 }
 
 // Start home service

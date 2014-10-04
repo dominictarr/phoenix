@@ -327,7 +327,7 @@ function createHomeApp(events, initialState) {
     if (typeof addr == 'string')
       addr = addr.split(':')
     if (!addr[0]) return cb(new Error('Invalid address'))
-    addr[1] = +addr[1] || 64000
+    addr[1] = +addr[1] || 80
     
     client.api.addNode(addr[0], addr[1], function(err) {
       if (err) return cb(err)
@@ -340,7 +340,7 @@ function createHomeApp(events, initialState) {
     if (typeof addr == 'string')
       addr = addr.split(':')
     if (!addr[0]) return cb(new Error('Invalid address'))
-    addr[1] = +addr[1] || 64000
+    addr[1] = +addr[1] || 80
 
     client.api.delNode(addr[0], addr[1], function(err) {
       if (err) return cb(err)

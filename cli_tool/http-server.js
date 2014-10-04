@@ -5,7 +5,7 @@ var connect = require('../lib/backend');
 
 exports.start = function(opts) {
   var homePort = opts.homeport || 65000
-  var pubPort = (opts.pub) ? (opts.pubport || 64000) : 0
+  var pubPort = (opts.pub) ? (opts.pubport || 80) : 0
 
   if (opts.daemon) {
     // Daemon-mode
