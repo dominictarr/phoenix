@@ -6,7 +6,7 @@
 // Reset and dependencies
 @import "bootstrap/normalize";
 @import "bootstrap/print";
-// @import "bootstrap/glyphicons";
+@import "bootstrap/glyphicons";
 
 // Core CSS
 @import "bootstrap/scaffolding";
@@ -53,4 +53,60 @@
 // Home styles
 .homeapp {
   visibility: visible !important;
+}
+
+$timeline-staff-pos-x: 22px;
+
+.feed {
+  position: relative;
+
+  &:before {
+    display: block;
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: $timeline-staff-pos-x;
+    width: 4px;
+    background-color: #f3f3f3;
+    z-index: -1;
+  }
+
+  .panel {
+    margin-bottom: 12px;
+
+    .panel-heading {
+      padding: 2px 8px;
+    }
+    .panel-body {
+      padding-top: 8px;
+      padding-right: 16px;
+      padding-left: 16px;
+      padding-bottom: 2px;
+    }
+  }
+
+  .phoenix-event {
+    margin-bottom: 16px;
+    margin-left: $timeline-staff-pos-x - 14px;
+
+    .event-icon {
+      float: left;
+      width: 32px;
+      height: 32px;
+      margin-top: -7px;
+      line-height: 32px;
+      color: #666;
+      text-align: center;
+      background-color: #f3f3f3;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    .event-body {
+      display: inline-block;
+      margin-left: 6px;
+    }
+  }
+
 }

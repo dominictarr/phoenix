@@ -76,15 +76,32 @@ function feed(feed, rev) {
 function message(msg) {
   var content;
   switch (msg.type.toString()) {
-    case 'init': content = h('strong', h('small', 'Account created')); break
-    case 'text': content = new widgets.Markdown(util.escapePlain(msg.message.plain)); break
-    case 'profile': content = h('strong', h('small', 'Is now known as ' + util.escapePlain(msg.message.nickname))); break
-    default: content = h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString())); break
+    case 'init': return messageEvent(msg, 'account-created', 'Account created')
+    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + util.escapePlain(msg.message.nickname))
+    case 'text': return messageText(msg)
+    default: return h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString()))
   }
 
+
+}
+
+function messageText(msg) {
   return h('.panel.panel-default', [
     h('.panel-heading', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
-    h('.panel-body', content)
+    h('.panel-body', new widgets.Markdown(util.escapePlain(msg.message.plain)))
+  ])
+}
+
+function messageEvent(msg, type, text) {
+  var icon;
+  switch (type) {
+    case 'account-created': icon = '.glyphicon-home'; break
+    case 'account-change': icon = '.glyphicon-user'; break
+    default: icon = '.glyphicon-asterisk'
+  }
+  return h('.phoenix-event', [
+    h('span.event-icon.glyphicon'+icon),
+    h('.event-body', text),
   ])
 }
 
