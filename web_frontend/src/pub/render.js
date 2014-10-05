@@ -21,6 +21,7 @@ function render(state) {
   return h('.pubapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/pub.css'),
     mercury.partial(header),
+    mercury.partial(connStatus, state.events, state.conn),
     h('.container', page)
   ])
 }
@@ -38,6 +39,12 @@ function header(events, uId) {
     ])
   ])
 }
+
+function connStatus(events, connStatus) {
+  if (!connStatus.hasError)
+    return h('div')
+  return h('.container', h('.alert.alert-danger', connStatus.explanation))
+} 
 
 function notfound(what, suggestion) {
   return h('div', [

@@ -8,17 +8,65 @@ var multicb = require('multicb')
 var util = require('../../../lib/util')
 var models = require('./models')
 
-// setup the server api connection
-var client = exports.client = prpc.client()
-var conn = WSStream('ws://' + window.location.host + '/ws')
-conn.on('error', function(e) { console.error('WS ERROR', e) })
-client.pipe(through(toBuffer)).pipe(conn).pipe(client)
+var client = exports.client = null
+
+// establishes the server api connection
+function setupClient(state) {
+  if (client) return
+
+  var conn = WSStream('ws://' + window.location.host + '/ws')
+  conn.on('error', handleClientError.bind(null, state))
+  conn.on('close', handleClientClose.bind(null, state))
+
+  client = exports.client = prpc.client()
+  client.pipe(through(toBuffer)).pipe(conn).pipe(client)
+
+  state.conn.hasError.set(false)
+  state.conn.explanation.set('')
+}
+
+// server api connection error handler
+function handleClientError(state, e) {
+  console.error('Connection to phoenix server error', e)
+}
+
+// server api connection close handler
+function handleClientClose(state, e) {
+  console.error('Lost connection to phoenix server')
+  state.conn.hasError.set(true)
+  countdownToClientReconnect(state, 10000, 'Lost connection with the backend. Has the phoenix server been closed? Retrying $TIME')
+}
+
+// helper to do client reconnects on drop
+function countdownToClientReconnect(state, dT, msg) {
+  var interval
+  var target = Date.now() + dT
+  function step() {
+    var remaining = target - Date.now()
+    if (remaining <= 0) {
+      // stop countdown
+      clearInterval(interval)
+      state.conn.explanation.set(msg.replace('$TIME', 'now...'))
+
+      // reconnect
+      client = exports.client = null
+      setupClient(state)
+    } else {
+      // update message
+      state.conn.explanation.set(msg.replace('$TIME', 'in ' + Math.round(remaining / 1000) + 's.'))
+    }
+  }
+  interval = setInterval(step, 1000)
+  step()
+}
+
 function toBuffer(chunk) {
   this.queue((Buffer.isBuffer(chunk)) ? chunk : new Buffer(chunk))
 }
 
 // pulls down remote data for the session
 exports.setupHomeApp = function(state) {
+  setupClient(state)
   // session
   client.api.getKeys(function(err, keys) {
     if (err) throw err
@@ -37,6 +85,7 @@ exports.setupHomeApp = function(state) {
 
 // pulls down remote data for the session
 exports.setupPubApp = function(state) {
+  setupClient(state)
   // followed profiles
   pull(toPull(client.api.following()), pull.drain(function (entry) { fetchProfile(state, entry.key) }))
 }

@@ -23,6 +23,10 @@ var defaults = {
       textFieldRows: 1,
       preview: ''
     },
+    conn: {
+      hasError: false,
+      explanation: ''
+    },
 
     // app data
     feed: [],
@@ -42,6 +46,10 @@ var defaults = {
   pubApp: {
     // gui state
     route: '',
+    conn: {
+      hasError: false,
+      explanation: ''
+    },
 
     // app data
     profiles: [],
@@ -96,6 +104,10 @@ function createHomeApp(events, initialState) {
       textFieldRows:  mercury.value(state.publishForm.textFieldRows),
       preview:        mercury.value(state.preview)
     }),
+    conn:        mercury.struct({
+      hasError:       mercury.value(state.conn.hasError),
+      explanation:    mercury.value(state.conn.explanation)
+    }),
     events:      events,
 
     feed:        mercury.array(state.feed.map(createMessage)),
@@ -103,10 +115,10 @@ function createHomeApp(events, initialState) {
     profileMap:  mercury.value(profileMap),
     servers:     mercury.array(state.servers.map(createServer)),
     user:        mercury.struct({
-      id:        mercury.value(state.user.id),
-      idStr:     mercury.value(state.user.idStr),
-      pubkey:    mercury.value(state.user.pubkey),
-      pubkeyStr: mercury.value(state.user.pubkeyStr)
+      id:             mercury.value(state.user.id),
+      idStr:          mercury.value(state.user.idStr),
+      pubkey:         mercury.value(state.user.pubkey),
+      pubkeyStr:      mercury.value(state.user.pubkeyStr)
     }),
     lastSync:   mercury.value(state.lastSync),
     isSyncing:  mercury.value(state.isSyncing)
@@ -125,6 +137,10 @@ function createPubApp(events, initialState) {
   // create object
   return mercury.struct({
     route:       mercury.value(state.route),
+    conn:        mercury.struct({
+      hasError:       mercury.value(state.conn.hasError),
+      explanation:    mercury.value(state.conn.explanation)
+    }),
     events:      events,
 
     profiles:    mercury.array(state.profiles.map(createProfile)),

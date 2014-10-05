@@ -23,6 +23,7 @@ function render(state) {
   return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
     mercury.partial(header, state.events, state.user.idStr),
+    mercury.partial(connStatus, state.events, state.conn),
     h('.container', page)
   ])
 }
@@ -44,6 +45,12 @@ function header(events, uId) {
       ])
     ])
   ])
+}
+
+function connStatus(events, connStatus) {
+  if (!connStatus.hasError)
+    return h('div')
+  return h('.container', h('.alert.alert-danger', connStatus.explanation))
 }
 
 function notfound(what, suggestion) {
