@@ -93,9 +93,15 @@ function messageText(msg) {
 }
 
 function messageEvent(msg, type, text) {
-  return h('.panel.panel-info', [
-    h('.panel-heading', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
-    h('.panel-body', h('small', text))
+  var icon;
+  switch (type) {
+    case 'account-created': icon = '.glyphicon-home'; break
+    case 'account-change': icon = '.glyphicon-user'; break
+    default: icon = '.glyphicon-asterisk'
+  }
+  return h('.phoenix-event', [
+    h('span.event-icon.glyphicon'+icon),
+    h('.event-body', text),
   ])
 }
 
