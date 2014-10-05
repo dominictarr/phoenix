@@ -10,7 +10,7 @@ var prpc     = require('phoenix-rpc')
 var connect  = require('../lib/backend')
 var util     = require('../lib/util')
 
-var allowedMethods = ['createReplicationStream']
+var allowedPublicMethods = ['createReplicationStream']
 
 function createServer(port) {
 	connect(function(err, backend) {
@@ -55,7 +55,8 @@ function createServer(port) {
 			// RPC-stream connection
 			console.log('Received CONNECT')
 			conn.write('HTTP/1.1 200 Connection Established\r\n\r\n')
-			conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
+      // :TODO: I think we may need to create a new prpc server here
+			conn.pipe(prpc.proxy(backend, allowedPublicMethods)).pipe(conn)
 		})
 		server.listen(port)
 
@@ -66,6 +67,7 @@ function createServer(port) {
       var conn = WSStream(ws)
       conn.on('error', function(err) { console.log('WS ERROR', err) })
       // :TODO: proper perms
+      // :TODO: I think we may need to create a new prpc server here
       var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
       conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
     })

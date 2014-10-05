@@ -4,8 +4,8 @@ var cfg     = require('../lib/config');
 var connect = require('../lib/backend');
 
 exports.start = function(opts) {
-  var homePort = opts.homeport || 65000
-  var pubPort = (opts.pub) ? (opts.pubport || 80) : 0
+  var homePort = opts.homeport || cfg.homeport
+  var pubPort = (opts.pub) ? (opts.pubport || cfg.pubport) : 0
 
   if (opts.daemon) {
     // Daemon-mode

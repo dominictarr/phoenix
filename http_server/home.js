@@ -60,7 +60,16 @@ function createServer(port, opts) {
         return serve(req.url)
       serve404();
     });
-    server.listen(port, '127.0.0.1')
+    server.on('connect', function(req, conn, head) {
+      // RPC-stream connection
+      console.log('Received CONNECT')
+      conn.write('HTTP/1.1 200 Connection Established\r\n\r\n')
+      // :TODO: proper perms
+      // :TODO: I think we may need to create a new prpc server here
+      var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
+      conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
+    })
+    server.listen(port)
 
     // Setup the websocket host
     var wss = new WSServer({server: server, path: '/ws'})
@@ -69,6 +78,7 @@ function createServer(port, opts) {
       var conn = WSStream(ws)
       conn.on('error', function(err) { console.log('WS ERROR', err) })
       // :TODO: proper perms
+      // :TODO: I think we may need to create a new prpc server here
       var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
       conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
     })

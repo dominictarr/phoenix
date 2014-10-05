@@ -14586,7 +14586,7 @@ exports.fetchProfileFeed = function(state, profid, cb) {
       }
 
       // fetch isFollowing state
-      if (state.user.idStr() != idStr) {
+      if (state.user && state.user.idStr() != idStr) {
         var cb2 = done()
         client.api.isFollowing(util.toBuffer(profid), function(err) {
           profile.isFollowing.set(!err)
