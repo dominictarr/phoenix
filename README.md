@@ -9,6 +9,8 @@ Social feeds without ads or owners. Be free!
 
 Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Relay servers optionally aggregate and redistribute the feeds.
 
+Join us in #scuttlebutt on freenode.
+
 ## Getting Started
 
 **To start on your localhost**
