@@ -54,3 +54,19 @@
 .homeapp {
   visibility: visible !important;
 }
+
+.feed {
+  position: relative;
+
+  &:before {
+    display: block;
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 36px;
+    width: 4px;
+    background-color: #f3f3f3;
+    z-index: -1;
+  }
+}
