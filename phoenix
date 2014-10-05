@@ -163,7 +163,7 @@ nomnom.command('serve')
     }
   })
   .callback(require('./cli_tool/http-server').start);
-nomnom.command('killserver')
+nomnom.command('stop')
   .help('Stops the web-server daemon if it\'s active.')
   .callback(require('./cli_tool/http-server').stop);
 /*nomnom.command('deploy')

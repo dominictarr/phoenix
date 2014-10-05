@@ -38,7 +38,7 @@ This will start the home server on 65000 and the pub server on port 80 (`-p`). T
 To stop it, run:
 
 ```
-./phoenix killserver
+./phoenix stop
 ```
 
 ## License
