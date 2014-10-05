@@ -1,73 +1,58 @@
-#feedpage {
-	form {
-		margin: 1em 0 0;
-		padding: 0;
-		textarea {
-			font-size: 15px;
-			line-height: 1.5em;
-			transition: none;
-			padding: 8px 10px;
-		}
-	}
-}
+
+$timeline-staff-pos-x: 22px;
 
 .feed {
-	margin-top: 1em;
+  position: relative;
 
-	.avatar {
-		width: 85px;
-		a img {
-			border-radius: 50%;
-			width: 64px;
-			height: 64px;
-			vertical-align: middle;
-		}
-	}
-	.content {
-		padding: 12px;
+  &:before {
+    display: block;
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: $timeline-staff-pos-x;
+    width: 4px;
+    background-color: #f3f3f3;
+    z-index: -1;
+  }
 
-		.ctrls {
-			float: right;
-			a {
-				color: #ccc;
-				&:hover {
-					color: $info-hover-color;
-				}
-			}
-		}
-		.image {
-			display: inline-block;
-		}
-		img {
-			max-width: 100%;
-			max-height: 200px;
-		}
-		p { margin: 0; }
-		.media-post .image {
-			float: left;
-			margin-right: 1em;
-		}
-		.encrypted-message {
-			border: 1px solid #D6D6D6;
-			padding: 0.7em 1em;
-			background: #eee;
+  .panel {
+    margin-bottom: 12px;
 
-			code {
-				word-break: break-all;
-				font-family: consolas, monospace;
+    .panel-heading {
+      padding: 2px 8px;
+    }
+    .panel-body {
+      padding: 10px 12px 2px;
+      > div {
+      	> :first-child {
+      		margin-top: 0
+      	}
+      }
+    }
+  }
 
-				&:before {
-					font-family: "entypo";
-					content: "#{$entypo-icon-lock}";
-					padding-right: 3px;
-				}
-			}
+  .phoenix-event {
+    margin-bottom: 16px;
+    margin-left: $timeline-staff-pos-x - 14px;
 
-			&.decrypted {
-				code:before {
-					content: "#{$entypo-icon-lock-open}";
-				}
-			}
-		}
-	}
+    .event-icon {
+      float: left;
+      width: 32px;
+      height: 32px;
+      margin-top: -7px;
+      line-height: 32px;
+      color: #666;
+      text-align: center;
+      background-color: #f3f3f3;
+      border: 2px solid #fff;
+      border-radius: 50%;
+    }
+
+    .event-body {
+      display: inline-block;
+      margin-left: 6px;
+    }
+  }
+
 }
