@@ -5,40 +5,40 @@ Phoenix v1
 
 ![screenshot](img/readme-screenshot1.png)
 
-Social feeds without ads or owners.
+Social feeds without ads or owners. Be free!
 
 Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Relay servers optionally aggregate and redistribute the feeds.
 
 ## Getting Started
 
-**To install on your localhost**
+**To start on your localhost**
 
 ```
 git clone https://github.com/pfraze/phoenix.git
 cd phoenix
 npm install
 ./phoenix setup
-./phoenix-web start
+./phoenix serve
 ```
 
-The web host runs a private instance on `localhost:64000`.
+The home server runs a private instance on `localhost:65000`.
 
 **To setup a relay**
 
 ```
-./phoenix-relay deploy user@host.com
+git clone https://github.com/pfraze/phoenix.git
+cd phoenix
+npm install
+./phoenix setup
+sudo ./phoenix serve -p -d
 ```
 
-After requesting your password, this command will open an ssh connection to your server, install phoenix, and start the relay daemon. To start the daemon manually, run:
-
-```
-./phoenix-relay start -d
-```
+This will start the home server on 65000 and the pub server on port 80 (`-p`). The `-d` will put the server in daemon mode.
 
 To stop it, run:
 
 ```
-./phoenix-relay stop
+./phoenix killserver
 ```
 
 ## License

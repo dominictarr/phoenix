@@ -24,7 +24,7 @@ function introHelp() {
 	console.log(' - Add hosts to your network with \'./phoenix sync <host address>\'');
 	console.log(' - Get more help with \'./phoenix -h\'');
 	console.log('')
-	console.log('Or, use the web interface with \'./phoenix-web start\'')
+	console.log('Or, use the web interface with \'./phoenix serve\'')
 	console.log('');
 }
 
