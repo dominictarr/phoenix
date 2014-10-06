@@ -58,7 +58,7 @@ function footer(events) {
 
 function feedPage(state) {
   return h('.feed-page.row', comren.columns({
-    main: [comren.feed(state.events, state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')],
+    main: [comren.feed(state, state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')],
     side: [feedControls(state), mercury.partial(profileLinks, state.profiles)]
   }, state.layout))
 }
@@ -71,7 +71,7 @@ function feedControls(state) {
   return h('.feed-ctrls', [
     h('.panel.panel-default', { style: { display: previewDisplay } }, [
       h('.panel-body', [
-        h('div.feed-preview', new widgets.Markdown(publishForm.preview)),
+        h('.feed-preview', new widgets.Markdown(publishForm.preview)),
       ])
     ]),
     h('.panel.panel-default', [
@@ -118,7 +118,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state.events, profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state, profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }

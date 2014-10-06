@@ -75,7 +75,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state.events, profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state, profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }

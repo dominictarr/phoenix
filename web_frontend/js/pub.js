@@ -13887,6 +13887,7 @@ exports.removeServer = function(state, addr, cb) {
 }
 }).call(this,require("buffer").Buffer)
 },{"../../../lib/util":1,"./models":258,"buffer":268,"multicb":130,"phoenix-rpc":131,"pull-stream":205,"stream-to-pull-stream":211,"through":213,"websocket-stream":228}],257:[function(require,module,exports){
+var mercury     = require('mercury')
 var h           = require('mercury').h
 var valueEvents = require('./value-events')
 var widgets     = require('./widgets')
@@ -13926,20 +13927,51 @@ var mascot = exports.mascot = function(quote) {
   ])
 }
 
-var feed = exports.feed = function(events, feed, rev) {
-  var messages = feed.map(message.bind(null, events))
-  if (rev) messages.reverse()
+var feed = exports.feed = function(state, feed, reverse) {
+  var messages = feed.map(message.bind(null, state.events, state.replyFormMap, state.replyForms))
+  if (reverse) messages.reverse()
   return h('.feed', messages)
 }
 
-var message = exports.message = function(events, msg) {
-  var content;
+var message = exports.message = function(events, replyFormMap, replyForms, msg) {
+  // main content
+  var main
   switch (msg.type.toString()) {
     case 'init': return messageEvent(msg, 'account-created', 'Account created')
     case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + util.escapePlain(msg.message.nickname))
-    case 'text': return messageText(events, msg)
+    case 'text': main = messageText(events, msg); break
     default: return h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString()))
   }
+
+  // reply form
+  var replyId = msg.authorStr + '-' + msg.sequence
+  if (typeof replyFormMap[replyId] != 'undefined') {
+    var i = replyFormMap[replyId]
+    var replyForm = replyForms[i]
+    main = h('div', [
+      main,
+      h('.message-reply', [
+        h('.panel.panel-default', [
+          h('.panel-body', h('.reply-preview', new widgets.Markdown(replyForm.preview || '*Reply...*')))
+        ]),
+        h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReplyForm, { id: replyId }) }, [
+          h('p', h('textarea.form-control', {
+            name: 'replyText',
+            placeholder: 'Reply...',
+            rows: replyForm.textFieldRows,
+            value: replyForm.textFieldValue,
+            'ev-change': mercury.valueEvent(events.setReplyFormTextField, { id: replyId }),
+            'ev-keyup': mercury.valueEvent(events.updateReplyFormTextField, { id: replyId })
+          })),
+          h('button.btn.btn-default', 'Post'),
+          ' ',
+          jsa(['cancel'], events.cancelReplyForm, { id: replyId }, { className: 'cancel' }),
+        ])
+      ])
+    ])
+  }
+
+  return main
 }
 
 var messageText = exports.messageText = function(events, msg) {
@@ -13957,11 +13989,11 @@ var messageText = exports.messageText = function(events, msg) {
         (h('p', [
           h('small.message-ctrls', [
             h('span.pull-right', [
-              jsa('#', [icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
+              jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
               ' ',
-              jsa('#', [icon('thumbs-up'), 'react'], events.reactToMsg, { msg: msg }),
+              jsa([icon('thumbs-up'), 'react'], events.reactToMsg, { msg: msg }),
               ' ',
-              jsa('#', [icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
+              jsa([icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
             ])
           ]),
         ])) :
@@ -14008,10 +14040,10 @@ function a(href, text, opts) {
   opts.href = href
   return h('a', opts, text)
 }
-function jsa(href, text, event, evData, opts) {
+function jsa(text, event, evData, opts) {
   opts = opts || {}
   opts['ev-click'] = valueEvents.click(event, evData, { preventDefault: true })
-  return a(href, text, opts)
+  return a('javascript:void()', text, opts)
 }
 function img(src) {
   return h('img', { src: src })
@@ -14028,7 +14060,8 @@ module.exports = {
   pubApp: createPubApp,
   message: createMessage,
   profile: createProfile,
-  server: createServer
+  server: createServer,
+  replyForm: createReplyForm
 }
 
 // Models
@@ -14038,16 +14071,18 @@ var defaults = {
   homeApp: {
     // gui state
     route: '',
+    layout: [['side', 4], ['main', 8]],
     publishForm: {
       textFieldValue: '',
       textFieldRows: 1,
       preview: ''
     },
+    replyForms: [],
+    replyFormMap: {},
     conn: {
       hasError: false,
       explanation: ''
     },
-    layout: [['side', 4], ['main', 8]],
 
     // app data
     feed: [],
@@ -14067,11 +14102,11 @@ var defaults = {
   pubApp: {
     // gui state
     route: '',
+    layout: [['side', 4], ['main', 8]],
     conn: {
       hasError: false,
       explanation: ''
     },
-    layout: [['side', 4], ['main', 8]],
 
     // app data
     profiles: [],
@@ -14103,6 +14138,13 @@ var defaults = {
     hostname: '',
     port: '',
     url: ''
+  },
+
+  replyForm: {
+    parent: undefined,
+    textFieldValue: '',
+    textFieldRows: 1,
+    preview: ''
   }
 }
 
@@ -14120,31 +14162,33 @@ function createHomeApp(events, initialState) {
 
   // create object
   return mercury.struct({
-    route:       mercury.value(state.route),
-    publishForm: mercury.struct({
+    route:         mercury.value(state.route),
+    layout:        mercury.value(state.layout),
+    publishForm:   mercury.struct({
       textFieldValue: mercury.value(state.publishForm.textFieldValue),
       textFieldRows:  mercury.value(state.publishForm.textFieldRows),
       preview:        mercury.value(state.preview)
     }),
-    conn:        mercury.struct({
+    replyForms:    mercury.array(state.replyForms.map(createReplyForm)),
+    replyFormMap:  mercury.value(state.replyFormMap),
+    conn:          mercury.struct({
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
     }),
-    layout:      mercury.value(state.layout),
     events:      events,
 
-    feed:        mercury.array(state.feed.map(createMessage)),
-    profiles:    mercury.array(state.profiles.map(createProfile)),
-    profileMap:  mercury.value(profileMap),
-    servers:     mercury.array(state.servers.map(createServer)),
-    user:        mercury.struct({
+    feed:          mercury.array(state.feed.map(createMessage)),
+    profiles:      mercury.array(state.profiles.map(createProfile)),
+    profileMap:    mercury.value(profileMap),
+    servers:       mercury.array(state.servers.map(createServer)),
+    user:          mercury.struct({
       id:             mercury.value(state.user.id),
       idStr:          mercury.value(state.user.idStr),
       pubkey:         mercury.value(state.user.pubkey),
       pubkeyStr:      mercury.value(state.user.pubkeyStr)
     }),
-    lastSync:   mercury.value(state.lastSync),
-    isSyncing:  mercury.value(state.isSyncing)
+    lastSync:      mercury.value(state.lastSync),
+    isSyncing:     mercury.value(state.isSyncing)
   })
 }
 
@@ -14160,11 +14204,11 @@ function createPubApp(events, initialState) {
   // create object
   return mercury.struct({
     route:       mercury.value(state.route),
+    layout:      mercury.value(state.layout),
     conn:        mercury.struct({
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
     }),
-    layout:      mercury.value(state.layout),
     events:      events,
 
     profiles:    mercury.array(state.profiles.map(createProfile)),
@@ -14198,6 +14242,14 @@ function createProfile(initialState) {
 function createServer(initialState) {
   var state = extend(defaults.server, initialState)
   state.url = 'http://' + state.hostname + ':' + state.port
+  return mercury.struct(state)
+}
+
+function createReplyForm(initialState) {
+  var state = extend(defaults.replyForm, initialState)
+  state.preview = mercury.value(state.preview)
+  state.textFieldValue = mercury.value(state.textFieldValue)
+  state.textFieldRows = mercury.value(state.textFieldRows)
   return mercury.struct(state)
 }
 }).call(this,require("buffer").Buffer)
@@ -14426,7 +14478,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state.events, profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state, profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }

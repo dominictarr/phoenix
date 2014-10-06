@@ -8,7 +8,8 @@ module.exports = {
   pubApp: createPubApp,
   message: createMessage,
   profile: createProfile,
-  server: createServer
+  server: createServer,
+  replyForm: createReplyForm
 }
 
 // Models
@@ -18,16 +19,18 @@ var defaults = {
   homeApp: {
     // gui state
     route: '',
+    layout: [['side', 4], ['main', 8]],
     publishForm: {
       textFieldValue: '',
       textFieldRows: 1,
       preview: ''
     },
+    replyForms: [],
+    replyFormMap: {},
     conn: {
       hasError: false,
       explanation: ''
     },
-    layout: [['side', 4], ['main', 8]],
 
     // app data
     feed: [],
@@ -47,11 +50,11 @@ var defaults = {
   pubApp: {
     // gui state
     route: '',
+    layout: [['side', 4], ['main', 8]],
     conn: {
       hasError: false,
       explanation: ''
     },
-    layout: [['side', 4], ['main', 8]],
 
     // app data
     profiles: [],
@@ -83,6 +86,13 @@ var defaults = {
     hostname: '',
     port: '',
     url: ''
+  },
+
+  replyForm: {
+    parent: undefined,
+    textFieldValue: '',
+    textFieldRows: 1,
+    preview: ''
   }
 }
 
@@ -100,31 +110,33 @@ function createHomeApp(events, initialState) {
 
   // create object
   return mercury.struct({
-    route:       mercury.value(state.route),
-    publishForm: mercury.struct({
+    route:         mercury.value(state.route),
+    layout:        mercury.value(state.layout),
+    publishForm:   mercury.struct({
       textFieldValue: mercury.value(state.publishForm.textFieldValue),
       textFieldRows:  mercury.value(state.publishForm.textFieldRows),
       preview:        mercury.value(state.preview)
     }),
-    conn:        mercury.struct({
+    replyForms:    mercury.array(state.replyForms.map(createReplyForm)),
+    replyFormMap:  mercury.value(state.replyFormMap),
+    conn:          mercury.struct({
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
     }),
-    layout:      mercury.value(state.layout),
     events:      events,
 
-    feed:        mercury.array(state.feed.map(createMessage)),
-    profiles:    mercury.array(state.profiles.map(createProfile)),
-    profileMap:  mercury.value(profileMap),
-    servers:     mercury.array(state.servers.map(createServer)),
-    user:        mercury.struct({
+    feed:          mercury.array(state.feed.map(createMessage)),
+    profiles:      mercury.array(state.profiles.map(createProfile)),
+    profileMap:    mercury.value(profileMap),
+    servers:       mercury.array(state.servers.map(createServer)),
+    user:          mercury.struct({
       id:             mercury.value(state.user.id),
       idStr:          mercury.value(state.user.idStr),
       pubkey:         mercury.value(state.user.pubkey),
       pubkeyStr:      mercury.value(state.user.pubkeyStr)
     }),
-    lastSync:   mercury.value(state.lastSync),
-    isSyncing:  mercury.value(state.isSyncing)
+    lastSync:      mercury.value(state.lastSync),
+    isSyncing:     mercury.value(state.isSyncing)
   })
 }
 
@@ -140,11 +152,11 @@ function createPubApp(events, initialState) {
   // create object
   return mercury.struct({
     route:       mercury.value(state.route),
+    layout:      mercury.value(state.layout),
     conn:        mercury.struct({
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
     }),
-    layout:      mercury.value(state.layout),
     events:      events,
 
     profiles:    mercury.array(state.profiles.map(createProfile)),
@@ -178,5 +190,13 @@ function createProfile(initialState) {
 function createServer(initialState) {
   var state = extend(defaults.server, initialState)
   state.url = 'http://' + state.hostname + ':' + state.port
+  return mercury.struct(state)
+}
+
+function createReplyForm(initialState) {
+  var state = extend(defaults.replyForm, initialState)
+  state.preview = mercury.value(state.preview)
+  state.textFieldValue = mercury.value(state.textFieldValue)
+  state.textFieldRows = mercury.value(state.textFieldRows)
   return mercury.struct(state)
 }

@@ -1,3 +1,4 @@
+var mercury     = require('mercury')
 var h           = require('mercury').h
 var valueEvents = require('./value-events')
 var widgets     = require('./widgets')
@@ -37,20 +38,51 @@ var mascot = exports.mascot = function(quote) {
   ])
 }
 
-var feed = exports.feed = function(events, feed, rev) {
-  var messages = feed.map(message.bind(null, events))
-  if (rev) messages.reverse()
+var feed = exports.feed = function(state, feed, reverse) {
+  var messages = feed.map(message.bind(null, state.events, state.replyFormMap, state.replyForms))
+  if (reverse) messages.reverse()
   return h('.feed', messages)
 }
 
-var message = exports.message = function(events, msg) {
-  var content;
+var message = exports.message = function(events, replyFormMap, replyForms, msg) {
+  // main content
+  var main
   switch (msg.type.toString()) {
     case 'init': return messageEvent(msg, 'account-created', 'Account created')
     case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + util.escapePlain(msg.message.nickname))
-    case 'text': return messageText(events, msg)
+    case 'text': main = messageText(events, msg); break
     default: return h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString()))
   }
+
+  // reply form
+  var replyId = msg.authorStr + '-' + msg.sequence
+  if (typeof replyFormMap[replyId] != 'undefined') {
+    var i = replyFormMap[replyId]
+    var replyForm = replyForms[i]
+    main = h('div', [
+      main,
+      h('.message-reply', [
+        h('.panel.panel-default', [
+          h('.panel-body', h('.reply-preview', new widgets.Markdown(replyForm.preview || '*Reply...*')))
+        ]),
+        h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReplyForm, { id: replyId }) }, [
+          h('p', h('textarea.form-control', {
+            name: 'replyText',
+            placeholder: 'Reply...',
+            rows: replyForm.textFieldRows,
+            value: replyForm.textFieldValue,
+            'ev-change': mercury.valueEvent(events.setReplyFormTextField, { id: replyId }),
+            'ev-keyup': mercury.valueEvent(events.updateReplyFormTextField, { id: replyId })
+          })),
+          h('button.btn.btn-default', 'Post'),
+          ' ',
+          jsa(['cancel'], events.cancelReplyForm, { id: replyId }, { className: 'cancel' }),
+        ])
+      ])
+    ])
+  }
+
+  return main
 }
 
 var messageText = exports.messageText = function(events, msg) {
@@ -68,11 +100,11 @@ var messageText = exports.messageText = function(events, msg) {
         (h('p', [
           h('small.message-ctrls', [
             h('span.pull-right', [
-              jsa('#', [icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
+              jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
               ' ',
-              jsa('#', [icon('thumbs-up'), 'react'], events.reactToMsg, { msg: msg }),
+              jsa([icon('thumbs-up'), 'react'], events.reactToMsg, { msg: msg }),
               ' ',
-              jsa('#', [icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
+              jsa([icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
             ])
           ]),
         ])) :
@@ -119,10 +151,10 @@ function a(href, text, opts) {
   opts.href = href
   return h('a', opts, text)
 }
-function jsa(href, text, event, evData, opts) {
+function jsa(text, event, evData, opts) {
   opts = opts || {}
   opts['ev-click'] = valueEvents.click(event, evData, { preventDefault: true })
-  return a(href, text, opts)
+  return a('javascript:void()', text, opts)
 }
 function img(src) {
   return h('img', { src: src })

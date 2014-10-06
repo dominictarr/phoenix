@@ -48,6 +48,69 @@ exports.submitPublishForm = function(state, data) {
   }, 100)
 }
 
+exports.updateReplyFormTextField = function(state, data) {
+  var m = state.replyFormMap()
+  var replyForm = state.replyForms.get(m[data.id])
+  if (!replyForm)
+    return
+
+  // expand/contract field if there's content in there
+  replyForm.textFieldRows.set((data.replyText) ? 3 : 1)
+  replyForm.preview.set(data.replyText)
+}
+
+exports.setReplyFormTextField = function(state, data) {
+  var m = state.replyFormMap()
+  var replyForm = state.replyForms.get(m[data.id])
+  if (!replyForm)
+    return
+
+  // update internal data
+  replyForm.textFieldValue.set(data.replyText)
+}
+
+exports.submitReplyForm = function(state, data) {
+  var m = state.replyFormMap()
+  var replyForm = state.replyForms.get(m[data.id])
+  if (!replyForm)
+    return
+
+  // update textarea
+  replyForm.textFieldValue.set(data.replyText)
+  var str = (replyForm.textFieldValue()).trim()
+  if (!str) return
+
+  // make the post
+  alert(str)
+  /*bus.replyText(state, str, function(err) {
+    if (err) throw err // :TODO: put in gui
+    bus.fetchFeed(state) // pull down the update
+  })*/
+
+  // this horrifying setTimeout hack is explained at [1]
+  setTimeout(function() {
+    // remove the form
+    state.replyForms.splice(m[data.id], 1, null)
+    m[data.id] = undefined
+    state.replyFormMap.set(m)
+  }, 100)
+}
+
+exports.cancelReplyForm = function(state, data) {
+  var m = state.replyFormMap()
+  var replyForm = state.replyForms.get(m[data.id])
+  if (!replyForm)
+    return
+
+  if (replyForm.preview().length && !confirm('Are you sure you want to cancel this message?'))
+    return
+
+  // remove the form
+  state.replyForms.splice(m[data.id], 1, null)
+  m[data.id] = undefined
+  state.replyFormMap.set(m)
+}
+
 exports.addFeed = function(state) {
   var token = prompt('Introduction token of the user:')
   if (!token) return
@@ -116,15 +179,27 @@ exports.toggleLayout = function(state) {
 }
 
 exports.replyToMsg = function(state, data) {
-  alert('todo')
+  var m = state.replyFormMap()
+  var msgid = data.msg.authorStr + '-' + data.msg.sequence
+  if (m[msgid])
+    return
+
+  // construct the new reply form
+  var replyForm = models.replyForm({ parent: msgid })
+  state.replyForms.push(replyForm)
+
+  // add to the map
+  m[msgid] = state.replyForms.getLength() - 1
+  console.log('setting', m)
+  state.replyFormMap.set(m)
 }
 
 exports.reactToMsg = function(state, data) {
-  alert('todo')
+  alert('todo https://github.com/pfraze/phoenix/issues/56')
 }
 
 exports.shareMsg = function(state, data) {
-  alert('todo')
+  alert('todo https://github.com/pfraze/phoenix/issues/52')
 }
 
 /*

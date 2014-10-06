@@ -11,6 +11,12 @@ function createEvents() {
     'setPublishFormTextField',
     'submitPublishForm',
 
+    // reply publish form
+    'updateReplyFormTextField',
+    'setReplyFormTextField',
+    'submitReplyForm',
+    'cancelReplyForm',
+
     // network page
     'addServer',
     'removeServer',

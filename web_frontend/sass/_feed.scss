@@ -48,6 +48,29 @@ $timeline-staff-pos-x: 22px;
     }
   }
 
+  .message-reply {
+    margin-left: 40px;
+    &::before {
+      height: 4px;
+      width: 18px;
+      display: block;
+      content: "";
+      position: relative;
+      top: 26px;
+      left: -18px;
+      background-color: #f3f3f3;
+      z-index: -1;
+    }
+    .reply-publish {
+      margin-bottom: 16px;
+      .cancel {
+        position: relative;
+        top: 2px;
+        margin-left: 4px;
+      }
+    }
+  }
+
   .phoenix-event {
     margin-top: 16px;
     margin-bottom: 16px;
@@ -75,7 +98,7 @@ $timeline-staff-pos-x: 22px;
   }
 }
 
-.feed-preview {
+.feed-preview, .reply-preview {
   > div {
     > :first-child {
       margin-top: 0
