@@ -23,11 +23,17 @@ $timeline-staff-pos-x: 22px;
       padding: 2px 8px;
     }
     .panel-body {
-      padding: 10px 12px 2px;
+      padding: 12px 12px 4px;
       > div {
       	> :first-child {
       		margin-top: 0
       	}
+      }
+      table {
+        margin-bottom: 8px;
+        th, td {
+          padding: 4px;
+        }
       }
     }
   }
