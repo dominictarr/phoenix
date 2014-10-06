@@ -21,7 +21,10 @@ function createEvents() {
     'follow',
     'unfollow',
     'sync',
-    'toggleLayout'
+    'toggleLayout',
+    'replyToMsg',
+    'reactToMsg',
+    'shareMsg'
   ])
   events.setRoute = EventRouter()
   return events

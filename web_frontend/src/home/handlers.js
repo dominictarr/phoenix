@@ -115,6 +115,18 @@ exports.toggleLayout = function(state) {
     state.layout.set([['main', 7], ['side', 5]])
 }
 
+exports.replyToMsg = function(state, data) {
+  alert('todo')
+}
+
+exports.reactToMsg = function(state, data) {
+  alert('todo')
+}
+
+exports.shareMsg = function(state, data) {
+  alert('todo')
+}
+
 /*
 1: the setTimeout hack in submitPublishForm()
 Basically, we need the `state.publishForm.textFieldValue.set(data.publishText)` to run its course

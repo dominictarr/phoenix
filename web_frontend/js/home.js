@@ -13602,7 +13602,10 @@ function createEvents() {
     'follow',
     'unfollow',
     'sync',
-    'toggleLayout'
+    'toggleLayout',
+    'replyToMsg',
+    'reactToMsg',
+    'shareMsg'
   ])
   events.setRoute = EventRouter()
   return events
@@ -13735,6 +13738,18 @@ exports.toggleLayout = function(state) {
     state.layout.set([['main', 7], ['side', 5]])
 }
 
+exports.replyToMsg = function(state, data) {
+  alert('todo')
+}
+
+exports.reactToMsg = function(state, data) {
+  alert('todo')
+}
+
+exports.shareMsg = function(state, data) {
+  alert('todo')
+}
+
 /*
 1: the setTimeout hack in submitPublishForm()
 Basically, we need the `state.publishForm.textFieldValue.set(data.publishText)` to run its course
@@ -13803,7 +13818,7 @@ function footer(events) {
 
 function feedPage(state) {
   return h('.feed-page.row', comren.columns({
-    main: [comren.feed(state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')],
+    main: [comren.feed(state.events, state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')],
     side: [feedControls(state), mercury.partial(profileLinks, state.profiles)]
   }, state.layout))
 }
@@ -13863,7 +13878,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state.events, profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }
@@ -14262,9 +14277,10 @@ exports.removeServer = function(state, addr, cb) {
 }
 }).call(this,require("buffer").Buffer)
 },{"../../../lib/util":1,"./models":262,"buffer":268,"multicb":130,"phoenix-rpc":131,"pull-stream":205,"stream-to-pull-stream":211,"through":213,"websocket-stream":228}],261:[function(require,module,exports){
-var h       = require('mercury').h
-var widgets = require('./widgets')
-var util    = require('../../../lib/util')
+var h           = require('mercury').h
+var valueEvents = require('./value-events')
+var widgets     = require('./widgets')
+var util        = require('../../../lib/util')
 
 var columns = exports.columns = function(parts, layout) {
   parts.blank = ''
@@ -14300,27 +14316,46 @@ var mascot = exports.mascot = function(quote) {
   ])
 }
 
-var feed = exports.feed = function(feed, rev) {
-  var messages = feed.map(message)
+var feed = exports.feed = function(events, feed, rev) {
+  var messages = feed.map(message.bind(null, events))
   if (rev) messages.reverse()
   return h('.feed', messages)
 }
 
-var message = exports.message = function(msg) {
+var message = exports.message = function(events, msg) {
   var content;
   switch (msg.type.toString()) {
     case 'init': return messageEvent(msg, 'account-created', 'Account created')
     case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + util.escapePlain(msg.message.nickname))
-    case 'text': return messageText(msg)
+    case 'text': return messageText(events, msg)
     default: return h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString()))
   }
 }
 
-var messageText = exports.messageText = function(msg) {
+var messageText = exports.messageText = function(events, msg) {
   return h('.panel.panel-default', [
     h('.panel-body', [
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
-      new widgets.Markdown(util.escapePlain(msg.message.plain))
+      h('p', [
+        userlink(msg.author, util.escapePlain(msg.authorNickname)),
+        h('small.message-ctrls', [
+          ' - ',
+          util.prettydate(new Date(msg.timestamp), true)
+        ]),
+      ]),
+      new widgets.Markdown(util.escapePlain(msg.message.plain)),
+      (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
+        (h('p', [
+          h('small.message-ctrls', [
+            h('span.pull-right', [
+              jsa('#', [icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
+              ' ',
+              jsa('#', [icon('thumbs-up'), 'react'], events.reactToMsg, { msg: msg }),
+              ' ',
+              jsa('#', [icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
+            ])
+          ]),
+        ])) :
+        ''
     ])
   ])
 }
@@ -14352,6 +14387,9 @@ var userlink = exports.userlink = function(id, text, opts) {
   return a('#/profile/'+idStr, text, opts)
 }
 
+function icon(i) {
+  return h('span.glyphicon.glyphicon-'+i)
+}
 function stylesheet(href) {
   return h('link', { rel: 'stylesheet', href: href })
 }
@@ -14360,10 +14398,15 @@ function a(href, text, opts) {
   opts.href = href
   return h('a', opts, text)
 }
+function jsa(href, text, event, evData, opts) {
+  opts = opts || {}
+  opts['ev-click'] = valueEvents.click(event, evData, { preventDefault: true })
+  return a(href, text, opts)
+}
 function img(src) {
   return h('img', { src: src })
 }
-},{"../../../lib/util":1,"./widgets":264,"mercury":14}],262:[function(require,module,exports){
+},{"../../../lib/util":1,"./value-events":263,"./widgets":264,"mercury":14}],262:[function(require,module,exports){
 (function (Buffer){
 // var cuid = require('cuid')
 var extend = require('xtend')

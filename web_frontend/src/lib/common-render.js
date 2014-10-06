@@ -1,6 +1,7 @@
-var h       = require('mercury').h
-var widgets = require('./widgets')
-var util    = require('../../../lib/util')
+var h           = require('mercury').h
+var valueEvents = require('./value-events')
+var widgets     = require('./widgets')
+var util        = require('../../../lib/util')
 
 var columns = exports.columns = function(parts, layout) {
   parts.blank = ''
@@ -36,27 +37,46 @@ var mascot = exports.mascot = function(quote) {
   ])
 }
 
-var feed = exports.feed = function(feed, rev) {
-  var messages = feed.map(message)
+var feed = exports.feed = function(events, feed, rev) {
+  var messages = feed.map(message.bind(null, events))
   if (rev) messages.reverse()
   return h('.feed', messages)
 }
 
-var message = exports.message = function(msg) {
+var message = exports.message = function(events, msg) {
   var content;
   switch (msg.type.toString()) {
     case 'init': return messageEvent(msg, 'account-created', 'Account created')
     case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + util.escapePlain(msg.message.nickname))
-    case 'text': return messageText(msg)
+    case 'text': return messageText(events, msg)
     default: return h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString()))
   }
 }
 
-var messageText = exports.messageText = function(msg) {
+var messageText = exports.messageText = function(events, msg) {
   return h('.panel.panel-default', [
     h('.panel-body', [
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
-      new widgets.Markdown(util.escapePlain(msg.message.plain))
+      h('p', [
+        userlink(msg.author, util.escapePlain(msg.authorNickname)),
+        h('small.message-ctrls', [
+          ' - ',
+          util.prettydate(new Date(msg.timestamp), true)
+        ]),
+      ]),
+      new widgets.Markdown(util.escapePlain(msg.message.plain)),
+      (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
+        (h('p', [
+          h('small.message-ctrls', [
+            h('span.pull-right', [
+              jsa('#', [icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
+              ' ',
+              jsa('#', [icon('thumbs-up'), 'react'], events.reactToMsg, { msg: msg }),
+              ' ',
+              jsa('#', [icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
+            ])
+          ]),
+        ])) :
+        ''
     ])
   ])
 }
@@ -88,6 +108,9 @@ var userlink = exports.userlink = function(id, text, opts) {
   return a('#/profile/'+idStr, text, opts)
 }
 
+function icon(i) {
+  return h('span.glyphicon.glyphicon-'+i)
+}
 function stylesheet(href) {
   return h('link', { rel: 'stylesheet', href: href })
 }
@@ -95,6 +118,11 @@ function a(href, text, opts) {
   opts = opts || {}
   opts.href = href
   return h('a', opts, text)
+}
+function jsa(href, text, event, evData, opts) {
+  opts = opts || {}
+  opts['ev-click'] = valueEvents.click(event, evData, { preventDefault: true })
+  return a(href, text, opts)
 }
 function img(src) {
   return h('img', { src: src })

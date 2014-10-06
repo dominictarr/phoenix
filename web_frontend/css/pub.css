@@ -1482,6 +1482,8 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 
 .affix { position: fixed; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
 
+.user-link { font-weight: bold; color: #555; }
+
 .feed { position: relative; }
 .feed:before { display: block; content: ""; position: absolute; top: 0; bottom: 0; left: 22px; width: 4px; background-color: #f3f3f3; z-index: -1; }
 .feed .panel { margin-bottom: 12px; }
@@ -1490,6 +1492,8 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 .feed .panel .panel-body > div > :first-child { margin-top: 0; }
 .feed .panel .panel-body table { margin-bottom: 8px; }
 .feed .panel .panel-body table th, .feed .panel .panel-body table td { padding: 4px 6px; }
+.feed .panel .panel-body .message-ctrls .glyphicon { margin-right: 2px; }
+.feed .panel .panel-body .message-ctrls a { margin-left: 5px; color: #888; }
 .feed .phoenix-event { margin-top: 16px; margin-bottom: 16px; margin-left: 8px; }
 .feed .phoenix-event .event-icon { float: left; width: 32px; height: 32px; margin-top: -7px; line-height: 32px; color: #666; text-align: center; background-color: #f3f3f3; border-radius: 50%; }
 .feed .phoenix-event .event-body { display: inline-block; margin-left: 6px; }

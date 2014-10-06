@@ -36,6 +36,15 @@ $timeline-staff-pos-x: 22px;
           padding: 4px 6px;
         }
       }
+      .message-ctrls {
+        .glyphicon {
+          margin-right: 2px;
+        }
+        a {
+          margin-left: 5px;
+          color: #888;
+        }
+      }
     }
   }
 
