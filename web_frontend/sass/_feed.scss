@@ -30,9 +30,10 @@ $timeline-staff-pos-x: 22px;
       	}
       }
       table {
+        @extend .table-bordered;
         margin-bottom: 8px;
         th, td {
-          padding: 4px;
+          padding: 4px 6px;
         }
       }
     }

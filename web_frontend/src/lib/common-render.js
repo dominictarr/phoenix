@@ -47,8 +47,10 @@ var message = exports.message = function(msg) {
 
 var messageText = exports.messageText = function(msg) {
   return h('.panel.panel-default', [
-    h('.panel-heading', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
-    h('.panel-body', new widgets.Markdown(util.escapePlain(msg.message.plain)))
+    h('.panel-body', [
+      h('p', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
+      new widgets.Markdown(util.escapePlain(msg.message.plain))
+    ])
   ])
 }
 
