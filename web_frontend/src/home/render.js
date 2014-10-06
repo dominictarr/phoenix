@@ -3,6 +3,7 @@ var h           = require('mercury').h
 var util        = require('../../../lib/util')
 var valueEvents = require('../lib/value-events')
 var widgets     = require('../lib/widgets')
+var comren      = require('../lib/common-render')
 
 module.exports = render
 
@@ -23,13 +24,11 @@ function render(state) {
   return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
     mercury.partial(header, state.events, state.user.idStr),
-    mercury.partial(connStatus, state.events, state.conn),
+    mercury.partial(comren.connStatus, state.events, state.conn),
     h('.container', page)
   ])
 }
 
-// Common Components
-// =================
 
 function header(events, uId) {
   return h('.nav.navbar.navbar-default', [
@@ -47,84 +46,12 @@ function header(events, uId) {
   ])
 }
 
-function connStatus(events, connStatus) {
-  if (!connStatus.hasError)
-    return h('div')
-  return h('.container', h('.alert.alert-danger', connStatus.explanation))
-}
-
-function notfound(what, suggestion) {
-  return h('div', [
-    h('h3', 'Sorry, '+what+' was not found.' + (suggestion || '')),
-    h('p', h('small', 'here\'s a cuddly kitty to help you through this trying time')),
-    randomcat()
-  ])
-}
-
-var cats = ['goingdown', 'hophop', 'huuhuuu', 'pillow-spin', 'shred', 'tailbites', 'woahwoah']
-function randomcat() {
-  var cat = cats[Math.round(Math.random() * 7)] || cats[0]
-  return img('/img/loading/'+cat+'.gif')
-}
-
-function mascot(quote) {
-  return h('.class', [
-    img('/img/logo.png'),
-    h('strong', [h('small', quote)])
-  ])
-}
-
-function feed(feed, rev) {
-  var messages = feed.map(message)
-  if (rev) messages.reverse()
-  return h('.feed', messages)
-}
-
-function message(msg) {
-  var content;
-  switch (msg.type.toString()) {
-    case 'init': return messageEvent(msg, 'account-created', 'Account created')
-    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + util.escapePlain(msg.message.nickname))
-    case 'text': return messageText(msg)
-    default: return h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString()))
-  }
-
-
-}
-
-function messageText(msg) {
-  return h('.panel.panel-default', [
-    h('.panel-heading', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
-    h('.panel-body', new widgets.Markdown(util.escapePlain(msg.message.plain)))
-  ])
-}
-
-function messageEvent(msg, type, text) {
-  var icon;
-  switch (type) {
-    case 'account-created': icon = '.glyphicon-home'; break
-    case 'account-change': icon = '.glyphicon-user'; break
-    default: icon = '.glyphicon-asterisk'
-  }
-  return h('.phoenix-event', [
-    h('span.event-icon.glyphicon'+icon),
-    h('.event-body', text),
-  ])
-}
-
-function syncButton(events, isSyncing) {
-  if (isSyncing) {
-    return h('button.btn.btn-default', { disabled: true }, 'Syncing...')
-  }
-  return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync')
-}
-
 // Feed Page
 // =========
 
 function feedPage(state) {
   return h('.feed-page.row', [
-    h('.col-xs-7', [feed(state.feed), mercury.partial(mascot, 'Dont let life get you down!')]),
+    h('.col-xs-7', [comren.feed(state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')]),
     h('.col-xs-5', [feedControls(state), mercury.partial(profileLinks, state.profiles)])
   ])
 }
@@ -156,7 +83,7 @@ function feedControls(state) {
     ]),
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [
-      syncButton(events, state.isSyncing),
+      comren.syncButton(events, state.isSyncing),
       ' ',
       h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add feed...')
     ])
@@ -179,11 +106,11 @@ function profilePage(state, profid) {
   var profile = (typeof profi != 'undefined') ? state.profiles[profi] : undefined
   if (!profile) {
     return h('.profile-page.row', [
-      h('.col-xs-7', [notfound('that user')])
+      h('.col-xs-7', [comren.notfound('that user')])
     ])
   }
   return h('.profile-page.row', [
-    h('.col-xs-7', [feed(profile.feed, true), mercury.partial(mascot, 'Is it hot in here?')]),
+    h('.col-xs-7', [comren.feed(profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')]),
     h('.col-xs-5', [mercury.partial(profileControls, state.events, profile)])
   ])
 }
@@ -205,7 +132,7 @@ function profileControls(events, profile) {
 
 function networkPage(state) {
   return h('.network-page.row', [
-    h('.col-xs-7', [pubservers(state.events, state.servers), mercury.partial(mascot, 'Who\'s cooking chicken?')]),
+    h('.col-xs-7', [pubservers(state.events, state.servers), mercury.partial(comren.mascot, 'Who\'s cooking chicken?')]),
     h('.col-xs-5', [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)])
   ])
 }
@@ -226,7 +153,7 @@ function server(events, server) {
 function networkControls(events, lastSync, isSyncing) {
   return h('.network-ctrls', [
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
-    h('p', [syncButton(events, isSyncing), ' ', h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
+    h('p', [comren.syncButton(events, isSyncing), ' ', h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
   ])
 }
 

@@ -39,6 +39,7 @@ $timeline-staff-pos-x: 22px;
   }
 
   .phoenix-event {
+    margin-top: 16px;
     margin-bottom: 16px;
     margin-left: $timeline-staff-pos-x - 14px;
 
@@ -51,7 +52,6 @@ $timeline-staff-pos-x: 22px;
       color: #666;
       text-align: center;
       background-color: #f3f3f3;
-      border: 2px solid #fff;
       border-radius: 50%;
     }
 
@@ -60,5 +60,7 @@ $timeline-staff-pos-x: 22px;
       margin-left: 6px;
     }
   }
-
+  .phoenix-event + .phoenix-event {
+    margin-top: 22px;
+  }
 }
