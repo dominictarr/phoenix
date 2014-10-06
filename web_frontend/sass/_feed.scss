@@ -51,6 +51,9 @@ $timeline-staff-pos-x: 22px;
   .message-reply {
     margin-left: 40px;
     margin-top: -12px;
+    margin-bottom: 16px;
+    border-bottom-left-radius: 6px;
+    border-bottom-right-radius: 6px;
     padding: 12px;
     background: #f3f3f3;
     .reply-publish {

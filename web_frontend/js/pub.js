@@ -13990,7 +13990,7 @@ var message = exports.message = function(state, msg) {
       main,
       h('.message-reply', [
         h('.phoenix-event', [
-          h('span.event-icon.glyphicon.glyphicon-thumbs-up'),
+          h('span.event-icon.glyphicon.glyphicon-hand-up'),
           h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', (reactForm.textFieldValue||'_'), ' this.']),
         ]),
         h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReactForm, { id: reactId }) }, [
@@ -14029,7 +14029,7 @@ var messageText = exports.messageText = function(events, msg) {
             h('span.pull-right', [
               jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
               ' ',
-              jsa([icon('thumbs-up'), 'react'], events.reactToMsg, { msg: msg }),
+              jsa([icon('hand-up'), 'react'], events.reactToMsg, { msg: msg }),
               ' ',
               jsa([icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
             ])
@@ -14045,7 +14045,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
   switch (type) {
     case 'account-created': icon = '.glyphicon-home'; break
     case 'account-change': icon = '.glyphicon-user'; break
-    default: icon = '.glyphicon-asterisk'
+    default: icon = '.glyphicon-hand-up'
   }
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),

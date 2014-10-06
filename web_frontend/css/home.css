@@ -1494,7 +1494,7 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 .feed .panel .panel-body table th, .feed .panel .panel-body table td { padding: 4px 6px; }
 .feed .panel .panel-body .message-ctrls .glyphicon { margin-right: 2px; }
 .feed .panel .panel-body .message-ctrls a { margin-left: 5px; color: #888; }
-.feed .message-reply { margin-left: 40px; margin-top: -12px; padding: 12px; background: #f3f3f3; }
+.feed .message-reply { margin-left: 40px; margin-top: -12px; margin-bottom: 16px; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; padding: 12px; background: #f3f3f3; }
 .feed .message-reply .reply-publish .cancel { position: relative; top: 2px; margin-left: 4px; }
 .feed .message-reply .phoenix-event { background: white; padding: 1em; border-radius: 4px; margin: 0 0 8px; }
 .feed .phoenix-event { margin-top: 16px; margin-bottom: 16px; margin-left: 8px; }
