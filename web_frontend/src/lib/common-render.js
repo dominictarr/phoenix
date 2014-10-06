@@ -132,6 +132,7 @@ var messageText = exports.messageText = function(events, msg) {
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
           h('small.message-ctrls', [
+            a('javascript:void()', '0 replies / 0 reactions'),
             h('span.pull-right', [
               jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
               ' ',
