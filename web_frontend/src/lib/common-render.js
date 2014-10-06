@@ -2,6 +2,13 @@ var h       = require('mercury').h
 var widgets = require('./widgets')
 var util    = require('../../../lib/util')
 
+var columns = exports.columns = function(parts, layout) {
+  parts.blank = ''
+  return layout.map(function(col) {
+    return h('.col-xs-' + col[1], parts[col[0]])
+  })
+}
+
 var connStatus = exports.connStatus = function(events, connStatus) {
   if (!connStatus.hasError)
     return h('div')

@@ -23,7 +23,8 @@ function render(state) {
     stylesheet('/css/pub.css'),
     mercury.partial(header),
     mercury.partial(comren.connStatus, state.events, state.conn),
-    h('.container', page)
+    h('.container', page),
+    mercury.partial(footer, state.events)
   ])
 }
 
@@ -35,6 +36,13 @@ function header(events, uId) {
         h('li', a('#/', 'members'))
       ])
     ])
+  ])
+}
+
+function footer(events) {
+  return h('.container', [
+    h('br'), h('br'),
+    h('p', a('#', 'toggle layout', { 'ev-click': valueEvents.click(events.toggleLayout, null, { preventDefault: true }) }))
   ])
 }
 
@@ -66,16 +74,15 @@ function profilePage(state, profid) {
       h('.col-xs-7', [comren.notfound('that user')])
     ])
   }
-  return h('.profile-page.row', [
-    h('.col-xs-7', [comren.feed(profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')]),
-    h('.col-xs-5', [mercury.partial(profileControls, state.events, profile)])
-  ])
+  return h('.profile-page.row', comren.columns({
+    main: [comren.feed(profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    side: [mercury.partial(profileControls, state.events, profile)]
+  }, state.layout))
 }
 
 function profileControls(events, profile) {
   return h('.profile-ctrls', [
-    h('h2', profile.nickname),
-    h('h3', h('small', 'joined '+profile.joinDate)),
+    h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]),
     h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
   ])
 }

@@ -20,7 +20,8 @@ function createEvents() {
     'showIntroToken',
     'follow',
     'unfollow',
-    'sync'
+    'sync',
+    'toggleLayout'
   ])
   events.setRoute = EventRouter()
   return events

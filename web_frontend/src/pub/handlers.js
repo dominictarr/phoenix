@@ -14,3 +14,11 @@ exports.showIntroToken = function(state, data) {
   var t = JSON.stringify({id: data.id, relays: []}) // :TODO: relays
   prompt('Intro Token', t)
 }
+
+exports.toggleLayout = function(state) {
+  var curr = state.layout()
+  if (curr[0][0] == 'main')
+    state.layout.set([['side', 4], ['main', 8]])
+  else
+    state.layout.set([['main', 7], ['side', 5]])
+}

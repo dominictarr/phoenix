@@ -13891,6 +13891,13 @@ var h       = require('mercury').h
 var widgets = require('./widgets')
 var util    = require('../../../lib/util')
 
+var columns = exports.columns = function(parts, layout) {
+  parts.blank = ''
+  return layout.map(function(col) {
+    return h('.col-xs-' + col[1], parts[col[0]])
+  })
+}
+
 var connStatus = exports.connStatus = function(events, connStatus) {
   if (!connStatus.hasError)
     return h('div')
@@ -13936,8 +13943,10 @@ var message = exports.message = function(msg) {
 
 var messageText = exports.messageText = function(msg) {
   return h('.panel.panel-default', [
-    h('.panel-heading', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
-    h('.panel-body', new widgets.Markdown(util.escapePlain(msg.message.plain)))
+    h('.panel-body', [
+      h('p', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
+      new widgets.Markdown(util.escapePlain(msg.message.plain))
+    ])
   ])
 }
 
@@ -14003,6 +14012,7 @@ var defaults = {
       hasError: false,
       explanation: ''
     },
+    layout: [['side', 4], ['main', 8]],
 
     // app data
     feed: [],
@@ -14026,6 +14036,7 @@ var defaults = {
       hasError: false,
       explanation: ''
     },
+    layout: [['side', 4], ['main', 8]],
 
     // app data
     profiles: [],
@@ -14084,6 +14095,7 @@ function createHomeApp(events, initialState) {
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
     }),
+    layout:      mercury.value(state.layout),
     events:      events,
 
     feed:        mercury.array(state.feed.map(createMessage)),
@@ -14117,6 +14129,7 @@ function createPubApp(events, initialState) {
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
     }),
+    layout:      mercury.value(state.layout),
     events:      events,
 
     profiles:    mercury.array(state.profiles.map(createProfile)),
@@ -14259,6 +14272,7 @@ function createEvents() {
   var events = mercury.input([
     // common buttons
     'showIntroToken',
+    'toggleLayout'
   ])
   events.setRoute = EventRouter()
   return events
@@ -14290,6 +14304,14 @@ exports.showIntroToken = function(state, data) {
   var t = JSON.stringify({id: data.id, relays: []}) // :TODO: relays
   prompt('Intro Token', t)
 }
+
+exports.toggleLayout = function(state) {
+  var curr = state.layout()
+  if (curr[0][0] == 'main')
+    state.layout.set([['side', 4], ['main', 8]])
+  else
+    state.layout.set([['main', 7], ['side', 5]])
+}
 },{"../lib/business":256,"../lib/models":258}],264:[function(require,module,exports){
 var mercury     = require('mercury')
 var h           = require('mercury').h
@@ -14316,7 +14338,8 @@ function render(state) {
     stylesheet('/css/pub.css'),
     mercury.partial(header),
     mercury.partial(comren.connStatus, state.events, state.conn),
-    h('.container', page)
+    h('.container', page),
+    mercury.partial(footer, state.events)
   ])
 }
 
@@ -14328,6 +14351,13 @@ function header(events, uId) {
         h('li', a('#/', 'members'))
       ])
     ])
+  ])
+}
+
+function footer(events) {
+  return h('.container', [
+    h('br'), h('br'),
+    h('p', a('#', 'toggle layout', { 'ev-click': valueEvents.click(events.toggleLayout, null, { preventDefault: true }) }))
   ])
 }
 
@@ -14359,16 +14389,15 @@ function profilePage(state, profid) {
       h('.col-xs-7', [comren.notfound('that user')])
     ])
   }
-  return h('.profile-page.row', [
-    h('.col-xs-7', [comren.feed(profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')]),
-    h('.col-xs-5', [mercury.partial(profileControls, state.events, profile)])
-  ])
+  return h('.profile-page.row', comren.columns({
+    main: [comren.feed(profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    side: [mercury.partial(profileControls, state.events, profile)]
+  }, state.layout))
 }
 
 function profileControls(events, profile) {
   return h('.profile-ctrls', [
-    h('h2', profile.nickname),
-    h('h3', h('small', 'joined '+profile.joinDate)),
+    h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]),
     h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
   ])
 }

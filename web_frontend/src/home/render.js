@@ -25,10 +25,10 @@ function render(state) {
     stylesheet('/css/home.css'),
     mercury.partial(header, state.events, state.user.idStr),
     mercury.partial(comren.connStatus, state.events, state.conn),
-    h('.container', page)
+    h('.container', page),
+    mercury.partial(footer, state.events)
   ])
 }
-
 
 function header(events, uId) {
   return h('.nav.navbar.navbar-default', [
@@ -46,14 +46,21 @@ function header(events, uId) {
   ])
 }
 
+function footer(events) {
+  return h('.container', [
+    h('br'), h('br'),
+    h('p', a('#', 'toggle layout', { 'ev-click': valueEvents.click(events.toggleLayout, null, { preventDefault: true }) }))
+  ])
+}
+
 // Feed Page
 // =========
 
 function feedPage(state) {
-  return h('.feed-page.row', [
-    h('.col-xs-7', [comren.feed(state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')]),
-    h('.col-xs-5', [feedControls(state), mercury.partial(profileLinks, state.profiles)])
-  ])
+  return h('.feed-page.row', comren.columns({
+    main: [comren.feed(state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')],
+    side: [feedControls(state), mercury.partial(profileLinks, state.profiles)]
+  }, state.layout))
 }
 
 function feedControls(state) {
@@ -109,10 +116,10 @@ function profilePage(state, profid) {
       h('.col-xs-7', [comren.notfound('that user')])
     ])
   }
-  return h('.profile-page.row', [
-    h('.col-xs-7', [comren.feed(profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')]),
-    h('.col-xs-5', [mercury.partial(profileControls, state.events, profile)])
-  ])
+  return h('.profile-page.row', comren.columns({
+    main: [comren.feed(profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    side: [mercury.partial(profileControls, state.events, profile)]
+  }, state.layout))
 }
 
 function profileControls(events, profile) {
@@ -120,8 +127,7 @@ function profileControls(events, profile) {
     h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Unfollow') :
     h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Follow')
   return h('.profile-ctrls', [
-    h('h2', profile.nickname),
-    h('h3', h('small', 'joined '+profile.joinDate)),
+    h('.panel.panel-default', h('.panel-body', h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]))),
     h('p', followBtn),
     h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
   ])
@@ -131,10 +137,10 @@ function profileControls(events, profile) {
 // ============
 
 function networkPage(state) {
-  return h('.network-page.row', [
-    h('.col-xs-7', [pubservers(state.events, state.servers), mercury.partial(comren.mascot, 'Who\'s cooking chicken?')]),
-    h('.col-xs-5', [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)])
-  ])
+  return h('.network-page.row', comren.columns({
+    main: [pubservers(state.events, state.servers), mercury.partial(comren.mascot, 'Who\'s cooking chicken?')],
+    side: [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)]
+  }, state.layout))
 }
 
 function pubservers(events, servers) {

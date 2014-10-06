@@ -8,6 +8,7 @@ function createEvents() {
   var events = mercury.input([
     // common buttons
     'showIntroToken',
+    'toggleLayout'
   ])
   events.setRoute = EventRouter()
   return events

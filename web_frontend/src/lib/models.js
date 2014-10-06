@@ -27,6 +27,7 @@ var defaults = {
       hasError: false,
       explanation: ''
     },
+    layout: [['side', 4], ['main', 8]],
 
     // app data
     feed: [],
@@ -50,6 +51,7 @@ var defaults = {
       hasError: false,
       explanation: ''
     },
+    layout: [['side', 4], ['main', 8]],
 
     // app data
     profiles: [],
@@ -108,6 +110,7 @@ function createHomeApp(events, initialState) {
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
     }),
+    layout:      mercury.value(state.layout),
     events:      events,
 
     feed:        mercury.array(state.feed.map(createMessage)),
@@ -141,6 +144,7 @@ function createPubApp(events, initialState) {
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
     }),
+    layout:      mercury.value(state.layout),
     events:      events,
 
     profiles:    mercury.array(state.profiles.map(createProfile)),

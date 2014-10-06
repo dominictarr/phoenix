@@ -65,3 +65,11 @@ $timeline-staff-pos-x: 22px;
     margin-top: 22px;
   }
 }
+
+.feed-preview {
+  > div {
+    > :first-child {
+      margin-top: 0
+    }
+  }
+}

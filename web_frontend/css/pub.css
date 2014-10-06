@@ -1495,4 +1495,8 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 .feed .phoenix-event .event-body { display: inline-block; margin-left: 6px; }
 .feed .phoenix-event + .phoenix-event { margin-top: 22px; }
 
+.feed-preview > div > :first-child { margin-top: 0; }
+
+.profile-ctrls h2 { margin-top: 0; margin-bottom: 4px; }
+
 .pubapp { visibility: visible !important; }
