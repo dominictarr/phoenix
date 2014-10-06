@@ -14319,7 +14319,7 @@ var message = exports.message = function(msg) {
 var messageText = exports.messageText = function(msg) {
   return h('.panel.panel-default', [
     h('.panel-body', [
-      h('p', [h('strong', util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
+      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), h('small', ' - ' + util.prettydate(new Date(msg.timestamp), true))]),
       new widgets.Markdown(util.escapePlain(msg.message.plain))
     ])
   ])
@@ -14334,7 +14334,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
   }
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),
-    h('.event-body', [h('strong', util.escapePlain(msg.authorNickname)), ' ' + text]),
+    h('.event-body', [userlink(msg.author, util.escapePlain(msg.authorNickname)), ' ' + text]),
   ])
 }
 
@@ -14343,6 +14343,13 @@ var syncButton = exports.syncButton = function(events, isSyncing) {
     return h('button.btn.btn-default', { disabled: true }, 'Syncing...')
   }
   return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync')
+}
+
+var userlink = exports.userlink = function(id, text, opts) {
+  opts = opts || {}
+  opts.className = (opts.className || '') + ' user-link'
+  var idStr = util.toHexString(id)
+  return a('#/profile/'+idStr, text, opts)
 }
 
 function stylesheet(href) {

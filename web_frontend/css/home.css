@@ -1482,6 +1482,8 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 
 .affix { position: fixed; -webkit-transform: translate3d(0, 0, 0); transform: translate3d(0, 0, 0); }
 
+.user-link { font-weight: bold; color: #555; }
+
 .feed { position: relative; }
 .feed:before { display: block; content: ""; position: absolute; top: 0; bottom: 0; left: 22px; width: 4px; background-color: #f3f3f3; z-index: -1; }
 .feed .panel { margin-bottom: 12px; }
