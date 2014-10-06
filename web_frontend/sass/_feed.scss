@@ -50,19 +50,10 @@ $timeline-staff-pos-x: 22px;
 
   .message-reply {
     margin-left: 40px;
-    &::before {
-      height: 4px;
-      width: 18px;
-      display: block;
-      content: "";
-      position: relative;
-      top: 26px;
-      left: -18px;
-      background-color: #f3f3f3;
-      z-index: -1;
-    }
+    margin-top: -12px;
+    padding: 12px;
+    background: #f3f3f3;
     .reply-publish {
-      margin-bottom: 16px;
       .cancel {
         position: relative;
         top: 2px;
