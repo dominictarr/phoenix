@@ -13686,6 +13686,10 @@ exports.fetchProfile = function(state, profid, cb) {
       profile.idStr = idStr
       profile = addProfile(state, profile)
 
+      // pull into current user data
+      if (profile.idStr == state.user.idStr())
+        state.user.nickname.set(profile.nickname)
+
       // drain the queue
       cbs(null, profile)
     })
@@ -13928,12 +13932,18 @@ var mascot = exports.mascot = function(quote) {
 }
 
 var feed = exports.feed = function(state, feed, reverse) {
-  var messages = feed.map(message.bind(null, state.events, state.replyFormMap, state.replyForms))
+  var messages = feed.map(message.bind(null, state))
   if (reverse) messages.reverse()
   return h('.feed', messages)
 }
 
-var message = exports.message = function(events, replyFormMap, replyForms, msg) {
+var message = exports.message = function(state, msg) {
+  var events = state.events
+  var replyFormMap = state.replyFormMap
+  var replyForms = state.replyForms
+  var reactFormMap = state.reactFormMap
+  var reactForms = state.reactForms
+
   // main content
   var main
   switch (msg.type.toString()) {
@@ -13952,7 +13962,7 @@ var message = exports.message = function(events, replyFormMap, replyForms, msg) 
       main,
       h('.message-reply', [
         h('.panel.panel-default', [
-          h('.panel-body', h('.reply-preview', new widgets.Markdown(replyForm.preview || '*Reply...*')))
+          h('.panel-body', h('.reply-preview', new widgets.Markdown(replyForm.preview)))
         ]),
         h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReplyForm, { id: replyId }) }, [
           h('p', h('textarea.form-control', {
@@ -13966,6 +13976,33 @@ var message = exports.message = function(events, replyFormMap, replyForms, msg) 
           h('button.btn.btn-default', 'Post'),
           ' ',
           jsa(['cancel'], events.cancelReplyForm, { id: replyId }, { className: 'cancel' }),
+        ])
+      ])
+    ])
+  }
+
+  // react form
+  var reactId = msg.authorStr + '-' + msg.sequence
+  if (typeof reactFormMap[reactId] != 'undefined') {
+    var i = reactFormMap[reactId]
+    var reactForm = reactForms[i]
+    main = h('div', [
+      main,
+      h('.message-reply', [
+        h('.phoenix-event', [
+          h('span.event-icon.glyphicon.glyphicon-thumbs-up'),
+          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', (reactForm.textFieldValue||'_'), ' this.']),
+        ]),
+        h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReactForm, { id: reactId }) }, [
+          h('p', h('input.form-control', {
+            name: 'reactText',
+            placeholder: 'Likes, dislikes, wants, etc...',
+            value: reactForm.textFieldValue,
+            'ev-keyup': mercury.valueEvent(events.updateReactFormTextField, { id: reactId })
+          })),
+          h('button.btn.btn-default', 'Post'),
+          ' ',
+          jsa(['cancel'], events.cancelReactForm, { id: reactId }, { className: 'cancel' }),
         ])
       ])
     ])
@@ -14061,7 +14098,8 @@ module.exports = {
   message: createMessage,
   profile: createProfile,
   server: createServer,
-  replyForm: createReplyForm
+  replyForm: createReplyForm,
+  reactForm: createReactForm
 }
 
 // Models
@@ -14079,6 +14117,8 @@ var defaults = {
     },
     replyForms: [],
     replyFormMap: {},
+    reactForms: [],
+    reactFormMap: {},
     conn: {
       hasError: false,
       explanation: ''
@@ -14093,7 +14133,8 @@ var defaults = {
       id: null,
       idStr: '',
       pubkey: null,
-      pubkeyStr: ''
+      pubkeyStr: '',
+      nickname: ''
     },
     lastSync: '',
     isSyncing: false
@@ -14145,6 +14186,12 @@ var defaults = {
     textFieldValue: '',
     textFieldRows: 1,
     preview: ''
+  },
+
+  reactForm: {
+    parent: undefined,
+    textFieldValue: '',
+    preview: ''
   }
 }
 
@@ -14171,6 +14218,8 @@ function createHomeApp(events, initialState) {
     }),
     replyForms:    mercury.array(state.replyForms.map(createReplyForm)),
     replyFormMap:  mercury.value(state.replyFormMap),
+    reactForms:    mercury.array(state.reactForms.map(createReactForm)),
+    reactFormMap:  mercury.value(state.reactFormMap),
     conn:          mercury.struct({
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
@@ -14185,7 +14234,8 @@ function createHomeApp(events, initialState) {
       id:             mercury.value(state.user.id),
       idStr:          mercury.value(state.user.idStr),
       pubkey:         mercury.value(state.user.pubkey),
-      pubkeyStr:      mercury.value(state.user.pubkeyStr)
+      pubkeyStr:      mercury.value(state.user.pubkeyStr),
+      nickname:       mercury.value(state.user.nickname)
     }),
     lastSync:      mercury.value(state.lastSync),
     isSyncing:     mercury.value(state.isSyncing)
@@ -14250,6 +14300,13 @@ function createReplyForm(initialState) {
   state.preview = mercury.value(state.preview)
   state.textFieldValue = mercury.value(state.textFieldValue)
   state.textFieldRows = mercury.value(state.textFieldRows)
+  return mercury.struct(state)
+}
+
+function createReactForm(initialState) {
+  var state = extend(defaults.reactForm, initialState)
+  state.preview = mercury.value(state.preview)
+  state.textFieldValue = mercury.value(state.textFieldValue)
   return mercury.struct(state)
 }
 }).call(this,require("buffer").Buffer)

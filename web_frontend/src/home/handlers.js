@@ -111,6 +111,56 @@ exports.cancelReplyForm = function(state, data) {
   state.replyFormMap.set(m)
 }
 
+exports.updateReactFormTextField = function(state, data) {
+  var m = state.reactFormMap()
+  var reactForm = state.reactForms.get(m[data.id])
+  if (!reactForm)
+    return
+
+  // update preview
+  reactForm.preview.set(data.reactText)
+  reactForm.textFieldValue.set(data.reactText)
+}
+
+exports.submitReactForm = function(state, data) {
+  var m = state.reactFormMap()
+  var reactForm = state.reactForms.get(m[data.id])
+  if (!reactForm)
+    return
+
+  // update textarea
+  reactForm.textFieldValue.set(data.reactText)
+  var str = (reactForm.textFieldValue()).trim()
+  if (!str) return
+
+  // make the post
+  alert(str)
+  /*bus.reactText(state, str, function(err) {
+    if (err) throw err // :TODO: put in gui
+    bus.fetchFeed(state) // pull down the update
+  })*/
+
+  // this horrifying setTimeout hack is explained at [1]
+  setTimeout(function() {
+    // remove the form
+    state.reactForms.splice(m[data.id], 1, null)
+    m[data.id] = undefined
+    state.reactFormMap.set(m)
+  }, 100)
+}
+
+exports.cancelReactForm = function(state, data) {
+  var m = state.reactFormMap()
+  var reactForm = state.reactForms.get(m[data.id])
+  if (!reactForm)
+    return
+
+  // remove the form
+  state.reactForms.splice(m[data.id], 1, null)
+  m[data.id] = undefined
+  state.reactFormMap.set(m)
+}
+
 exports.addFeed = function(state) {
   var token = prompt('Introduction token of the user:')
   if (!token) return
@@ -190,12 +240,22 @@ exports.replyToMsg = function(state, data) {
 
   // add to the map
   m[msgid] = state.replyForms.getLength() - 1
-  console.log('setting', m)
   state.replyFormMap.set(m)
 }
 
 exports.reactToMsg = function(state, data) {
-  alert('todo https://github.com/pfraze/phoenix/issues/56')
+  var m = state.reactFormMap()
+  var msgid = data.msg.authorStr + '-' + data.msg.sequence
+  if (m[msgid])
+    return
+
+  // construct the new react form
+  var reactForm = models.reactForm({ parent: msgid })
+  state.reactForms.push(reactForm)
+
+  // add to the map
+  m[msgid] = state.reactForms.getLength() - 1
+  state.reactFormMap.set(m)
 }
 
 exports.shareMsg = function(state, data) {

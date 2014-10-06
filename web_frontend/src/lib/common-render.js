@@ -39,12 +39,18 @@ var mascot = exports.mascot = function(quote) {
 }
 
 var feed = exports.feed = function(state, feed, reverse) {
-  var messages = feed.map(message.bind(null, state.events, state.replyFormMap, state.replyForms))
+  var messages = feed.map(message.bind(null, state))
   if (reverse) messages.reverse()
   return h('.feed', messages)
 }
 
-var message = exports.message = function(events, replyFormMap, replyForms, msg) {
+var message = exports.message = function(state, msg) {
+  var events = state.events
+  var replyFormMap = state.replyFormMap
+  var replyForms = state.replyForms
+  var reactFormMap = state.reactFormMap
+  var reactForms = state.reactForms
+
   // main content
   var main
   switch (msg.type.toString()) {
@@ -63,7 +69,7 @@ var message = exports.message = function(events, replyFormMap, replyForms, msg) 
       main,
       h('.message-reply', [
         h('.panel.panel-default', [
-          h('.panel-body', h('.reply-preview', new widgets.Markdown(replyForm.preview || '*Reply...*')))
+          h('.panel-body', h('.reply-preview', new widgets.Markdown(replyForm.preview)))
         ]),
         h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReplyForm, { id: replyId }) }, [
           h('p', h('textarea.form-control', {
@@ -77,6 +83,33 @@ var message = exports.message = function(events, replyFormMap, replyForms, msg) 
           h('button.btn.btn-default', 'Post'),
           ' ',
           jsa(['cancel'], events.cancelReplyForm, { id: replyId }, { className: 'cancel' }),
+        ])
+      ])
+    ])
+  }
+
+  // react form
+  var reactId = msg.authorStr + '-' + msg.sequence
+  if (typeof reactFormMap[reactId] != 'undefined') {
+    var i = reactFormMap[reactId]
+    var reactForm = reactForms[i]
+    main = h('div', [
+      main,
+      h('.message-reply', [
+        h('.phoenix-event', [
+          h('span.event-icon.glyphicon.glyphicon-thumbs-up'),
+          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', (reactForm.textFieldValue||'_'), ' this.']),
+        ]),
+        h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReactForm, { id: reactId }) }, [
+          h('p', h('input.form-control', {
+            name: 'reactText',
+            placeholder: 'Likes, dislikes, wants, etc...',
+            value: reactForm.textFieldValue,
+            'ev-keyup': mercury.valueEvent(events.updateReactFormTextField, { id: reactId })
+          })),
+          h('button.btn.btn-default', 'Post'),
+          ' ',
+          jsa(['cancel'], events.cancelReactForm, { id: reactId }, { className: 'cancel' }),
         ])
       ])
     ])

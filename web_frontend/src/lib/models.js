@@ -9,7 +9,8 @@ module.exports = {
   message: createMessage,
   profile: createProfile,
   server: createServer,
-  replyForm: createReplyForm
+  replyForm: createReplyForm,
+  reactForm: createReactForm
 }
 
 // Models
@@ -27,6 +28,8 @@ var defaults = {
     },
     replyForms: [],
     replyFormMap: {},
+    reactForms: [],
+    reactFormMap: {},
     conn: {
       hasError: false,
       explanation: ''
@@ -41,7 +44,8 @@ var defaults = {
       id: null,
       idStr: '',
       pubkey: null,
-      pubkeyStr: ''
+      pubkeyStr: '',
+      nickname: ''
     },
     lastSync: '',
     isSyncing: false
@@ -93,6 +97,12 @@ var defaults = {
     textFieldValue: '',
     textFieldRows: 1,
     preview: ''
+  },
+
+  reactForm: {
+    parent: undefined,
+    textFieldValue: '',
+    preview: ''
   }
 }
 
@@ -119,6 +129,8 @@ function createHomeApp(events, initialState) {
     }),
     replyForms:    mercury.array(state.replyForms.map(createReplyForm)),
     replyFormMap:  mercury.value(state.replyFormMap),
+    reactForms:    mercury.array(state.reactForms.map(createReactForm)),
+    reactFormMap:  mercury.value(state.reactFormMap),
     conn:          mercury.struct({
       hasError:       mercury.value(state.conn.hasError),
       explanation:    mercury.value(state.conn.explanation)
@@ -133,7 +145,8 @@ function createHomeApp(events, initialState) {
       id:             mercury.value(state.user.id),
       idStr:          mercury.value(state.user.idStr),
       pubkey:         mercury.value(state.user.pubkey),
-      pubkeyStr:      mercury.value(state.user.pubkeyStr)
+      pubkeyStr:      mercury.value(state.user.pubkeyStr),
+      nickname:       mercury.value(state.user.nickname)
     }),
     lastSync:      mercury.value(state.lastSync),
     isSyncing:     mercury.value(state.isSyncing)
@@ -198,5 +211,12 @@ function createReplyForm(initialState) {
   state.preview = mercury.value(state.preview)
   state.textFieldValue = mercury.value(state.textFieldValue)
   state.textFieldRows = mercury.value(state.textFieldRows)
+  return mercury.struct(state)
+}
+
+function createReactForm(initialState) {
+  var state = extend(defaults.reactForm, initialState)
+  state.preview = mercury.value(state.preview)
+  state.textFieldValue = mercury.value(state.textFieldValue)
   return mercury.struct(state)
 }

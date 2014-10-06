@@ -17,6 +17,12 @@ function createEvents() {
     'submitReplyForm',
     'cancelReplyForm',
 
+    // reaction publish form
+    'updateReactFormTextField',
+    'setReactFormTextField',
+    'submitReactForm',
+    'cancelReactForm',
+
     // network page
     'addServer',
     'removeServer',

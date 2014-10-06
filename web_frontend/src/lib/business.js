@@ -134,6 +134,10 @@ exports.fetchProfile = function(state, profid, cb) {
       profile.idStr = idStr
       profile = addProfile(state, profile)
 
+      // pull into current user data
+      if (profile.idStr == state.user.idStr())
+        state.user.nickname.set(profile.nickname)
+
       // drain the queue
       cbs(null, profile)
     })
