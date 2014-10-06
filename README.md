@@ -38,8 +38,18 @@ This will start the home server on 65000 and the pub server on port 80 (`-p`). T
 To stop it, run:
 
 ```
-./phoenix stop
+sudo ./phoenix stop
 ```
+
+
+## Contributing
+
+Contributions are welcome! The fastest way to get started is to check the issues board. Issues tagged "Help Wanted" are the low-hanging fruit and should be easy to handle. Submit your update as a PR; maintainers will review and merge asap.
+
+Make sure your submissions are licensed for free use. All code in Phoenix (including contributions) falls under the license below, or under the licenses attached to included libraries.
+
+You can get help in #scuttlebutt on freenode.
+
 
 ## License
 
