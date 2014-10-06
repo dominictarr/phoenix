@@ -13812,8 +13812,9 @@ function feedControls(state) {
   var events = state.events
   var publishForm = state.publishForm
   var lastSync = state.lastSync
+  var previewDisplay = (publishForm.preview) ? 'block' : 'none'
   return h('.feed-ctrls', [
-    h('.panel.panel-default', [
+    h('.panel.panel-default', { style: { display: previewDisplay } }, [
       h('.panel-body', [
         h('div.feed-preview', new widgets.Markdown(publishForm.preview)),
       ])
