@@ -1,5 +1,14 @@
 var util  = require('../../../lib/util')
-var mdlib = require('markdown').markdown
+var marked = require('marked');
+marked.setOptions({
+  gfm: true,
+  tables: true,
+  breaks: false,
+  pedantic: false,
+  sanitize: true,
+  smartLists: true,
+  smartypants: false
+});
 
 exports.Markdown = Markdown
 function Markdown(rawtext) {
@@ -14,5 +23,5 @@ Markdown.prototype.init = function () {
 }
 
 Markdown.prototype.update = function (prev, elem) {
-  elem.innerHTML = mdlib.toHTML(util.escapePlain(this.rawtext))
+  elem.innerHTML = marked(util.escapePlain(this.rawtext))
 }
