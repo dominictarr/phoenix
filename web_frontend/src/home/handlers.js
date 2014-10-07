@@ -64,6 +64,16 @@ exports.setPublishFormText = function(state, data) {
   form.textValue.set(data.publishText)
 }
 
+exports.setPublishFormType = function(state, data) {
+  var form = getPublishForm(state, data.id)
+  if (!form)
+    return
+
+  // update internal data
+  form.type.set(data.type)
+  form.textPlaceholder.set('Publish...')
+}
+
 exports.submitPublishForm = function(state, data) {
   var form = getPublishForm(state, data.id)
   if (!form)

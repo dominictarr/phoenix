@@ -70,31 +70,40 @@ $timeline-staff-pos-x: 22px;
       }
     }
   }
+}
 
-  .phoenix-event {
-    margin-top: 16px;
-    margin-bottom: 16px;
-    margin-left: $timeline-staff-pos-x - 14px;
+.phoenix-event {
+  margin-top: 16px;
+  margin-bottom: 16px;
+  margin-left: $timeline-staff-pos-x - 14px;
 
-    .event-icon {
-      float: left;
-      width: 32px;
-      height: 32px;
-      margin-top: -7px;
-      line-height: 32px;
-      color: #666;
-      text-align: center;
-      background-color: #f3f3f3;
-      border-radius: 50%;
-    }
-
-    .event-body {
-      display: inline-block;
-      margin-left: 6px;
-    }
+  .event-icon {
+    float: left;
+    width: 32px;
+    height: 32px;
+    margin-top: -7px;
+    line-height: 32px;
+    color: #666;
+    text-align: center;
+    background-color: #f3f3f3;
+    border-radius: 50%;
   }
-  .phoenix-event + .phoenix-event {
-    margin-top: 22px;
+
+  .event-body {
+    display: inline-block;
+    margin-left: 6px;
+  }
+}
+.phoenix-event + .phoenix-event {
+  margin-top: 22px;
+}
+
+.feed-ctrls {
+  .publish-wrapper {
+    margin-bottom: 8px;
+  }
+  .phoenix-event {
+    margin-bottom: 26px;
   }
 }
 

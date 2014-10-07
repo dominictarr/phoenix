@@ -14035,15 +14035,23 @@ var publishForm = exports.publishForm = function(state, form) {
         })),
         h('button.btn.btn-default', 'Post'),
         ' ',
-        jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }),
+        (!form.permanent) ? jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
+        h('span.pull-right', [
+          h('strong', jsa('text', state.events.setPublishFormType, { id: form.id, type: 'text' })),
+          ' / ',
+          jsa('action', state.events.setPublishFormType, { id: form.id, type: 'act' })
+        ])
       ])
     ])
   }
   if (form.type == 'act') {
+    var hand = (form.parent) ? 'up' : 'right'
     return h('.publish-wrapper', [
       h('.phoenix-event', [
-        h('span.event-icon.glyphicon.glyphicon-hand-up'),
-        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', (form.textValue||'_'), ' this.']),
+        h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
+        (form.parent) ?
+          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, ' this.']) :
+          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, '.']),
       ]),
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {
@@ -14054,7 +14062,12 @@ var publishForm = exports.publishForm = function(state, form) {
         })),
         h('button.btn.btn-default', 'Post'),
         ' ',
-        jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }),
+        (!form.permanent) ? jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
+        h('span.pull-right', [
+          jsa('text', state.events.setPublishFormType, { id: form.id, type: 'text' }),
+          ' / ',
+          h('strong', jsa('action', state.events.setPublishFormType, { id: form.id, type: 'act' }))
+        ])
       ])
     ])
   }
@@ -14075,6 +14088,25 @@ var userlink = exports.userlink = function(id, text, opts) {
   opts.className = (opts.className || '') + ' user-link'
   var idStr = util.toHexString(id)
   return a('#/profile/'+idStr, text, opts)
+}
+
+function dropdown(text, items) {
+  return h('.dropdown', [
+    new widgets.DropdownBtn(text),
+    h('ul.dropdown-menu', items.map(function(item) {
+      return h('li', jsa(item[0], item[1], item[2]))
+    }))
+  ])
+}
+
+function splitdown(btn, items) {
+  return h('.btn-group', [
+    btn,
+    new widgets.DropdownBtn(),
+    h('ul.dropdown-menu', items.map(function(item) {
+      return h('li', jsa(item[0], item[1], item[2]))
+    }))
+  ])
 }
 
 function icon(i) {
@@ -14363,6 +14395,35 @@ Markdown.prototype.init = function () {
 
 Markdown.prototype.update = function (prev, elem) {
   elem.innerHTML = marked(util.escapePlain(this.rawtext))
+}
+
+exports.DropdownBtn = DropdownBtn
+function DropdownBtn(title) {
+  this.title = title||''
+}
+DropdownBtn.prototype.type = 'Widget';
+
+DropdownBtn.prototype.init = function () {
+  var elem = document.createElement('button')
+  elem.className = 'btn btn-default dropdown-toggle'
+  this.update(null, elem)
+  return elem
+}
+
+DropdownBtn.prototype.update = function (prev, elem) {
+  elem.innerHTML = this.title + ' <span class="caret"></span>'
+  elem.onclick = onclick.bind(elem)
+  elem.onsubmit = abort
+}
+
+function onclick(e) {
+  abort(e)
+  this.parentNode.classList.toggle('open')
+}
+
+function abort(e) {
+  e.preventDefault()
+  e.stopPropagation()
 }
 },{"../../../lib/util":1,"marked":13}],261:[function(require,module,exports){
 var document = require('global/document')

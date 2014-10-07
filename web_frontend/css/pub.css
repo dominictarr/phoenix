@@ -1497,10 +1497,15 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 .feed .message-reply { margin-left: 40px; margin-top: -12px; margin-bottom: 16px; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; padding: 12px; background: #f3f3f3; }
 .feed .message-reply .publish-wrapper .phoenix-event { background: white; padding: 1em; border-radius: 4px; margin: 0 0 8px; }
 .feed .message-reply .publish-wrapper .cancel { position: relative; top: 2px; margin-left: 4px; }
-.feed .phoenix-event { margin-top: 16px; margin-bottom: 16px; margin-left: 8px; }
-.feed .phoenix-event .event-icon { float: left; width: 32px; height: 32px; margin-top: -7px; line-height: 32px; color: #666; text-align: center; background-color: #f3f3f3; border-radius: 50%; }
-.feed .phoenix-event .event-body { display: inline-block; margin-left: 6px; }
-.feed .phoenix-event + .phoenix-event { margin-top: 22px; }
+
+.phoenix-event { margin-top: 16px; margin-bottom: 16px; margin-left: 8px; }
+.phoenix-event .event-icon { float: left; width: 32px; height: 32px; margin-top: -7px; line-height: 32px; color: #666; text-align: center; background-color: #f3f3f3; border-radius: 50%; }
+.phoenix-event .event-body { display: inline-block; margin-left: 6px; }
+
+.phoenix-event + .phoenix-event { margin-top: 22px; }
+
+.feed-ctrls .publish-wrapper { margin-bottom: 8px; }
+.feed-ctrls .phoenix-event { margin-bottom: 26px; }
 
 .publish-preview > div > :first-child, .publish-preview > div > :first-child { margin-top: 0; }
 
