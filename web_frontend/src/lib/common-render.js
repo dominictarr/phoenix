@@ -65,13 +65,14 @@ var message = exports.message = function(state, msg) {
   var main
   switch (msg.type.toString()) {
     case 'init': return messageEvent(msg, 'account-created', 'Account created')
-    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + util.escapePlain(msg.message.nickname))
+    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.message.nickname)
+    case 'act': return messageEvent(msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain)
     case 'text': main = messageText(events, msg); break
-    default: return h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString()))
+    default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
   // reply/react form
-  var formId = msg.authorStr + '-' + msg.sequence
+  var formId = util.toHexString(msg.id)
   if (typeof publishFormMap[formId] != 'undefined') {
     var i = publishFormMap[formId]
     main = h('div', [main, h('.message-reply', publishForm(state, publishForms[i]))])
@@ -116,7 +117,8 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
   switch (type) {
     case 'account-created': icon = '.glyphicon-home'; break
     case 'account-change': icon = '.glyphicon-user'; break
-    default: icon = '.glyphicon-hand-up'
+    case 'react': icon = '.glyphicon-hand-up'; break
+    default: icon = '.glyphicon-hand-right'
   }
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),
@@ -125,7 +127,6 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
 }
 
 var publishForm = exports.publishForm = function(state, form) {
-  // var previewDisplay = (publishForm.preview) ? 'block' : 'none'
   if (form.type == 'text') {
     return  h('.publish-wrapper', [
       h('.panel.panel-default', [
@@ -157,8 +158,8 @@ var publishForm = exports.publishForm = function(state, form) {
       h('.phoenix-event', [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
         (form.parent) ?
-          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, ' this.']) :
-          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, '.']),
+          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, ' this']) :
+          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue]),
       ]),
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {

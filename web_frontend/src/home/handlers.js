@@ -85,12 +85,17 @@ exports.submitPublishForm = function(state, data) {
   if (!str) return
 
   // make the post
-  alert(str)
-  // :TODO:
-  /*bus.publishText(state, str, function(err) {
+  if (!form.parent) {
+    if (form.type() == 'text')     bus.publishText(state, str, after)
+    else if (form.type() == 'act') bus.publishAction(state, str, after)
+  } else {
+    if (form.type() == 'text')     bus.publishReply(state, str, form.parent, after)
+    else if (form.type() == 'act') bus.publishReaction(state, str, form.parent, after)
+  }
+  function after(err) {
     if (err) throw err // :TODO: put in gui
     bus.fetchFeed(state) // pull down the update
-  })*/
+  }
 
   // this horrifying setTimeout hack is explained at [1]
   setTimeout(function() {
@@ -199,15 +204,15 @@ exports.toggleLayout = function(state) {
 }
 
 exports.replyToMsg = function(state, data) {
-  var id = data.msg.authorStr + '-' + data.msg.sequence
-  var form = addPublishForm(state, id, 'TODO')
+  var id = data.msg.idStr
+  var form = addPublishForm(state, id, data.msg.id)
   form.type.set('text')
   form.textPlaceholder.set('Reply...')
 }
 
 exports.reactToMsg = function(state, data) {
-  var id = data.msg.authorStr + '-' + data.msg.sequence
-  var form = addPublishForm(state, id, 'TODO')
+  var id = data.msg.idStr
+  var form = addPublishForm(state, id, data.msg.id)
   form.type.set('act')
   form.textPlaceholder.set('Likes, wants, agrees with, etc...')
 }

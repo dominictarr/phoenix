@@ -1,4 +1,5 @@
-IGNORES = -i fs -i eccjs -i "proquint-" -i blake2s -i http -i level -i level/sublevel -i level-sublevel/bytewise -i secure-scuttlebutt -i secure-scuttlebutt/defaults -i pull-level
+#IGNORES = -i fs -i eccjs -i "proquint-" -i blake2s -i http -i level -i level/sublevel -i level-sublevel/bytewise -i secure-scuttlebutt -i secure-scuttlebutt/defaults -i pull-level
+IGNORES = -i fs -i "proquint-" -i http -i level -i level/sublevel -i level-sublevel/bytewise -i pull-level
 webhome: js css
 js: js_pub js_home
 

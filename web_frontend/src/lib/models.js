@@ -58,6 +58,7 @@ var defaults = {
   },
 
   message: {
+    id: null,
     author: null,
     authorStr: '',
     message: null,
@@ -163,11 +164,11 @@ function createPubApp(events, initialState) {
 function createMessage(initialState) {
   var state = extend(defaults.message, initialState)
   try {
-    state.type = (new Buffer(state.type)).toString()
-    state.authorStr = (new Buffer(state.author)).toString('hex')
+    state.type = state.type.toString()
+    state.authorStr = state.author.toString('hex')
     state.message = msgpack.decode(new Buffer(state.message))
   } catch(e) {
-    if (state.type != 'init') { // :TODO: may need to remove in the future? not sure if the init message with go msgpack
+    if (state.type != 'init') { // :TODO: may need to remove in the future? not sure if the init message will adopt msgpack
       console.log('Bad message encoding', state)
       return null
     }

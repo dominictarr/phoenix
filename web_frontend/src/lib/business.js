@@ -1,14 +1,27 @@
-var WSStream = require('websocket-stream')
-var prpc = require('phoenix-rpc')
-var through = require('through')
-var pull = require('pull-stream')
-var toPull = require('stream-to-pull-stream')
-var multicb = require('multicb')
+var WSStream    = require('websocket-stream')
+var prpc        = require('phoenix-rpc')
+var through     = require('through')
+var pull        = require('pull-stream')
+var toPull      = require('stream-to-pull-stream')
+var multicb     = require('multicb')
+var ssbDefaults = require('secure-scuttlebutt/defaults')
+var msgpack     = require('msgpack-js')
 
-var util = require('../../../lib/util')
-var models = require('./models')
+var util        = require('../../../lib/util')
+var models      = require('./models')
 
 var client = exports.client = null
+
+function genMsgId(msg) {
+  return ssbDefaults.hash(ssbDefaults.codec.encode(msg))
+}
+function convertMsgBuffers(msg) {
+  msg.previous = new Buffer(msg.previous)
+  msg.author = new Buffer(msg.author)
+  msg.message = new Buffer(msg.message)
+  msg.type = new Buffer(msg.type)
+  msg.signature = new Buffer(msg.signature) 
+}
 
 // establishes the server api connection
 function setupClient(state) {
@@ -165,6 +178,10 @@ exports.fetchFeed = function(state, opts, cb) {
     pull(
       toPull(client.api.createFeedStream()),
       pull.asyncMap(function(m, cb) {
+        convertMsgBuffers(m)
+        m.id = genMsgId(m)
+        m.idStr = util.toHexString(m.id)
+
         fetchProfile(state, m.author, function(err, profile) {
           if (err) console.error('Error loading profile for message', err, m)
           else m.authorNickname = profile.nickname
@@ -208,6 +225,9 @@ exports.fetchProfileFeed = function(state, profid, cb) {
         pull(
           toPull(client.api.createHistoryStream(util.toBuffer(profid), 0)),
           pull.drain(function (m) {
+            convertMsgBuffers(m)
+            m.id = genMsgId(m)
+            m.idStr = util.toHexString(m.id)
             m.authorNickname = profile.nickname
             m = models.message(m)
             if (m.type == 'init') profile.joinDate.set(util.prettydate(new Date(m.timestamp), true))
@@ -255,9 +275,34 @@ exports.fetchServers = function(state, cb) {
 
 // posts to the feed
 var publishText =
-exports.publishText = function(state, str, cb) {
-  if (!str.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  client.api.text_post(str, cb)
+exports.publishText = function(state, text, cb) {
+  if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
+  client.api.addMessage('text', msgpack.encode({plain: text}), cb)
+}
+
+// posts to the feed
+var publishReply =
+exports.publishReply = function(state, text, parent, cb) {
+  parent = util.toBuffer(parent)
+  if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
+  if (!parent) return cb(new Error('Must provide a parent message to the reply'))
+  client.api.addMessage('text', msgpack.encode({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+}
+
+// posts to the feed
+var publishAction =
+exports.publishAction = function(state, text, cb) {
+  if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
+  client.api.addMessage('act', msgpack.encode({plain: text}), cb)
+}
+
+// posts to the feed
+var publishReaction =
+exports.publishReaction = function(state, text, parent, cb) {
+  parent = util.toBuffer(parent)
+  if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
+  if (!parent) return cb(new Error('Must provide a parent message to the reply'))
+  client.api.addMessage('act', msgpack.encode({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
 }
 
 // begins following a feed
