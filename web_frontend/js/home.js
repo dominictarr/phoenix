@@ -21296,6 +21296,9 @@ var messageText = exports.messageText = function(events, msg) {
           ' - ',
           util.prettydate(new Date(msg.timestamp), true)
         ]),
+        (msg.message.repliesTo) ?
+          h('span.repliesto', [' in response to ', a('javascript:void()', shortHex(msg.message.repliesTo.$msg))])
+          : '',
       ]),
       new widgets.Markdown(util.escapePlain(msg.message.plain)),
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
@@ -21327,7 +21330,17 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
   }
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),
-    h('.event-body', [userlink(msg.author, util.escapePlain(msg.authorNickname)), ' ' + text]),
+    h('.event-body', [
+      h('p', [
+        h('small.message-ctrls', [
+          util.prettydate(new Date(msg.timestamp), true)
+        ]),
+        (msg.message.repliesTo) ?
+          h('span.repliesto', [' in response to ', a('javascript:void()', shortHex(msg.message.repliesTo.$msg))])
+          : '',
+      ]),
+      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), ' ' + text])
+    ]),
   ])
 }
 
@@ -21363,7 +21376,7 @@ var publishForm = exports.publishForm = function(state, form) {
       h('.phoenix-event', [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
         (form.parent) ?
-          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, ' this.']) :
+          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, ' this']) :
           h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue]),
       ]),
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
@@ -21440,6 +21453,10 @@ function jsa(text, event, evData, opts) {
 }
 function img(src) {
   return h('img', { src: src })
+}
+
+function shortHex(buf) {
+  return util.toHexString(buf).slice(0, 6) + '...'
 }
 },{"../../../lib/util":1,"./value-events":306,"./widgets":307,"mercury":14}],305:[function(require,module,exports){
 (function (Buffer){

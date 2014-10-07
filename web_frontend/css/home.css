@@ -1602,15 +1602,16 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 .feed .message-reply .publish-wrapper .cancel { position: relative; top: 2px; margin-left: 4px; }
 
 .phoenix-event { margin-top: 16px; margin-bottom: 16px; margin-left: 8px; }
-.phoenix-event .event-icon { float: left; width: 32px; height: 32px; margin-top: -7px; line-height: 32px; color: #666; text-align: center; background-color: #f3f3f3; border-radius: 50%; }
-.phoenix-event .event-body { display: inline-block; margin-left: 6px; }
-
-.phoenix-event + .phoenix-event { margin-top: 22px; }
+.phoenix-event .event-icon { float: left; width: 32px; height: 32px; margin-top: 12px; line-height: 32px; color: #666; text-align: center; background-color: #f3f3f3; border-radius: 50%; }
+.phoenix-event .event-body { display: inline-block; margin-left: 6px; margin-bottom: 8px; }
+.phoenix-event .event-body p { margin: 0; }
 
 .feed-ctrls .publish-wrapper { margin-bottom: 8px; }
 .feed-ctrls .phoenix-event { margin-bottom: 26px; }
 
 .publish-preview > div > :first-child, .publish-preview > div > :first-child { margin-top: 0; }
+
+.repliesto { margin: 0; font-size: 85%; color: #888; }
 
 .profile-ctrls h2 { margin-top: 0; margin-bottom: 4px; }
 

@@ -81,7 +81,7 @@ $timeline-staff-pos-x: 22px;
     float: left;
     width: 32px;
     height: 32px;
-    margin-top: -7px;
+    margin-top: 12px;
     line-height: 32px;
     color: #666;
     text-align: center;
@@ -92,10 +92,11 @@ $timeline-staff-pos-x: 22px;
   .event-body {
     display: inline-block;
     margin-left: 6px;
+    margin-bottom: 8px;
+    p {
+      margin: 0;
+    }
   }
-}
-.phoenix-event + .phoenix-event {
-  margin-top: 22px;
 }
 
 .feed-ctrls {
@@ -113,4 +114,10 @@ $timeline-staff-pos-x: 22px;
       margin-top: 0
     }
   }
+}
+
+.repliesto {
+  margin: 0;
+  font-size: 85%;
+  color: #888;
 }
