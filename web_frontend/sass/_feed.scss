@@ -56,18 +56,18 @@ $timeline-staff-pos-x: 22px;
     border-bottom-right-radius: 6px;
     padding: 12px;
     background: #f3f3f3;
-    .reply-publish {
+    .publish-wrapper {
+      .phoenix-event {
+        background: white;
+        padding: 1em;
+        border-radius: 4px;
+        margin: 0 0 8px;
+      }
       .cancel {
         position: relative;
         top: 2px;
         margin-left: 4px;
       }
-    }
-    .phoenix-event {
-      background: white;
-      padding: 1em;
-      border-radius: 4px;
-      margin: 0 0 8px;
     }
   }
 
@@ -98,7 +98,7 @@ $timeline-staff-pos-x: 22px;
   }
 }
 
-.feed-preview, .reply-preview {
+.publish-preview, .publish-preview {
   > div {
     > :first-child {
       margin-top: 0

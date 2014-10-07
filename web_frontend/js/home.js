@@ -13566,8 +13566,18 @@ handlers.setRoute(state, window.location.hash)
 
 module.exports = createApp
 function createApp() {
+  var initState = {
+    publishFormMap: { feed: 0 },
+    publishForms: [{
+      id: 'feed',
+      type: 'text',
+      textPlaceholder: 'Publish...',
+      permanent: true
+    }]
+  }
+
   var events = createEvents()
-  var state = window.state = models.homeApp(events)
+  var state = window.state = models.homeApp(events, initState)
   bus.setupHomeApp(state)
   wireUpEvents(state, events)
   return state
@@ -13587,22 +13597,11 @@ var mercury = require('mercury')
 module.exports = createEvents
 function createEvents() {
   var events = mercury.input([
-    // feed page publish form
-    'updatePublishFormTextField',
-    'setPublishFormTextField',
+    // publish forms
+    'updatePublishFormText',
+    'setPublishFormText',
     'submitPublishForm',
-
-    // reply publish form
-    'updateReplyFormTextField',
-    'setReplyFormTextField',
-    'submitReplyForm',
-    'cancelReplyForm',
-
-    // reaction publish form
-    'updateReactFormTextField',
-    'setReactFormTextField',
-    'submitReactForm',
-    'cancelReactForm',
+    'cancelPublishForm',
 
     // network page
     'addServer',
@@ -13651,149 +13650,109 @@ exports.setRoute = function(state, route) {
   state.route.set(route)
 }
 
-exports.updatePublishFormTextField = function(state, data) {
-  // expand/contract field if there's content in there
-  state.publishForm.textFieldRows.set((data.publishText) ? 3 : 1)
-  state.publishForm.preview.set(data.publishText)
+function getPublishForm(state, id) {
+  var m = state.publishFormMap()
+  return state.publishForms.get(m[id])
 }
 
-exports.setPublishFormTextField = function(state, data) {
+function addPublishForm(state, id, parent) {
+  var m = state.publishFormMap()
+  if (m[id])
+    return state.publishForms.get(m[id])
+
+  // construct the new form
+  var publishForm = models.publishForm({ id: id, parent: parent })
+  state.publishForms.push(publishForm)
+
+  // add to the map
+  m[id] = state.publishForms.getLength() - 1
+  state.publishFormMap.set(m)
+
+  return publishForm
+}
+
+exports.updatePublishFormText = function(state, data) {
+  var form = getPublishForm(state, data.id)
+  if (!form)
+    return
+
+  // expand/contract field if there's content in there
+  switch (form.type()) {
+    case 'text':
+      form.textRows.set((data.publishText) ? 3 : 1)
+      form.preview.set(data.publishText)
+      break
+    case 'act':
+      form.preview.set(data.publishText)
+      form.textValue.set(data.publishText)
+      break
+  }
+}
+
+exports.setPublishFormText = function(state, data) {
+  var form = getPublishForm(state, data.id)
+  if (!form)
+    return
+
   // update internal data
-  state.publishForm.textFieldValue.set(data.publishText)
+  form.textValue.set(data.publishText)
 }
 
 exports.submitPublishForm = function(state, data) {
+  var form = getPublishForm(state, data.id)
+  if (!form)
+    return
+
   // update textarea
-  state.publishForm.textFieldValue.set(data.publishText)
-  var str = (state.publishForm.textFieldValue()).trim()
+  form.textValue.set(data.publishText)
+  var str = (form.textValue()).trim()
   if (!str) return
 
   // make the post
-  bus.publishText(state, str, function(err) {
+  alert(str)
+  // :TODO:
+  /*bus.publishText(state, str, function(err) {
     if (err) throw err // :TODO: put in gui
     bus.fetchFeed(state) // pull down the update
-  })
+  })*/
 
   // this horrifying setTimeout hack is explained at [1]
   setTimeout(function() {
+    if (form.permanent) {
+      // reset the form
+      form.textValue.set('')
+      form.textRows.set(1)
+      form.preview.set('')
+    } else {
+      // remove the form
+      var m = state.publishFormMap()
+      state.publishForms.splice(m[form.id], 1, null)
+      m[data.id] = undefined
+      state.publishFormMap.set(m)
+    }
+  }, 100)
+}
+
+exports.cancelPublishForm = function(state, data) {
+  var m = state.publishFormMap()
+  var form = state.publishForms.get(m[data.id])
+  if (!form)
+    return
+
+  if (form.preview() && !confirm('Are you sure you want to cancel this message?'))
+    return
+
+  if (form.permanent) {
     // reset the form
-    state.publishForm.textFieldValue.set('')
-    state.publishForm.textFieldRows.set(1)
-    state.publishForm.preview.set('')
-  }, 100)
-}
-
-exports.updateReplyFormTextField = function(state, data) {
-  var m = state.replyFormMap()
-  var replyForm = state.replyForms.get(m[data.id])
-  if (!replyForm)
-    return
-
-  // expand/contract field if there's content in there
-  replyForm.textFieldRows.set((data.replyText) ? 3 : 1)
-  replyForm.preview.set(data.replyText)
-}
-
-exports.setReplyFormTextField = function(state, data) {
-  var m = state.replyFormMap()
-  var replyForm = state.replyForms.get(m[data.id])
-  if (!replyForm)
-    return
-
-  // update internal data
-  replyForm.textFieldValue.set(data.replyText)
-}
-
-exports.submitReplyForm = function(state, data) {
-  var m = state.replyFormMap()
-  var replyForm = state.replyForms.get(m[data.id])
-  if (!replyForm)
-    return
-
-  // update textarea
-  replyForm.textFieldValue.set(data.replyText)
-  var str = (replyForm.textFieldValue()).trim()
-  if (!str) return
-
-  // make the post
-  alert(str)
-  /*bus.replyText(state, str, function(err) {
-    if (err) throw err // :TODO: put in gui
-    bus.fetchFeed(state) // pull down the update
-  })*/
-
-  // this horrifying setTimeout hack is explained at [1]
-  setTimeout(function() {
+    form.textValue.set('')
+    form.textRows.set(1)
+    form.preview.set('')
+  } else {
     // remove the form
-    state.replyForms.splice(m[data.id], 1, null)
+    state.publishForms.splice(m[data.id], 1, null)
     m[data.id] = undefined
-    state.replyFormMap.set(m)
-  }, 100)
-}
-
-exports.cancelReplyForm = function(state, data) {
-  var m = state.replyFormMap()
-  var replyForm = state.replyForms.get(m[data.id])
-  if (!replyForm)
-    return
-
-  if (replyForm.preview().length && !confirm('Are you sure you want to cancel this message?'))
-    return
-
-  // remove the form
-  state.replyForms.splice(m[data.id], 1, null)
-  m[data.id] = undefined
-  state.replyFormMap.set(m)
-}
-
-exports.updateReactFormTextField = function(state, data) {
-  var m = state.reactFormMap()
-  var reactForm = state.reactForms.get(m[data.id])
-  if (!reactForm)
-    return
-
-  // update preview
-  reactForm.preview.set(data.reactText)
-  reactForm.textFieldValue.set(data.reactText)
-}
-
-exports.submitReactForm = function(state, data) {
-  var m = state.reactFormMap()
-  var reactForm = state.reactForms.get(m[data.id])
-  if (!reactForm)
-    return
-
-  // update textarea
-  reactForm.textFieldValue.set(data.reactText)
-  var str = (reactForm.textFieldValue()).trim()
-  if (!str) return
-
-  // make the post
-  alert(str)
-  /*bus.reactText(state, str, function(err) {
-    if (err) throw err // :TODO: put in gui
-    bus.fetchFeed(state) // pull down the update
-  })*/
-
-  // this horrifying setTimeout hack is explained at [1]
-  setTimeout(function() {
-    // remove the form
-    state.reactForms.splice(m[data.id], 1, null)
-    m[data.id] = undefined
-    state.reactFormMap.set(m)
-  }, 100)
-}
-
-exports.cancelReactForm = function(state, data) {
-  var m = state.reactFormMap()
-  var reactForm = state.reactForms.get(m[data.id])
-  if (!reactForm)
-    return
-
-  // remove the form
-  state.reactForms.splice(m[data.id], 1, null)
-  m[data.id] = undefined
-  state.reactFormMap.set(m)
+    state.publishFormMap.set(m)
+  }
 }
 
 exports.addFeed = function(state) {
@@ -13864,33 +13823,17 @@ exports.toggleLayout = function(state) {
 }
 
 exports.replyToMsg = function(state, data) {
-  var m = state.replyFormMap()
-  var msgid = data.msg.authorStr + '-' + data.msg.sequence
-  if (m[msgid])
-    return
-
-  // construct the new reply form
-  var replyForm = models.replyForm({ parent: msgid })
-  state.replyForms.push(replyForm)
-
-  // add to the map
-  m[msgid] = state.replyForms.getLength() - 1
-  state.replyFormMap.set(m)
+  var id = data.msg.authorStr + '-' + data.msg.sequence
+  var form = addPublishForm(state, id, 'TODO')
+  form.type.set('text')
+  form.textPlaceholder.set('Reply...')
 }
 
 exports.reactToMsg = function(state, data) {
-  var m = state.reactFormMap()
-  var msgid = data.msg.authorStr + '-' + data.msg.sequence
-  if (m[msgid])
-    return
-
-  // construct the new react form
-  var reactForm = models.reactForm({ parent: msgid })
-  state.reactForms.push(reactForm)
-
-  // add to the map
-  m[msgid] = state.reactForms.getLength() - 1
-  state.reactFormMap.set(m)
+  var id = data.msg.authorStr + '-' + data.msg.sequence
+  var form = addPublishForm(state, id, 'TODO')
+  form.type.set('act')
+  form.textPlaceholder.set('Likes, wants, agrees with, etc...')
 }
 
 exports.shareMsg = function(state, data) {
@@ -13899,8 +13842,8 @@ exports.shareMsg = function(state, data) {
 
 /*
 1: the setTimeout hack in submitPublishForm()
-Basically, we need the `state.publishForm.textFieldValue.set(data.publishText)` to run its course
-before we can call `state.publishForm.textFieldValue.set('')` and have an effect. This wouldn't be
+Basically, we need the `state.publishForm.textValue.set(data.publishText)` to run its course
+before we can call `state.publishForm.textValue.set('')` and have an effect. This wouldn't be
 an issue if the textarea's change event always fired before the submit event, but, because we trigger
 with ctrl+enter and are trying not to much directly with the DOM events (Mercury-land) this is our solution.
 */
@@ -13972,30 +13915,9 @@ function feedPage(state) {
 
 function feedControls(state) {
   var events = state.events
-  var publishForm = state.publishForm
   var lastSync = state.lastSync
-  var previewDisplay = (publishForm.preview) ? 'block' : 'none'
   return h('.feed-ctrls', [
-    h('.panel.panel-default', { style: { display: previewDisplay } }, [
-      h('.panel-body', [
-        h('.feed-preview', new widgets.Markdown(publishForm.preview)),
-      ])
-    ]),
-    h('.panel.panel-default', [
-      h('.panel-body', [
-        h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
-          h('p', h('textarea.form-control', {
-            name: 'publishText',
-            placeholder: 'Publish...',
-            rows: publishForm.textFieldRows,
-            value: publishForm.textFieldValue,
-            'ev-change': mercury.valueEvent(events.setPublishFormTextField),
-            'ev-keyup': mercury.valueEvent(events.updatePublishFormTextField)
-          })),
-          h('button.btn.btn-default', 'Post')
-        ])
-      ])
-    ]),
+    comren.publishForm(state, state.publishForms[0]),
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [
       comren.syncButton(events, state.isSyncing),
@@ -14434,6 +14356,9 @@ var valueEvents = require('./value-events')
 var widgets     = require('./widgets')
 var util        = require('../../../lib/util')
 
+// puts the given vdom parts in columns given a `layout` config
+// - `parts`: an object mapping names to vdom elements, eg { main: h(...), side: h(...) }
+// - `layout`: an array of arrays choosing the layout, eg [['main', 8], ['side', 4]]
 var columns = exports.columns = function(parts, layout) {
   parts.blank = ''
   return layout.map(function(col) {
@@ -14441,12 +14366,14 @@ var columns = exports.columns = function(parts, layout) {
   })
 }
 
+// connection status alert
 var connStatus = exports.connStatus = function(events, connStatus) {
   if (!connStatus.hasError)
     return h('div')
   return h('.container', h('.alert.alert-danger', connStatus.explanation))
 }
 
+// not found message
 var notfound = exports.notfound = function(what, suggestion) {
   return h('div', [
     h('h3', 'Sorry, '+what+' was not found.' + (suggestion || '')),
@@ -14455,12 +14382,14 @@ var notfound = exports.notfound = function(what, suggestion) {
   ])
 }
 
+// random cat giferator
 var cats = ['goingdown', 'hophop', 'huuhuuu', 'pillow-spin', 'shred', 'tailbites', 'woahwoah']
 var randomcat = exports.randomcat = function() {
   var cat = cats[Math.round(Math.random() * 7)] || cats[0]
   return img('/img/loading/'+cat+'.gif')
 }
 
+// felix the phoenix
 var mascot = exports.mascot = function(quote) {
   return h('.class', [
     img('/img/logo.png'),
@@ -14468,18 +14397,21 @@ var mascot = exports.mascot = function(quote) {
   ])
 }
 
+// feed view
+// - `state`: full application state
+// - `feed`: which feed to render
+// - `reverse`: bool, reverse the feed?
 var feed = exports.feed = function(state, feed, reverse) {
   var messages = feed.map(message.bind(null, state))
   if (reverse) messages.reverse()
   return h('.feed', messages)
 }
 
+// feed message renderer
 var message = exports.message = function(state, msg) {
   var events = state.events
-  var replyFormMap = state.replyFormMap
-  var replyForms = state.replyForms
-  var reactFormMap = state.reactFormMap
-  var reactForms = state.reactForms
+  var publishFormMap = state.publishFormMap
+  var publishForms = state.publishForms
 
   // main content
   var main
@@ -14490,64 +14422,17 @@ var message = exports.message = function(state, msg) {
     default: return h('em', 'Unknown message type: ' + util.escapePlain(msg.type.toString()))
   }
 
-  // reply form
-  var replyId = msg.authorStr + '-' + msg.sequence
-  if (typeof replyFormMap[replyId] != 'undefined') {
-    var i = replyFormMap[replyId]
-    var replyForm = replyForms[i]
-    main = h('div', [
-      main,
-      h('.message-reply', [
-        h('.panel.panel-default', [
-          h('.panel-body', h('.reply-preview', new widgets.Markdown(replyForm.preview)))
-        ]),
-        h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReplyForm, { id: replyId }) }, [
-          h('p', h('textarea.form-control', {
-            name: 'replyText',
-            placeholder: 'Reply...',
-            rows: replyForm.textFieldRows,
-            value: replyForm.textFieldValue,
-            'ev-change': mercury.valueEvent(events.setReplyFormTextField, { id: replyId }),
-            'ev-keyup': mercury.valueEvent(events.updateReplyFormTextField, { id: replyId })
-          })),
-          h('button.btn.btn-default', 'Post'),
-          ' ',
-          jsa(['cancel'], events.cancelReplyForm, { id: replyId }, { className: 'cancel' }),
-        ])
-      ])
-    ])
-  }
-
-  // react form
-  var reactId = msg.authorStr + '-' + msg.sequence
-  if (typeof reactFormMap[reactId] != 'undefined') {
-    var i = reactFormMap[reactId]
-    var reactForm = reactForms[i]
-    main = h('div', [
-      main,
-      h('.message-reply', [
-        h('.phoenix-event', [
-          h('span.event-icon.glyphicon.glyphicon-hand-up'),
-          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', (reactForm.textFieldValue||'_'), ' this.']),
-        ]),
-        h('div.reply-publish', { 'ev-event': valueEvents.submit(events.submitReactForm, { id: reactId }) }, [
-          h('p', h('input.form-control', {
-            name: 'reactText',
-            placeholder: 'Likes, dislikes, wants, etc...',
-            value: reactForm.textFieldValue,
-            'ev-keyup': mercury.valueEvent(events.updateReactFormTextField, { id: reactId })
-          })),
-          h('button.btn.btn-default', 'Post'),
-          ' ',
-          jsa(['cancel'], events.cancelReactForm, { id: reactId }, { className: 'cancel' }),
-        ])
-      ])
-    ])
+  // reply/react form
+  var formId = msg.authorStr + '-' + msg.sequence
+  if (typeof publishFormMap[formId] != 'undefined') {
+    var i = publishFormMap[formId]
+    main = h('div', [main, h('.message-reply', publishForm(state, publishForms[i]))])
   }
 
   return main
 }
 
+// message text-content renderer
 var messageText = exports.messageText = function(events, msg) {
   return h('.panel.panel-default', [
     h('.panel-body', [
@@ -14577,6 +14462,7 @@ var messageText = exports.messageText = function(events, msg) {
   ])
 }
 
+// message event-content renderer
 var messageEvent = exports.messageEvent = function(msg, type, text) {
   var icon;
   switch (type) {
@@ -14589,6 +14475,52 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
     h('.event-body', [userlink(msg.author, util.escapePlain(msg.authorNickname)), ' ' + text]),
   ])
 }
+
+var publishForm = exports.publishForm = function(state, form) {
+  // var previewDisplay = (publishForm.preview) ? 'block' : 'none'
+  if (form.type == 'text') {
+    return  h('.publish-wrapper', [
+      h('.panel.panel-default', [
+        h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview)))
+      ]),
+      h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
+        h('p', h('textarea.form-control', {
+          name: 'publishText',
+          placeholder: form.textPlaceholder,
+          rows: form.textRows,
+          value: form.textValue,
+          'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
+          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id })
+        })),
+        h('button.btn.btn-default', 'Post'),
+        ' ',
+        jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }),
+      ])
+    ])
+  }
+  if (form.type == 'act') {
+    return h('.publish-wrapper', [
+      h('.phoenix-event', [
+        h('span.event-icon.glyphicon.glyphicon-hand-up'),
+        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', (form.textValue||'_'), ' this.']),
+      ]),
+      h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
+        h('p', h('input.form-control', {
+          name: 'publishText',
+          placeholder: form.textPlaceholder,
+          value: form.textValue,
+          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id })
+        })),
+        h('button.btn.btn-default', 'Post'),
+        ' ',
+        jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }),
+      ])
+    ])
+  }
+}
+
+// Helper Elements
+// ===============
 
 var syncButton = exports.syncButton = function(events, isSyncing) {
   if (isSyncing) {
@@ -14636,8 +14568,7 @@ module.exports = {
   message: createMessage,
   profile: createProfile,
   server: createServer,
-  replyForm: createReplyForm,
-  reactForm: createReactForm
+  publishForm: createPublishForm
 }
 
 // Models
@@ -14648,15 +14579,8 @@ var defaults = {
     // gui state
     route: '',
     layout: [['side', 4], ['main', 8]],
-    publishForm: {
-      textFieldValue: '',
-      textFieldRows: 1,
-      preview: ''
-    },
-    replyForms: [],
-    replyFormMap: {},
-    reactForms: [],
-    reactFormMap: {},
+    publishForms: [],
+    publishFormMap: {},
     conn: {
       hasError: false,
       explanation: ''
@@ -14719,18 +14643,16 @@ var defaults = {
     url: ''
   },
 
-  replyForm: {
+  publishForm: {
+    id: '',
+    type: '',
     parent: undefined,
-    textFieldValue: '',
-    textFieldRows: 1,
-    preview: ''
+    textPlaceholder: '',
+    textValue: '',
+    textRows: 1,
+    preview: '',
+    permanent: false
   },
-
-  reactForm: {
-    parent: undefined,
-    textFieldValue: '',
-    preview: ''
-  }
 }
 
 // Constructors
@@ -14747,36 +14669,29 @@ function createHomeApp(events, initialState) {
 
   // create object
   return mercury.struct({
-    route:         mercury.value(state.route),
-    layout:        mercury.value(state.layout),
-    publishForm:   mercury.struct({
-      textFieldValue: mercury.value(state.publishForm.textFieldValue),
-      textFieldRows:  mercury.value(state.publishForm.textFieldRows),
-      preview:        mercury.value(state.preview)
+    route:           mercury.value(state.route),
+    layout:          mercury.value(state.layout),
+    publishForms:    mercury.array(state.publishForms.map(createPublishForm)),
+    publishFormMap:  mercury.value(state.publishFormMap),
+    conn:            mercury.struct({
+      hasError:        mercury.value(state.conn.hasError),
+      explanation:     mercury.value(state.conn.explanation)
     }),
-    replyForms:    mercury.array(state.replyForms.map(createReplyForm)),
-    replyFormMap:  mercury.value(state.replyFormMap),
-    reactForms:    mercury.array(state.reactForms.map(createReactForm)),
-    reactFormMap:  mercury.value(state.reactFormMap),
-    conn:          mercury.struct({
-      hasError:       mercury.value(state.conn.hasError),
-      explanation:    mercury.value(state.conn.explanation)
-    }),
-    events:      events,
+    events:          events,
 
-    feed:          mercury.array(state.feed.map(createMessage)),
-    profiles:      mercury.array(state.profiles.map(createProfile)),
-    profileMap:    mercury.value(profileMap),
-    servers:       mercury.array(state.servers.map(createServer)),
-    user:          mercury.struct({
-      id:             mercury.value(state.user.id),
-      idStr:          mercury.value(state.user.idStr),
-      pubkey:         mercury.value(state.user.pubkey),
-      pubkeyStr:      mercury.value(state.user.pubkeyStr),
-      nickname:       mercury.value(state.user.nickname)
+    feed:            mercury.array(state.feed.map(createMessage)),
+    profiles:        mercury.array(state.profiles.map(createProfile)),
+    profileMap:      mercury.value(profileMap),
+    servers:         mercury.array(state.servers.map(createServer)),
+    user:            mercury.struct({
+      id:              mercury.value(state.user.id),
+      idStr:           mercury.value(state.user.idStr),
+      pubkey:          mercury.value(state.user.pubkey),
+      pubkeyStr:       mercury.value(state.user.pubkeyStr),
+      nickname:        mercury.value(state.user.nickname)
     }),
-    lastSync:      mercury.value(state.lastSync),
-    isSyncing:     mercury.value(state.isSyncing)
+    lastSync:        mercury.value(state.lastSync),
+    isSyncing:       mercury.value(state.isSyncing)
   })
 }
 
@@ -14833,18 +14748,13 @@ function createServer(initialState) {
   return mercury.struct(state)
 }
 
-function createReplyForm(initialState) {
+function createPublishForm(initialState) {
   var state = extend(defaults.replyForm, initialState)
-  state.preview = mercury.value(state.preview)
-  state.textFieldValue = mercury.value(state.textFieldValue)
-  state.textFieldRows = mercury.value(state.textFieldRows)
-  return mercury.struct(state)
-}
-
-function createReactForm(initialState) {
-  var state = extend(defaults.reactForm, initialState)
-  state.preview = mercury.value(state.preview)
-  state.textFieldValue = mercury.value(state.textFieldValue)
+  state.type            = mercury.value(state.type)
+  state.textPlaceholder = mercury.value(state.textPlaceholder)
+  state.preview         = mercury.value(state.preview)
+  state.textValue       = mercury.value(state.textValue)
+  state.textRows        = mercury.value(state.textRows)
   return mercury.struct(state)
 }
 }).call(this,require("buffer").Buffer)

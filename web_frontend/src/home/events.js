@@ -6,22 +6,11 @@ var mercury = require('mercury')
 module.exports = createEvents
 function createEvents() {
   var events = mercury.input([
-    // feed page publish form
-    'updatePublishFormTextField',
-    'setPublishFormTextField',
+    // publish forms
+    'updatePublishFormText',
+    'setPublishFormText',
     'submitPublishForm',
-
-    // reply publish form
-    'updateReplyFormTextField',
-    'setReplyFormTextField',
-    'submitReplyForm',
-    'cancelReplyForm',
-
-    // reaction publish form
-    'updateReactFormTextField',
-    'setReactFormTextField',
-    'submitReactForm',
-    'cancelReactForm',
+    'cancelPublishForm',
 
     // network page
     'addServer',

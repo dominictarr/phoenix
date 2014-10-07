@@ -15,8 +15,18 @@ handlers.setRoute(state, window.location.hash)
 
 module.exports = createApp
 function createApp() {
+  var initState = {
+    publishFormMap: { feed: 0 },
+    publishForms: [{
+      id: 'feed',
+      type: 'text',
+      textPlaceholder: 'Publish...',
+      permanent: true
+    }]
+  }
+
   var events = createEvents()
-  var state = window.state = models.homeApp(events)
+  var state = window.state = models.homeApp(events, initState)
   bus.setupHomeApp(state)
   wireUpEvents(state, events)
   return state

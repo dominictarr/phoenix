@@ -16,149 +16,109 @@ exports.setRoute = function(state, route) {
   state.route.set(route)
 }
 
-exports.updatePublishFormTextField = function(state, data) {
-  // expand/contract field if there's content in there
-  state.publishForm.textFieldRows.set((data.publishText) ? 3 : 1)
-  state.publishForm.preview.set(data.publishText)
+function getPublishForm(state, id) {
+  var m = state.publishFormMap()
+  return state.publishForms.get(m[id])
 }
 
-exports.setPublishFormTextField = function(state, data) {
+function addPublishForm(state, id, parent) {
+  var m = state.publishFormMap()
+  if (m[id])
+    return state.publishForms.get(m[id])
+
+  // construct the new form
+  var publishForm = models.publishForm({ id: id, parent: parent })
+  state.publishForms.push(publishForm)
+
+  // add to the map
+  m[id] = state.publishForms.getLength() - 1
+  state.publishFormMap.set(m)
+
+  return publishForm
+}
+
+exports.updatePublishFormText = function(state, data) {
+  var form = getPublishForm(state, data.id)
+  if (!form)
+    return
+
+  // expand/contract field if there's content in there
+  switch (form.type()) {
+    case 'text':
+      form.textRows.set((data.publishText) ? 3 : 1)
+      form.preview.set(data.publishText)
+      break
+    case 'act':
+      form.preview.set(data.publishText)
+      form.textValue.set(data.publishText)
+      break
+  }
+}
+
+exports.setPublishFormText = function(state, data) {
+  var form = getPublishForm(state, data.id)
+  if (!form)
+    return
+
   // update internal data
-  state.publishForm.textFieldValue.set(data.publishText)
+  form.textValue.set(data.publishText)
 }
 
 exports.submitPublishForm = function(state, data) {
+  var form = getPublishForm(state, data.id)
+  if (!form)
+    return
+
   // update textarea
-  state.publishForm.textFieldValue.set(data.publishText)
-  var str = (state.publishForm.textFieldValue()).trim()
+  form.textValue.set(data.publishText)
+  var str = (form.textValue()).trim()
   if (!str) return
 
   // make the post
-  bus.publishText(state, str, function(err) {
+  alert(str)
+  // :TODO:
+  /*bus.publishText(state, str, function(err) {
     if (err) throw err // :TODO: put in gui
     bus.fetchFeed(state) // pull down the update
-  })
+  })*/
 
   // this horrifying setTimeout hack is explained at [1]
   setTimeout(function() {
+    if (form.permanent) {
+      // reset the form
+      form.textValue.set('')
+      form.textRows.set(1)
+      form.preview.set('')
+    } else {
+      // remove the form
+      var m = state.publishFormMap()
+      state.publishForms.splice(m[form.id], 1, null)
+      m[data.id] = undefined
+      state.publishFormMap.set(m)
+    }
+  }, 100)
+}
+
+exports.cancelPublishForm = function(state, data) {
+  var m = state.publishFormMap()
+  var form = state.publishForms.get(m[data.id])
+  if (!form)
+    return
+
+  if (form.preview() && !confirm('Are you sure you want to cancel this message?'))
+    return
+
+  if (form.permanent) {
     // reset the form
-    state.publishForm.textFieldValue.set('')
-    state.publishForm.textFieldRows.set(1)
-    state.publishForm.preview.set('')
-  }, 100)
-}
-
-exports.updateReplyFormTextField = function(state, data) {
-  var m = state.replyFormMap()
-  var replyForm = state.replyForms.get(m[data.id])
-  if (!replyForm)
-    return
-
-  // expand/contract field if there's content in there
-  replyForm.textFieldRows.set((data.replyText) ? 3 : 1)
-  replyForm.preview.set(data.replyText)
-}
-
-exports.setReplyFormTextField = function(state, data) {
-  var m = state.replyFormMap()
-  var replyForm = state.replyForms.get(m[data.id])
-  if (!replyForm)
-    return
-
-  // update internal data
-  replyForm.textFieldValue.set(data.replyText)
-}
-
-exports.submitReplyForm = function(state, data) {
-  var m = state.replyFormMap()
-  var replyForm = state.replyForms.get(m[data.id])
-  if (!replyForm)
-    return
-
-  // update textarea
-  replyForm.textFieldValue.set(data.replyText)
-  var str = (replyForm.textFieldValue()).trim()
-  if (!str) return
-
-  // make the post
-  alert(str)
-  /*bus.replyText(state, str, function(err) {
-    if (err) throw err // :TODO: put in gui
-    bus.fetchFeed(state) // pull down the update
-  })*/
-
-  // this horrifying setTimeout hack is explained at [1]
-  setTimeout(function() {
+    form.textValue.set('')
+    form.textRows.set(1)
+    form.preview.set('')
+  } else {
     // remove the form
-    state.replyForms.splice(m[data.id], 1, null)
+    state.publishForms.splice(m[data.id], 1, null)
     m[data.id] = undefined
-    state.replyFormMap.set(m)
-  }, 100)
-}
-
-exports.cancelReplyForm = function(state, data) {
-  var m = state.replyFormMap()
-  var replyForm = state.replyForms.get(m[data.id])
-  if (!replyForm)
-    return
-
-  if (replyForm.preview().length && !confirm('Are you sure you want to cancel this message?'))
-    return
-
-  // remove the form
-  state.replyForms.splice(m[data.id], 1, null)
-  m[data.id] = undefined
-  state.replyFormMap.set(m)
-}
-
-exports.updateReactFormTextField = function(state, data) {
-  var m = state.reactFormMap()
-  var reactForm = state.reactForms.get(m[data.id])
-  if (!reactForm)
-    return
-
-  // update preview
-  reactForm.preview.set(data.reactText)
-  reactForm.textFieldValue.set(data.reactText)
-}
-
-exports.submitReactForm = function(state, data) {
-  var m = state.reactFormMap()
-  var reactForm = state.reactForms.get(m[data.id])
-  if (!reactForm)
-    return
-
-  // update textarea
-  reactForm.textFieldValue.set(data.reactText)
-  var str = (reactForm.textFieldValue()).trim()
-  if (!str) return
-
-  // make the post
-  alert(str)
-  /*bus.reactText(state, str, function(err) {
-    if (err) throw err // :TODO: put in gui
-    bus.fetchFeed(state) // pull down the update
-  })*/
-
-  // this horrifying setTimeout hack is explained at [1]
-  setTimeout(function() {
-    // remove the form
-    state.reactForms.splice(m[data.id], 1, null)
-    m[data.id] = undefined
-    state.reactFormMap.set(m)
-  }, 100)
-}
-
-exports.cancelReactForm = function(state, data) {
-  var m = state.reactFormMap()
-  var reactForm = state.reactForms.get(m[data.id])
-  if (!reactForm)
-    return
-
-  // remove the form
-  state.reactForms.splice(m[data.id], 1, null)
-  m[data.id] = undefined
-  state.reactFormMap.set(m)
+    state.publishFormMap.set(m)
+  }
 }
 
 exports.addFeed = function(state) {
@@ -229,33 +189,17 @@ exports.toggleLayout = function(state) {
 }
 
 exports.replyToMsg = function(state, data) {
-  var m = state.replyFormMap()
-  var msgid = data.msg.authorStr + '-' + data.msg.sequence
-  if (m[msgid])
-    return
-
-  // construct the new reply form
-  var replyForm = models.replyForm({ parent: msgid })
-  state.replyForms.push(replyForm)
-
-  // add to the map
-  m[msgid] = state.replyForms.getLength() - 1
-  state.replyFormMap.set(m)
+  var id = data.msg.authorStr + '-' + data.msg.sequence
+  var form = addPublishForm(state, id, 'TODO')
+  form.type.set('text')
+  form.textPlaceholder.set('Reply...')
 }
 
 exports.reactToMsg = function(state, data) {
-  var m = state.reactFormMap()
-  var msgid = data.msg.authorStr + '-' + data.msg.sequence
-  if (m[msgid])
-    return
-
-  // construct the new react form
-  var reactForm = models.reactForm({ parent: msgid })
-  state.reactForms.push(reactForm)
-
-  // add to the map
-  m[msgid] = state.reactForms.getLength() - 1
-  state.reactFormMap.set(m)
+  var id = data.msg.authorStr + '-' + data.msg.sequence
+  var form = addPublishForm(state, id, 'TODO')
+  form.type.set('act')
+  form.textPlaceholder.set('Likes, wants, agrees with, etc...')
 }
 
 exports.shareMsg = function(state, data) {
@@ -264,8 +208,8 @@ exports.shareMsg = function(state, data) {
 
 /*
 1: the setTimeout hack in submitPublishForm()
-Basically, we need the `state.publishForm.textFieldValue.set(data.publishText)` to run its course
-before we can call `state.publishForm.textFieldValue.set('')` and have an effect. This wouldn't be
+Basically, we need the `state.publishForm.textValue.set(data.publishText)` to run its course
+before we can call `state.publishForm.textValue.set('')` and have an effect. This wouldn't be
 an issue if the textarea's change event always fired before the submit event, but, because we trigger
 with ctrl+enter and are trying not to much directly with the DOM events (Mercury-land) this is our solution.
 */

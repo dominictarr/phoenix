@@ -65,30 +65,9 @@ function feedPage(state) {
 
 function feedControls(state) {
   var events = state.events
-  var publishForm = state.publishForm
   var lastSync = state.lastSync
-  var previewDisplay = (publishForm.preview) ? 'block' : 'none'
   return h('.feed-ctrls', [
-    h('.panel.panel-default', { style: { display: previewDisplay } }, [
-      h('.panel-body', [
-        h('.feed-preview', new widgets.Markdown(publishForm.preview)),
-      ])
-    ]),
-    h('.panel.panel-default', [
-      h('.panel-body', [
-        h('div.feed-publish', { 'ev-event': valueEvents.submit(events.submitPublishForm) }, [
-          h('p', h('textarea.form-control', {
-            name: 'publishText',
-            placeholder: 'Publish...',
-            rows: publishForm.textFieldRows,
-            value: publishForm.textFieldValue,
-            'ev-change': mercury.valueEvent(events.setPublishFormTextField),
-            'ev-keyup': mercury.valueEvent(events.updatePublishFormTextField)
-          })),
-          h('button.btn.btn-default', 'Post')
-        ])
-      ])
-    ]),
+    comren.publishForm(state, state.publishForms[0]),
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [
       comren.syncButton(events, state.isSyncing),
