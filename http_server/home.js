@@ -69,7 +69,7 @@ function createServer(port, opts) {
       var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
       conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
     })
-    server.listen(port)
+    server.listen(port, '::')
 
     // Setup the websocket host
     var wss = new WSServer({server: server, path: '/ws'})

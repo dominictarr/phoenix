@@ -58,7 +58,7 @@ function createServer(port) {
       // :TODO: I think we may need to create a new prpc server here
 			conn.pipe(prpc.proxy(backend, allowedPublicMethods)).pipe(conn)
 		})
-		server.listen(port)
+		server.listen(port, '::')
 
     // Setup the websocket host
     var wss = new WSServer({server: server, path: '/ws'})
