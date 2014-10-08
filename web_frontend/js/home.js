@@ -21010,7 +21010,28 @@ exports.fetchFeed = function(state, opts, cb) {
       pull.drain(function (m) {
         m = models.message(m)
         if (messageIsCached(state, m)) return // :TODO: remove this once we only pull new messages
+
+        // add to feed
         if (m) state.feed.unshift(m)
+        
+        // index replies
+        if (m.message.repliesTo && m.message.repliesTo.$msg) {
+          var id = util.toHexString(m.message.repliesTo.$msg)
+          if (id) {
+            if (m.type == 'text') {
+              var sr = state.feedReplies()
+              if (!sr[id]) sr[id] = []
+              sr[id].push(m.idStr)
+              state.feedReplies.set(sr)
+            }
+            if (m.type == 'act') {
+              var sr = state.feedReacts()
+              if (!sr[id]) sr[id] = []
+              sr[id].push(m.idStr)
+              state.feedReacts.set(sr)              
+            }
+          }
+        }
       }, function() { cbs(null, state.feed()) })
     )
   })
@@ -21262,7 +21283,6 @@ var feed = exports.feed = function(state, feed, reverse) {
 
 // feed message renderer
 var message = exports.message = function(state, msg) {
-  var events = state.events
   var publishFormMap = state.publishFormMap
   var publishForms = state.publishForms
 
@@ -21272,7 +21292,7 @@ var message = exports.message = function(state, msg) {
     case 'init': return messageEvent(msg, 'account-created', 'Account created')
     case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.message.nickname)
     case 'act': return messageEvent(msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain)
-    case 'text': main = messageText(events, msg); break
+    case 'text': main = messageText(state, msg); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -21287,7 +21307,10 @@ var message = exports.message = function(state, msg) {
 }
 
 // message text-content renderer
-var messageText = exports.messageText = function(events, msg) {
+var messageText = exports.messageText = function(state, msg) {
+  var events = state.events
+  var nReplies = (state.feedReplies[msg.idStr]) ? state.feedReplies[msg.idStr].length : 0
+  var nReacts  = (state.feedReacts[msg.idStr]) ? state.feedReacts[msg.idStr].length : 0
   return h('.panel.panel-default', [
     h('.panel-body', [
       h('p', [
@@ -21304,7 +21327,7 @@ var messageText = exports.messageText = function(events, msg) {
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
           h('small.message-ctrls', [
-            a('javascript:void()', '0 replies / 0 reactions'),
+            a('javascript:void()', nReplies + ' replies / ' + nReacts + ' reactions'),
             h('span.pull-right', [
               jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
               ' ',
@@ -21493,6 +21516,8 @@ var defaults = {
 
     // app data
     feed: [],
+    feedReplies: {},
+    feedReacts: {},
     profiles: [],
     profileMap: {},
     servers: [],
@@ -21586,6 +21611,8 @@ function createHomeApp(events, initialState) {
     events:          events,
 
     feed:            mercury.array(state.feed.map(createMessage)),
+    feedReplies:     mercury.value(state.feedReplies),
+    feedReacts:      mercury.value(state.feedReacts),
     profiles:        mercury.array(state.profiles.map(createProfile)),
     profileMap:      mercury.value(profileMap),
     servers:         mercury.array(state.servers.map(createServer)),

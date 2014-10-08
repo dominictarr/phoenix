@@ -29,6 +29,8 @@ var defaults = {
 
     // app data
     feed: [],
+    feedReplies: {},
+    feedReacts: {},
     profiles: [],
     profileMap: {},
     servers: [],
@@ -122,6 +124,8 @@ function createHomeApp(events, initialState) {
     events:          events,
 
     feed:            mercury.array(state.feed.map(createMessage)),
+    feedReplies:     mercury.value(state.feedReplies),
+    feedReacts:      mercury.value(state.feedReacts),
     profiles:        mercury.array(state.profiles.map(createProfile)),
     profileMap:      mercury.value(profileMap),
     servers:         mercury.array(state.servers.map(createServer)),

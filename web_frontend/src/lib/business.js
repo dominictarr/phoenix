@@ -191,7 +191,28 @@ exports.fetchFeed = function(state, opts, cb) {
       pull.drain(function (m) {
         m = models.message(m)
         if (messageIsCached(state, m)) return // :TODO: remove this once we only pull new messages
+
+        // add to feed
         if (m) state.feed.unshift(m)
+        
+        // index replies
+        if (m.message.repliesTo && m.message.repliesTo.$msg) {
+          var id = util.toHexString(m.message.repliesTo.$msg)
+          if (id) {
+            if (m.type == 'text') {
+              var sr = state.feedReplies()
+              if (!sr[id]) sr[id] = []
+              sr[id].push(m.idStr)
+              state.feedReplies.set(sr)
+            }
+            if (m.type == 'act') {
+              var sr = state.feedReacts()
+              if (!sr[id]) sr[id] = []
+              sr[id].push(m.idStr)
+              state.feedReacts.set(sr)              
+            }
+          }
+        }
       }, function() { cbs(null, state.feed()) })
     )
   })

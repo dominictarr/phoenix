@@ -57,7 +57,6 @@ var feed = exports.feed = function(state, feed, reverse) {
 
 // feed message renderer
 var message = exports.message = function(state, msg) {
-  var events = state.events
   var publishFormMap = state.publishFormMap
   var publishForms = state.publishForms
 
@@ -67,7 +66,7 @@ var message = exports.message = function(state, msg) {
     case 'init': return messageEvent(msg, 'account-created', 'Account created')
     case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.message.nickname)
     case 'act': return messageEvent(msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain)
-    case 'text': main = messageText(events, msg); break
+    case 'text': main = messageText(state, msg); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -82,7 +81,10 @@ var message = exports.message = function(state, msg) {
 }
 
 // message text-content renderer
-var messageText = exports.messageText = function(events, msg) {
+var messageText = exports.messageText = function(state, msg) {
+  var events = state.events
+  var nReplies = (state.feedReplies[msg.idStr]) ? state.feedReplies[msg.idStr].length : 0
+  var nReacts  = (state.feedReacts[msg.idStr]) ? state.feedReacts[msg.idStr].length : 0
   return h('.panel.panel-default', [
     h('.panel-body', [
       h('p', [
@@ -99,7 +101,7 @@ var messageText = exports.messageText = function(events, msg) {
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
           h('small.message-ctrls', [
-            a('javascript:void()', '0 replies / 0 reactions'),
+            a('javascript:void()', nReplies + ' replies / ' + nReacts + ' reactions'),
             h('span.pull-right', [
               jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
               ' ',
