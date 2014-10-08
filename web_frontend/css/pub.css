@@ -1485,8 +1485,9 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 .user-link { font-weight: bold; color: #555; }
 
 .feed { position: relative; }
-.feed:before { display: block; content: ""; position: absolute; top: 0; bottom: 0; left: 22px; width: 4px; background-color: #f3f3f3; z-index: -1; }
-.feed > div:first-child > .event-icon::after { content: ''; background: #FFF; position: absolute; top: -20px; width: 20px; height: 20px; left: 5px; }
+.feed:not(.nobar):before { display: block; content: ""; position: absolute; top: 0; bottom: 0; left: 22px; width: 4px; background-color: #f3f3f3; z-index: -1; }
+.feed.subfeed { margin-left: 40px; }
+.feed.subfeed:before { top: -20px; }
 .feed .panel { margin-bottom: 12px; }
 .feed .panel .panel-heading { padding: 2px 8px; }
 .feed .panel .panel-body { padding: 4px 10px 4px; }

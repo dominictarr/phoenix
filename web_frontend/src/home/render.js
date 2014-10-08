@@ -17,6 +17,9 @@ function render(state) {
   } else if (state.route.indexOf('profile/') === 0) {
     var profid = state.route.slice(8)
     page = profilePage(state, profid)
+  } else if (state.route.indexOf('msg/') === 0) {
+    var msgid = state.route.slice(4)
+    page = messagePage(state, msgid)
   } else {
     page = feedPage(state)
   }
@@ -111,6 +114,34 @@ function profileControls(events, profile) {
     h('p', followBtn),
     h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
   ])
+}
+
+// Message Page
+// ============
+
+function messagePage(state, msgid) {
+  var msgi = state.messageMap[msgid]
+  var msg = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
+  if (!msg) {
+    return h('.message-page.row', [
+      h('.col-xs-7', [comren.notfound('that message')])
+    ])
+  }
+
+  // build replies feed
+  var replies = (state.feedReplies[msg.idStr] || []).map(function(reply) {
+    var msgi = state.messageMap[reply.idStr]
+    return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
+  })
+
+  // render
+  return h('.message-page.row', comren.columns({
+    main: [h('.feed.nobar', [
+      comren.message(state, msg),
+      comren.subfeed(state, replies, true)
+    ])],
+    side: ''
+  }, state.layout))
 }
 
 // Network Page

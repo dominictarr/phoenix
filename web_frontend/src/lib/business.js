@@ -194,23 +194,18 @@ exports.fetchFeed = function(state, opts, cb) {
 
         // add to feed
         if (m) state.feed.unshift(m)
+        var mm = state.messageMap()
+        mm[m.idStr] = state.feed.getLength() - 1
+        state.messageMap.set(mm)
         
         // index replies
         if (m.message.repliesTo && m.message.repliesTo.$msg) {
           var id = util.toHexString(m.message.repliesTo.$msg)
           if (id) {
-            if (m.type == 'text') {
-              var sr = state.feedReplies()
-              if (!sr[id]) sr[id] = []
-              sr[id].push(m.idStr)
-              state.feedReplies.set(sr)
-            }
-            if (m.type == 'act') {
-              var sr = state.feedReacts()
-              if (!sr[id]) sr[id] = []
-              sr[id].push(m.idStr)
-              state.feedReacts.set(sr)              
-            }
+            var sr = state.feedReplies()
+            if (!sr[id]) sr[id] = []
+            sr[id].push({ idStr: m.idStr, type: m.type })
+            state.feedReplies.set(sr)
           }
         }
       }, function() { cbs(null, state.feed()) })

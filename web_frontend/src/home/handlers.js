@@ -7,6 +7,10 @@ exports.setRoute = function(state, route) {
     var profid = route.slice(8)
     bus.fetchProfileFeed(state, profid)
   }
+  else if (route.indexOf('msg/') === 0) {
+    var msgid = route.slice(4)
+    bus.fetchFeed(state)
+  }
   else if (route == 'network') {
     bus.fetchServers(state)
   }

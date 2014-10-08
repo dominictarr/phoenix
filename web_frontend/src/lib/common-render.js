@@ -55,6 +55,16 @@ var feed = exports.feed = function(state, feed, reverse) {
   return h('.feed', messages)
 }
 
+// subfeed view
+// - `state`: full application state
+// - `feed`: which feed to render
+// - `reverse`: bool, reverse the feed?
+var subfeed = exports.subfeed = function(state, feed, reverse) {
+  var messages = feed.map(message.bind(null, state))
+  if (reverse) messages.reverse()
+  return h('.feed.subfeed', messages)
+}
+
 // feed message renderer
 var message = exports.message = function(state, msg) {
   var publishFormMap = state.publishFormMap
@@ -81,10 +91,17 @@ var message = exports.message = function(state, msg) {
 }
 
 // message text-content renderer
+var zeroArray = [0]
 var messageText = exports.messageText = function(state, msg) {
   var events = state.events
-  var nReplies = (state.feedReplies[msg.idStr]) ? state.feedReplies[msg.idStr].length : 0
-  var nReacts  = (state.feedReacts[msg.idStr]) ? state.feedReacts[msg.idStr].length : 0
+  var replies = state.feedReplies[msg.idStr]
+  var nReplies = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'text') ? 1 : 0) }) : 0
+  var nReacts  = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'act') ? 1 : 0) }) : 0
+  var REs
+  if (nReplies && nReacts) REs = a('#/msg/'+msg.idStr, nReplies + ' replies ' + nReacts + ' reactions')
+  else if (nReplies) REs = a('#/msg/'+msg.idStr, nReplies + ' replies')
+  else if (nReacts) REs = a('#/msg/'+msg.idStr, nReacts + ' reactions')
+  var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
   return h('.panel.panel-default', [
     h('.panel-body', [
       h('p', [
@@ -93,16 +110,16 @@ var messageText = exports.messageText = function(state, msg) {
           ' - ',
           util.prettydate(new Date(msg.timestamp), true)
         ]),
-        (msg.message.repliesTo) ?
-          h('span.repliesto', [' in response to ', a('javascript:void()', shortHex(msg.message.repliesTo.$msg))])
+        (replyIdStr) ?
+          h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
       new widgets.Markdown(util.escapePlain(msg.message.plain)),
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
-          h('small.message-ctrls', [
-            a('javascript:void()', nReplies + ' replies / ' + nReacts + ' reactions'),
-            h('span.pull-right', [
+          h('small', [
+            REs,
+            h('span.message-ctrls.pull-right', [
               jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
               ' ',
               jsa([icon('hand-up'), 'react'], events.reactToMsg, { msg: msg }),
@@ -125,6 +142,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
     case 'react': icon = '.glyphicon-hand-up'; break
     default: icon = '.glyphicon-hand-right'
   }
+  var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),
     h('.event-body', [
@@ -132,8 +150,8 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
         h('small.message-ctrls', [
           util.prettydate(new Date(msg.timestamp), true)
         ]),
-        (msg.message.repliesTo) ?
-          h('span.repliesto', [' in response to ', a('javascript:void()', shortHex(msg.message.repliesTo.$msg))])
+        (replyIdStr) ?
+          h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
       h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), ' ' + text])
@@ -152,7 +170,7 @@ var publishForm = exports.publishForm = function(state, form) {
         h('p', h('textarea.form-control', {
           name: 'publishText',
           placeholder: form.textPlaceholder,
-          rows: form.textRows,
+          rows: form.textRows || 1,
           value: form.textValue,
           'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
           'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id })
@@ -254,6 +272,6 @@ function img(src) {
   return h('img', { src: src })
 }
 
-function shortHex(buf) {
-  return util.toHexString(buf).slice(0, 6) + '...'
+function shortHex(str) {
+  return str.slice(0, 6) + '...'
 }

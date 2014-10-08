@@ -19,7 +19,7 @@ var defaults = {
   homeApp: {
     // gui state
     route: '',
-    layout: [['side', 4], ['main', 8]],
+    layout: [['main', 8], ['side', 4]],
     publishForms: [],
     publishFormMap: {},
     conn: {
@@ -29,8 +29,8 @@ var defaults = {
 
     // app data
     feed: [],
+    messageMap: {},
     feedReplies: {},
-    feedReacts: {},
     profiles: [],
     profileMap: {},
     servers: [],
@@ -124,8 +124,8 @@ function createHomeApp(events, initialState) {
     events:          events,
 
     feed:            mercury.array(state.feed.map(createMessage)),
+    messageMap:      mercury.value(state.messageMap),
     feedReplies:     mercury.value(state.feedReplies),
-    feedReacts:      mercury.value(state.feedReacts),
     profiles:        mercury.array(state.profiles.map(createProfile)),
     profileMap:      mercury.value(profileMap),
     servers:         mercury.array(state.servers.map(createServer)),
