@@ -13,6 +13,10 @@ var state = createApp()
 mercury.app(document.body, state, render)
 handlers.setRoute(state, window.location.hash)
 
+// put some things on the window object for debugging
+window.state = state
+window.models = models
+
 module.exports = createApp
 function createApp() {
   var initState = {
@@ -26,7 +30,7 @@ function createApp() {
   }
 
   var events = createEvents()
-  var state = window.state = models.homeApp(events, initState)
+  var state = models.homeApp(events, initState)
   bus.setupHomeApp(state)
   wireUpEvents(state, events)
   return state

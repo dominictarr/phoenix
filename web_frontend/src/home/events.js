@@ -13,6 +13,10 @@ function createEvents() {
     'submitPublishForm',
     'cancelPublishForm',
 
+    // mention box behaviors
+    'mentionBoxInput',
+    'mentionBoxKeypress',
+
     // network page
     'addServer',
     'removeServer',

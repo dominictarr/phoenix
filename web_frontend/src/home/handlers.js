@@ -1,5 +1,6 @@
 var models = require('../lib/models')
 var bus = require('../lib/business')
+var textareaCaretPosition = require('../lib/textarea-caret-position')
 
 exports.setRoute = function(state, route) {
   route = route.substr(2) || 'feed'
@@ -140,6 +141,91 @@ exports.cancelPublishForm = function(state, data) {
   }
 }
 
+var wordBoundary = /\s/;
+exports.mentionBoxInput = function(state, e) {
+  var active = state.suggestBox.active()
+
+  // are we in a word that starts with @?
+  var v = e.target.value
+  var i = e.target.selectionStart
+  for (i; i >= 0; i--) {
+    if (wordBoundary.test(v.charAt(i)))
+      return state.suggestBox.active.set(false)
+    if (v.charAt(i) == '@' && (i === 0 || wordBoundary.test(v.charAt(i - 1))))
+      break
+  }
+  if (i < 0) return state.suggestBox.active.set(false)
+
+  // in an @-word, make sure we have a select box
+  if (!active) {
+    // calculate position
+    var pos = textareaCaretPosition(e.target, i)
+    var rects = e.target.getClientRects()
+    pos.left += rects[0].left
+    pos.top += rects[0].top + 20
+
+    // setup
+    state.suggestBox.active.set(true)
+    state.suggestBox.selection.set(0)
+    state.suggestBox.positionX.set(pos.left)
+    state.suggestBox.positionY.set(pos.top)
+
+    // add options
+    state.suggestBox.options.splice(0, state.suggestBox.options.getLength())
+    state.profiles.forEach(function(profile) {
+      state.suggestBox.options.push({ title: profile.nickname, subtitle: shortHex(profile.idStr), value: profile.idStr })
+    })
+  }
+
+  // update the current suggestion value
+  var word = v.slice(i+1, e.target.selectionStart)
+  state.suggestBox.textValue.set(word)
+  state.suggestBox.selection.set(0)
+  state.suggestBox.filtered.splice(0, state.suggestBox.filtered.getLength())
+  state.suggestBox.options.forEach(function(opt) {
+    if (opt.title.indexOf(word) === 0 || opt.subtitle.indexOf(word) === 0)
+      state.suggestBox.filtered.push(opt)
+  })
+
+  // cancel if there's nothing available
+  if (state.suggestBox.filtered.getLength() == 0)
+    state.suggestBox.active.set(false)
+}
+
+exports.mentionBoxKeypress = function(state, e) {
+  if (state.suggestBox.active()) {
+    // scroll the selection up/down
+    var sel = state.suggestBox.selection()
+    if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13)
+      e.preventDefault()
+    if (e.keyCode == 38 && sel > 0) // up
+      state.suggestBox.selection.set(sel - 1)
+    if (e.keyCode == 40 && sel < (state.suggestBox.options.getLength() - 1)) // down
+      state.suggestBox.selection.set(sel + 1)
+    if (e.keyCode == 13) { // enter
+      if (state.suggestBox.filtered.getLength()) {
+        var choice = state.suggestBox.filtered.get(state.suggestBox.selection())
+        if (choice && choice.value) {
+          // update the text under the cursor to have the current selection's value
+          var v = e.target.value
+          var start = e.target.selectionStart
+          var end = start
+          for (start; start >= 0; start--) {
+            if (v.charAt(start) == '@')
+              break
+          }
+          for (end; end < v.length; end++) {
+            if (wordBoundary.test(v.charAt(end)))
+              break
+          }
+          e.target.value = v.slice(0, start + 1) + choice.value + v.slice(end)
+        }
+      }
+      state.suggestBox.active.set(false)
+    }
+  }
+}
+
 exports.addFeed = function(state) {
   var token = prompt('Introduction token of the user:')
   if (!token) return
@@ -223,6 +309,10 @@ exports.reactToMsg = function(state, data) {
 
 exports.shareMsg = function(state, data) {
   alert('todo https://github.com/pfraze/phoenix/issues/52')
+}
+
+function shortHex(str) {
+  return str.slice(0, 6) + '..' + str.slice(-2)
 }
 
 /*

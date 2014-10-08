@@ -121,7 +121,7 @@ exports.queue = function() {
   }
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],2:[function(require,module,exports){
+},{"buffer":314}],2:[function(require,module,exports){
 var slice = Array.prototype.slice
 
 module.exports = iterativelyWalk
@@ -310,7 +310,7 @@ if (typeof document !== 'undefined') {
 }
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":310}],8:[function(require,module,exports){
+},{"min-document":313}],8:[function(require,module,exports){
 (function (global){
 if (typeof window !== "undefined") {
     module.exports = window;
@@ -387,7 +387,7 @@ function defaultGetRoute() {
     return location.hash || "#/"
 }
 
-},{"events":327,"global/document":7,"routes":10,"url":349,"xtend/mutable":12}],10:[function(require,module,exports){
+},{"events":330,"global/document":7,"routes":10,"url":352,"xtend/mutable":12}],10:[function(require,module,exports){
 
 var localRoutes = [];
 
@@ -2324,7 +2324,7 @@ function DataSet(elem) {
 
 },{"./create-hash.js":19,"individual":22,"weakmap-shim/create-store":24}],21:[function(require,module,exports){
 module.exports=require(7)
-},{"/home/pfrazee/phoenix/node_modules/global/document.js":7,"min-document":310}],22:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/global/document.js":7,"min-document":313}],22:[function(require,module,exports){
 (function (global){
 var root = typeof window !== 'undefined' ?
     window : typeof global !== 'undefined' ?
@@ -3036,7 +3036,7 @@ module.exports.cancel = function() {
 */
 
 }).call(this,require('_process'))
-},{"_process":331}],43:[function(require,module,exports){
+},{"_process":334}],43:[function(require,module,exports){
 var setNonEnumerable = require("./lib/set-non-enumerable.js");
 
 module.exports = addListener
@@ -4346,7 +4346,7 @@ function removeProperty(node, props, previous, propName) {
 function patchObject(node, props, previous, propName, propValue) {
     if(previous && isObject(previous[propName]) &&
         getPrototype(previous[propName]) !== getPrototype(propValue)) {
-        node[propName] = previousValue
+        node[propName] = previous[propName]
         return
     }
 
@@ -4509,7 +4509,7 @@ function ascending(a, b) {
 
 },{}],76:[function(require,module,exports){
 module.exports=require(7)
-},{"/home/pfrazee/phoenix/node_modules/global/document.js":7,"min-document":310}],77:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/global/document.js":7,"min-document":313}],77:[function(require,module,exports){
 module.exports = isObject
 
 function isObject(x) {
@@ -6870,7 +6870,7 @@ exports.proxy = function(upstreamApi, allowedMethods) {
 	return mx;
 };
 
-},{"./lib/debug":135,"./lib/rpc-api":138,"fs":308,"mux-demux/msgpack":144,"net":308,"path":330,"rpc-stream":172}],132:[function(require,module,exports){
+},{"./lib/debug":135,"./lib/rpc-api":138,"fs":311,"mux-demux/msgpack":144,"net":311,"path":333,"rpc-stream":172}],132:[function(require,module,exports){
 exports.manifest = {
   methods: {
     friends_follow: { type: 'async' },
@@ -7074,7 +7074,7 @@ exports.instance = function(opts) {
 
   return keys
 }
-},{"blake2s":140,"crypto":317,"eccjs":141,"events":327,"fs":308,"proquint-":308}],137:[function(require,module,exports){
+},{"blake2s":140,"crypto":320,"eccjs":141,"events":330,"fs":311,"proquint-":311}],137:[function(require,module,exports){
 var debug = require('./debug')
 exports.manifest = {
   methods: {
@@ -7225,7 +7225,7 @@ exports.instance = function(opts, db, ssb) {
 
   return netnodes
 }
-},{"../":131,"./debug":135,"http":308,"pull-level":308,"pull-stream":166,"pull-stream-to-stream":164}],138:[function(require,module,exports){
+},{"../":131,"./debug":135,"http":311,"pull-level":311,"pull-stream":166,"pull-stream-to-stream":164}],138:[function(require,module,exports){
 var stream      = require('stream');
 var through     = require('through');
 var debug       = require('./debug');
@@ -7403,7 +7403,7 @@ for (var k in apis) {
     };
   }
 })();
-},{"./apps/friends":132,"./apps/profile":133,"./apps/text":134,"./debug":135,"./keys":136,"./netnodes":137,"./ssb":139,"level":308,"level-sublevel/bytewise":308,"secure-scuttlebutt/defaults":178,"stream":348,"through":234}],139:[function(require,module,exports){
+},{"./apps/friends":132,"./apps/profile":133,"./apps/text":134,"./debug":135,"./keys":136,"./netnodes":137,"./ssb":139,"level":311,"level-sublevel/bytewise":311,"secure-scuttlebutt/defaults":178,"stream":351,"through":234}],139:[function(require,module,exports){
 var ssbInstances = {}
 exports.manifest = {
   methods: {
@@ -8811,7 +8811,7 @@ if('undefined' === typeof module)
 else
   module.exports = BLAKE2s
 
-},{"buffer":311}],141:[function(require,module,exports){
+},{"buffer":314}],141:[function(require,module,exports){
 (function (Buffer){
 var sjcl = require('./vendor/sjcl')
 
@@ -8898,7 +8898,7 @@ exports.unkem = function (curve, key, kem) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"./vendor/sjcl":142,"buffer":311}],142:[function(require,module,exports){
+},{"./vendor/sjcl":142,"buffer":314}],142:[function(require,module,exports){
 /** @fileOverview Javascript cryptography implementation.
  *
  * Crush to remove comments, shorten variable names and
@@ -12268,7 +12268,7 @@ sjcl.ecc.ecdsa.secretKey.prototype = {
   }
 };
 
-},{"crypto":317}],143:[function(require,module,exports){
+},{"crypto":320}],143:[function(require,module,exports){
 'use strict';
 
 var through = require('through')
@@ -12621,7 +12621,7 @@ module.exports = function (write, end) {
 
 
 }).call(this,require('_process'))
-},{"_process":331,"stream":348}],146:[function(require,module,exports){
+},{"_process":334,"stream":351}],146:[function(require,module,exports){
 /*
 Copyright (c) 2012 Ajax.org B.V
 
@@ -12967,7 +12967,7 @@ function duplex(writer, reader) {
     }
 }
 
-},{"stream":348}],163:[function(require,module,exports){
+},{"stream":351}],163:[function(require,module,exports){
 module.exports = extend
 
 function extend(target) {
@@ -13108,7 +13108,7 @@ function duplex (reader, read) {
 
 
 }).call(this,require('_process'))
-},{"_process":331,"pull-core":165,"stream":348}],165:[function(require,module,exports){
+},{"_process":334,"pull-core":165,"stream":351}],165:[function(require,module,exports){
 exports.id = 
 function (item) {
   return item
@@ -13894,7 +13894,7 @@ function (read, mapper) {
 
 
 }).call(this,require('_process'))
-},{"./sinks":169,"./sources":170,"_process":331,"pull-core":168}],172:[function(require,module,exports){
+},{"./sinks":169,"./sources":170,"_process":334,"pull-core":168}],172:[function(require,module,exports){
 var through = require('through')
 var serialize = require('stream-serializer')()
 
@@ -14093,7 +14093,7 @@ exports.raw = function (stream) {
 }
 
 
-},{"events":327}],174:[function(require,module,exports){
+},{"events":330}],174:[function(require,module,exports){
 (function (Buffer){
 
 var EventEmitter = require('events').EventEmitter
@@ -14225,7 +14225,7 @@ exports.init = function (ssb, followDb) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311,"cont":183,"events":327,"pull-level":308,"pull-stream":216,"varstruct":229,"varstruct-match":228}],175:[function(require,module,exports){
+},{"buffer":314,"cont":183,"events":330,"pull-level":311,"pull-stream":216,"varstruct":229,"varstruct-match":228}],175:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter
 var msgpack = require('msgpack')
 
@@ -14274,7 +14274,7 @@ exports.init = function(ssb, db) {
 
   return app
 }
-},{"events":327,"msgpack":205}],176:[function(require,module,exports){
+},{"events":330,"msgpack":205}],176:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter
 var msgpack = require('msgpack')
 
@@ -14310,7 +14310,7 @@ exports.init = function(ssb, db) {
 
   return app
 }
-},{"events":327,"msgpack":205}],177:[function(require,module,exports){
+},{"events":330,"msgpack":205}],177:[function(require,module,exports){
 (function (Buffer){
 var svarint   = require('signed-varint')
 var varstruct = require('varstruct')
@@ -14460,7 +14460,7 @@ exports.type = 'secure-scuttlebutt-codec'
 
 
 }).call(this,require("buffer").Buffer)
-},{"assert":309,"buffer":311,"signed-varint":223,"varstruct":229,"varstruct-match":228}],178:[function(require,module,exports){
+},{"assert":312,"buffer":314,"signed-varint":223,"varstruct":229,"varstruct-match":228}],178:[function(require,module,exports){
 
 var Blake2s = require('blake2s')
 var crypto  = require('crypto')
@@ -14531,7 +14531,7 @@ module.exports = {
 }
 
 
-},{"./codec":177,"blake2s":182,"crypto":317,"eccjs":202}],179:[function(require,module,exports){
+},{"./codec":177,"blake2s":182,"crypto":320,"eccjs":202}],179:[function(require,module,exports){
 var Message = require('./message')
 
 module.exports = function (ssb, keys, opts) {
@@ -14798,7 +14798,7 @@ module.exports = function (db, opts) {
   return db
 }
 
-},{"./feed":179,"./replicate":231,"./validation":233,"assert":309,"continuable-para":185,"monotonic-timestamp":204,"pull-level":308,"pull-paramap":209,"pull-stream":216}],181:[function(require,module,exports){
+},{"./feed":179,"./replicate":231,"./validation":233,"assert":312,"continuable-para":185,"monotonic-timestamp":204,"pull-level":311,"pull-paramap":209,"pull-stream":216}],181:[function(require,module,exports){
 (function (Buffer){
 
 
@@ -14838,9 +14838,9 @@ module.exports = function (opts) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],182:[function(require,module,exports){
+},{"buffer":314}],182:[function(require,module,exports){
 module.exports=require(140)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/blake2s/index.js":140,"buffer":311}],183:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/blake2s/index.js":140,"buffer":314}],183:[function(require,module,exports){
 var cont = require('continuable')
 
 exports = module.exports = function (fun) {
@@ -15288,9 +15288,9 @@ function shim (obj) {
 
 },{}],202:[function(require,module,exports){
 module.exports=require(141)
-},{"./vendor/sjcl":203,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/eccjs/index.js":141,"buffer":311}],203:[function(require,module,exports){
+},{"./vendor/sjcl":203,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/eccjs/index.js":141,"buffer":314}],203:[function(require,module,exports){
 module.exports=require(142)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/eccjs/vendor/sjcl.js":142,"crypto":317}],204:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/eccjs/vendor/sjcl.js":142,"crypto":320}],204:[function(require,module,exports){
 // If `Date.now()` is invoked twice quickly, it's possible to get two
 // identical time stamps. To avoid generation duplications, subsequent
 // calls are manually ordered to force uniqueness.
@@ -15432,7 +15432,7 @@ sys.inherits(Stream, events.EventEmitter);
 exports.Stream = Stream;
 
 }).call(this,"/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/msgpack/lib")
-},{"buffer":311,"events":327,"sys":351,"util":351}],206:[function(require,module,exports){
+},{"buffer":314,"events":330,"sys":354,"util":354}],206:[function(require,module,exports){
 var pull = require('pull-core')
 
 function all(ary, abort, cb) {
@@ -16275,7 +16275,7 @@ function (read, highWaterMark) {
 
 
 }).call(this,require('_process'))
-},{"./sinks":213,"./sources":214,"_process":331,"pull-core":212}],216:[function(require,module,exports){
+},{"./sinks":213,"./sources":214,"_process":334,"pull-core":212}],216:[function(require,module,exports){
 module.exports=require(166)
 },{"./maybe":217,"./sinks":219,"./sources":220,"./throughs":221,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream/index.js":166,"pull-core":218}],217:[function(require,module,exports){
 module.exports=require(167)
@@ -16287,7 +16287,7 @@ module.exports=require(169)
 module.exports=require(170)
 },{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream/sources.js":170}],221:[function(require,module,exports){
 module.exports=require(171)
-},{"./sinks":219,"./sources":220,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream/throughs.js":171,"_process":331,"pull-core":218}],222:[function(require,module,exports){
+},{"./sinks":219,"./sources":220,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream/throughs.js":171,"_process":334,"pull-core":218}],222:[function(require,module,exports){
 (function (Buffer){
 
 
@@ -16359,7 +16359,7 @@ exports.encode = function (codec) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],223:[function(require,module,exports){
+},{"buffer":314}],223:[function(require,module,exports){
 var varint = require('varint')
 exports.encode = function encode (v, b, o) {
   v = v >= 0 ? v*2 : v*-2 - 1
@@ -16526,7 +16526,7 @@ module.exports = function (tagCodec) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],229:[function(require,module,exports){
+},{"buffer":314}],229:[function(require,module,exports){
 (function (Buffer){
 'use strict'
 var varint = require('varint')
@@ -16828,7 +16828,7 @@ exports.vararray = function (lenType, itemType) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311,"int53":230,"varint":226}],230:[function(require,module,exports){
+},{"buffer":314,"int53":230,"varint":226}],230:[function(require,module,exports){
 var assert = require('assert')
 
 var int53 = {}
@@ -16944,7 +16944,7 @@ int53.writeUInt64LE = function (number, buffer, offset) {
 
 module.exports = int53
 
-},{"assert":309}],231:[function(require,module,exports){
+},{"assert":312}],231:[function(require,module,exports){
 var pull = require('pull-stream')
 var many = require('pull-many')
 var cat  = require('pull-cat')
@@ -17108,7 +17108,7 @@ exports.isInteger = function (v) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"blake2s":182,"buffer":311}],233:[function(require,module,exports){
+},{"blake2s":182,"buffer":314}],233:[function(require,module,exports){
 (function (Buffer){
 'use strict';
 
@@ -17279,7 +17279,7 @@ module.exports = function (ssb, opts) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311,"continuable-para":185,"deep-equal":199,"pull-stream":216}],234:[function(require,module,exports){
+},{"buffer":314,"continuable-para":185,"deep-equal":199,"pull-stream":216}],234:[function(require,module,exports){
 (function (process){
 var Stream = require('stream')
 
@@ -17391,7 +17391,7 @@ function through (write, end, opts) {
 
 
 }).call(this,require('_process'))
-},{"_process":331,"stream":348}],235:[function(require,module,exports){
+},{"_process":334,"stream":351}],235:[function(require,module,exports){
 module.exports=require(166)
 },{"./maybe":236,"./sinks":238,"./sources":239,"./throughs":240,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream/index.js":166,"pull-core":237}],236:[function(require,module,exports){
 module.exports=require(167)
@@ -17403,17 +17403,17 @@ module.exports=require(169)
 module.exports=require(170)
 },{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream/sources.js":170}],240:[function(require,module,exports){
 module.exports=require(171)
-},{"./sinks":238,"./sources":239,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream/throughs.js":171,"_process":331,"pull-core":237}],241:[function(require,module,exports){
+},{"./sinks":238,"./sources":239,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream/throughs.js":171,"_process":334,"pull-core":237}],241:[function(require,module,exports){
 module.exports=require(177)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/codec.js":177,"assert":309,"buffer":311,"signed-varint":246,"varstruct":252,"varstruct-match":251}],242:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/codec.js":177,"assert":312,"buffer":314,"signed-varint":246,"varstruct":252,"varstruct-match":251}],242:[function(require,module,exports){
 module.exports=require(178)
-},{"./codec":241,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/defaults.js":178,"blake2s":243,"crypto":317,"eccjs":244}],243:[function(require,module,exports){
+},{"./codec":241,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/defaults.js":178,"blake2s":243,"crypto":320,"eccjs":244}],243:[function(require,module,exports){
 module.exports=require(140)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/blake2s/index.js":140,"buffer":311}],244:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/blake2s/index.js":140,"buffer":314}],244:[function(require,module,exports){
 module.exports=require(141)
-},{"./vendor/sjcl":245,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/eccjs/index.js":141,"buffer":311}],245:[function(require,module,exports){
+},{"./vendor/sjcl":245,"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/eccjs/index.js":141,"buffer":314}],245:[function(require,module,exports){
 module.exports=require(142)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/eccjs/vendor/sjcl.js":142,"crypto":317}],246:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/eccjs/vendor/sjcl.js":142,"crypto":320}],246:[function(require,module,exports){
 module.exports=require(223)
 },{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/signed-varint/index.js":223,"varint":249}],247:[function(require,module,exports){
 module.exports=require(224)
@@ -17425,11 +17425,11 @@ module.exports=require(226)
 module.exports=require(227)
 },{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/varint/length.js":227}],251:[function(require,module,exports){
 module.exports=require(228)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/varstruct-match/index.js":228,"buffer":311}],252:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/varstruct-match/index.js":228,"buffer":314}],252:[function(require,module,exports){
 module.exports=require(229)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/varstruct/index.js":229,"buffer":311,"int53":253,"varint":249}],253:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/varstruct/index.js":229,"buffer":314,"int53":253,"varint":249}],253:[function(require,module,exports){
 module.exports=require(230)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/varstruct/node_modules/int53/index.js":230,"assert":309}],254:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/secure-scuttlebutt/node_modules/varstruct/node_modules/int53/index.js":230,"assert":312}],254:[function(require,module,exports){
 (function (process){
 var pull = require('pull-core')
 
@@ -17614,11 +17614,11 @@ exports.read2 = read2
 
 
 }).call(this,require('_process'))
-},{"_process":331,"pull-core":255}],255:[function(require,module,exports){
+},{"_process":334,"pull-core":255}],255:[function(require,module,exports){
 module.exports=require(165)
 },{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/pull-stream-to-stream/node_modules/pull-core/index.js":165}],256:[function(require,module,exports){
 module.exports=require(234)
-},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/through/index.js":234,"_process":331,"stream":348}],257:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/phoenix-rpc/node_modules/through/index.js":234,"_process":334,"stream":351}],257:[function(require,module,exports){
 module.exports=require(58)
 },{"/home/pfrazee/phoenix/node_modules/mercury/node_modules/value-event/base-event.js":58,"dom-delegator":261}],258:[function(require,module,exports){
 var BaseEvent = require('./base-event.js');
@@ -17739,7 +17739,7 @@ function WebSocketStream(target, protocols) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311,"duplexify":272,"through2":295,"ws":297}],272:[function(require,module,exports){
+},{"buffer":314,"duplexify":272,"through2":295,"ws":297}],272:[function(require,module,exports){
 (function (process,Buffer){
 var stream = require('readable-stream')
 var eos = require('end-of-stream')
@@ -17964,7 +17964,7 @@ Duplexify.prototype.end = function(data, enc, cb) {
 
 module.exports = Duplexify
 }).call(this,require('_process'),require("buffer").Buffer)
-},{"_process":331,"buffer":311,"end-of-stream":273,"readable-stream":285,"util":351}],273:[function(require,module,exports){
+},{"_process":334,"buffer":314,"end-of-stream":273,"readable-stream":285,"util":354}],273:[function(require,module,exports){
 var once = require('once');
 
 var noop = function() {};
@@ -18188,7 +18188,7 @@ function forEach (xs, f) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_readable":278,"./_stream_writable":280,"_process":331,"core-util-is":281,"inherits":282}],277:[function(require,module,exports){
+},{"./_stream_readable":278,"./_stream_writable":280,"_process":334,"core-util-is":281,"inherits":282}],277:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19222,7 +19222,7 @@ function indexOf (xs, x) {
 }
 
 }).call(this,require('_process'))
-},{"_process":331,"buffer":311,"core-util-is":281,"events":327,"inherits":282,"isarray":283,"stream":348,"string_decoder/":284}],279:[function(require,module,exports){
+},{"_process":334,"buffer":314,"core-util-is":281,"events":330,"inherits":282,"isarray":283,"stream":351,"string_decoder/":284}],279:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -19824,7 +19824,7 @@ function endWritable(stream, state, cb) {
 }
 
 }).call(this,require('_process'))
-},{"./_stream_duplex":276,"_process":331,"buffer":311,"core-util-is":281,"inherits":282,"stream":348}],281:[function(require,module,exports){
+},{"./_stream_duplex":276,"_process":334,"buffer":314,"core-util-is":281,"inherits":282,"stream":351}],281:[function(require,module,exports){
 (function (Buffer){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -19934,7 +19934,7 @@ function objectToString(o) {
   return Object.prototype.toString.call(o);
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],282:[function(require,module,exports){
+},{"buffer":314}],282:[function(require,module,exports){
 module.exports=require(23)
 },{"/home/pfrazee/phoenix/node_modules/mercury/node_modules/dom-delegator/node_modules/inherits/inherits_browser.js":23}],283:[function(require,module,exports){
 module.exports = Array.isArray || function (arr) {
@@ -20164,7 +20164,7 @@ function base64DetectIncompleteChar(buffer) {
   this.charLength = this.charReceived ? 3 : 0;
 }
 
-},{"buffer":311}],285:[function(require,module,exports){
+},{"buffer":314}],285:[function(require,module,exports){
 exports = module.exports = require('./lib/_stream_readable.js');
 exports.Readable = exports;
 exports.Writable = require('./lib/_stream_writable.js');
@@ -20174,21 +20174,21 @@ exports.PassThrough = require('./lib/_stream_passthrough.js');
 
 },{"./lib/_stream_duplex.js":276,"./lib/_stream_passthrough.js":277,"./lib/_stream_readable.js":278,"./lib/_stream_transform.js":279,"./lib/_stream_writable.js":280}],286:[function(require,module,exports){
 module.exports=require(276)
-},{"./_stream_readable":287,"./_stream_writable":289,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_duplex.js":276,"_process":331,"core-util-is":290,"inherits":291}],287:[function(require,module,exports){
+},{"./_stream_readable":287,"./_stream_writable":289,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_duplex.js":276,"_process":334,"core-util-is":290,"inherits":291}],287:[function(require,module,exports){
 module.exports=require(278)
-},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js":278,"_process":331,"buffer":311,"core-util-is":290,"events":327,"inherits":291,"isarray":292,"stream":348,"string_decoder/":293}],288:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js":278,"_process":334,"buffer":314,"core-util-is":290,"events":330,"inherits":291,"isarray":292,"stream":351,"string_decoder/":293}],288:[function(require,module,exports){
 module.exports=require(279)
 },{"./_stream_duplex":286,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_transform.js":279,"core-util-is":290,"inherits":291}],289:[function(require,module,exports){
 module.exports=require(280)
-},{"./_stream_duplex":286,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_writable.js":280,"_process":331,"buffer":311,"core-util-is":290,"inherits":291,"stream":348}],290:[function(require,module,exports){
+},{"./_stream_duplex":286,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_writable.js":280,"_process":334,"buffer":314,"core-util-is":290,"inherits":291,"stream":351}],290:[function(require,module,exports){
 module.exports=require(281)
-},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":281,"buffer":311}],291:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":281,"buffer":314}],291:[function(require,module,exports){
 module.exports=require(23)
 },{"/home/pfrazee/phoenix/node_modules/mercury/node_modules/dom-delegator/node_modules/inherits/inherits_browser.js":23}],292:[function(require,module,exports){
 module.exports=require(283)
 },{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/isarray/index.js":283}],293:[function(require,module,exports){
 module.exports=require(284)
-},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/string_decoder/index.js":284,"buffer":311}],294:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/string_decoder/index.js":284,"buffer":314}],294:[function(require,module,exports){
 module.exports = require("./lib/_stream_transform.js")
 
 },{"./lib/_stream_transform.js":288}],295:[function(require,module,exports){
@@ -20291,7 +20291,7 @@ module.exports.obj = through2(function (options, transform, flush) {
 })
 
 }).call(this,require('_process'))
-},{"_process":331,"readable-stream/transform":294,"util":351,"xtend":296}],296:[function(require,module,exports){
+},{"_process":334,"readable-stream/transform":294,"util":354,"xtend":296}],296:[function(require,module,exports){
 module.exports=require(52)
 },{"/home/pfrazee/phoenix/node_modules/mercury/node_modules/observ-struct/node_modules/xtend/index.js":52}],297:[function(require,module,exports){
 
@@ -20356,6 +20356,10 @@ var state = createApp()
 mercury.app(document.body, state, render)
 handlers.setRoute(state, window.location.hash)
 
+// put some things on the window object for debugging
+window.state = state
+window.models = models
+
 module.exports = createApp
 function createApp() {
   var initState = {
@@ -20369,7 +20373,7 @@ function createApp() {
   }
 
   var events = createEvents()
-  var state = window.state = models.homeApp(events, initState)
+  var state = models.homeApp(events, initState)
   bus.setupHomeApp(state)
   wireUpEvents(state, events)
   return state
@@ -20380,7 +20384,7 @@ function wireUpEvents(state, events) {
     events[k](handlers[k].bind(null, state))
   }
 }
-},{"./home/events.js":300,"./home/handlers.js":301,"./home/render.js":302,"./lib/business.js":303,"./lib/models.js":305,"global/document":7,"global/window":8,"mercury":14}],300:[function(require,module,exports){
+},{"./home/events.js":300,"./home/handlers.js":301,"./home/render.js":302,"./lib/business.js":303,"./lib/models.js":307,"global/document":7,"global/window":8,"mercury":14}],300:[function(require,module,exports){
 var window = require('global/window')
 var HashRouter = require('hash-router')
 var Event = require('geval')
@@ -20395,6 +20399,10 @@ function createEvents() {
     'setPublishFormType',
     'submitPublishForm',
     'cancelPublishForm',
+
+    // mention box behaviors
+    'mentionBoxInput',
+    'mentionBoxKeypress',
 
     // network page
     'addServer',
@@ -20427,6 +20435,7 @@ function EventRouter() {
 },{"geval":6,"global/window":8,"hash-router":9,"mercury":14}],301:[function(require,module,exports){
 var models = require('../lib/models')
 var bus = require('../lib/business')
+var textareaCaretPosition = require('../lib/textarea-caret-position')
 
 exports.setRoute = function(state, route) {
   route = route.substr(2) || 'feed'
@@ -20567,6 +20576,91 @@ exports.cancelPublishForm = function(state, data) {
   }
 }
 
+var wordBoundary = /\s/;
+exports.mentionBoxInput = function(state, e) {
+  var active = state.suggestBox.active()
+
+  // are we in a word that starts with @?
+  var v = e.target.value
+  var i = e.target.selectionStart
+  for (i; i >= 0; i--) {
+    if (wordBoundary.test(v.charAt(i)))
+      return state.suggestBox.active.set(false)
+    if (v.charAt(i) == '@' && (i === 0 || wordBoundary.test(v.charAt(i - 1))))
+      break
+  }
+  if (i < 0) return state.suggestBox.active.set(false)
+
+  // in an @-word, make sure we have a select box
+  if (!active) {
+    // calculate position
+    var pos = textareaCaretPosition(e.target, i)
+    var rects = e.target.getClientRects()
+    pos.left += rects[0].left
+    pos.top += rects[0].top + 20
+
+    // setup
+    state.suggestBox.active.set(true)
+    state.suggestBox.selection.set(0)
+    state.suggestBox.positionX.set(pos.left)
+    state.suggestBox.positionY.set(pos.top)
+
+    // add options
+    state.suggestBox.options.splice(0, state.suggestBox.options.getLength())
+    state.profiles.forEach(function(profile) {
+      state.suggestBox.options.push({ title: profile.nickname, subtitle: shortHex(profile.idStr), value: profile.idStr })
+    })
+  }
+
+  // update the current suggestion value
+  var word = v.slice(i+1, e.target.selectionStart)
+  state.suggestBox.textValue.set(word)
+  state.suggestBox.selection.set(0)
+  state.suggestBox.filtered.splice(0, state.suggestBox.filtered.getLength())
+  state.suggestBox.options.forEach(function(opt) {
+    if (opt.title.indexOf(word) === 0 || opt.subtitle.indexOf(word) === 0)
+      state.suggestBox.filtered.push(opt)
+  })
+
+  // cancel if there's nothing available
+  if (state.suggestBox.filtered.getLength() == 0)
+    state.suggestBox.active.set(false)
+}
+
+exports.mentionBoxKeypress = function(state, e) {
+  if (state.suggestBox.active()) {
+    // scroll the selection up/down
+    var sel = state.suggestBox.selection()
+    if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13)
+      e.preventDefault()
+    if (e.keyCode == 38 && sel > 0) // up
+      state.suggestBox.selection.set(sel - 1)
+    if (e.keyCode == 40 && sel < (state.suggestBox.options.getLength() - 1)) // down
+      state.suggestBox.selection.set(sel + 1)
+    if (e.keyCode == 13) { // enter
+      if (state.suggestBox.filtered.getLength()) {
+        var choice = state.suggestBox.filtered.get(state.suggestBox.selection())
+        if (choice && choice.value) {
+          // update the text under the cursor to have the current selection's value
+          var v = e.target.value
+          var start = e.target.selectionStart
+          var end = start
+          for (start; start >= 0; start--) {
+            if (v.charAt(start) == '@')
+              break
+          }
+          for (end; end < v.length; end++) {
+            if (wordBoundary.test(v.charAt(end)))
+              break
+          }
+          e.target.value = v.slice(0, start + 1) + choice.value + v.slice(end)
+        }
+      }
+      state.suggestBox.active.set(false)
+    }
+  }
+}
+
 exports.addFeed = function(state) {
   var token = prompt('Introduction token of the user:')
   if (!token) return
@@ -20652,6 +20746,10 @@ exports.shareMsg = function(state, data) {
   alert('todo https://github.com/pfraze/phoenix/issues/52')
 }
 
+function shortHex(str) {
+  return str.slice(0, 6) + '..' + str.slice(-2)
+}
+
 /*
 1: the setTimeout hack in submitPublishForm()
 Basically, we need the `state.publishForm.textValue.set(data.publishText)` to run its course
@@ -20659,13 +20757,14 @@ before we can call `state.publishForm.textValue.set('')` and have an effect. Thi
 an issue if the textarea's change event always fired before the submit event, but, because we trigger
 with ctrl+enter and are trying not to much directly with the DOM events (Mercury-land) this is our solution.
 */
-},{"../lib/business":303,"../lib/models":305}],302:[function(require,module,exports){
+},{"../lib/business":303,"../lib/models":307,"../lib/textarea-caret-position":308}],302:[function(require,module,exports){
 var mercury     = require('mercury')
 var h           = require('mercury').h
 var util        = require('../../../lib/util')
 var valueEvents = require('../lib/value-events')
 var widgets     = require('../lib/widgets')
 var comren      = require('../lib/common-render')
+var com         = require('../lib/com')
 
 module.exports = render
 
@@ -20688,6 +20787,7 @@ function render(state) {
 
   return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
+    mercury.partial(com.suggestBox, state.suggestBox),
     mercury.partial(header, state.events, state.user.idStr),
     mercury.partial(comren.connStatus, state.events, state.conn),
     h('.container', page),
@@ -20850,7 +20950,7 @@ function a(href, text, opts) {
 function img(src) {
   return h('img', { src: src })
 }
-},{"../../../lib/util":1,"../lib/common-render":304,"../lib/value-events":306,"../lib/widgets":307,"mercury":14}],303:[function(require,module,exports){
+},{"../../../lib/util":1,"../lib/com":304,"../lib/common-render":306,"../lib/value-events":309,"../lib/widgets":310,"mercury":14}],303:[function(require,module,exports){
 (function (Buffer){
 var WSStream    = require('websocket-stream')
 var prpc        = require('phoenix-rpc')
@@ -21253,7 +21353,27 @@ exports.removeServer = function(state, addr, cb) {
   })
 }
 }).call(this,require("buffer").Buffer)
-},{"../../../lib/util":1,"./models":305,"buffer":311,"msgpack-js":116,"multicb":130,"phoenix-rpc":131,"pull-stream":235,"secure-scuttlebutt/defaults":242,"stream-to-pull-stream":254,"through":256,"websocket-stream":271}],304:[function(require,module,exports){
+},{"../../../lib/util":1,"./models":307,"buffer":314,"msgpack-js":116,"multicb":130,"phoenix-rpc":131,"pull-stream":235,"secure-scuttlebutt/defaults":242,"stream-to-pull-stream":254,"through":256,"websocket-stream":271}],304:[function(require,module,exports){
+module.exports = {
+  suggestBox: require('./suggest-box').suggestBox,
+}
+},{"./suggest-box":305}],305:[function(require,module,exports){
+var mercury     = require('mercury')
+var h           = require('mercury').h
+
+var suggestBox = exports.suggestBox = function(box) {
+  if (!box.active)
+    return h('.suggest-box')
+  return h('.suggest-box', { style: { left: (box.positionX+'px'), top: (box.positionY+'px') } }, [
+    h('ul', box.filtered.map(function(opt, i) {
+      var sel = 'li'
+      if (i === box.selection)
+        sel += '.selected'
+      return h(sel, [h('strong', opt.title), ' ', h('small', opt.subtitle)])
+    }))
+  ])
+}
+},{"mercury":14}],306:[function(require,module,exports){
 var mercury     = require('mercury')
 var h           = require('mercury').h
 var valueEvents = require('./value-events')
@@ -21429,7 +21549,9 @@ var publishForm = exports.publishForm = function(state, form) {
           rows: form.textRows || 1,
           value: form.textValue,
           'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
-          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id })
+          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
+          'ev-keydown': state.events.mentionBoxKeypress,
+          'ev-input': state.events.mentionBoxInput
         })),
         h('button.btn.btn-default', 'Post'),
         ' ',
@@ -21448,16 +21570,16 @@ var publishForm = exports.publishForm = function(state, form) {
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        (form.parent) ?
-          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, ' this']) :
-          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue]),
+        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue])
       ]),
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {
           name: 'publishText',
           placeholder: form.textPlaceholder,
           value: form.textValue,
-          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id })
+          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
+          'ev-keydown': state.events.mentionBoxKeypress,
+          'ev-input': state.events.mentionBoxInput
         })),
         h('button.btn.btn-default', 'Post'),
         ' ',
@@ -21531,7 +21653,7 @@ function img(src) {
 function shortHex(str) {
   return str.slice(0, 6) + '...'
 }
-},{"../../../lib/util":1,"./value-events":306,"./widgets":307,"mercury":14}],305:[function(require,module,exports){
+},{"../../../lib/util":1,"./value-events":309,"./widgets":310,"mercury":14}],307:[function(require,module,exports){
 (function (Buffer){
 // var cuid = require('cuid')
 var extend = require('xtend')
@@ -21554,9 +21676,18 @@ var defaults = {
   homeApp: {
     // gui state
     route: '',
-    layout: [['main', 8], ['side', 4]],
+    layout: [['main', 7], ['side', 5]],
     publishForms: [],
     publishFormMap: {},
+    suggestBox: {
+      active: false,
+      positionX: 0,
+      positionY: 0,
+      selection: 0,
+      textValue: '',
+      options: [],
+      filtered: []
+    },
     conn: {
       hasError: false,
       explanation: ''
@@ -21631,7 +21762,7 @@ var defaults = {
     textRows: 1,
     preview: '',
     permanent: false
-  },
+  }
 }
 
 // Constructors
@@ -21652,6 +21783,15 @@ function createHomeApp(events, initialState) {
     layout:          mercury.value(state.layout),
     publishForms:    mercury.array(state.publishForms.map(createPublishForm)),
     publishFormMap:  mercury.value(state.publishFormMap),
+    suggestBox:      mercury.struct({
+      active:          mercury.value(state.suggestBox.active),
+      positionX:       mercury.value(state.suggestBox.positionX),
+      positionY:       mercury.value(state.suggestBox.positionY),
+      selection:       mercury.value(state.suggestBox.selection),
+      textValue:       mercury.value(state.suggestBox.textValue),
+      options:         mercury.array(state.suggestBox.options),
+      filtered:        mercury.array(state.suggestBox.filtered)
+    }),
     conn:            mercury.struct({
       hasError:        mercury.value(state.conn.hasError),
       explanation:     mercury.value(state.conn.explanation)
@@ -21739,7 +21879,118 @@ function createPublishForm(initialState) {
   return mercury.struct(state)
 }
 }).call(this,require("buffer").Buffer)
-},{"buffer":311,"mercury":14,"msgpack-js":116,"xtend":298}],306:[function(require,module,exports){
+},{"buffer":314,"mercury":14,"msgpack-js":116,"xtend":298}],308:[function(require,module,exports){
+/* jshint browser: true */
+
+// https://github.com/component/textarea-caret-position
+// MIT Licensed, Copyright (c) 2014 Jonathan Ong me@jongleberry.com
+
+// The properties that we copy into a mirrored div.
+// Note that some browsers, such as Firefox,
+// do not concatenate properties, i.e. padding-top, bottom etc. -> padding,
+// so we have to do every single property specifically.
+var properties = [
+  'direction',  // RTL support
+  'boxSizing',
+  'width',  // on Chrome and IE, exclude the scrollbar, so the mirror div wraps exactly as the textarea does
+  'height',
+  'overflowX',
+  'overflowY',  // copy the scrollbar for IE
+
+  'borderTopWidth',
+  'borderRightWidth',
+  'borderBottomWidth',
+  'borderLeftWidth',
+
+  'paddingTop',
+  'paddingRight',
+  'paddingBottom',
+  'paddingLeft',
+
+  // https://developer.mozilla.org/en-US/docs/Web/CSS/font
+  'fontStyle',
+  'fontVariant',
+  'fontWeight',
+  'fontStretch',
+  'fontSize',
+  'fontSizeAdjust',
+  'lineHeight',
+  'fontFamily',
+
+  'textAlign',
+  'textTransform',
+  'textIndent',
+  'textDecoration',  // might not make a difference, but better be safe
+
+  'letterSpacing',
+  'wordSpacing'
+];
+
+var isFirefox = !(window.mozInnerScreenX == null);
+
+var getCaretCoordinatesFn = function (element, position, recalculate) {
+  // mirrored div
+  var div = document.createElement('div');
+  div.id = 'input-textarea-caret-position-mirror-div';
+  document.body.appendChild(div);
+
+  var style = div.style;
+  var computed = window.getComputedStyle? getComputedStyle(element) : element.currentStyle;  // currentStyle for IE < 9
+
+  // default textarea styles
+  style.whiteSpace = 'pre-wrap';
+  if (element.nodeName !== 'INPUT')
+    style.wordWrap = 'break-word';  // only for textarea-s
+
+  // position off-screen
+  style.position = 'absolute';  // required to return coordinates properly
+  style.visibility = 'hidden';  // not 'display: none' because we want rendering
+
+  // transfer the element's properties to the div
+  properties.forEach(function (prop) {
+    style[prop] = computed[prop];
+  });
+
+  if (isFirefox) {
+    style.width = parseInt(computed.width) - 2 + 'px'  // Firefox adds 2 pixels to the padding - https://bugzilla.mozilla.org/show_bug.cgi?id=753662
+    // Firefox lies about the overflow property for textareas: https://bugzilla.mozilla.org/show_bug.cgi?id=984275
+    if (element.scrollHeight > parseInt(computed.height))
+      style.overflowY = 'scroll';
+  } else {
+    style.overflow = 'hidden';  // for Chrome to not render a scrollbar; IE keeps overflowY = 'scroll'
+  }  
+
+  div.textContent = element.value.substring(0, position);
+  // the second special handling for input type="text" vs textarea: spaces need to be replaced with non-breaking spaces - http://stackoverflow.com/a/13402035/1269037
+  if (element.nodeName === 'INPUT')
+    div.textContent = div.textContent.replace(/\s/g, "\u00a0");
+
+  var span = document.createElement('span');
+  // Wrapping must be replicated *exactly*, including when a long word gets
+  // onto the next line, with whitespace at the end of the line before (#7).
+  // The  *only* reliable way to do that is to copy the *entire* rest of the
+  // textarea's content into the <span> created at the caret position.
+  // for inputs, just '.' would be enough, but why bother?
+  span.textContent = element.value.substring(position) || '.';  // || because a completely empty faux span doesn't render at all
+  div.appendChild(span);
+
+  var coordinates = {
+    top: span.offsetTop + parseInt(computed['borderTopWidth']),
+    left: span.offsetLeft + parseInt(computed['borderLeftWidth'])
+  };
+
+  document.body.removeChild(div);
+
+  return coordinates;
+}
+
+if (typeof Package !== 'undefined') {
+  getCaretCoordinates = getCaretCoordinatesFn;  // Meteor
+} else {
+  module.exports = getCaretCoordinatesFn;    // Component
+}
+
+},{}],309:[function(require,module,exports){
 var extend = require('xtend')
 var BaseEvent = require('value-event/base-event')
 var getFormData = require('form-data-set/element')
@@ -21776,7 +22027,7 @@ exports.submit = BaseEvent(function (e) {
   return data;
 })
 
-},{"form-data-set/element":3,"value-event/base-event":257,"value-event/click":258,"xtend":298}],307:[function(require,module,exports){
+},{"form-data-set/element":3,"value-event/base-event":257,"value-event/click":258,"xtend":298}],310:[function(require,module,exports){
 var util  = require('../../../lib/util')
 var marked = require('marked');
 marked.setOptions({
@@ -21833,9 +22084,9 @@ function abort(e) {
   e.preventDefault()
   e.stopPropagation()
 }
-},{"../../../lib/util":1,"marked":13}],308:[function(require,module,exports){
+},{"../../../lib/util":1,"marked":13}],311:[function(require,module,exports){
 
-},{}],309:[function(require,module,exports){
+},{}],312:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //
 // THIS IS NOT TESTED NOR LIKELY TO WORK OUTSIDE V8!
@@ -22197,9 +22448,9 @@ var objectKeys = Object.keys || function (obj) {
   return keys;
 };
 
-},{"util/":351}],310:[function(require,module,exports){
-module.exports=require(308)
-},{"/usr/local/lib/node_modules/browserify/lib/_empty.js":308}],311:[function(require,module,exports){
+},{"util/":354}],313:[function(require,module,exports){
+module.exports=require(311)
+},{"/usr/local/lib/node_modules/browserify/lib/_empty.js":311}],314:[function(require,module,exports){
 /*!
  * The buffer module from node.js, for the browser.
  *
@@ -23370,7 +23621,7 @@ function assert (test, message) {
   if (!test) throw new Error(message || 'Failed assertion')
 }
 
-},{"base64-js":312,"ieee754":313}],312:[function(require,module,exports){
+},{"base64-js":315,"ieee754":316}],315:[function(require,module,exports){
 var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 
 ;(function (exports) {
@@ -23492,7 +23743,7 @@ var lookup = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
 	exports.fromByteArray = uint8ToBase64
 }(typeof exports === 'undefined' ? (this.base64js = {}) : exports))
 
-},{}],313:[function(require,module,exports){
+},{}],316:[function(require,module,exports){
 exports.read = function(buffer, offset, isLE, mLen, nBytes) {
   var e, m,
       eLen = nBytes * 8 - mLen - 1,
@@ -23578,7 +23829,7 @@ exports.write = function(buffer, value, offset, isLE, mLen, nBytes) {
   buffer[offset + i - d] |= s * 128;
 };
 
-},{}],314:[function(require,module,exports){
+},{}],317:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('sha.js')
 
@@ -23612,7 +23863,7 @@ module.exports = function (alg) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"./md5":318,"buffer":311,"ripemd160":319,"sha.js":321}],315:[function(require,module,exports){
+},{"./md5":321,"buffer":314,"ripemd160":322,"sha.js":324}],318:[function(require,module,exports){
 (function (Buffer){
 var createHash = require('./create-hash')
 
@@ -23657,7 +23908,7 @@ Hmac.prototype.digest = function (enc) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"./create-hash":314,"buffer":311}],316:[function(require,module,exports){
+},{"./create-hash":317,"buffer":314}],319:[function(require,module,exports){
 (function (Buffer){
 var intSize = 4;
 var zeroBuffer = new Buffer(intSize); zeroBuffer.fill(0);
@@ -23695,7 +23946,7 @@ function hash(buf, fn, hashSize, bigEndian) {
 module.exports = { hash: hash };
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],317:[function(require,module,exports){
+},{"buffer":314}],320:[function(require,module,exports){
 (function (Buffer){
 var rng = require('./rng')
 
@@ -23753,7 +24004,7 @@ each(['createCredentials'
 })
 
 }).call(this,require("buffer").Buffer)
-},{"./create-hash":314,"./create-hmac":315,"./pbkdf2":325,"./rng":326,"buffer":311}],318:[function(require,module,exports){
+},{"./create-hash":317,"./create-hmac":318,"./pbkdf2":328,"./rng":329,"buffer":314}],321:[function(require,module,exports){
 /*
  * A JavaScript implementation of the RSA Data Security, Inc. MD5 Message
  * Digest Algorithm, as defined in RFC 1321.
@@ -23910,7 +24161,7 @@ module.exports = function md5(buf) {
   return helpers.hash(buf, core_md5, 16);
 };
 
-},{"./helpers":316}],319:[function(require,module,exports){
+},{"./helpers":319}],322:[function(require,module,exports){
 (function (Buffer){
 
 module.exports = ripemd160
@@ -24119,7 +24370,7 @@ function ripemd160(message) {
 
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],320:[function(require,module,exports){
+},{"buffer":314}],323:[function(require,module,exports){
 var u = require('./util')
 var write = u.write
 var fill = u.zeroFill
@@ -24219,7 +24470,7 @@ module.exports = function (Buffer) {
   return Hash
 }
 
-},{"./util":324}],321:[function(require,module,exports){
+},{"./util":327}],324:[function(require,module,exports){
 var exports = module.exports = function (alg) {
   var Alg = exports[alg]
   if(!Alg) throw new Error(alg + ' is not supported (we accept pull requests)')
@@ -24233,7 +24484,7 @@ exports.sha =
 exports.sha1 = require('./sha1')(Buffer, Hash)
 exports.sha256 = require('./sha256')(Buffer, Hash)
 
-},{"./hash":320,"./sha1":322,"./sha256":323,"buffer":311}],322:[function(require,module,exports){
+},{"./hash":323,"./sha1":325,"./sha256":326,"buffer":314}],325:[function(require,module,exports){
 /*
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-1, as defined
  * in FIPS PUB 180-1
@@ -24394,7 +24645,7 @@ module.exports = function (Buffer, Hash) {
   return Sha1
 }
 
-},{"util":351}],323:[function(require,module,exports){
+},{"util":354}],326:[function(require,module,exports){
 
 /**
  * A JavaScript implementation of the Secure Hash Algorithm, SHA-256, as defined
@@ -24559,7 +24810,7 @@ module.exports = function (Buffer, Hash) {
 
 }
 
-},{"./util":324,"util":351}],324:[function(require,module,exports){
+},{"./util":327,"util":354}],327:[function(require,module,exports){
 exports.write = write
 exports.zeroFill = zeroFill
 
@@ -24597,7 +24848,7 @@ function zeroFill(buf, from) {
 }
 
 
-},{}],325:[function(require,module,exports){
+},{}],328:[function(require,module,exports){
 (function (Buffer){
 // JavaScript PBKDF2 Implementation
 // Based on http://git.io/qsv2zw
@@ -24683,7 +24934,7 @@ module.exports = function (createHmac, exports) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],326:[function(require,module,exports){
+},{"buffer":314}],329:[function(require,module,exports){
 (function (Buffer){
 (function() {
   module.exports = function(size) {
@@ -24697,7 +24948,7 @@ module.exports = function (createHmac, exports) {
 }())
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":311}],327:[function(require,module,exports){
+},{"buffer":314}],330:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -25000,11 +25251,11 @@ function isUndefined(arg) {
   return arg === void 0;
 }
 
-},{}],328:[function(require,module,exports){
+},{}],331:[function(require,module,exports){
 module.exports=require(23)
-},{"/home/pfrazee/phoenix/node_modules/mercury/node_modules/dom-delegator/node_modules/inherits/inherits_browser.js":23}],329:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/mercury/node_modules/dom-delegator/node_modules/inherits/inherits_browser.js":23}],332:[function(require,module,exports){
 module.exports=require(283)
-},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/isarray/index.js":283}],330:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/isarray/index.js":283}],333:[function(require,module,exports){
 (function (process){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -25232,7 +25483,7 @@ var substr = 'ab'.substr(-1) === 'b'
 ;
 
 }).call(this,require('_process'))
-},{"_process":331}],331:[function(require,module,exports){
+},{"_process":334}],334:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -25297,7 +25548,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],332:[function(require,module,exports){
+},{}],335:[function(require,module,exports){
 (function (global){
 /*! http://mths.be/punycode v1.2.4 by @mathias */
 ;(function(root) {
@@ -25808,7 +26059,7 @@ process.chdir = function (dir) {
 }(this));
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],333:[function(require,module,exports){
+},{}],336:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -25894,7 +26145,7 @@ var isArray = Array.isArray || function (xs) {
   return Object.prototype.toString.call(xs) === '[object Array]';
 };
 
-},{}],334:[function(require,module,exports){
+},{}],337:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -25981,40 +26232,40 @@ var objectKeys = Object.keys || function (obj) {
   return res;
 };
 
-},{}],335:[function(require,module,exports){
+},{}],338:[function(require,module,exports){
 'use strict';
 
 exports.decode = exports.parse = require('./decode');
 exports.encode = exports.stringify = require('./encode');
 
-},{"./decode":333,"./encode":334}],336:[function(require,module,exports){
+},{"./decode":336,"./encode":337}],339:[function(require,module,exports){
 module.exports = require("./lib/_stream_duplex.js")
 
-},{"./lib/_stream_duplex.js":337}],337:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":340}],340:[function(require,module,exports){
 module.exports=require(276)
-},{"./_stream_readable":339,"./_stream_writable":341,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_duplex.js":276,"_process":331,"core-util-is":342,"inherits":328}],338:[function(require,module,exports){
+},{"./_stream_readable":342,"./_stream_writable":344,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_duplex.js":276,"_process":334,"core-util-is":345,"inherits":331}],341:[function(require,module,exports){
 module.exports=require(277)
-},{"./_stream_transform":340,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_passthrough.js":277,"core-util-is":342,"inherits":328}],339:[function(require,module,exports){
+},{"./_stream_transform":343,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_passthrough.js":277,"core-util-is":345,"inherits":331}],342:[function(require,module,exports){
 module.exports=require(278)
-},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js":278,"_process":331,"buffer":311,"core-util-is":342,"events":327,"inherits":328,"isarray":329,"stream":348,"string_decoder/":343}],340:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_readable.js":278,"_process":334,"buffer":314,"core-util-is":345,"events":330,"inherits":331,"isarray":332,"stream":351,"string_decoder/":346}],343:[function(require,module,exports){
 module.exports=require(279)
-},{"./_stream_duplex":337,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_transform.js":279,"core-util-is":342,"inherits":328}],341:[function(require,module,exports){
+},{"./_stream_duplex":340,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_transform.js":279,"core-util-is":345,"inherits":331}],344:[function(require,module,exports){
 module.exports=require(280)
-},{"./_stream_duplex":337,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_writable.js":280,"_process":331,"buffer":311,"core-util-is":342,"inherits":328,"stream":348}],342:[function(require,module,exports){
+},{"./_stream_duplex":340,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/lib/_stream_writable.js":280,"_process":334,"buffer":314,"core-util-is":345,"inherits":331,"stream":351}],345:[function(require,module,exports){
 module.exports=require(281)
-},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":281,"buffer":311}],343:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/core-util-is/lib/util.js":281,"buffer":314}],346:[function(require,module,exports){
 module.exports=require(284)
-},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/string_decoder/index.js":284,"buffer":311}],344:[function(require,module,exports){
+},{"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/node_modules/string_decoder/index.js":284,"buffer":314}],347:[function(require,module,exports){
 module.exports = require("./lib/_stream_passthrough.js")
 
-},{"./lib/_stream_passthrough.js":338}],345:[function(require,module,exports){
+},{"./lib/_stream_passthrough.js":341}],348:[function(require,module,exports){
 module.exports=require(285)
-},{"./lib/_stream_duplex.js":337,"./lib/_stream_passthrough.js":338,"./lib/_stream_readable.js":339,"./lib/_stream_transform.js":340,"./lib/_stream_writable.js":341,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/readable.js":285}],346:[function(require,module,exports){
+},{"./lib/_stream_duplex.js":340,"./lib/_stream_passthrough.js":341,"./lib/_stream_readable.js":342,"./lib/_stream_transform.js":343,"./lib/_stream_writable.js":344,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/duplexify/node_modules/readable-stream/readable.js":285}],349:[function(require,module,exports){
 module.exports=require(294)
-},{"./lib/_stream_transform.js":340,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/through2/node_modules/readable-stream/transform.js":294}],347:[function(require,module,exports){
+},{"./lib/_stream_transform.js":343,"/home/pfrazee/phoenix/node_modules/websocket-stream/node_modules/through2/node_modules/readable-stream/transform.js":294}],350:[function(require,module,exports){
 module.exports = require("./lib/_stream_writable.js")
 
-},{"./lib/_stream_writable.js":341}],348:[function(require,module,exports){
+},{"./lib/_stream_writable.js":344}],351:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -26143,7 +26394,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":327,"inherits":328,"readable-stream/duplex.js":336,"readable-stream/passthrough.js":344,"readable-stream/readable.js":345,"readable-stream/transform.js":346,"readable-stream/writable.js":347}],349:[function(require,module,exports){
+},{"events":330,"inherits":331,"readable-stream/duplex.js":339,"readable-stream/passthrough.js":347,"readable-stream/readable.js":348,"readable-stream/transform.js":349,"readable-stream/writable.js":350}],352:[function(require,module,exports){
 // Copyright Joyent, Inc. and other Node contributors.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -26852,14 +27103,14 @@ function isNullOrUndefined(arg) {
   return  arg == null;
 }
 
-},{"punycode":332,"querystring":335}],350:[function(require,module,exports){
+},{"punycode":335,"querystring":338}],353:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],351:[function(require,module,exports){
+},{}],354:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -27449,4 +27700,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":350,"_process":331,"inherits":328}]},{},[299]);
+},{"./support/isBuffer":353,"_process":334,"inherits":331}]},{},[299]);

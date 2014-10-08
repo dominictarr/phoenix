@@ -173,7 +173,9 @@ var publishForm = exports.publishForm = function(state, form) {
           rows: form.textRows || 1,
           value: form.textValue,
           'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
-          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id })
+          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
+          'ev-keydown': state.events.mentionBoxKeypress,
+          'ev-input': state.events.mentionBoxInput
         })),
         h('button.btn.btn-default', 'Post'),
         ' ',
@@ -192,16 +194,16 @@ var publishForm = exports.publishForm = function(state, form) {
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        (form.parent) ?
-          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, ' this']) :
-          h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue]),
+        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue])
       ]),
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {
           name: 'publishText',
           placeholder: form.textPlaceholder,
           value: form.textValue,
-          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id })
+          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
+          'ev-keydown': state.events.mentionBoxKeypress,
+          'ev-input': state.events.mentionBoxInput
         })),
         h('button.btn.btn-default', 'Post'),
         ' ',

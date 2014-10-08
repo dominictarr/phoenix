@@ -4,6 +4,7 @@ var util        = require('../../../lib/util')
 var valueEvents = require('../lib/value-events')
 var widgets     = require('../lib/widgets')
 var comren      = require('../lib/common-render')
+var com         = require('../lib/com')
 
 module.exports = render
 
@@ -26,6 +27,7 @@ function render(state) {
 
   return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
+    mercury.partial(com.suggestBox, state.suggestBox),
     mercury.partial(header, state.events, state.user.idStr),
     mercury.partial(comren.connStatus, state.events, state.conn),
     h('.container', page),

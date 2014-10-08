@@ -19,9 +19,18 @@ var defaults = {
   homeApp: {
     // gui state
     route: '',
-    layout: [['main', 8], ['side', 4]],
+    layout: [['main', 7], ['side', 5]],
     publishForms: [],
     publishFormMap: {},
+    suggestBox: {
+      active: false,
+      positionX: 0,
+      positionY: 0,
+      selection: 0,
+      textValue: '',
+      options: [],
+      filtered: []
+    },
     conn: {
       hasError: false,
       explanation: ''
@@ -96,7 +105,7 @@ var defaults = {
     textRows: 1,
     preview: '',
     permanent: false
-  },
+  }
 }
 
 // Constructors
@@ -117,6 +126,15 @@ function createHomeApp(events, initialState) {
     layout:          mercury.value(state.layout),
     publishForms:    mercury.array(state.publishForms.map(createPublishForm)),
     publishFormMap:  mercury.value(state.publishFormMap),
+    suggestBox:      mercury.struct({
+      active:          mercury.value(state.suggestBox.active),
+      positionX:       mercury.value(state.suggestBox.positionX),
+      positionY:       mercury.value(state.suggestBox.positionY),
+      selection:       mercury.value(state.suggestBox.selection),
+      textValue:       mercury.value(state.suggestBox.textValue),
+      options:         mercury.array(state.suggestBox.options),
+      filtered:        mercury.array(state.suggestBox.filtered)
+    }),
     conn:            mercury.struct({
       hasError:        mercury.value(state.conn.hasError),
       explanation:     mercury.value(state.conn.explanation)
