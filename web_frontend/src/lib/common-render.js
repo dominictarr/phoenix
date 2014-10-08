@@ -141,8 +141,9 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
 
 var publishForm = exports.publishForm = function(state, form) {
   if (form.type == 'text') {
+    var previewDisplay = (!!form.preview) ? 'block' : 'none'
     return  h('.publish-wrapper', [
-      h('.panel.panel-default', [
+      h('.panel.panel-default', { style: { display: previewDisplay } }, [
         h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview)))
       ]),
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
@@ -166,9 +167,10 @@ var publishForm = exports.publishForm = function(state, form) {
     ])
   }
   if (form.type == 'act') {
+    var previewDisplay = (!!form.textValue) ? 'block' : 'none'
     var hand = (form.parent) ? 'up' : 'right'
     return h('.publish-wrapper', [
-      h('.phoenix-event', [
+      h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
         (form.parent) ?
           h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue, ' this']) :

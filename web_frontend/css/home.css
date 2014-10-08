@@ -1609,7 +1609,9 @@ input[type="submit"].btn-block, input[type="reset"].btn-block, input[type="butto
 .feed-ctrls .publish-wrapper { margin-bottom: 8px; }
 .feed-ctrls .phoenix-event { margin-bottom: 26px; }
 
-.publish-preview > div > :first-child, .publish-preview > div > :first-child { margin-top: 0; }
+.publish-wrapper .publish-preview > div > :first-child { margin-top: 0; }
+.publish-wrapper .phoenix-event .event-icon { margin-top: 0; }
+.publish-wrapper .phoenix-event .event-body { margin: 6px; }
 
 .repliesto { margin: 0; font-size: 85%; color: #888; }
 

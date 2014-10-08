@@ -108,10 +108,20 @@ $timeline-staff-pos-x: 22px;
   }
 }
 
-.publish-preview, .publish-preview {
-  > div {
-    > :first-child {
-      margin-top: 0
+.publish-wrapper {
+  .publish-preview {
+    > div {
+      > :first-child {
+        margin-top: 0
+      }
+    }
+  }
+  .phoenix-event {
+    .event-icon {
+      margin-top: 0;
+    }
+    .event-body {
+      margin: 6px;
     }
   }
 }
