@@ -208,7 +208,9 @@ function createProfile(initialState) {
 
 function createServer(initialState) {
   var state = extend(defaults.server, initialState)
-  state.url = 'http://' + state.hostname + ':' + state.port
+  var hostname = state.hostname.indexOf(':') != -1 ?
+    '[' + state.hostname + ']' : state.hostname
+  state.url = 'http://' + hostname + ':' + state.port
   return mercury.struct(state)
 }
 

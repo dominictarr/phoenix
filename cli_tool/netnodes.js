@@ -1,6 +1,7 @@
 var http    = require('http');
 var prpc    = require('phoenix-rpc');
 var connect = require('../lib/backend');
+var util    = require('../lib/util');
 
 exports.addNode = function(opts) {
 	connect(function(err, backend) {
@@ -9,7 +10,7 @@ exports.addNode = function(opts) {
 		if (!opts.host)
 			return backend.syncNetwork(onSynced);
 
-		var host = opts.host.split(':');
+		var host = util.splitAddr(opts.host);
 		var addr = host[0];
 		var port = +host[1] || 80;
 
@@ -40,7 +41,7 @@ exports.delNode = function(opts) {
 	connect(function(err, backend) {
 		if (err) return console.error(err);
 	
-		var host = opts.host.split(':');
+		var host = util.splitAddr(opts.host);
 		var addr = host[0];
 		var port = +host[1] || 80;
 

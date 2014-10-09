@@ -366,7 +366,7 @@ exports.removeFeed = function(state, id, cb) {
 var addServer =
 exports.addServer = function(state, addr, cb) {
   if (typeof addr == 'string')
-    addr = addr.split(':')
+    addr = util.splitAddr(addr)
   if (!addr[0]) return cb(new Error('Invalid address'))
   addr[1] = +addr[1] || 80
   
@@ -380,7 +380,7 @@ exports.addServer = function(state, addr, cb) {
 var removeServer =
 exports.removeServer = function(state, addr, cb) {
   if (typeof addr == 'string')
-    addr = addr.split(':')
+    addr = util.splitAddr(addr)
   if (!addr[0]) return cb(new Error('Invalid address'))
   addr[1] = +addr[1] || 80
 
