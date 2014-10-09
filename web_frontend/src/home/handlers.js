@@ -188,7 +188,7 @@ exports.mentionBoxInput = function(state, e) {
           image: '/img/emoji/' + emoji + '.png',
           title: emoji,
           subtitle: emoji,
-          value: emoji + ':'
+          value: emoji + ': '
         })
       }
     }
