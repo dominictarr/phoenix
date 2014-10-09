@@ -1,6 +1,7 @@
   {
   "name": "phoenix",
   "dependencies": {
+    "secure-scuttlebutt": "git://github.com/dominictarr/secure-scuttlebutt.git#495ecae54ed1bbee627ee94d74663391b9947d5f",
     "nomnom": "1.8.0",
     "osenv": "0.0.3",
     "pull-stream": "~2.24.1",
@@ -11,7 +12,7 @@
     "stream-to-pull-stream": "~1.4.1",
     "ssh2": "~0.3.6",
     "rc": "~0.5.1",
-    "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#8f70637f73913588651e020ed2dce86dec056d07",
+    "phoenix-rpc": "git://github.com/pfraze/phoenix-rpc.git#2b92b7a58d62dccc226eafa3769fd38a2a7f507c",
     "concat-stream": "~1.4.6",
     "msgpack-js": "~0.3.0",
     "open": "~0.0.5",
