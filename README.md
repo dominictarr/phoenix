@@ -17,6 +17,7 @@ Join us in #scuttlebutt on freenode.
 git clone https://github.com/pfraze/phoenix.git
 cd phoenix
 npm install
+make
 ./phoenix setup
 ./phoenix serve
 ```
@@ -29,6 +30,7 @@ The home server runs a private instance on `localhost:65000`.
 git clone https://github.com/pfraze/phoenix.git
 cd phoenix
 npm install
+make
 ./phoenix setup
 sudo ./phoenix serve -p -d
 ```
