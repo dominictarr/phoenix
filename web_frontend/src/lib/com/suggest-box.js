@@ -9,7 +9,8 @@ var suggestBox = exports.suggestBox = function(box) {
       var sel = 'li'
       if (i === box.selection)
         sel += '.selected'
-      return h(sel, [h('strong', opt.title), ' ', h('small', opt.subtitle)])
+      title = opt.image ? h('img', { src: opt.image }) : h('strong', opt.title)
+      return h(sel, [title, ' ', h('small', opt.subtitle)])
     }))
   ])
 }

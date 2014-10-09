@@ -1,5 +1,7 @@
 var util  = require('../../../lib/util')
+var emojiNamedCharacters = require('emoji-named-characters')
 var marked = require('marked');
+
 marked.setOptions({
   gfm: true,
   tables: true,
@@ -7,7 +9,15 @@ marked.setOptions({
   pedantic: false,
   sanitize: true,
   smartLists: true,
-  smartypants: false
+  smartypants: false,
+  emoji: function(emoji) {
+    return emoji in emojiNamedCharacters ?
+        '<img src="/img/emoji/' + encodeURI(emoji) + '.png"'
+        + ' alt=":' + escape(emoji) + ':"'
+        + ' title=":' + escape(emoji) + ':"'
+        + ' class="emoji" align="absmiddle" height="20" width="20">'
+      : ':' + emoji + ':'
+  }
 });
 
 exports.Markdown = Markdown

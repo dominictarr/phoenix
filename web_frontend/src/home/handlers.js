@@ -1,6 +1,7 @@
 var models = require('../lib/models')
 var bus = require('../lib/business')
 var textareaCaretPosition = require('../lib/textarea-caret-position')
+var emojiNamedCharacters = require('emoji-named-characters')
 
 exports.setRoute = function(state, route) {
   route = route.substr(2) || 'feed'
@@ -142,21 +143,26 @@ exports.cancelPublishForm = function(state, data) {
 }
 
 var wordBoundary = /\s/;
+var mentionTypes = {'@': 'profile', ':': 'emoji'};
 exports.mentionBoxInput = function(state, e) {
   var active = state.suggestBox.active()
+  var mentionType
 
-  // are we in a word that starts with @?
+  // are we in a word that starts with @ or :
   var v = e.target.value
   var i = e.target.selectionStart
   for (i; i >= 0; i--) {
     if (wordBoundary.test(v.charAt(i)))
       return state.suggestBox.active.set(false)
-    if (v.charAt(i) == '@' && (i === 0 || wordBoundary.test(v.charAt(i - 1))))
+    if (v.charAt(i) in mentionTypes && (i === 0 || wordBoundary.test(v.charAt(i - 1)))) {
+      mentionType = mentionTypes[v[i]]
+      if (mentionType == 'emoji' && !v[i+1]) continue
       break
+    }
   }
   if (i < 0) return state.suggestBox.active.set(false)
 
-  // in an @-word, make sure we have a select box
+  // in a mention-word, make sure we have a select box
   if (!active) {
     // calculate position
     var pos = textareaCaretPosition(e.target, i)
@@ -172,9 +178,20 @@ exports.mentionBoxInput = function(state, e) {
 
     // add options
     state.suggestBox.options.splice(0, state.suggestBox.options.getLength())
-    state.profiles.forEach(function(profile) {
-      state.suggestBox.options.push({ title: profile.nickname, subtitle: shortHex(profile.idStr), value: profile.idStr })
-    })
+    if (mentionType == 'profile') {
+      state.profiles.forEach(function(profile) {
+        state.suggestBox.options.push({ title: profile.nickname, subtitle: shortHex(profile.idStr), value: profile.idStr })
+      })
+    } else {
+      for (var emoji in emojiNamedCharacters) {
+        state.suggestBox.options.push({
+          image: '/img/emoji/' + emoji + '.png',
+          title: emoji,
+          subtitle: emoji,
+          value: emoji + ': '
+        })
+      }
+    }
   }
 
   // update the current suggestion value
@@ -211,7 +228,7 @@ exports.mentionBoxKeypress = function(state, e) {
           var start = e.target.selectionStart
           var end = start
           for (start; start >= 0; start--) {
-            if (v.charAt(start) == '@')
+            if (v.charAt(start) in mentionTypes)
               break
           }
           for (end; end < v.length; end++) {
