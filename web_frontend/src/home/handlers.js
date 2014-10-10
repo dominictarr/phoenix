@@ -337,5 +337,5 @@ function shortHex(str) {
 Basically, we need the `state.publishForm.textValue.set(data.publishText)` to run its course
 before we can call `state.publishForm.textValue.set('')` and have an effect. This wouldn't be
 an issue if the textarea's change event always fired before the submit event, but, because we trigger
-with ctrl+enter and are trying not to much directly with the DOM events (Mercury-land) this is our solution.
+with ctrl+enter and are trying not to muck directly with the DOM events (Mercury-land) this is our solution.
 */

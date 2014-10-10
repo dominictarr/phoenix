@@ -8,8 +8,13 @@ exports.ctrlEnter = BaseEvent(function (e) {
   if (e.keyCode != 13 || !e.ctrlKey)
     return
   
-  e.preventDefault()
-  return this.data
+  var value = getFormData(e.currentTarget)
+  var data = extend(value, this.data)
+  
+  if (e.preventDefault)
+    e.preventDefault()
+
+  return data;
 })
 
 exports.submit = BaseEvent(function (e) {

@@ -174,7 +174,7 @@ var publishForm = exports.publishForm = function(state, form) {
           value: form.textValue,
           'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
           'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
-          'ev-keydown': state.events.mentionBoxKeypress,
+          'ev-keydown': [valueEvents.ctrlEnter(state.events.submitPublishForm, { id: form.id }), state.events.mentionBoxKeypress],
           'ev-input': state.events.mentionBoxInput
         })),
         h('button.btn.btn-default', 'Post'),
@@ -202,7 +202,7 @@ var publishForm = exports.publishForm = function(state, form) {
           placeholder: form.textPlaceholder,
           value: form.textValue,
           'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
-          'ev-keydown': state.events.mentionBoxKeypress,
+          'ev-keydown': [valueEvents.ctrlEnter(state.events.submitPublishForm, { id: form.id }), state.events.mentionBoxKeypress],
           'ev-input': state.events.mentionBoxInput
         })),
         h('button.btn.btn-default', 'Post'),
