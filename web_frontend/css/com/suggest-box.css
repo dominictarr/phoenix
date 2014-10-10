@@ -1,5 +1,0 @@
-.suggest-box { position: absolute; border: 1px solid #ddd; z-index: 100; background: white; }
-.suggest-box ul { margin: 0; padding: 0; list-style: none; }
-.suggest-box ul li { padding: 4px 8px; font-size: 85%; border-bottom: 1px solid #ddd; }
-.suggest-box ul li:last-child { border: 0; }
-.suggest-box ul li.selected { color: #fff; background-color: #428bca; border-color: #357ebd; }
