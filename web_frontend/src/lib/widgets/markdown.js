@@ -43,14 +43,14 @@ Markdown.prototype.update = function (prev, elem) {
   elem.innerHTML = this.mentionLinks(marked(util.escapePlain(this.rawtext), opts))
 }
 
-var mentionRegex = /(\s|>|^)@(\w+)(\s|<|$)/g;
+var mentionRegex = /(\s|>|^)@([A-z0-9]+)/g;
 Markdown.prototype.mentionLinks = function(str) {
   var nicknames = this.nicknames
   if (!nicknames)
     return str
-  return str.replace(mentionRegex, function(full, $1, $2, $3) {
+  return str.replace(mentionRegex, function(full, $1, $2) {
     var nickname = nicknames[$2] || $2;
-    return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + nickname + '</a>' + ($3||'')
+    return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + nickname + '</a>'
   })
 }
 

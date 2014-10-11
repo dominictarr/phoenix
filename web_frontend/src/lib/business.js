@@ -299,7 +299,7 @@ var preprocessTextPost =
 exports.preprocessTextPost = function(msg) {
   // extract any @-mentions
   var match
-  var mentionRegex = /(\s|^)@(\w+)(\s|$)/g;
+  var mentionRegex = /(\s|^)@([A-z0-9]+)/g;
   while ((match = mentionRegex.exec(msg.plain))) {
     var mention = match[2]
     if (!msg.mentions)
@@ -308,7 +308,6 @@ exports.preprocessTextPost = function(msg) {
       msg.mentions.push({ $feed: util.toBuffer(mention), $rel: 'mentions' })
     } catch (e) { /* bad hash, ignore */ }
   }
-  console.debug('posting', msg)
   return msg
 }
 
