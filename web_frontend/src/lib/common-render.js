@@ -10,8 +10,12 @@ function CounterTriggerHook(value, counter) {
   this.counter = counter
 }
 CounterTriggerHook.prototype.hook = function (elem, prop, previous) {
-  if (!previous || this.counter !== previous.counter)
-    elem.setAttribute(prop, this.value)
+  if (!previous || this.counter !== previous.counter) {
+    if (prop == 'value')
+      elem.value = this.value // setting .value directly is more reliable
+    else
+      elem.setAttribute(prop, this.value)
+  }
 }
 
 
@@ -165,7 +169,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
           h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), ' ' + text])
+      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)),  new widgets.Markdown(' ' + text, true)])
     ]),
   ])
 }
@@ -182,11 +186,12 @@ var publishForm = exports.publishForm = function(state, form) {
           name: 'publishText',
           placeholder: form.textPlaceholder,
           rows: form.textRows || 1,
+          value: form.textValue,
           'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
           'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
           'ev-keydown': [valueEvents.ctrlEnter(state.events.submitPublishForm, { id: form.id }), state.events.mentionBoxKeypress],
           'ev-input': state.events.mentionBoxInput
-        }, form.textValue||'')),
+        })),
         h('button.btn.btn-default', 'Post'),
         ' ',
         (!form.permanent) ? jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
@@ -204,7 +209,7 @@ var publishForm = exports.publishForm = function(state, form) {
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.preview])
+        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', new widgets.Markdown(form.preview, true)])
       ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {

@@ -70,7 +70,7 @@ exports.setPublishFormType = function(state, data) {
   // update internal data
   form.type.set(data.type)
   form.textPlaceholder.set('Publish...')
-  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
+  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.submitPublishForm = function(state, data) {
@@ -96,22 +96,19 @@ exports.submitPublishForm = function(state, data) {
     bus.fetchFeed(state) // pull down the update
   }
 
-  // this horrifying setTimeout hack is explained at [1]
-  setTimeout(function() {
-    if (form.permanent) {
-      // reset the form
-      form.textValue.set('')
-      form.textRows.set(1)
-      form.preview.set('')
-      form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
-    } else {
-      // remove the form
-      var m = state.publishFormMap()
-      state.publishForms.splice(m[form.id], 1, null)
-      m[data.id] = undefined
-      state.publishFormMap.set(m)
-    }
-  }, 100)
+  if (form.permanent) {
+    // reset the form
+    form.textValue.set('')
+    form.textRows.set(1)
+    form.preview.set('')
+    form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
+  } else {
+    // remove the form
+    var m = state.publishFormMap()
+    state.publishForms.splice(m[form.id], 1, null)
+    m[data.id] = undefined
+    state.publishFormMap.set(m)
+  }
 }
 
 exports.cancelPublishForm = function(state, data) {
@@ -128,7 +125,7 @@ exports.cancelPublishForm = function(state, data) {
     form.textValue.set('')
     form.textRows.set(1)
     form.preview.set('')
-    form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
+    form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
   } else {
     // remove the form
     state.publishForms.splice(m[data.id], 1, null)
@@ -155,7 +152,6 @@ exports.mentionBoxInput = function(state, e) {
     }
     if (v.charAt(i) in mentionTypes && (i === 0 || wordBoundary.test(v.charAt(i - 1)))) {
       mentionType = mentionTypes[v[i]]
-      if (mentionType == 'emoji' && !v[i+1]) continue
       break
     }
   }
@@ -202,10 +198,11 @@ exports.mentionBoxInput = function(state, e) {
   state.suggestBox.textValue.set(word)
   state.suggestBox.selection.set(0)
   state.suggestBox.filtered.splice(0, state.suggestBox.filtered.getLength())
-  state.suggestBox.options.forEach(function(opt) {
+  for (var i=0; i < state.suggestBox.options.getLength() && state.suggestBox.filtered.getLength() < 10; i++) {
+    var opt = state.suggestBox.options.get(i)
     if (opt.title.indexOf(word) === 0 || opt.subtitle.indexOf(word) === 0)
       state.suggestBox.filtered.push(opt)
-  })
+  }
 
   // cancel if there's nothing available
   if (state.suggestBox.filtered.getLength() == 0)
@@ -215,15 +212,24 @@ exports.mentionBoxInput = function(state, e) {
 // :TODO: refactor into a value-event
 exports.mentionBoxKeypress = function(state, e) {
   if (state.suggestBox.active()) {
-    // scroll the selection up/down
     var sel = state.suggestBox.selection()
-    if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13)
+    if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13 || e.keyCode == 27)
       e.preventDefault()
-    if (e.keyCode == 38 && sel > 0) // up
+
+    // up
+    if (e.keyCode == 38 && sel > 0)
       state.suggestBox.selection.set(sel - 1)
-    if (e.keyCode == 40 && sel < (state.suggestBox.options.getLength() - 1)) // down
+
+    // down
+    if (e.keyCode == 40 && sel < (state.suggestBox.options.getLength() - 1))
       state.suggestBox.selection.set(sel + 1)
-    if (e.keyCode == 13) { // enter
+
+    // escape
+    if (e.keyCode == 27)
+      state.suggestBox.active.set(false)
+
+    // enter
+    if (e.keyCode == 13) {
       if (state.suggestBox.filtered.getLength()) {
         var choice = state.suggestBox.filtered.get(state.suggestBox.selection())
         if (choice && choice.value) {
@@ -337,7 +343,7 @@ exports.replyToMsg = function(state, data) {
   var form = addPublishForm(state, id, data.msg.id)
   form.type.set('text')
   form.textPlaceholder.set('Reply...')
-  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
+  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.reactToMsg = function(state, data) {
@@ -345,7 +351,7 @@ exports.reactToMsg = function(state, data) {
   var form = addPublishForm(state, id, data.msg.id)
   form.type.set('act')
   form.textPlaceholder.set('Likes, wants, agrees with, etc...')
-  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
+  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.shareMsg = function(state, data) {
@@ -355,11 +361,3 @@ exports.shareMsg = function(state, data) {
 function shortHex(str) {
   return str.slice(0, 6) + '..' + str.slice(-2)
 }
-
-/*
-1: the setTimeout hack in submitPublishForm()
-Basically, we need the `state.publishForm.textValue.set(data.publishText)` to run its course
-before we can call `state.publishForm.textValue.set('')` and have an effect. This wouldn't be
-an issue if the textarea's change event always fired before the submit event, but, because we trigger
-with ctrl+enter and are trying not to muck directly with the DOM events (Mercury-land) this is our solution.
-*/
