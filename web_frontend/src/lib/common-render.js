@@ -169,7 +169,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
           h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)),  new widgets.Markdown(' ' + text, true)])
+      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)),  new widgets.Markdown(' ' + text, { inline: true })])
     ]),
   ])
 }
@@ -209,7 +209,7 @@ var publishForm = exports.publishForm = function(state, form) {
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', new widgets.Markdown(form.preview, true)])
+        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true })])
       ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {

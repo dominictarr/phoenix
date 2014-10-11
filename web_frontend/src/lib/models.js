@@ -42,6 +42,7 @@ var defaults = {
     feedReplies: {},
     profiles: [],
     profileMap: {},
+    nicknameMap: {},
     servers: [],
     user: {
       id: null,
@@ -115,12 +116,6 @@ var defaults = {
 function createHomeApp(events, initialState) {
   var state = extend(defaults.homeApp, initialState)
 
-  // create a map of profile ids to their indexes
-  var profileMap = {}
-  state.profiles.forEach(function(prof, i) {
-    profileMap[prof.id.toString('hex')] = i
-  })
-
   // create object
   return mercury.struct({
     route:           mercury.value(state.route),
@@ -146,7 +141,8 @@ function createHomeApp(events, initialState) {
     messageMap:      mercury.value(state.messageMap),
     feedReplies:     mercury.value(state.feedReplies),
     profiles:        mercury.array(state.profiles.map(createProfile)),
-    profileMap:      mercury.value(profileMap),
+    profileMap:      mercury.value(state.profileMap),
+    nicknameMap:     mercury.value(state.nicknameMap),
     servers:         mercury.array(state.servers.map(createServer)),
     user:            mercury.struct({
       id:              mercury.value(state.user.id),

@@ -22,9 +22,11 @@ marked.setOptions({
 
 var inlineRenderer = new InlineRenderer()
 module.exports = Markdown
-function Markdown(rawtext, isInline) {
-  this.rawtext = rawtext
-  this.isInline = isInline
+function Markdown(rawtext, opts) {
+  opts = opts || {}
+  this.rawtext   = rawtext
+  this.isInline  = opts.inline
+  this.nicknames = opts.nicknames
 }
 Markdown.prototype.type = 'Widget';
 
