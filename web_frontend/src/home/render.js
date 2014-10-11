@@ -72,7 +72,7 @@ function feedControls(state) {
   var events = state.events
   var lastSync = state.lastSync
   return h('.feed-ctrls', [
-    comren.publishForm(state, state.publishForms[0]),
+    mercury.partial(comren.publishForm, state.publishForms[0], state.events, state.user),
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [
       comren.syncButton(events, state.isSyncing),

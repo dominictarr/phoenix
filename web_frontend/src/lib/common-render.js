@@ -88,10 +88,10 @@ var message = exports.message = function(state, msg) {
   // main content
   var main
   switch (msg.type.toString()) {
-    case 'init': return messageEvent(msg, 'account-created', 'Account created')
-    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.message.nickname)
-    case 'act': return messageEvent(msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain)
-    case 'text': main = messageText(state, msg); break
+    case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created')
+    case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.message.nickname)
+    case 'act': return mercury.partial(messageEvent, msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain)
+    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr]); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -99,7 +99,7 @@ var message = exports.message = function(state, msg) {
   var formId = util.toHexString(msg.id)
   if (typeof publishFormMap[formId] != 'undefined') {
     var i = publishFormMap[formId]
-    main = h('div', [main, h('.message-reply', publishForm(state, publishForms[i]))])
+    main = h('div', [main, h('.message-reply', mercury.partial(publishForm, publishForms[i], state.events, state.user))])
   }
 
   return main
@@ -107,9 +107,8 @@ var message = exports.message = function(state, msg) {
 
 // message text-content renderer
 var zeroArray = [0]
-var messageText = exports.messageText = function(state, msg) {
-  var events = state.events
-  var replies = state.feedReplies[msg.idStr]
+var messageText = exports.messageText = function(msg, events, replies) {
+  console.log('messageText')
   var nReplies = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'text') ? 1 : 0) }) : 0
   var nReacts  = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'act') ? 1 : 0) }) : 0
   var REs
@@ -150,6 +149,7 @@ var messageText = exports.messageText = function(state, msg) {
 
 // message event-content renderer
 var messageEvent = exports.messageEvent = function(msg, type, text) {
+  console.log('messageEvent')
   var icon;
   switch (type) {
     case 'account-created': icon = '.glyphicon-home'; break
@@ -174,31 +174,32 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
   ])
 }
 
-var publishForm = exports.publishForm = function(state, form) {
+var publishForm = exports.publishForm = function(form, events, user) {
+  console.log('publishForm')
   if (form.type == 'text') {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
     return  h('.publish-wrapper', [
       h('.panel.panel-default', { style: { display: previewDisplay } }, [
         h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview)))
       ]),
-      h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
+      h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
         h('p', h('textarea.form-control', {
           name: 'publishText',
           placeholder: form.textPlaceholder,
           rows: form.textRows || 1,
           value: form.textValue,
-          'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
-          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
-          'ev-keydown': [valueEvents.ctrlEnter(state.events.submitPublishForm, { id: form.id }), state.events.mentionBoxKeypress],
-          'ev-input': state.events.mentionBoxInput
+          'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
+          'ev-keyup': mercury.valueEvent(events.updatePublishFormText, { id: form.id }),
+          'ev-keydown': [valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id }), events.mentionBoxKeypress],
+          'ev-input': events.mentionBoxInput
         })),
         h('button.btn.btn-default', 'Post'),
         ' ',
-        (!form.permanent) ? jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
+        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
         h('span.pull-right', [
-          h('strong', jsa('text', state.events.setPublishFormType, { id: form.id, type: 'text' })),
+          h('strong', jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
           ' / ',
-          jsa('action', state.events.setPublishFormType, { id: form.id, type: 'act' })
+          jsa('action', events.setPublishFormType, { id: form.id, type: 'act' })
         ])
       ])
     ])
@@ -209,28 +210,28 @@ var publishForm = exports.publishForm = function(state, form) {
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', new widgets.Markdown(form.preview, true)])
+        h('.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(form.preview, true)])
       ]),      
-      h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
+      h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {
           name: 'publishText',
           placeholder: form.textPlaceholder,
           value: new CounterTriggerHook(form.textValue||'', form.setValueTrigger),
-          'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
+          'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
           'ev-keyup': [
-            state.events.mentionBoxKeypress,
-            mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }), 
-            valueEvents.ctrlEnter(state.events.submitPublishForm, { id: form.id })
+            events.mentionBoxKeypress,
+            mercury.valueEvent(events.updatePublishFormText, { id: form.id }), 
+            valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id })
           ],
-          'ev-input': state.events.mentionBoxInput
+          'ev-input': events.mentionBoxInput
         })),          
         h('button.btn.btn-default', 'Post'),
         ' ',
-        (!form.permanent) ? jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
+        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
         h('span.pull-right', [
-          jsa('text', state.events.setPublishFormType, { id: form.id, type: 'text' }),
+          jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
           ' / ',
-          h('strong', jsa('action', state.events.setPublishFormType, { id: form.id, type: 'act' }))
+          h('strong', jsa('action', events.setPublishFormType, { id: form.id, type: 'act' }))
         ])
       ])
     ])
