@@ -49,8 +49,10 @@ exports.updatePublishFormText = function(state, data) {
     return
 
   // expand/contract field if there's content in there
-  form.textRows.set((data.publishText) ? 3 : 1)
-  form.preview.set(data.publishText)
+  if (form.preview() !== data.publishText) {
+    form.textRows.set((data.publishText) ? 3 : 1)
+    form.preview.set(data.publishText)
+  }
 }
 
 exports.setPublishFormText = function(state, data) {
