@@ -40,6 +40,7 @@ var defaults = {
     feed: [],
     messageMap: {},
     feedReplies: {},
+    feedDuplicates: {},
     profiles: [],
     profileMap: {},
     nicknameMap: {},
@@ -79,7 +80,8 @@ var defaults = {
     signature: null,
     timestamp: 0,
     type: null,
-    authorNickname: ''
+    authorNickname: '',
+    hidden: false
   },
 
   profile: {
@@ -140,6 +142,7 @@ function createHomeApp(events, initialState) {
     feed:            mercury.array(state.feed.map(createMessage)),
     messageMap:      mercury.value(state.messageMap),
     feedReplies:     mercury.value(state.feedReplies),
+    feedDuplicates:  mercury.value(state.feedDuplicates),
     profiles:        mercury.array(state.profiles.map(createProfile)),
     profileMap:      mercury.value(state.profileMap),
     nicknameMap:     mercury.value(state.nicknameMap),
@@ -192,6 +195,7 @@ function createMessage(initialState) {
       return null
     }
   }
+  state.hidden = mercury.value(state.hidden)
   return mercury.struct(state)
 }
 

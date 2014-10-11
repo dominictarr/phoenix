@@ -136,13 +136,27 @@ function messagePage(state, msgid) {
     return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
   })
 
+  // fetch duplicates data
+  var dups = (state.feedDuplicates[msg.idStr] || []).map(function(dup) {
+    var msgi = state.messageMap[dup.idStr]
+    var msg = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined    
+    if (!msg) return
+    return h('span', [
+      'Shared by ',
+      comren.userlink(msg.author, util.escapePlain(msg.authorNickname)),
+      ' ',
+      util.prettydate(new Date(msg.timestamp), true),
+      h('br')
+    ])
+  })
+
   // render
   return h('.message-page.row', comren.columns({
     main: [h('.feed.nobar', [
       comren.message(state, msg),
       comren.subfeed(state, replies, true)
     ])],
-    side: ''
+    side: dups
   }, state.layout))
 }
 

@@ -213,6 +213,25 @@ exports.fetchFeed = function(state, opts, cb) {
             state.feedReplies.set(sr)
           }
         }
+
+        // index duplicates
+        if (m.message.duplicates && m.message.duplicates.$msg) {
+          var id = util.toHexString(m.message.duplicates.$msg)
+          if (id) {
+            var dr = state.feedDuplicates()
+            if (!dr[id]) dr[id] = []
+            dr[id].push({ idStr: m.idStr })
+            state.feedDuplicates.set(dr)
+
+            // hide the duplicate if the original is already in the feed
+            if (mm[id]) {
+              m.hidden.set(true)
+            } else {
+              // use this one to represent the original
+              mm[id] = state.feed.getLength() - 1
+            }
+          }
+        }
       }, function() { cbs(null, state.feed()) })
     )
   })
