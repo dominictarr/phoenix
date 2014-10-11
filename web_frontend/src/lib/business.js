@@ -343,6 +343,22 @@ exports.publishReaction = function(state, text, parent, cb) {
   client.api.addMessage('act', msgpack.encode(preprocessTextPost({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}})), cb)
 }
 
+// posts a copy of the given message to the feed
+var publishDuplicate =
+exports.publishDuplicate = function(state, msg, cb) {
+  console.log(msg)
+  if (!msg.message.duplicates) {
+    msg.message.duplicates = {
+      $msg: util.toBuffer(msg.id),
+      $rel: 'duplicates',
+      author: util.toBuffer(msg.author),
+      timestamp: msg.timestamp,
+      timezone: msg.timezone
+    }
+  }
+  client.api.addMessage(msg.type, msgpack.encode(msg.message), cb)
+}
+
 // begins following a feed
 var addFeed =
 exports.addFeed = function(state, token, cb) {
