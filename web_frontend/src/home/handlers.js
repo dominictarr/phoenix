@@ -357,7 +357,16 @@ exports.reactToMsg = function(state, data) {
 }
 
 exports.shareMsg = function(state, data) {
-  alert('todo https://github.com/pfraze/phoenix/issues/52')
+  var id = data.msg.idStr
+  var text = data.msg.message.plain
+  if (text.length > 100)
+    text = text.slice(0, 100) + '...'
+  if (!confirm('Share with your followers, "' + text + '"?'))
+    return
+  bus.publishDuplicate(state, data.msg, function(err) {
+    if (err) throw err // :TODO: put in gui
+    bus.fetchFeed(state) // pull down the update
+  })
 }
 
 function shortHex(str) {

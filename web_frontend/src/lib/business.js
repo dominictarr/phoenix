@@ -213,6 +213,25 @@ exports.fetchFeed = function(state, opts, cb) {
             state.feedReplies.set(sr)
           }
         }
+
+        // index duplicates
+        if (m.message.duplicates && m.message.duplicates.$msg) {
+          var id = util.toHexString(m.message.duplicates.$msg)
+          if (id) {
+            var dr = state.feedDuplicates()
+            if (!dr[id]) dr[id] = []
+            dr[id].push({ idStr: m.idStr })
+            state.feedDuplicates.set(dr)
+
+            // hide the duplicate if the original is already in the feed
+            if (mm[id]) {
+              m.hidden.set(true)
+            } else {
+              // use this one to represent the original
+              mm[id] = state.feed.getLength() - 1
+            }
+          }
+        }
       }, function() { cbs(null, state.feed()) })
     )
   })
@@ -341,6 +360,21 @@ exports.publishReaction = function(state, text, parent, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
   client.api.addMessage('act', msgpack.encode(preprocessTextPost({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}})), cb)
+}
+
+// posts a copy of the given message to the feed
+var publishDuplicate =
+exports.publishDuplicate = function(state, msg, cb) {
+  if (!msg.message.duplicates) {
+    msg.message.duplicates = {
+      $msg: util.toBuffer(msg.id),
+      $rel: 'duplicates',
+      author: util.toBuffer(msg.author),
+      timestamp: msg.timestamp,
+      timezone: msg.timezone
+    }
+  }
+  client.api.addMessage(msg.type, msgpack.encode(msg.message), cb)
 }
 
 // begins following a feed

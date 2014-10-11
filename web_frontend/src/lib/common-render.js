@@ -60,12 +60,16 @@ var mascot = exports.mascot = function(quote) {
   ])
 }
 
+function notHidden(msg) {
+  return !msg.hidden
+}
+
 // feed view
 // - `state`: full application state
 // - `feed`: which feed to render
 // - `reverse`: bool, reverse the feed?
 var feed = exports.feed = function(state, feed, reverse) {
-  var messages = feed.map(message.bind(null, state))
+  var messages = feed.filter(notHidden).map(message.bind(null, state))
   if (reverse) messages.reverse()
   return h('.feed', messages)
 }
@@ -75,7 +79,7 @@ var feed = exports.feed = function(state, feed, reverse) {
 // - `feed`: which feed to render
 // - `reverse`: bool, reverse the feed?
 var subfeed = exports.subfeed = function(state, feed, reverse) {
-  var messages = feed.map(message.bind(null, state))
+  var messages = feed.filter(notHidden).map(message.bind(null, state))
   if (reverse) messages.reverse()
   return h('.feed.subfeed', messages)
 }
@@ -91,7 +95,7 @@ var message = exports.message = function(state, msg) {
     case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
     case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.message.nickname, state.nicknameMap)
     case 'act': return mercury.partial(messageEvent, msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain, state.nicknameMap)
-    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr], state.nicknameMap); break
+    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr], state.feedDuplicates[msg.idStr], state.nicknameMap); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -106,32 +110,61 @@ var message = exports.message = function(state, msg) {
 }
 
 // message text-content renderer
-var zeroArray = [0]
-var messageText = exports.messageText = function(msg, events, replies, nicknameMap) {
-  var nReplies = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'text') ? 1 : 0) }) : 0
-  var nReacts  = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'act') ? 1 : 0) }) : 0
-  var REs
-  if (nReplies && nReacts) REs = a('#/msg/'+msg.idStr, nReplies + ' replies ' + nReacts + ' reactions')
-  else if (nReplies) REs = a('#/msg/'+msg.idStr, nReplies + ' replies')
-  else if (nReacts) REs = a('#/msg/'+msg.idStr, nReacts + ' reactions')
+var messageText = exports.messageText = function(msg, events, replies, duplicates, nicknameMap) {
+  // header
+  var header
   var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
+  if (msg.message.duplicates) {
+    // duplicated message
+    var author = msg.message.duplicates.author
+    var authorStr = util.toHexString(author)
+    var authorNick = nicknameMap[authorStr] || authorStr
+    header = h('p', [
+      userlink(author, util.escapePlain(authorNick)),
+      h('small.message-ctrls', [
+        ' - ',
+        util.prettydate(new Date(msg.message.duplicates.timestamp||0), true)
+      ]),
+      (replyIdStr) ?
+        h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
+        : '',
+      h('span.repliesto', [' shared by ', userlink(msg.author, util.escapePlain(msg.authorNickname))])
+    ])
+  } else {
+    // normal message
+    header = h('p', [
+      userlink(msg.author, util.escapePlain(msg.authorNickname)),
+      h('small.message-ctrls', [
+        ' - ',
+        util.prettydate(new Date(msg.timestamp), true)
+      ]),
+      (replyIdStr) ?
+        h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
+        : '',
+    ])
+  }
+
+  // stats
+  var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
+  var nReacts  = (replies) ? replies.filter(function(r) { return (r.type == 'act') }).length : 0
+  var nDups    = (duplicates) ? duplicates.length : 0
+  var stats = []
+  if (nReplies) stats.push(nReplies + ' replies')
+  if (nReacts)  stats.push(nReacts + ' reactions')
+  if (nDups)    stats.push(nDups + ' shares')
+  if (stats.length)
+    stats = a('#/msg/'+msg.idStr, stats.join(' '))
+  else
+    stats = ''
+
   return h('.panel.panel-default', [
     h('.panel-body', [
-      h('p', [
-        userlink(msg.author, util.escapePlain(msg.authorNickname)),
-        h('small.message-ctrls', [
-          ' - ',
-          util.prettydate(new Date(msg.timestamp), true)
-        ]),
-        (replyIdStr) ?
-          h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
-          : '',
-      ]),
+      header,
       new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
           h('small', [
-            REs,
+            stats,
             h('span.message-ctrls.pull-right', [
               jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
               ' ',
@@ -292,5 +325,5 @@ function img(src) {
 }
 
 function shortHex(str) {
-  return str.slice(0, 6) + '...'
+  return str.slice(0, 6) + '...' + str.slice(-2)
 }
