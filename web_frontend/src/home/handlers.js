@@ -187,7 +187,7 @@ exports.mentionBoxInput = function(state, e) {
           image: '/img/emoji/' + emoji + '.png',
           title: emoji,
           subtitle: emoji,
-          value: emoji + ': '
+          value: emoji + ':'
         })
       }
     }
@@ -246,7 +246,7 @@ exports.mentionBoxKeypress = function(state, e) {
               break
           }
           // :TODO: once this is a value event, set the state instead of mutating the dom's value and firing the change event
-          e.target.value = v.slice(0, start + 1) + choice.value + v.slice(end)
+          e.target.value = v.slice(0, start + 1) + choice.value + ' ' + v.slice(end)
           // fire the change event
           fireEvent(e.target, 'change')
         }

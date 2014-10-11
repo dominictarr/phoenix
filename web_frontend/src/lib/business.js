@@ -297,7 +297,18 @@ exports.fetchServers = function(state, cb) {
 // does pre-processing on text-based messages
 var preprocessTextPost =
 exports.preprocessTextPost = function(msg) {
-  // :TODO:
+  // extract any @-mentions
+  var match
+  var mentionRegex = /(\s|^)@(\w+)(\s|$)/g;
+  while ((match = mentionRegex.exec(msg.plain))) {
+    var mention = match[2]
+    if (!msg.mentions)
+      msg.mentions = []
+    try {
+      msg.mentions.push({ $feed: util.toBuffer(mention), $rel: 'mentions' })
+    } catch (e) { /* bad hash, ignore */ }
+  }
+  console.debug('posting', msg)
   return msg
 }
 
