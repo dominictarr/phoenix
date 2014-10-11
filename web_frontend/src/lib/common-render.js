@@ -111,6 +111,40 @@ var message = exports.message = function(state, msg) {
 
 // message text-content renderer
 var messageText = exports.messageText = function(msg, events, replies, duplicates, nicknameMap) {
+  // header
+  var header
+  var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
+  if (msg.message.duplicates) {
+    // duplicated message
+    var author = msg.message.duplicates.author
+    var authorStr = util.toHexString(author)
+    var authorNick = nicknameMap[authorStr] || authorStr
+    header = h('p', [
+      userlink(author, util.escapePlain(authorNick)),
+      h('small.message-ctrls', [
+        ' - ',
+        util.prettydate(new Date(msg.message.duplicates.timestamp||0), true)
+      ]),
+      (replyIdStr) ?
+        h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
+        : '',
+      h('span.repliesto', [' shared by ', userlink(msg.author, util.escapePlain(msg.authorNickname))])
+    ])
+  } else {
+    // normal message
+    header = h('p', [
+      userlink(msg.author, util.escapePlain(msg.authorNickname)),
+      h('small.message-ctrls', [
+        ' - ',
+        util.prettydate(new Date(msg.timestamp), true)
+      ]),
+      (replyIdStr) ?
+        h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
+        : '',
+    ])
+  }
+
+  // stats
   var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
   var nReacts  = (replies) ? replies.filter(function(r) { return (r.type == 'act') }).length : 0
   var nDups    = (duplicates) ? duplicates.length : 0
@@ -120,19 +154,12 @@ var messageText = exports.messageText = function(msg, events, replies, duplicate
   if (nDups)    stats.push(nDups + ' shares')
   if (stats.length)
     stats = a('#/msg/'+msg.idStr, stats.join(' '))
-  var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
+  else
+    stats = ''
+
   return h('.panel.panel-default', [
     h('.panel-body', [
-      h('p', [
-        userlink(msg.author, util.escapePlain(msg.authorNickname)),
-        h('small.message-ctrls', [
-          ' - ',
-          util.prettydate(new Date(msg.timestamp), true)
-        ]),
-        (replyIdStr) ?
-          h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
-          : '',
-      ]),
+      header,
       new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
@@ -298,5 +325,5 @@ function img(src) {
 }
 
 function shortHex(str) {
-  return str.slice(0, 6) + '...'
+  return str.slice(0, 6) + '...' + str.slice(-2)
 }
