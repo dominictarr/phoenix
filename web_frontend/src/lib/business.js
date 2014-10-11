@@ -365,7 +365,6 @@ exports.publishReaction = function(state, text, parent, cb) {
 // posts a copy of the given message to the feed
 var publishDuplicate =
 exports.publishDuplicate = function(state, msg, cb) {
-  console.log(msg)
   if (!msg.message.duplicates) {
     msg.message.duplicates = {
       $msg: util.toBuffer(msg.id),
