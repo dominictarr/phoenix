@@ -88,9 +88,9 @@ var message = exports.message = function(state, msg) {
   // main content
   var main
   switch (msg.type.toString()) {
-    case 'init': return messageEvent(msg, 'account-created', 'Account created')
-    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.message.nickname)
-    case 'act': return messageEvent(msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain)
+    case 'init': return messageEvent(msg, 'account-created', 'Account created', state.nicknameMap)
+    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.message.nickname, state.nicknameMap)
+    case 'act': return messageEvent(msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain, state.nicknameMap)
     case 'text': main = messageText(state, msg); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
@@ -129,7 +129,7 @@ var messageText = exports.messageText = function(state, msg) {
           h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
-      new widgets.Markdown(util.escapePlain(msg.message.plain)),
+      new widgets.Markdown(msg.message.plain, { nicknames: state.nicknameMap }),
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
           h('small', [
@@ -149,7 +149,7 @@ var messageText = exports.messageText = function(state, msg) {
 }
 
 // message event-content renderer
-var messageEvent = exports.messageEvent = function(msg, type, text) {
+var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap) {
   var icon;
   switch (type) {
     case 'account-created': icon = '.glyphicon-home'; break
@@ -169,7 +169,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
           h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)),  new widgets.Markdown(' ' + text, { inline: true })])
+      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)),  new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })])
     ]),
   ])
 }
@@ -179,7 +179,7 @@ var publishForm = exports.publishForm = function(state, form) {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
     return  h('.publish-wrapper', [
       h('.panel.panel-default', { style: { display: previewDisplay } }, [
-        h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview)))
+        h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview, { nicknames: state.nicknameMap })))
       ]),
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('textarea.form-control', {
@@ -209,7 +209,7 @@ var publishForm = exports.publishForm = function(state, form) {
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true })])
+        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true, nicknames: state.nicknameMap })])
       ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {

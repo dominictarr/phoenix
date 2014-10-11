@@ -40,7 +40,18 @@ Markdown.prototype.update = function (prev, elem) {
   var opts = {}
   if (this.isInline)
     opts.renderer = inlineRenderer
-  elem.innerHTML = marked(util.escapePlain(this.rawtext), opts)
+  elem.innerHTML = this.mentionLinks(marked(util.escapePlain(this.rawtext), opts))
+}
+
+var mentionRegex = /(\s|>|^)@(\w+)(\s|<|$)/g;
+Markdown.prototype.mentionLinks = function(str) {
+  var nicknames = this.nicknames
+  if (!nicknames)
+    return str
+  return str.replace(mentionRegex, function(full, $1, $2, $3) {
+    var nickname = nicknames[$2] || $2;
+    return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + nickname + '</a>' + ($3||'')
+  })
 }
 
 
