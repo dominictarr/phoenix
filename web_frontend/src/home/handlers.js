@@ -49,16 +49,8 @@ exports.updatePublishFormText = function(state, data) {
     return
 
   // expand/contract field if there's content in there
-  switch (form.type()) {
-    case 'text':
-      form.textRows.set((data.publishText) ? 3 : 1)
-      form.preview.set(data.publishText)
-      break
-    case 'act':
-      form.preview.set(data.publishText)
-      form.textValue.set(data.publishText)
-      break
-  }
+  form.textRows.set((data.publishText) ? 3 : 1)
+  form.preview.set(data.publishText)
 }
 
 exports.setPublishFormText = function(state, data) {
@@ -78,6 +70,7 @@ exports.setPublishFormType = function(state, data) {
   // update internal data
   form.type.set(data.type)
   form.textPlaceholder.set('Publish...')
+  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
 }
 
 exports.submitPublishForm = function(state, data) {
@@ -110,6 +103,7 @@ exports.submitPublishForm = function(state, data) {
       form.textValue.set('')
       form.textRows.set(1)
       form.preview.set('')
+      form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
     } else {
       // remove the form
       var m = state.publishFormMap()
@@ -134,6 +128,7 @@ exports.cancelPublishForm = function(state, data) {
     form.textValue.set('')
     form.textRows.set(1)
     form.preview.set('')
+    form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
   } else {
     // remove the form
     state.publishForms.splice(m[data.id], 1, null)
@@ -142,6 +137,7 @@ exports.cancelPublishForm = function(state, data) {
   }
 }
 
+// :TODO: refactor into a value-event
 var wordBoundary = /\s/;
 var mentionTypes = {'@': 'profile', ':': 'emoji'};
 exports.mentionBoxInput = function(state, e) {
@@ -152,15 +148,22 @@ exports.mentionBoxInput = function(state, e) {
   var v = e.target.value
   var i = e.target.selectionStart
   for (i; i >= 0; i--) {
-    if (wordBoundary.test(v.charAt(i)))
-      return state.suggestBox.active.set(false)
+    if (wordBoundary.test(v.charAt(i))) {
+      if (active)
+        state.suggestBox.active.set(false)
+      return
+    }
     if (v.charAt(i) in mentionTypes && (i === 0 || wordBoundary.test(v.charAt(i - 1)))) {
       mentionType = mentionTypes[v[i]]
       if (mentionType == 'emoji' && !v[i+1]) continue
       break
     }
   }
-  if (i < 0) return state.suggestBox.active.set(false)
+  if (i < 0) {
+    if (active)
+      state.suggestBox.active.set(false)
+    return
+  }
 
   // in a mention-word, make sure we have a select box
   if (!active) {
@@ -209,6 +212,7 @@ exports.mentionBoxInput = function(state, e) {
     state.suggestBox.active.set(false)
 }
 
+// :TODO: refactor into a value-event
 exports.mentionBoxKeypress = function(state, e) {
   if (state.suggestBox.active()) {
     // scroll the selection up/down
@@ -235,11 +239,29 @@ exports.mentionBoxKeypress = function(state, e) {
             if (wordBoundary.test(v.charAt(end)))
               break
           }
+          // :TODO: once this is a value event, set the state instead of mutating the dom's value and firing the change event
           e.target.value = v.slice(0, start + 1) + choice.value + v.slice(end)
+          // fire the change event
+          fireEvent(e.target, 'change')
         }
       }
       state.suggestBox.active.set(false)
     }
+  }
+}
+
+// TEMPORARY helper
+function fireEvent(element,event){
+  if (document.createEventObject) {
+    // dispatch for IE
+    var evt = document.createEventObject();
+    return element.fireEvent('on'+event, evt)
+  }
+  else{
+    // dispatch for firefox + others
+    var evt = document.createEvent("HTMLEvents");
+    evt.initEvent(event, true, true); // event type, bubbling, cancelable
+    return !element.dispatchEvent(evt);
   }
 }
 
@@ -315,6 +337,7 @@ exports.replyToMsg = function(state, data) {
   var form = addPublishForm(state, id, data.msg.id)
   form.type.set('text')
   form.textPlaceholder.set('Reply...')
+  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
 }
 
 exports.reactToMsg = function(state, data) {
@@ -322,6 +345,7 @@ exports.reactToMsg = function(state, data) {
   var form = addPublishForm(state, id, data.msg.id)
   form.type.set('act')
   form.textPlaceholder.set('Likes, wants, agrees with, etc...')
+  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a full render
 }
 
 exports.shareMsg = function(state, data) {

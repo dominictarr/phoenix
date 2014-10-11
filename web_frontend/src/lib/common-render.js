@@ -4,6 +4,17 @@ var valueEvents = require('./value-events')
 var widgets     = require('./widgets')
 var util        = require('../../../lib/util')
 
+// attribute hook 
+function CounterTriggerHook(value, counter) {
+  this.value = value
+  this.counter = counter
+}
+CounterTriggerHook.prototype.hook = function (elem, prop, previous) {
+  if (!previous || this.counter !== previous.counter)
+    elem.setAttribute(prop, this.value)
+}
+
+
 // puts the given vdom parts in columns given a `layout` config
 // - `parts`: an object mapping names to vdom elements, eg { main: h(...), side: h(...) }
 // - `layout`: an array of arrays choosing the layout, eg [['main', 8], ['side', 4]]
@@ -171,12 +182,11 @@ var publishForm = exports.publishForm = function(state, form) {
           name: 'publishText',
           placeholder: form.textPlaceholder,
           rows: form.textRows || 1,
-          value: form.textValue,
           'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
           'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
           'ev-keydown': [valueEvents.ctrlEnter(state.events.submitPublishForm, { id: form.id }), state.events.mentionBoxKeypress],
           'ev-input': state.events.mentionBoxInput
-        })),
+        }, form.textValue||'')),
         h('button.btn.btn-default', 'Post'),
         ' ',
         (!form.permanent) ? jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
@@ -189,22 +199,26 @@ var publishForm = exports.publishForm = function(state, form) {
     ])
   }
   if (form.type == 'act') {
-    var previewDisplay = (!!form.textValue) ? 'block' : 'none'
+    var previewDisplay = (!!form.preview) ? 'block' : 'none'
     var hand = (form.parent) ? 'up' : 'right'
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.textValue])
-      ]),
+        h('.event-body', [userlink(state.user.id, state.user.nickname), ' ', form.preview])
+      ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(state.events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {
           name: 'publishText',
           placeholder: form.textPlaceholder,
-          value: form.textValue,
-          'ev-keyup': mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }),
-          'ev-keydown': [valueEvents.ctrlEnter(state.events.submitPublishForm, { id: form.id }), state.events.mentionBoxKeypress],
+          value: new CounterTriggerHook(form.textValue||'', form.setValueTrigger),
+          'ev-change': mercury.valueEvent(state.events.setPublishFormText, { id: form.id }),
+          'ev-keyup': [
+            state.events.mentionBoxKeypress,
+            mercury.valueEvent(state.events.updatePublishFormText, { id: form.id }), 
+            valueEvents.ctrlEnter(state.events.submitPublishForm, { id: form.id })
+          ],
           'ev-input': state.events.mentionBoxInput
-        })),
+        })),          
         h('button.btn.btn-default', 'Post'),
         ' ',
         (!form.permanent) ? jsa(['cancel'], state.events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',

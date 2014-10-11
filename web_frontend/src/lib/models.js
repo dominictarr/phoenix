@@ -104,7 +104,8 @@ var defaults = {
     textValue: '',
     textRows: 1,
     preview: '',
-    permanent: false
+    permanent: false,
+    setValueTrigger: 1 // trigger counter - when changed, will force an overwrite of the form's input value
   }
 }
 
@@ -221,5 +222,6 @@ function createPublishForm(initialState) {
   state.preview         = mercury.value(state.preview)
   state.textValue       = mercury.value(state.textValue)
   state.textRows        = mercury.value(state.textRows)
+  state.setValueTrigger = mercury.value(state.setValueTrigger)
   return mercury.struct(state)
 }
