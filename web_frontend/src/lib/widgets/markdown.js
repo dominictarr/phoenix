@@ -22,9 +22,11 @@ marked.setOptions({
 
 var inlineRenderer = new InlineRenderer()
 module.exports = Markdown
-function Markdown(rawtext, isInline) {
-  this.rawtext = rawtext
-  this.isInline = isInline
+function Markdown(rawtext, opts) {
+  opts = opts || {}
+  this.rawtext   = rawtext
+  this.isInline  = opts.inline
+  this.nicknames = opts.nicknames
 }
 Markdown.prototype.type = 'Widget';
 
@@ -38,7 +40,18 @@ Markdown.prototype.update = function (prev, elem) {
   var opts = {}
   if (this.isInline)
     opts.renderer = inlineRenderer
-  elem.innerHTML = marked(util.escapePlain(this.rawtext), opts)
+  elem.innerHTML = this.mentionLinks(marked(util.escapePlain(this.rawtext), opts))
+}
+
+var mentionRegex = /(\s|>|^)@([A-z0-9]+)/g;
+Markdown.prototype.mentionLinks = function(str) {
+  var nicknames = this.nicknames
+  if (!nicknames)
+    return str
+  return str.replace(mentionRegex, function(full, $1, $2) {
+    var nickname = nicknames[$2] || $2;
+    return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + nickname + '</a>'
+  })
 }
 
 

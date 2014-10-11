@@ -117,7 +117,12 @@ exports.addProfile = function(state, p) {
 
   // add index to the profile map
   pm[id] = i
-  state.profileMap(pm)
+  state.profileMap.set(pm)
+
+  // add to nickname map
+  var nm = state.nicknameMap()
+  nm[id] = p.nickname
+  state.nicknameMap.set(nm)
 
   return p
 }
@@ -289,11 +294,28 @@ exports.fetchServers = function(state, cb) {
   })
 }
 
+// does pre-processing on text-based messages
+var preprocessTextPost =
+exports.preprocessTextPost = function(msg) {
+  // extract any @-mentions
+  var match
+  var mentionRegex = /(\s|^)@([A-z0-9]+)/g;
+  while ((match = mentionRegex.exec(msg.plain))) {
+    var mention = match[2]
+    if (!msg.mentions)
+      msg.mentions = []
+    try {
+      msg.mentions.push({ $feed: util.toBuffer(mention), $rel: 'mentions' })
+    } catch (e) { /* bad hash, ignore */ }
+  }
+  return msg
+}
+
 // posts to the feed
 var publishText =
 exports.publishText = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  client.api.addMessage('text', msgpack.encode({plain: text}), cb)
+  client.api.addMessage('text', msgpack.encode(preprocessTextPost({plain: text})), cb)
 }
 
 // posts to the feed
@@ -302,14 +324,14 @@ exports.publishReply = function(state, text, parent, cb) {
   parent = util.toBuffer(parent)
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  client.api.addMessage('text', msgpack.encode({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  client.api.addMessage('text', msgpack.encode(preprocessTextPost({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}})), cb)
 }
 
 // posts to the feed
 var publishAction =
 exports.publishAction = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  client.api.addMessage('act', msgpack.encode({plain: text}), cb)
+  client.api.addMessage('act', msgpack.encode(preprocessTextPost({plain: text})), cb)
 }
 
 // posts to the feed
@@ -318,7 +340,7 @@ exports.publishReaction = function(state, text, parent, cb) {
   parent = util.toBuffer(parent)
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  client.api.addMessage('act', msgpack.encode({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  client.api.addMessage('act', msgpack.encode(preprocessTextPost({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}})), cb)
 }
 
 // begins following a feed

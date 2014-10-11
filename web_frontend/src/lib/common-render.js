@@ -88,10 +88,10 @@ var message = exports.message = function(state, msg) {
   // main content
   var main
   switch (msg.type.toString()) {
-    case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created')
-    case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.message.nickname)
-    case 'act': return mercury.partial(messageEvent, msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain)
-    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr]); break
+    case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
+    case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.message.nickname, state.nicknameMap)
+    case 'act': return mercury.partial(messageEvent, msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain, state.nicknameMap)
+    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr], state.nicknameMap); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -99,7 +99,7 @@ var message = exports.message = function(state, msg) {
   var formId = util.toHexString(msg.id)
   if (typeof publishFormMap[formId] != 'undefined') {
     var i = publishFormMap[formId]
-    main = h('div', [main, h('.message-reply', mercury.partial(publishForm, publishForms[i], state.events, state.user))])
+    main = h('div', [main, h('.message-reply', publishForm(publishForms[i], state.events, state.user, state.nicknameMap))])
   }
 
   return main
@@ -107,7 +107,7 @@ var message = exports.message = function(state, msg) {
 
 // message text-content renderer
 var zeroArray = [0]
-var messageText = exports.messageText = function(msg, events, replies) {
+var messageText = exports.messageText = function(msg, events, replies, nicknameMap) {
   var nReplies = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'text') ? 1 : 0) }) : 0
   var nReacts  = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'act') ? 1 : 0) }) : 0
   var REs
@@ -127,7 +127,7 @@ var messageText = exports.messageText = function(msg, events, replies) {
           h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
-      new widgets.Markdown(util.escapePlain(msg.message.plain)),
+      new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
           h('small', [
@@ -147,7 +147,7 @@ var messageText = exports.messageText = function(msg, events, replies) {
 }
 
 // message event-content renderer
-var messageEvent = exports.messageEvent = function(msg, type, text) {
+var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap) {
   var icon;
   switch (type) {
     case 'account-created': icon = '.glyphicon-home'; break
@@ -167,17 +167,17 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
           h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)),  new widgets.Markdown(' ' + text, true)])
+      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)),  new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })])
     ]),
   ])
 }
 
-var publishForm = exports.publishForm = function(form, events, user) {
+var publishForm = exports.publishForm = function(form, events, user, nicknameMap) {
   if (form.type == 'text') {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
     return  h('.publish-wrapper', [
       h('.panel.panel-default', { style: { display: previewDisplay } }, [
-        h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview)))
+        h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview, { nicknames: nicknameMap })))
       ]),
       h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
         h('p', h('textarea.form-control', {
@@ -207,7 +207,7 @@ var publishForm = exports.publishForm = function(form, events, user) {
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(form.preview, true)])
+        h('.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true, nicknames: nicknameMap })])
       ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {
