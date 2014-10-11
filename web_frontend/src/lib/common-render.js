@@ -108,7 +108,6 @@ var message = exports.message = function(state, msg) {
 // message text-content renderer
 var zeroArray = [0]
 var messageText = exports.messageText = function(msg, events, replies) {
-  console.log('messageText')
   var nReplies = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'text') ? 1 : 0) }) : 0
   var nReacts  = (replies) ? zeroArray.concat(replies).reduce(function(acc, r) { return acc + ((r.type == 'act') ? 1 : 0) }) : 0
   var REs
@@ -149,7 +148,6 @@ var messageText = exports.messageText = function(msg, events, replies) {
 
 // message event-content renderer
 var messageEvent = exports.messageEvent = function(msg, type, text) {
-  console.log('messageEvent')
   var icon;
   switch (type) {
     case 'account-created': icon = '.glyphicon-home'; break
@@ -175,7 +173,6 @@ var messageEvent = exports.messageEvent = function(msg, type, text) {
 }
 
 var publishForm = exports.publishForm = function(form, events, user) {
-  console.log('publishForm')
   if (form.type == 'text') {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
     return  h('.publish-wrapper', [
