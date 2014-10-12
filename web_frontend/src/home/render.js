@@ -64,7 +64,7 @@ function footer(events) {
 function feedPage(state) {
   return h('.feed-page.row', comren.columns({
     main: [comren.feed(state, state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')],
-    side: [feedControls(state), mercury.partial(profileLinks, state.profiles)]
+    side: [feedControls(state), mercury.partial(notifications, state.notifications)]
   }, state.layout))
 }
 
@@ -82,12 +82,8 @@ function feedControls(state) {
   ])
 }
 
-function profileLinks(profiles) {
-  return h('div', profiles.map(profileLink))
-}
-
-function profileLink(profile) {
-  return h('div', a('/#/profile/'+profile.idStr, profile.nickname || '???'))
+function notifications(nots) {
+  return h('strong', 'todo')
 }
 
 // Profile Page
@@ -165,8 +161,13 @@ function messagePage(state, msgid) {
 
 function networkPage(state) {
   return h('.network-page.row', comren.columns({
-    main: [pubservers(state.events, state.servers), mercury.partial(comren.mascot, 'Who\'s cooking chicken?')],
-    side: [mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing)]
+    main: [
+      h('h3', 'Pub Servers'),
+      mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing),
+      pubservers(state.events, state.servers),
+      mercury.partial(comren.mascot, 'Who\'s cooking chicken?')
+    ],
+    side: [mercury.partial(profileLinks, state.profiles)]
   }, state.layout))
 }
 
@@ -188,6 +189,14 @@ function networkControls(events, lastSync, isSyncing) {
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [comren.syncButton(events, isSyncing), ' ', h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
   ])
+}
+
+function profileLinks(profiles) {
+  return h('div', [h('h3', 'Feeds'), profiles.map(profileLink)])
+}
+
+function profileLink(profile) {
+  return h('div', a('/#/profile/'+profile.idStr, profile.nickname || '???'))
 }
 
 // Helpers

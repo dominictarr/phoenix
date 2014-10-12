@@ -9,7 +9,8 @@ module.exports = {
   message: createMessage,
   profile: createProfile,
   server: createServer,
-  publishForm: createPublishForm
+  publishForm: createPublishForm,
+  notification: createNotification
 }
 
 // Models
@@ -41,6 +42,7 @@ var defaults = {
     messageMap: {},
     feedReplies: {},
     feedRebroadcasts: {},
+    notifications: [],
     profiles: [],
     profileMap: {},
     nicknameMap: {},
@@ -109,6 +111,13 @@ var defaults = {
     preview: '',
     permanent: false,
     setValueTrigger: 1 // trigger counter - when changed, will force an overwrite of the form's input value
+  },
+
+  notification: {
+    msgIdStr: '',
+    authorNickname: '',
+    msgText: '',
+    read: false
   }
 }
 
@@ -143,6 +152,7 @@ function createHomeApp(events, initialState) {
     messageMap:       mercury.value(state.messageMap),
     feedReplies:      mercury.value(state.feedReplies),
     feedRebroadcasts: mercury.value(state.feedRebroadcasts),
+    notifications:    mercury.array(state.notifications.map(createNotification)),
     profiles:         mercury.array(state.profiles.map(createProfile)),
     profileMap:       mercury.value(state.profileMap),
     nicknameMap:      mercury.value(state.nicknameMap),
@@ -223,5 +233,11 @@ function createPublishForm(initialState) {
   state.textValue       = mercury.value(state.textValue)
   state.textRows        = mercury.value(state.textRows)
   state.setValueTrigger = mercury.value(state.setValueTrigger)
+  return mercury.struct(state)
+}
+
+function createNotification(initialState) {
+  var state = extend(defaults.notification, initialState)
+  state.read = mercury.value(state.read)
   return mercury.struct(state)
 }
