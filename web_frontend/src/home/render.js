@@ -136,8 +136,8 @@ function messagePage(state, msgid) {
     return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
   })
 
-  // fetch duplicates data
-  var dups = (state.feedDuplicates[msg.idStr] || []).map(function(dup) {
+  // fetch rebroadcast data
+  var dups = (state.feedRebroadcasts[msg.idStr] || []).map(function(dup) {
     var msgi = state.messageMap[dup.idStr]
     var msg = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined    
     if (!msg) return
