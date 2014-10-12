@@ -67,11 +67,22 @@ function notHidden(msg) {
 // feed view
 // - `state`: full application state
 // - `feed`: which feed to render
+// - `pagination`: { start:, end: }
 // - `reverse`: bool, reverse the feed?
-var feed = exports.feed = function(state, feed, reverse) {
-  var messages = feed.filter(notHidden).map(message.bind(null, state))
-  if (reverse) messages.reverse()
-  return h('.feed', messages)
+var feed = exports.feed = function(state, feed, pagination, reverse) {
+  var moreBtn
+  feed = feed.filter(notHidden)
+  if (reverse) feed.reverse()
+  if (pagination) {
+    if (pagination.end < feed.length) {
+      moreBtn = h('div.load-more', jsa('Load More', state.events.loadMore, undefined, { className: 'btn btn-default' }))
+    }
+    feed = feed.slice(pagination.start, pagination.end)
+  }
+  feed = feed.map(message.bind(null, state))
+  if (moreBtn)
+    feed.push(moreBtn)
+  return h('.feed', feed)
 }
 
 // subfeed view

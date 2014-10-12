@@ -63,7 +63,7 @@ function footer(events) {
 
 function feedPage(state) {
   return h('.feed-page.row', comren.columns({
-    main: [comren.feed(state, state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')],
+    main: [comren.feed(state, state.feed, state.pagination), mercury.partial(comren.mascot, 'Dont let life get you down!')],
     side: [feedControls(state), mercury.partial(profileLinks, state.profiles)]
   }, state.layout))
 }
@@ -102,7 +102,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state, profile.feed, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state, profile.feed, state.pagination, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }

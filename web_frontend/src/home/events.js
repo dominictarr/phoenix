@@ -22,6 +22,7 @@ function createEvents() {
     'removeServer',
 
     // common buttons
+    'loadMore',
     'addFeed',
     'showIntroToken',
     'follow',
