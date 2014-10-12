@@ -22,6 +22,7 @@ function createEvents() {
     'removeServer',
 
     // common buttons
+    'openMsg',
     'addFeed',
     'showIntroToken',
     'follow',

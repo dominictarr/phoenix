@@ -273,6 +273,10 @@ function fireEvent(element,event){
   }
 }
 
+exports.openMsg = function(state, data) {
+  window.location.hash = '#/msg/' + data.idStr
+}
+
 exports.addFeed = function(state) {
   var token = prompt('Introduction token of the user:')
   if (!token) return

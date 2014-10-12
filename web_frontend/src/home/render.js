@@ -5,6 +5,7 @@ var valueEvents = require('../lib/value-events')
 var widgets     = require('../lib/widgets')
 var comren      = require('../lib/common-render')
 var com         = require('../lib/com')
+var widgets     = require('../lib/widgets')
 
 module.exports = render
 
@@ -64,7 +65,7 @@ function footer(events) {
 function feedPage(state) {
   return h('.feed-page.row', comren.columns({
     main: [comren.feed(state, state.feed), mercury.partial(comren.mascot, 'Dont let life get you down!')],
-    side: [feedControls(state), mercury.partial(notifications, state.notifications)]
+    side: [feedControls(state), mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
   }, state.layout))
 }
 
@@ -82,9 +83,18 @@ function feedControls(state) {
   ])
 }
 
-function notifications(nots) {
-  return h('strong', 'todo')
+function notifications(nicknameMap, events, notes) {
+  return h('table.table.table-hover.notifications', h('tbody', notes.map(notification.bind(null, nicknameMap, events)).reverse()))
 }
+
+function notification(nicknameMap, events, note) {
+  return h('tr', { 'ev-click': valueEvents.click(events.openMsg, { idStr: note.msgIdStr }, { preventDefault: true }) }, [
+    h('td', note.authorNickname),
+    h('td', new widgets.Markdown(note.msgText, { inline: true, nicknames: nicknameMap }))
+  ])
+}
+
+
 
 // Profile Page
 // ============

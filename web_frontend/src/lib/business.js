@@ -204,34 +204,9 @@ exports.fetchFeed = function(state, opts, cb) {
         state.messageMap.set(mm)
         
         // index replies
-        if (m.message.repliesTo && m.message.repliesTo.$msg) {
-          var id = util.toHexString(m.message.repliesTo.$msg)
-          if (id) {
-            var sr = state.feedReplies()
-            if (!sr[id]) sr[id] = []
-            sr[id].push({ idStr: m.idStr, type: m.type })
-            state.feedReplies.set(sr)
-          }
-        }
-
-        // index rebroadcasts
-        if (m.message.rebroadcasts && m.message.rebroadcasts.$msg) {
-          var id = util.toHexString(m.message.rebroadcasts.$msg)
-          if (id) {
-            var dr = state.feedRebroadcasts()
-            if (!dr[id]) dr[id] = []
-            dr[id].push({ idStr: m.idStr })
-            state.feedRebroadcasts.set(dr)
-
-            // hide the rebroadcast if the original is already in the feed
-            if (mm[id]) {
-              m.hidden.set(true)
-            } else {
-              // use this one to represent the original
-              mm[id] = state.feed.getLength() - 1
-            }
-          }
-        }
+        if (m.message.repliesTo)    indexReplies(state, m)
+        if (m.message.rebroadcasts) indexRebroadcasts(state, m, mm)
+        if (m.message.mentions)     indexMentions(state, m)
       }, function() { cbs(null, state.feed()) })
     )
   })
@@ -247,6 +222,54 @@ function messageIsCached(state, a) {
     }
   }
   return false
+}
+
+function indexReplies(state, msg) {
+  try {
+    var id = util.toHexString(msg.message.repliesTo.$msg)
+    if (id) {
+      var sr = state.feedReplies()
+      if (!sr[id]) sr[id] = []
+      sr[id].push({ idStr: msg.idStr, type: msg.type })
+      state.feedReplies.set(sr)
+    }
+  } catch(e) { console.warn('failed to index reply', e) }
+}
+
+function indexRebroadcasts(state, msg, msgMap) {
+  try {
+    var id = util.toHexString(msg.message.rebroadcasts.$msg)
+    if (id) {
+      var dr = state.feedRebroadcasts()
+      if (!dr[id]) dr[id] = []
+      dr[id].push({ idStr: msg.idStr })
+      state.feedRebroadcasts.set(dr)
+
+      // hide the rebroadcast if the original is already in the feed
+      if (msgMap[id]) {
+        msg.hidden.set(true)
+      } else {
+        // use this one to represent the original
+        msgMap[id] = state.feed.getLength() - 1
+      }
+    }
+  } catch(e) { console.warn('failed to index rebroadcast', e) }
+}
+
+function indexMentions(state, msg) {
+  // look for mentions of the current user and create notifications for them
+  var mentions = Array.isArray(msg.message.mentions) ? msg.message.mentions : [msg.message.mentions]
+  for (var i=0; i < mentions.length; i++) {
+    try {
+      var mention = mentions[i]
+      if (util.toHexString(mention.$feed) != state.user.idStr()) continue
+      state.notifications.push(models.notification({
+        msgIdStr:       msg.idStr,
+        authorNickname: msg.authorNickname,
+        msgText:        msg.message.plain
+      }))
+    } catch(e) { console.warn('failed to index mention', e) }
+  }
 }
 
 // loads the profile's feed (from the backend or cache)

@@ -75,11 +75,11 @@ InlineRenderer.prototype.html = function(html) {
 };
 
 InlineRenderer.prototype.heading = function(text, level, raw) {
-  return '<strong>' + text + '</strong>';
+  return '<strong>' + text + '</strong> ';
 };
 
 InlineRenderer.prototype.hr = function() {
-  return '';
+  return ' ';
 };
 
 InlineRenderer.prototype.list = function(body, ordered) {
@@ -92,7 +92,7 @@ InlineRenderer.prototype.listitem = function(text) {
 };
 
 InlineRenderer.prototype.paragraph = function(text) {
-  return text;
+  return text + ' ';
 };
 
 InlineRenderer.prototype.table = function(header, body) {
@@ -121,7 +121,7 @@ InlineRenderer.prototype.codespan = function(text) {
 };
 
 InlineRenderer.prototype.br = function() {
-  return ''
+  return ' '
 };
 
 InlineRenderer.prototype.del = function(text) {

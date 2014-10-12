@@ -200,7 +200,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
           h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
           : '',
       ]),
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)),  new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })])
+      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })])
     ]),
   ])
 }
