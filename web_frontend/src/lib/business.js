@@ -214,16 +214,16 @@ exports.fetchFeed = function(state, opts, cb) {
           }
         }
 
-        // index duplicates
-        if (m.message.duplicates && m.message.duplicates.$msg) {
-          var id = util.toHexString(m.message.duplicates.$msg)
+        // index rebroadcasts
+        if (m.message.rebroadcasts && m.message.rebroadcasts.$msg) {
+          var id = util.toHexString(m.message.rebroadcasts.$msg)
           if (id) {
-            var dr = state.feedDuplicates()
+            var dr = state.feedRebroadcasts()
             if (!dr[id]) dr[id] = []
             dr[id].push({ idStr: m.idStr })
-            state.feedDuplicates.set(dr)
+            state.feedRebroadcasts.set(dr)
 
-            // hide the duplicate if the original is already in the feed
+            // hide the rebroadcast if the original is already in the feed
             if (mm[id]) {
               m.hidden.set(true)
             } else {
@@ -363,13 +363,13 @@ exports.publishReaction = function(state, text, parent, cb) {
 }
 
 // posts a copy of the given message to the feed
-var publishDuplicate =
-exports.publishDuplicate = function(state, msg, cb) {
-  if (!msg.message.duplicates) {
-    msg.message.duplicates = {
+var publishRebroadcast =
+exports.publishRebroadcast = function(state, msg, cb) {
+  if (!msg.message.rebroadcasts) {
+    msg.message.rebroadcasts = {
+      $rel: 'rebroadcasts',
       $msg: util.toBuffer(msg.id),
-      $rel: 'duplicates',
-      author: util.toBuffer(msg.author),
+      $feed: util.toBuffer(msg.author),
       timestamp: msg.timestamp,
       timezone: msg.timezone
     }

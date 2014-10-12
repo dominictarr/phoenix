@@ -40,7 +40,7 @@ var defaults = {
     feed: [],
     messageMap: {},
     feedReplies: {},
-    feedDuplicates: {},
+    feedRebroadcasts: {},
     profiles: [],
     profileMap: {},
     nicknameMap: {},
@@ -120,42 +120,42 @@ function createHomeApp(events, initialState) {
 
   // create object
   return mercury.struct({
-    route:           mercury.value(state.route),
-    layout:          mercury.value(state.layout),
-    publishForms:    mercury.array(state.publishForms.map(createPublishForm)),
-    publishFormMap:  mercury.value(state.publishFormMap),
-    suggestBox:      mercury.struct({
-      active:          mercury.value(state.suggestBox.active),
-      positionX:       mercury.value(state.suggestBox.positionX),
-      positionY:       mercury.value(state.suggestBox.positionY),
-      selection:       mercury.value(state.suggestBox.selection),
-      textValue:       mercury.value(state.suggestBox.textValue),
-      options:         mercury.array(state.suggestBox.options),
-      filtered:        mercury.array(state.suggestBox.filtered)
+    route:            mercury.value(state.route),
+    layout:           mercury.value(state.layout),
+    publishForms:     mercury.array(state.publishForms.map(createPublishForm)),
+    publishFormMap:   mercury.value(state.publishFormMap),
+    suggestBox:       mercury.struct({
+      active:           mercury.value(state.suggestBox.active),
+      positionX:        mercury.value(state.suggestBox.positionX),
+      positionY:        mercury.value(state.suggestBox.positionY),
+      selection:        mercury.value(state.suggestBox.selection),
+      textValue:        mercury.value(state.suggestBox.textValue),
+      options:          mercury.array(state.suggestBox.options),
+      filtered:         mercury.array(state.suggestBox.filtered)
     }),
-    conn:            mercury.struct({
-      hasError:        mercury.value(state.conn.hasError),
-      explanation:     mercury.value(state.conn.explanation)
+    conn:             mercury.struct({
+      hasError:         mercury.value(state.conn.hasError),
+      explanation:      mercury.value(state.conn.explanation)
     }),
-    events:          events,
+    events:           events,
 
-    feed:            mercury.array(state.feed.map(createMessage)),
-    messageMap:      mercury.value(state.messageMap),
-    feedReplies:     mercury.value(state.feedReplies),
-    feedDuplicates:  mercury.value(state.feedDuplicates),
-    profiles:        mercury.array(state.profiles.map(createProfile)),
-    profileMap:      mercury.value(state.profileMap),
-    nicknameMap:     mercury.value(state.nicknameMap),
-    servers:         mercury.array(state.servers.map(createServer)),
-    user:            mercury.struct({
-      id:              mercury.value(state.user.id),
-      idStr:           mercury.value(state.user.idStr),
-      pubkey:          mercury.value(state.user.pubkey),
-      pubkeyStr:       mercury.value(state.user.pubkeyStr),
-      nickname:        mercury.value(state.user.nickname)
-    }),
-    lastSync:        mercury.value(state.lastSync),
-    isSyncing:       mercury.value(state.isSyncing)
+    feed:             mercury.array(state.feed.map(createMessage)),
+    messageMap:       mercury.value(state.messageMap),
+    feedReplies:      mercury.value(state.feedReplies),
+    feedRebroadcasts: mercury.value(state.feedRebroadcasts),
+    profiles:         mercury.array(state.profiles.map(createProfile)),
+    profileMap:       mercury.value(state.profileMap),
+    nicknameMap:      mercury.value(state.nicknameMap),
+    servers:          mercury.array(state.servers.map(createServer)),
+    user:             mercury.struct({
+      id:               mercury.value(state.user.id),
+      idStr:            mercury.value(state.user.idStr),
+      pubkey:           mercury.value(state.user.pubkey),
+      pubkeyStr:        mercury.value(state.user.pubkeyStr),
+      nickname:         mercury.value(state.user.nickname)
+    }), 
+    lastSync:         mercury.value(state.lastSync),
+    isSyncing:        mercury.value(state.isSyncing)
   })
 }
 

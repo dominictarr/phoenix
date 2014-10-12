@@ -95,7 +95,7 @@ var message = exports.message = function(state, msg) {
     case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
     case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.message.nickname, state.nicknameMap)
     case 'act': return mercury.partial(messageEvent, msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain, state.nicknameMap)
-    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr], state.feedDuplicates[msg.idStr], state.nicknameMap); break
+    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr], state.feedRebroadcasts[msg.idStr], state.nicknameMap); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -110,20 +110,20 @@ var message = exports.message = function(state, msg) {
 }
 
 // message text-content renderer
-var messageText = exports.messageText = function(msg, events, replies, duplicates, nicknameMap) {
+var messageText = exports.messageText = function(msg, events, replies, rebroadcasts, nicknameMap) {
   // header
   var header
   var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
-  if (msg.message.duplicates) {
+  if (msg.message.rebroadcasts) {
     // duplicated message
-    var author = msg.message.duplicates.author
+    var author = msg.message.rebroadcasts.$feed
     var authorStr = util.toHexString(author)
     var authorNick = nicknameMap[authorStr] || authorStr
     header = h('p', [
       userlink(author, util.escapePlain(authorNick)),
       h('small.message-ctrls', [
         ' - ',
-        util.prettydate(new Date(msg.message.duplicates.timestamp||0), true)
+        util.prettydate(new Date(msg.message.rebroadcasts.timestamp||0), true)
       ]),
       (replyIdStr) ?
         h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
@@ -147,7 +147,7 @@ var messageText = exports.messageText = function(msg, events, replies, duplicate
   // stats
   var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
   var nReacts  = (replies) ? replies.filter(function(r) { return (r.type == 'act') }).length : 0
-  var nDups    = (duplicates) ? duplicates.length : 0
+  var nDups    = (rebroadcasts) ? rebroadcasts.length : 0
   var stats = []
   if (nReplies) stats.push(nReplies + ' replies')
   if (nReacts)  stats.push(nReacts + ' reactions')

@@ -363,7 +363,7 @@ exports.shareMsg = function(state, data) {
     text = text.slice(0, 100) + '...'
   if (!confirm('Share with your followers, "' + text + '"?'))
     return
-  bus.publishDuplicate(state, data.msg, function(err) {
+  bus.publishRebroadcast(state, data.msg, function(err) {
     if (err) throw err // :TODO: put in gui
     bus.fetchFeed(state) // pull down the update
   })
