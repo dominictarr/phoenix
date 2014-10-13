@@ -102,7 +102,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state, profile.feed, state.pagination, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state, profile.feed, state.pagination, true)],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }
@@ -168,8 +168,7 @@ function networkPage(state) {
     main: [
       h('h3', 'Pub Servers'),
       mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing),
-      pubservers(state.events, state.servers),
-      mercury.partial(comren.mascot, 'Who\'s cooking chicken?')
+      pubservers(state.events, state.servers)
     ],
     side: [mercury.partial(profileLinks, state.profiles)]
   }, state.layout))

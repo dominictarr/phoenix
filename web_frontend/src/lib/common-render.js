@@ -52,14 +52,6 @@ var randomcat = exports.randomcat = function() {
   return img('/img/loading/'+cat+'.gif')
 }
 
-// felix the phoenix
-var mascot = exports.mascot = function(quote) {
-  return h('.class', [
-    img('/img/logo.png'),
-    h('strong', [h('small', quote)])
-  ])
-}
-
 function notHidden(msg) {
   return !msg.hidden
 }

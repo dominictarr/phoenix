@@ -43,7 +43,7 @@ function header(events, uId) {
 
 function membersPage(state) {
   return h('.members-page.row', [
-    h('.col-xs-7', [members(state.profiles), mercury.partial(comren.mascot, 'Welcome to the phoenix network!')])
+    h('.col-xs-7', members(state.profiles))
   ])
 }
 
@@ -67,7 +67,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state, profile.feed, state.pagination, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state, profile.feed, state.pagination, true)],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }
