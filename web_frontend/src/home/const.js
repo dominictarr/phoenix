@@ -1,0 +1,1 @@
+exports.PAGE_SIZE = 30

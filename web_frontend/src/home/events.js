@@ -23,6 +23,7 @@ function createEvents() {
 
     // common buttons
     'openMsg',
+    'loadMore',
     'addFeed',
     'showIntroToken',
     'follow',

@@ -32,6 +32,10 @@ var defaults = {
       options: [],
       filtered: []
     },
+    pagination: {
+      start: 0,
+      end: 0
+    },
     conn: {
       hasError: false,
       explanation: ''
@@ -141,6 +145,10 @@ function createHomeApp(events, initialState) {
       textValue:        mercury.value(state.suggestBox.textValue),
       options:          mercury.array(state.suggestBox.options),
       filtered:         mercury.array(state.suggestBox.filtered)
+    }),
+    pagination:       mercury.struct({
+      start:            mercury.value(state.pagination.start),
+      end:              mercury.value(state.pagination.end)
     }),
     conn:             mercury.struct({
       hasError:         mercury.value(state.conn.hasError),

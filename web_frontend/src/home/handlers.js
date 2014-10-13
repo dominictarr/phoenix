@@ -1,10 +1,16 @@
+var constants = require('./const')
 var models = require('../lib/models')
 var bus = require('../lib/business')
 var textareaCaretPosition = require('../lib/textarea-caret-position')
 var emojiNamedCharacters = require('emoji-named-characters')
 
 exports.setRoute = function(state, route) {
+  // run any business needed, then update route
   route = route.substr(2) || 'feed'
+  
+  state.pagination.start.set(0)
+  state.pagination.end.set(constants.PAGE_SIZE)
+
   if (route.indexOf('profile/') === 0) {
     var profid = route.slice(8)
     bus.fetchProfileFeed(state, profid)
@@ -275,6 +281,10 @@ function fireEvent(element,event){
 
 exports.openMsg = function(state, data) {
   window.location.hash = '#/msg/' + data.idStr
+}
+
+exports.loadMore = function(state) {
+  state.pagination.end.set(state.pagination.end() + constants.PAGE_SIZE)
 }
 
 exports.addFeed = function(state) {
