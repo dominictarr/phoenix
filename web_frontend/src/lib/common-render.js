@@ -202,17 +202,10 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
   var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),
-    h('.event-body', [
-      h('p', [
-        h('small.message-ctrls', [
-          util.prettydate(new Date(msg.timestamp), true)
-        ]),
-        (replyIdStr) ?
-          h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
-          : '',
-      ]),
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })])
-    ]),
+    h('p.event-body', [
+      userlink(msg.author, util.escapePlain(msg.authorNickname)),
+      new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })
+    ])
   ])
 }
 
@@ -251,7 +244,7 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true, nicknames: nicknameMap })])
+        h('p.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true, nicknames: nicknameMap })])
       ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
         h('p', h('input.form-control', {

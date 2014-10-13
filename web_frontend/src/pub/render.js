@@ -23,26 +23,18 @@ function render(state) {
     stylesheet('/css/pub.css'),
     mercury.partial(header),
     mercury.partial(comren.connStatus, state.events, state.conn),
-    h('.container', page),
-    mercury.partial(footer, state.events)
+    h('.container-fluid', page)
   ])
 }
 
 function header(events, uId) {
   return h('.nav.navbar.navbar-default', [
-    h('.container', [
+    h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
       h('ul.nav.navbar-nav', [
         h('li', a('#/', 'members'))
       ])
     ])
-  ])
-}
-
-function footer(events) {
-  return h('.container', [
-    h('br'), h('br'),
-    h('p', a('#', 'toggle layout', { 'ev-click': valueEvents.click(events.toggleLayout, null, { preventDefault: true }) }))
   ])
 }
 

@@ -346,14 +346,6 @@ exports.removeServer = function(state, data) {
   })
 }
 
-exports.toggleLayout = function(state) {
-  var curr = state.layout()
-  if (curr[0][0] == 'main')
-    state.layout.set([['side', 4], ['main', 8]])
-  else
-    state.layout.set([['main', 7], ['side', 5]])
-}
-
 exports.replyToMsg = function(state, data) {
   var id = data.msg.idStr
   var form = addPublishForm(state, id, data.msg.id)
