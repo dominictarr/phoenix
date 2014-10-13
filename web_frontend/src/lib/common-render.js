@@ -219,29 +219,36 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
           'ev-keydown': [valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id }), events.mentionBoxKeypress],
           'ev-input': events.mentionBoxInput
         })),
-        h('button.btn.btn-default', 'Post'),
-        ' ',
-        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
         h('span.pull-right', [
           h('strong', jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
           ' / ',
           jsa('action', events.setPublishFormType, { id: form.id, type: 'act' })
-        ])
+        ]),
+        h('button.btn.btn-default', 'Post'),
+        ' ',
+        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
       ])
     ])
   }
   if (form.type == 'act') {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
     var hand = (form.parent) ? 'up' : 'right'
+    var suggestions = (form.parent) ? h('p', [
+      h('span.btn-group', [suggestBtn('Like', 'likes this'), suggestBtn('Dislike', 'dislikes this')]),
+      ' ', h('span.btn-group', [suggestBtn('Love', 'loves this'), suggestBtn('Hate', 'hates this')]),
+      ' ', h('span.btn-group', [suggestBtn('Agree', 'agrees with this'), suggestBtn('Disagree', 'disagrees with this')]),
+      ' ', h('span.btn-group', [suggestBtn('Confirm', 'confirms this'), suggestBtn('Deny', 'denies this')])
+    ]) : ''
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
         h('p.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true, nicknames: nicknameMap })])
       ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
+        suggestions,
         h('p', h('input.form-control', {
           name: 'publishText',
-          placeholder: form.textPlaceholder,
+          // placeholder: form.textPlaceholder,
           value: new CounterTriggerHook(form.textValue||'', form.setValueTrigger),
           'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
           'ev-keyup': [
@@ -250,17 +257,21 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
             valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id })
           ],
           'ev-input': events.mentionBoxInput
-        })),          
-        h('button.btn.btn-default', 'Post'),
-        ' ',
-        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
+        })),
         h('span.pull-right', [
           jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
           ' / ',
           h('strong', jsa('action', events.setPublishFormType, { id: form.id, type: 'act' }))
-        ])
+        ]),
+        h('button.btn.btn-default', 'Post'),
+        ' ',
+        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
       ])
     ])
+  }
+
+  function suggestBtn(label, text) {
+    return jsa(label, events.setPublishFormText, { id: form.id, publishText: text }, { className: 'btn btn-default btn-xs' })
   }
 }
 

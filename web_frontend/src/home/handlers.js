@@ -68,6 +68,9 @@ exports.setPublishFormText = function(state, data) {
 
   // update internal data
   form.textValue.set(data.publishText)
+  form.textRows.set((data.publishText) ? 3 : 1)
+  form.preview.set(data.publishText)
+  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.setPublishFormType = function(state, data) {
