@@ -122,6 +122,7 @@ function profileControls(events, profile) {
 // ============
 
 function messagePage(state, msgid) {
+  // lookup the main message
   var msgi = state.messageMap[msgid]
   var msg = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
   if (!msg) {
@@ -130,33 +131,42 @@ function messagePage(state, msgid) {
     ])
   }
 
-  // build replies feed
-  var replies = (state.feedReplies[msg.idStr] || []).map(function(reply) {
-    var msgi = state.messageMap[reply.idStr]
-    return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
+  // lookup the selected message
+  var selectedMsg = msg // :TODO:
+
+  // collect reactions of the selected msg
+  var reactions = []
+  ;(state.feedReplies[selectedMsg.idStr] || []).forEach(function(replyData) {
+    var msgi     = state.messageMap[replyData.idStr] // look up index
+    var reaction = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+    if (reaction && reaction.type == 'act')
+      reactions.push(reaction)
   })
 
-  // fetch rebroadcast data
-  var dups = (state.feedRebroadcasts[msg.idStr] || []).map(function(dup) {
-    var msgi = state.messageMap[dup.idStr]
-    var msg = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined    
-    if (!msg) return
-    return h('span', [
-      'Shared by ',
-      comren.userlink(msg.author, util.escapePlain(msg.authorNickname)),
-      ' ',
-      util.prettydate(new Date(msg.timestamp), true),
-      h('br')
-    ])
+  // collect rebroadcast data
+  var shares = []
+  ;(state.feedRebroadcasts[msg.idStr] || []).map(function(share) {
+    var msgi  = state.messageMap[share.idStr]
+    var share = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null    
+    if (share)
+      shares.push(share)
   })
 
   // render
   return h('.message-page.row', comren.columns({
-    main: [h('.feed.nobar', [
-      comren.message(state, msg),
-      comren.subfeed(state, replies, true)
-    ])],
-    side: dups
+    main: comren.msgThread(state, msg),
+    side: [
+      shares.map(function(shareMsg) {
+        return h('span', [
+          'Shared by ',
+          comren.userlink(shareMsg.author, util.escapePlain(shareMsg.authorNickname)),
+          ' ',
+          util.prettydate(new Date(shareMsg.timestamp), true),
+          h('br')
+        ])
+      }),
+      comren.feed(state, reactions, true)
+    ]
   }, state.layout))
 }
 

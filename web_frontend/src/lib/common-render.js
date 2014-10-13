@@ -77,14 +77,37 @@ var feed = exports.feed = function(state, feed, pagination, reverse) {
   return h('.feed', feed)
 }
 
-// subfeed view
+// message thread view
 // - `state`: full application state
-// - `feed`: which feed to render
-// - `reverse`: bool, reverse the feed?
-var subfeed = exports.subfeed = function(state, feed, reverse) {
-  var messages = feed.filter(notHidden).map(message.bind(null, state))
-  if (reverse) messages.reverse()
-  return h('.feed.subfeed', messages)
+// - `msg`: which message's thread to render
+var msgThread = exports.msgThread = function(state, msg) {
+  return h('.feed', [
+    message(state, msg),
+    msgThreadTree(state, msg)
+  ])
+}
+
+// helper, recursively renders reply-tree of a thread
+function msgThreadTree(state, msg) {
+  // collect replies
+  var replies = []
+  ;(state.feedReplies[msg.idStr] || []).forEach(function(replyData) {
+    // fetch and render message
+    var msgi  = state.messageMap[replyData.idStr] // look up index
+    var reply = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+    if (reply && reply.type == 'text' && notHidden(reply)) {
+      replies.push(message(state, reply))
+
+      // build and render subtree
+      var subtree = msgThreadTree(state, reply)
+      if (subtree)
+        replies.push(subtree)
+    }
+  })
+
+  if (replies.length)
+    return h('.feed.subfeed', replies)
+  return ''
 }
 
 // feed message renderer
