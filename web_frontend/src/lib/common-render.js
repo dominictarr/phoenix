@@ -166,14 +166,14 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
       new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
       (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
         (h('p', [
-          h('small', [
+          h('small.message-ctrls', [
             stats,
-            h('span.message-ctrls.pull-right', [
-              jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
+            h('span.pull-right', [
+              jsa(icon('pencil'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
               ' ',
-              jsa([icon('hand-up'), 'react'], events.reactToMsg, { msg: msg }),
+              jsa(icon('hand-up'), events.reactToMsg, { msg: msg }, { title: 'React' }),
               ' ',
-              jsa([icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
+              jsa(icon('share-alt'), events.shareMsg, { msg: msg }, { title: 'Share' })
             ])
           ]),
         ])) :
