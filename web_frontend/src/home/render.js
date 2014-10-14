@@ -131,42 +131,10 @@ function messagePage(state, msgid) {
     ])
   }
 
-  // lookup the selected message
-  var selectedMsg = msg // :TODO:
-
-  // collect reactions of the selected msg
-  var reactions = []
-  ;(state.feedReplies[selectedMsg.idStr] || []).forEach(function(replyData) {
-    var msgi     = state.messageMap[replyData.idStr] // look up index
-    var reaction = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
-    if (reaction && reaction.type == 'act')
-      reactions.push(reaction)
-  })
-
-  // collect rebroadcast data
-  var shares = []
-  ;(state.feedRebroadcasts[msg.idStr] || []).map(function(share) {
-    var msgi  = state.messageMap[share.idStr]
-    var share = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null    
-    if (share)
-      shares.push(share)
-  })
-
   // render
   return h('.message-page.row', comren.columns({
     main: comren.msgThread(state, msg),
-    side: [
-      shares.map(function(shareMsg) {
-        return h('span', [
-          'Shared by ',
-          comren.userlink(shareMsg.author, util.escapePlain(shareMsg.authorNickname)),
-          ' ',
-          util.prettydate(new Date(shareMsg.timestamp), true),
-          h('br')
-        ])
-      }),
-      comren.feed(state, reactions, true)
-    ]
+    side: []
   }, state.layout))
 }
 

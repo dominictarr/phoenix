@@ -121,7 +121,7 @@ var message = exports.message = function(state, msg) {
     case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
     case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.message.nickname, state.nicknameMap)
     case 'act': return mercury.partial(messageEvent, msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain, state.nicknameMap)
-    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr], state.feedRebroadcasts[msg.idStr], state.nicknameMap); break
+    case 'text': main = mercury.partial(messageText, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -130,6 +130,15 @@ var message = exports.message = function(state, msg) {
   if (typeof publishFormMap[formId] != 'undefined') {
     var i = publishFormMap[formId]
     main = h('div', [main, h('.message-reply', publishForm(publishForms[i], state.events, state.user, state.nicknameMap))])
+  }
+
+  // helper to lookup messages
+  function lookupAll(index) {
+    if (!index || !index.length) return []
+    return index.map(function(entry) {
+      var msgi  = state.messageMap[entry.idStr]
+      return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+    })
   }
 
   return main
@@ -146,7 +155,7 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
     var authorStr = util.toHexString(author)
     var authorNick = nicknameMap[authorStr] || authorStr
     header = h('p', [
-      userlink(author, util.escapePlain(authorNick)),
+      userlink(author, authorNick),
       h('small.message-ctrls', [
         ' - ',
         util.prettydate(new Date(msg.message.rebroadcasts.timestamp||0), true)
@@ -154,12 +163,12 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
       (replyIdStr) ?
         h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
         : '',
-      h('span.repliesto', [' shared by ', userlink(msg.author, util.escapePlain(msg.authorNickname))])
+      h('span.repliesto', [' shared by ', userlink(msg.author, msg.authorNickname)])
     ])
   } else {
     // normal message
     header = h('p', [
-      userlink(msg.author, util.escapePlain(msg.authorNickname)),
+      userlink(msg.author, msg.authorNickname),
       h('small.message-ctrls', [
         ' - ',
         util.prettydate(new Date(msg.timestamp), true)
@@ -170,27 +179,53 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
     ])
   }
 
-  // stats
+  // replies
   var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
-  var nReacts  = (replies) ? replies.filter(function(r) { return (r.type == 'act') }).length : 0
-  var nDups    = (rebroadcasts) ? rebroadcasts.length : 0
-  var stats = []
-  if (nReplies) stats.push(nReplies + ' replies')
-  if (nReacts)  stats.push(nReacts + ' reactions')
-  if (nDups)    stats.push(nDups + ' shares')
-  if (stats.length)
-    stats = a('#/msg/'+msg.idStr, stats.join(' '))
-  else
-    stats = ''
+  var replyStr = (nReplies) ? a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
 
+  // reactions
+  var reactionsStr = []
+  var reactMap = {}
+  // create a map of reaction-text -> author-nicknames
+  ;(replies || []).forEach(function(reply) {
+    if (reply && reply.type == 'act') {
+      var react = ''+reply.message.plain
+      if (!reactMap[react])
+        reactMap[react] = []
+      reactMap[react].push({ id: reply.author, nick: reply.authorNickname })
+    }
+  })
+  // render the list of reactions
+  for (var react in reactMap) {
+    if (reactionsStr.length)
+      reactionsStr.push(', ')
+    var reactors = reactMap[react]
+    var str = [userlink(reactors[0].id, reactors[0].nick)]
+    if (reactors.length > 1)
+      str.push(' and ' + (reactors.length - 1) + ' others')
+    str.push(' ' + react.trim() + ' this')
+    reactionsStr.push(str)
+  }
+  if (reactionsStr.length) reactionsStr.push('.')
+
+  // rebroadcasts
+  var rebroadcastsStr = []
+  if (rebroadcasts.length) {
+    rebroadcastsStr.push(userlink(rebroadcasts[0].author, rebroadcasts[0].authorNickname))
+    if (rebroadcasts.length > 1)
+      rebroadcastsStr.push(' and ' + (rebroadcasts.length - 1) + ' others')
+    rebroadcastsStr.push(' shared this.')
+  }
+
+  // body
   return h('.panel.panel-default', [
     h('.panel-body', [
       header,
       new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
-      (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
-        (h('p', [
+      (events.replyToMsg && events.reactToMsg && events.shareMsg)
+        ? (h('p', [
           h('small.message-ctrls', [
-            stats,
+            replyStr,
             h('span.pull-right', [
               jsa(icon('pencil'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
               ' ',
@@ -199,9 +234,12 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
               jsa(icon('share-alt'), events.shareMsg, { msg: msg }, { title: 'Share' })
             ])
           ]),
-        ])) :
-        ''
-    ])
+        ]))
+        : ''
+    ]),
+    (reactionsStr.length || rebroadcastsStr.length)
+      ? h('.panel-footer', h('small', [reactionsStr, ' ', rebroadcastsStr]))
+      : ''
   ])
 }
 
@@ -218,7 +256,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),
     h('p.event-body', [
-      userlink(msg.author, util.escapePlain(msg.authorNickname)),
+      userlink(msg.author, msg.authorNickname),
       new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })
     ])
   ])
