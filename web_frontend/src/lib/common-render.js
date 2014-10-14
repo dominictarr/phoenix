@@ -209,8 +209,10 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
     // generate the "bob and N others ___ this" phrase
     var reactors = reactMap[react]
     var str = [userlink(reactors[0].id, reactors[0].nick)]
-    if (reactors.length > 1)
-      str.push(' and ' + (reactors.length - 1) + ' others')
+    if (reactors.length > 1) {
+      var theOthers = reactors.slice(1).map(function(r) { return r.nick })
+      str.push(h('a', { href: 'javascript:void()', title: theOthers.join(', ') }, ' and ' + theOthers.length + ' others'))
+    }
     str.push(' ' + react.trim() + ' this')
     reactionsStr.push(str)
   }
@@ -221,8 +223,10 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
   if (rebroadcasts.length) {
     rebroadcasts = onePerAuthor(rebroadcasts)
     rebroadcastsStr.push(userlink(rebroadcasts[0].author, rebroadcasts[0].authorNickname))
-    if (rebroadcasts.length > 1)
-      rebroadcastsStr.push(' and ' + (rebroadcasts.length - 1) + ' others')
+    if (rebroadcasts.length > 1) {
+      var theOthers = rebroadcasts.slice(1).map(function(r) { return r.authorNickname })
+      rebroadcastsStr.push(h('a', { href: 'javascript:void()', title: theOthers.join(', ') }, ' and ' + theOthers.length + ' others'))
+    }
     rebroadcastsStr.push(' shared this.')
   }
   function onePerAuthor(list) {
