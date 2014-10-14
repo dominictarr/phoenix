@@ -276,12 +276,20 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
     case 'react': icon = '.glyphicon-hand-up'; break
     default: icon = '.glyphicon-hand-right'
   }
-  var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
+
+  var parentLink = ''
+  if (msg.message.repliesTo) {
+    var id = util.toHexString(msg.message.repliesTo.$msg)
+    parentLink = a('#/msg/'+id, shortHex(id))
+  }
+
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),
     h('p.event-body', [
       userlink(msg.author, msg.authorNickname),
-      new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })
+      new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap }),
+      ' ',
+      parentLink
     ])
   ])
 }
