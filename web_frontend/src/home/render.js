@@ -144,41 +144,50 @@ function messagePage(state, msgid) {
 
 function networkPage(state) {
   return h('.network-page.row', comren.columns({
-    main: [
-      h('h3', 'Pub Servers'),
-      mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing),
-      pubservers(state.events, state.servers)
-    ],
-    side: [mercury.partial(profileLinks, state.profiles)]
-  }, state.layout))
-}
-
-function pubservers(events, servers) {
-  return h('.servers', servers.map(server.bind(null, events)))
-}
-
-function server(events, server) {
-  return h('.panel.panel-default', [
-    h('.panel-body', [
-      h('h3', a(server.url, server.hostname)),
-      h('p', h('button.btn.btn-default', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'Remove'))
+    gutter: [],
+    col1: h('.panel.panel-default', [
+      h('.panel-heading', h('h3.panel-title', [
+        'Following',
+        h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addFeed}, 'add')
+      ])),
+      h('.panel-body', profileLinks(state.events, state.profiles.filter(isFollowing)))
+    ]),
+    col2: h('.panel.panel-default', [
+      h('.panel-heading', h('h3.panel-title', 'Followers')),
+      h('.panel-body', '')
+    ]),
+    col3: h('.panel.panel-default', [
+      h('.panel-heading', h('h3.panel-title', [
+        'Known Servers',
+        h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addServer}, 'add')
+      ])),
+      h('.panel-body', serverLinks(state.events, state.servers))
     ])
+  }, [['gutter', 1], ['col1', 2], ['col2', 2], ['col3', 2]]))
+}
+
+function isFollowing(p) { return p.isFollowing }
+
+function serverLinks(events, servers) {
+  return h('.servers', servers.map(serverLink.bind(null, events)))
+}
+
+function serverLink(events, server) {
+  return h('h3', [
+    a(server.url, server.hostname),
+    h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'remove')
   ])
 }
 
-function networkControls(events, lastSync, isSyncing) {
-  return h('.network-ctrls', [
-    h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
-    h('p', [comren.syncButton(events, isSyncing), ' ', h('button.btn.btn-default', {'ev-click': events.addServer}, 'Add server...')])
+function profileLinks(events, profiles) {
+  return profiles.map(profileLink.bind(null, events))
+}
+
+function profileLink(events, profile) {
+  return h('h3', [
+    a('/#/profile/'+profile.idStr, profile.nickname || '???'),
+    h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
   ])
-}
-
-function profileLinks(profiles) {
-  return h('div', [h('h3', 'Feeds'), profiles.map(profileLink)])
-}
-
-function profileLink(profile) {
-  return h('div', a('/#/profile/'+profile.idStr, profile.nickname || '???'))
 }
 
 // Helpers
