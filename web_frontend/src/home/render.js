@@ -29,13 +29,13 @@ function render(state) {
   return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
     mercury.partial(com.suggestBox, state.suggestBox),
-    mercury.partial(header, state.events, state.user.idStr),
+    mercury.partial(header, state.events, state.user.idStr, state.isSyncing),
     mercury.partial(comren.connStatus, state.events, state.conn),
     h('.container-fluid', page)
   ])
 }
 
-function header(events, uId) {
+function header(events, uId, isSyncing) {
   return h('.nav.navbar.navbar-default', [
     h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
@@ -45,7 +45,9 @@ function header(events, uId) {
         h('li', a('#/network', 'network'))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
-        h('li', a('#', 'your intro token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }, { preventDefault: true }) }))
+        h('li', a('#', 'your intro token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }, { preventDefault: true }) })),
+        h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add friend')),
+        h('li', comren.syncButton(events, isSyncing))
       ])
     ])
   ])
@@ -60,21 +62,8 @@ function feedPage(state) {
   return h('.feed-page.row', comren.columns({
     left: [comren.feed(state, events, state.pagination)],
     main: [comren.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, texts, state.pagination)],
-    right: [feedControls(state), mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
+    right: [mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
   }, [['left', 3], ['main', 5], ['right', 4]]))
-}
-
-function feedControls(state) {
-  var events = state.events
-  var lastSync = state.lastSync
-  return h('.feed-ctrls', [
-    h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
-    h('p', [
-      comren.syncButton(events, state.isSyncing),
-      ' ',
-      h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add feed...')
-    ])
-  ])
 }
 
 function notifications(nicknameMap, events, notes) {
