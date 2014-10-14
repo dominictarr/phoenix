@@ -263,6 +263,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
 }
 
 var publishForm = exports.publishForm = function(form, events, user, nicknameMap) {
+  var isReply = !!form.parent
   if (form.type == 'text') {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
     return  h('.publish-wrapper', [
@@ -283,7 +284,7 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
         h('span.pull-right', [
           h('strong', jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
           ' / ',
-          jsa('action', events.setPublishFormType, { id: form.id, type: 'act' })
+          jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' })
         ]),
         h('button.btn.btn-default', 'Post'),
         ' ',
@@ -293,17 +294,18 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
   }
   if (form.type == 'act') {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
-    var hand = (form.parent) ? 'up' : 'right'
-    var suggestions = (form.parent) ? h('p', [
-      h('span.btn-group', [suggestBtn('Like', 'likes this'), suggestBtn('Dislike', 'dislikes this')]),
-      ' ', h('span.btn-group', [suggestBtn('Love', 'loves this'), suggestBtn('Hate', 'hates this')]),
-      ' ', h('span.btn-group', [suggestBtn('Agree', 'agrees with this'), suggestBtn('Disagree', 'disagrees with this')]),
-      ' ', h('span.btn-group', [suggestBtn('Confirm', 'confirms this'), suggestBtn('Deny', 'denies this')])
+    var hand = (isReply) ? 'up' : 'right'
+    var suggestions = (isReply) ? h('p', [
+      h('span.btn-group', [suggestBtn('Like', 'liked'), suggestBtn('Dislike', 'disliked')]),
+      ' ', h('span.btn-group', [suggestBtn('Love', 'loved'), suggestBtn('Hate', 'hated')]),
+      ' ', h('span.btn-group', [suggestBtn('Agree', 'agreed with'), suggestBtn('Disagree', 'disagreed with')]),
+      ' ', h('span.btn-group', [suggestBtn('Confirm', 'confirmed'), suggestBtn('Deny', 'denied')])
     ]) : ''
+    var preview = (isReply) ? (form.preview + ' this.') : form.preview
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('p.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true, nicknames: nicknameMap })])
+        h('p.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(preview, { inline: true, nicknames: nicknameMap })])
       ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
         suggestions,
@@ -322,7 +324,7 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
         h('span.pull-right', [
           jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
           ' / ',
-          h('strong', jsa('action', events.setPublishFormType, { id: form.id, type: 'act' }))
+          h('strong', jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }))
         ]),
         h('button.btn.btn-default', 'Post'),
         ' ',
