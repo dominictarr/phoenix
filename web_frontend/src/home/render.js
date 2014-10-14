@@ -55,7 +55,7 @@ function header(events, uId) {
 // =========
 
 function feedPage(state) {
-  var events = state.feed.filter(function(msg) { return msg.type != 'text' })
+  var events = state.feed.filter(function(msg) { return msg.type != 'text' && !msg.message.repliesTo })
   var texts = state.feed.filter(function(msg) { return msg.type == 'text' })
   return h('.feed-page.row', comren.columns({
     left: [comren.feed(state, events, state.pagination)],
