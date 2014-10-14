@@ -52,14 +52,6 @@ var randomcat = exports.randomcat = function() {
   return img('/img/loading/'+cat+'.gif')
 }
 
-// felix the phoenix
-var mascot = exports.mascot = function(quote) {
-  return h('.class', [
-    img('/img/logo.png'),
-    h('strong', [h('small', quote)])
-  ])
-}
-
 function notHidden(msg) {
   return !msg.hidden
 }
@@ -85,14 +77,37 @@ var feed = exports.feed = function(state, feed, pagination, reverse) {
   return h('.feed', feed)
 }
 
-// subfeed view
+// message thread view
 // - `state`: full application state
-// - `feed`: which feed to render
-// - `reverse`: bool, reverse the feed?
-var subfeed = exports.subfeed = function(state, feed, reverse) {
-  var messages = feed.filter(notHidden).map(message.bind(null, state))
-  if (reverse) messages.reverse()
-  return h('.feed.subfeed', messages)
+// - `msg`: which message's thread to render
+var msgThread = exports.msgThread = function(state, msg) {
+  return h('.feed', [
+    message(state, msg),
+    msgThreadTree(state, msg)
+  ])
+}
+
+// helper, recursively renders reply-tree of a thread
+function msgThreadTree(state, msg) {
+  // collect replies
+  var replies = []
+  ;(state.feedReplies[msg.idStr] || []).forEach(function(replyData) {
+    // fetch and render message
+    var msgi  = state.messageMap[replyData.idStr] // look up index
+    var reply = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+    if (reply && reply.type == 'text' && notHidden(reply)) {
+      replies.push(message(state, reply))
+
+      // build and render subtree
+      var subtree = msgThreadTree(state, reply)
+      if (subtree)
+        replies.push(subtree)
+    }
+  })
+
+  if (replies.length)
+    return h('.feed.subfeed', replies)
+  return ''
 }
 
 // feed message renderer
@@ -106,7 +121,7 @@ var message = exports.message = function(state, msg) {
     case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
     case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.message.nickname, state.nicknameMap)
     case 'act': return mercury.partial(messageEvent, msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain, state.nicknameMap)
-    case 'text': main = mercury.partial(messageText, msg, state.events, state.feedReplies[msg.idStr], state.feedRebroadcasts[msg.idStr], state.nicknameMap); break
+    case 'text': main = mercury.partial(messageText, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -115,6 +130,15 @@ var message = exports.message = function(state, msg) {
   if (typeof publishFormMap[formId] != 'undefined') {
     var i = publishFormMap[formId]
     main = h('div', [main, h('.message-reply', publishForm(publishForms[i], state.events, state.user, state.nicknameMap))])
+  }
+
+  // helper to lookup messages
+  function lookupAll(index) {
+    if (!index || !index.length) return []
+    return index.map(function(entry) {
+      var msgi  = state.messageMap[entry.idStr]
+      return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+    })
   }
 
   return main
@@ -131,7 +155,7 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
     var authorStr = util.toHexString(author)
     var authorNick = nicknameMap[authorStr] || authorStr
     header = h('p', [
-      userlink(author, util.escapePlain(authorNick)),
+      userlink(author, authorNick),
       h('small.message-ctrls', [
         ' - ',
         util.prettydate(new Date(msg.message.rebroadcasts.timestamp||0), true)
@@ -139,12 +163,12 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
       (replyIdStr) ?
         h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
         : '',
-      h('span.repliesto', [' shared by ', userlink(msg.author, util.escapePlain(msg.authorNickname))])
+      h('span.repliesto', [' shared by ', userlink(msg.author, msg.authorNickname)])
     ])
   } else {
     // normal message
     header = h('p', [
-      userlink(msg.author, util.escapePlain(msg.authorNickname)),
+      userlink(msg.author, msg.authorNickname),
       h('small.message-ctrls', [
         ' - ',
         util.prettydate(new Date(msg.timestamp), true)
@@ -155,38 +179,91 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
     ])
   }
 
-  // stats
+  // replies
   var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
-  var nReacts  = (replies) ? replies.filter(function(r) { return (r.type == 'act') }).length : 0
-  var nDups    = (rebroadcasts) ? rebroadcasts.length : 0
-  var stats = []
-  if (nReplies) stats.push(nReplies + ' replies')
-  if (nReacts)  stats.push(nReacts + ' reactions')
-  if (nDups)    stats.push(nDups + ' shares')
-  if (stats.length)
-    stats = a('#/msg/'+msg.idStr, stats.join(' '))
-  else
-    stats = ''
+  var replyStr = (nReplies) ? a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
 
+  // reactions
+  var reactionsStr = []
+  var reactMap = {}
+  // create a map of reaction-text -> author-nicknames
+  ;(replies || []).forEach(function(reply) {
+    if (reply && reply.type == 'act') {
+      var react = ''+reply.message.plain
+      if (!reactMap[react])
+        reactMap[react] = []
+      if (notYetAdded(reactMap[react], reply))
+        reactMap[react].push({ id: reply.author, nick: reply.authorNickname })
+    }
+  })
+  function notYetAdded(list, reply) { // helper to remove duplicate reactions by a user
+    var nick = reply.authorNickname
+    return list.filter(function(r) { return r.nick == nick }).length === 0
+  }
+  // render the list of reactions
+  for (var react in reactMap) {
+    // add separators
+    if (reactionsStr.length)
+      reactionsStr.push(', ')
+
+    // generate the "bob and N others ___ this" phrase
+    var reactors = reactMap[react]
+    var str = [userlink(reactors[0].id, reactors[0].nick)]
+    if (reactors.length > 1) {
+      var theOthers = reactors.slice(1).map(function(r) { return r.nick })
+      str.push(h('a', { href: 'javascript:void()', title: theOthers.join(', ') }, ' and ' + theOthers.length + ' others'))
+    }
+    str.push(' ' + react.trim() + ' this')
+    reactionsStr.push(str)
+  }
+  if (reactionsStr.length) reactionsStr.push('.')
+
+  // rebroadcasts
+  var rebroadcastsStr = []
+  if (rebroadcasts.length) {
+    rebroadcasts = onePerAuthor(rebroadcasts)
+    rebroadcastsStr.push(userlink(rebroadcasts[0].author, rebroadcasts[0].authorNickname))
+    if (rebroadcasts.length > 1) {
+      var theOthers = rebroadcasts.slice(1).map(function(r) { return r.authorNickname })
+      rebroadcastsStr.push(h('a', { href: 'javascript:void()', title: theOthers.join(', ') }, ' and ' + theOthers.length + ' others'))
+    }
+    rebroadcastsStr.push(' shared this.')
+  }
+  function onePerAuthor(list) {
+    // helper to reduce the list of messages to 1 per author
+    var ids = {}
+    return list.filter(function(msg) {
+      if (!ids[msg.authorStr]) {
+        ids[msg.authorStr] = 1
+        return true
+      }
+      return false
+    })
+  }
+
+  // body
   return h('.panel.panel-default', [
     h('.panel-body', [
       header,
       new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
-      (events.replyToMsg && events.reactToMsg && events.shareMsg) ?
-        (h('p', [
-          h('small', [
-            stats,
-            h('span.message-ctrls.pull-right', [
-              jsa([icon('pencil'), 'reply'], events.replyToMsg, { msg: msg }),
+      (events.replyToMsg && events.reactToMsg && events.shareMsg)
+        ? (h('p', [
+          h('small.message-ctrls', [
+            replyStr,
+            h('span.pull-right', [
+              jsa(icon('pencil'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
               ' ',
-              jsa([icon('hand-up'), 'react'], events.reactToMsg, { msg: msg }),
+              jsa(icon('hand-up'), events.reactToMsg, { msg: msg }, { title: 'React' }),
               ' ',
-              jsa([icon('share-alt'), 'share'], events.shareMsg, { msg: msg })
+              jsa(icon('share-alt'), events.shareMsg, { msg: msg }, { title: 'Share' })
             ])
           ]),
-        ])) :
-        ''
-    ])
+        ]))
+        : ''
+    ]),
+    (reactionsStr.length || rebroadcastsStr.length)
+      ? h('.panel-footer', h('small', [reactionsStr, ' ', rebroadcastsStr]))
+      : ''
   ])
 }
 
@@ -202,21 +279,15 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
   var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
   return h('.phoenix-event', [
     h('span.event-icon.glyphicon'+icon),
-    h('.event-body', [
-      h('p', [
-        h('small.message-ctrls', [
-          util.prettydate(new Date(msg.timestamp), true)
-        ]),
-        (replyIdStr) ?
-          h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
-          : '',
-      ]),
-      h('p', [userlink(msg.author, util.escapePlain(msg.authorNickname)), new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })])
-    ]),
+    h('p.event-body', [
+      userlink(msg.author, msg.authorNickname),
+      new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap })
+    ])
   ])
 }
 
 var publishForm = exports.publishForm = function(form, events, user, nicknameMap) {
+  var isReply = !!form.parent
   if (form.type == 'text') {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
     return  h('.publish-wrapper', [
@@ -234,29 +305,37 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
           'ev-keydown': [valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id }), events.mentionBoxKeypress],
           'ev-input': events.mentionBoxInput
         })),
-        h('button.btn.btn-default', 'Post'),
-        ' ',
-        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
         h('span.pull-right', [
           h('strong', jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
           ' / ',
-          jsa('action', events.setPublishFormType, { id: form.id, type: 'act' })
-        ])
+          jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' })
+        ]),
+        h('button.btn.btn-default', 'Post'),
+        ' ',
+        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
       ])
     ])
   }
   if (form.type == 'act') {
     var previewDisplay = (!!form.preview) ? 'block' : 'none'
-    var hand = (form.parent) ? 'up' : 'right'
+    var hand = (isReply) ? 'up' : 'right'
+    var suggestions = (isReply) ? h('p', [
+      h('span.btn-group', [suggestBtn('Like', 'liked'), suggestBtn('Dislike', 'disliked')]),
+      ' ', h('span.btn-group', [suggestBtn('Love', 'loved'), suggestBtn('Hate', 'hated')]),
+      ' ', h('span.btn-group', [suggestBtn('Agree', 'agreed with'), suggestBtn('Disagree', 'disagreed with')]),
+      ' ', h('span.btn-group', [suggestBtn('Confirm', 'confirmed'), suggestBtn('Deny', 'denied')])
+    ]) : ''
+    var preview = (isReply) ? (form.preview + ' this.') : form.preview
     return h('.publish-wrapper', [
       h('.phoenix-event', { style: { display: previewDisplay } }, [
         h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(form.preview, { inline: true, nicknames: nicknameMap })])
+        h('p.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(preview, { inline: true, nicknames: nicknameMap })])
       ]),      
       h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
+        suggestions,
         h('p', h('input.form-control', {
           name: 'publishText',
-          placeholder: form.textPlaceholder,
+          // placeholder: form.textPlaceholder,
           value: new CounterTriggerHook(form.textValue||'', form.setValueTrigger),
           'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
           'ev-keyup': [
@@ -265,17 +344,21 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
             valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id })
           ],
           'ev-input': events.mentionBoxInput
-        })),          
-        h('button.btn.btn-default', 'Post'),
-        ' ',
-        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : '',
+        })),
         h('span.pull-right', [
           jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
           ' / ',
-          h('strong', jsa('action', events.setPublishFormType, { id: form.id, type: 'act' }))
-        ])
+          h('strong', jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }))
+        ]),
+        h('button.btn.btn-default', 'Post'),
+        ' ',
+        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
       ])
     ])
+  }
+
+  function suggestBtn(label, text) {
+    return jsa(label, events.setPublishFormText, { id: form.id, publishText: text }, { className: 'btn btn-default btn-xs' })
   }
 }
 

@@ -29,7 +29,6 @@ function createEvents() {
     'follow',
     'unfollow',
     'sync',
-    'toggleLayout',
     'replyToMsg',
     'reactToMsg',
     'shareMsg'

@@ -23,14 +23,13 @@ function render(state) {
     stylesheet('/css/pub.css'),
     mercury.partial(header),
     mercury.partial(comren.connStatus, state.events, state.conn),
-    h('.container', page),
-    mercury.partial(footer, state.events)
+    h('.container-fluid', page)
   ])
 }
 
 function header(events, uId) {
   return h('.nav.navbar.navbar-default', [
-    h('.container', [
+    h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
       h('ul.nav.navbar-nav', [
         h('li', a('#/', 'members'))
@@ -39,19 +38,12 @@ function header(events, uId) {
   ])
 }
 
-function footer(events) {
-  return h('.container', [
-    h('br'), h('br'),
-    h('p', a('#', 'toggle layout', { 'ev-click': valueEvents.click(events.toggleLayout, null, { preventDefault: true }) }))
-  ])
-}
-
 // Members Page
 // ============
 
 function membersPage(state) {
   return h('.members-page.row', [
-    h('.col-xs-7', [members(state.profiles), mercury.partial(comren.mascot, 'Welcome to the phoenix network!')])
+    h('.col-xs-7', members(state.profiles))
   ])
 }
 
@@ -75,7 +67,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state, profile.feed, state.pagination, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state, profile.feed, state.pagination, true)],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }

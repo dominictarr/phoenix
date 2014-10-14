@@ -68,6 +68,9 @@ exports.setPublishFormText = function(state, data) {
 
   // update internal data
   form.textValue.set(data.publishText)
+  form.textRows.set((data.publishText) ? 3 : 1)
+  form.preview.set(data.publishText)
+  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.setPublishFormType = function(state, data) {
@@ -344,14 +347,6 @@ exports.removeServer = function(state, data) {
   bus.removeServer(state, [data.hostname, data.port], function(err) {
     if (err) alert(err.toString())
   })
-}
-
-exports.toggleLayout = function(state) {
-  var curr = state.layout()
-  if (curr[0][0] == 'main')
-    state.layout.set([['side', 4], ['main', 8]])
-  else
-    state.layout.set([['main', 7], ['side', 5]])
 }
 
 exports.replyToMsg = function(state, data) {

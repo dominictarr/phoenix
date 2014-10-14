@@ -31,14 +31,13 @@ function render(state) {
     mercury.partial(com.suggestBox, state.suggestBox),
     mercury.partial(header, state.events, state.user.idStr),
     mercury.partial(comren.connStatus, state.events, state.conn),
-    h('.container', page),
-    mercury.partial(footer, state.events)
+    h('.container-fluid', page)
   ])
 }
 
 function header(events, uId) {
   return h('.nav.navbar.navbar-default', [
-    h('.container', [
+    h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
       h('ul.nav.navbar-nav', [
         h('li', a('#/', 'latest')),
@@ -52,28 +51,23 @@ function header(events, uId) {
   ])
 }
 
-function footer(events) {
-  return h('.container', [
-    h('br'), h('br'),
-    h('p', a('#', 'toggle layout', { 'ev-click': valueEvents.click(events.toggleLayout, null, { preventDefault: true }) }))
-  ])
-}
-
 // Feed Page
 // =========
 
 function feedPage(state) {
+  var events = state.feed.filter(function(msg) { return msg.type != 'text' && !msg.message.repliesTo })
+  var texts = state.feed.filter(function(msg) { return msg.type == 'text' })
   return h('.feed-page.row', comren.columns({
-    main: [comren.feed(state, state.feed, state.pagination), mercury.partial(comren.mascot, 'Dont let life get you down!')],
-    side: [feedControls(state), mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
-  }, state.layout))
+    left: [comren.feed(state, events, state.pagination)],
+    main: [comren.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, texts, state.pagination)],
+    right: [feedControls(state), mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
+  }, [['left', 3], ['main', 5], ['right', 4]]))
 }
 
 function feedControls(state) {
   var events = state.events
   var lastSync = state.lastSync
   return h('.feed-ctrls', [
-    comren.publishForm(state.publishForms[0], events, state.user, state.nicknameMap),
     h('p', 'Last synced '+((lastSync) ? util.prettydate(lastSync, true) : '---')),
     h('p', [
       comren.syncButton(events, state.isSyncing),
@@ -108,7 +102,7 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state, profile.feed, state.pagination, true), mercury.partial(comren.mascot, 'Is it hot in here?')],
+    main: [comren.feed(state, profile.feed, state.pagination, true)],
     side: [mercury.partial(profileControls, state.events, profile)]
   }, state.layout))
 }
@@ -128,6 +122,7 @@ function profileControls(events, profile) {
 // ============
 
 function messagePage(state, msgid) {
+  // lookup the main message
   var msgi = state.messageMap[msgid]
   var msg = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
   if (!msg) {
@@ -136,33 +131,10 @@ function messagePage(state, msgid) {
     ])
   }
 
-  // build replies feed
-  var replies = (state.feedReplies[msg.idStr] || []).map(function(reply) {
-    var msgi = state.messageMap[reply.idStr]
-    return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
-  })
-
-  // fetch rebroadcast data
-  var dups = (state.feedRebroadcasts[msg.idStr] || []).map(function(dup) {
-    var msgi = state.messageMap[dup.idStr]
-    var msg = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined    
-    if (!msg) return
-    return h('span', [
-      'Shared by ',
-      comren.userlink(msg.author, util.escapePlain(msg.authorNickname)),
-      ' ',
-      util.prettydate(new Date(msg.timestamp), true),
-      h('br')
-    ])
-  })
-
   // render
   return h('.message-page.row', comren.columns({
-    main: [h('.feed.nobar', [
-      comren.message(state, msg),
-      comren.subfeed(state, replies, true)
-    ])],
-    side: dups
+    main: comren.msgThread(state, msg),
+    side: []
   }, state.layout))
 }
 
@@ -174,8 +146,7 @@ function networkPage(state) {
     main: [
       h('h3', 'Pub Servers'),
       mercury.partial(networkControls, state.events, state.lastSync, state.isSyncing),
-      pubservers(state.events, state.servers),
-      mercury.partial(comren.mascot, 'Who\'s cooking chicken?')
+      pubservers(state.events, state.servers)
     ],
     side: [mercury.partial(profileLinks, state.profiles)]
   }, state.layout))
