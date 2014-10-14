@@ -20,7 +20,6 @@ var defaults = {
   homeApp: {
     // gui state
     route: '',
-    layout: [['main', 7], ['side', 5]],
     publishForms: [],
     publishFormMap: {},
     suggestBox: {
