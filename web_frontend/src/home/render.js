@@ -102,9 +102,10 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
+    gutter: [],
     main: [comren.feed(state, profile.feed, state.pagination, true)],
     side: [mercury.partial(profileControls, state.events, profile)]
-  }, state.layout))
+  }, [['gutter', 1], ['main', 6], ['side', 3]]))
 }
 
 function profileControls(events, profile) {
@@ -133,9 +134,9 @@ function messagePage(state, msgid) {
 
   // render
   return h('.message-page.row', comren.columns({
-    main: comren.msgThread(state, msg),
-    side: []
-  }, state.layout))
+    left: [],
+    main: comren.msgThread(state, msg)
+  }, [['left', 1], ['main', 6]]))
 }
 
 // Network Page
