@@ -192,13 +192,21 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
       var react = ''+reply.message.plain
       if (!reactMap[react])
         reactMap[react] = []
-      reactMap[react].push({ id: reply.author, nick: reply.authorNickname })
+      if (notYetAdded(reactMap[react], reply))
+        reactMap[react].push({ id: reply.author, nick: reply.authorNickname })
     }
   })
+  function notYetAdded(list, reply) { // helper to remove duplicate reactions by a user
+    var nick = reply.authorNickname
+    return list.filter(function(r) { return r.nick == nick }).length === 0
+  }
   // render the list of reactions
   for (var react in reactMap) {
+    // add separators
     if (reactionsStr.length)
       reactionsStr.push(', ')
+
+    // generate the "bob and N others ___ this" phrase
     var reactors = reactMap[react]
     var str = [userlink(reactors[0].id, reactors[0].nick)]
     if (reactors.length > 1)
@@ -211,10 +219,22 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
   // rebroadcasts
   var rebroadcastsStr = []
   if (rebroadcasts.length) {
+    rebroadcasts = onePerAuthor(rebroadcasts)
     rebroadcastsStr.push(userlink(rebroadcasts[0].author, rebroadcasts[0].authorNickname))
     if (rebroadcasts.length > 1)
       rebroadcastsStr.push(' and ' + (rebroadcasts.length - 1) + ' others')
     rebroadcastsStr.push(' shared this.')
+  }
+  function onePerAuthor(list) {
+    // helper to reduce the list of messages to 1 per author
+    var ids = {}
+    return list.filter(function(msg) {
+      if (!ids[msg.authorStr]) {
+        ids[msg.authorStr] = 1
+        return true
+      }
+      return false
+    })
   }
 
   // body
