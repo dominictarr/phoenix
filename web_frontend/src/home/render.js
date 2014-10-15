@@ -16,6 +16,8 @@ function render(state) {
   var page
   if (state.route == 'network') {
     page = networkPage(state)
+  } else if (state.route == 'inbox') {
+    page = inboxPage(state)
   } else if (state.route.indexOf('profile/') === 0) {
     var profid = state.route.slice(8)
     page = profilePage(state, profid)
@@ -41,6 +43,7 @@ function header(events, uId, isSyncing) {
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
       h('ul.nav.navbar-nav', [
         h('li', a('#/', 'latest')),
+        h('li', a('#/inbox', 'inbox')),
         h('li', a('#/profile/' + uId, 'profile')),
         h('li', a('#/network', 'network'))
       ]),
@@ -60,14 +63,25 @@ function feedPage(state) {
   var events = state.feed.filter(function(msg) { return msg.type != 'text' && !msg.message.repliesTo })
   var texts = state.feed.filter(function(msg) { return msg.type == 'text' })
   return h('.feed-page.row', comren.columns({
-    left: [comren.feed(state, events, state.pagination)],
+    gutter: '',
     main: [comren.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, texts, state.pagination)],
-    right: [mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
-  }, [['left', 3], ['main', 5], ['right', 4]]))
+    side: [comren.feed(state, events, state.pagination)]
+  }, [['gutter', 1], ['main', 5], ['side', 5]]))
+}
+
+
+// Inbox Page
+// ==========
+
+function inboxPage(state) {
+  return h('.inbox-page.row', comren.columns({
+    gutter: '',
+    main: [mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
+  }, [['gutter', 1], ['main', 7]]))
 }
 
 function notifications(nicknameMap, events, notes) {
-  return h('table.table.table-hover.notifications', h('tbody', notes.map(notification.bind(null, nicknameMap, events)).reverse()))
+  return h('.panel.panel-default', h('table.table.table-hover.notifications', h('tbody', notes.map(notification.bind(null, nicknameMap, events)).reverse())))
 }
 
 function notification(nicknameMap, events, note) {
@@ -76,7 +90,6 @@ function notification(nicknameMap, events, note) {
     h('td', new widgets.Markdown(note.msgText, { inline: true, nicknames: nicknameMap }))
   ])
 }
-
 
 
 // Profile Page
@@ -94,7 +107,7 @@ function profilePage(state, profid) {
     gutter: [],
     main: [comren.feed(state, profile.feed, state.pagination, true)],
     side: [mercury.partial(profileControls, state.events, profile)]
-  }, [['gutter', 1], ['main', 6], ['side', 3]]))
+  }, [['gutter', 1], ['main', 5], ['side', 3]]))
 }
 
 function profileControls(events, profile) {
