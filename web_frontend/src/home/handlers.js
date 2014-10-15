@@ -267,6 +267,11 @@ exports.mentionBoxKeypress = function(state, e) {
   }
 }
 
+exports.mentionBoxBlur = function(state) {
+  if (state.suggestBox.active())
+    state.suggestBox.active.set(false)
+}
+
 // TEMPORARY helper
 function fireEvent(element,event){
   if (document.createEventObject) {

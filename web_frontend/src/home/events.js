@@ -16,6 +16,7 @@ function createEvents() {
     // mention box behaviors
     'mentionBoxInput',
     'mentionBoxKeypress',
+    'mentionBoxBlur',
 
     // network page
     'addServer',

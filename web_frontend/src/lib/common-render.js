@@ -312,7 +312,8 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
           'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
           'ev-keyup': mercury.valueEvent(events.updatePublishFormText, { id: form.id }),
           'ev-keydown': [valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id }), events.mentionBoxKeypress],
-          'ev-input': events.mentionBoxInput
+          'ev-input': events.mentionBoxInput,
+          'ev-blur': events.mentionBoxBlur
         })),
         h('span.pull-right', [
           h('strong', jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
@@ -352,7 +353,8 @@ var publishForm = exports.publishForm = function(form, events, user, nicknameMap
             mercury.valueEvent(events.updatePublishFormText, { id: form.id }), 
             valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id })
           ],
-          'ev-input': events.mentionBoxInput
+          'ev-input': events.mentionBoxInput,
+          'ev-blur': events.mentionBoxBlur
         })),
         h('span.pull-right', [
           jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
