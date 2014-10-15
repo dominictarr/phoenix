@@ -224,7 +224,7 @@ exports.mentionBoxInput = function(state, e) {
 exports.mentionBoxKeypress = function(state, e) {
   if (state.suggestBox.active()) {
     var sel = state.suggestBox.selection()
-    if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13 || e.keyCode == 27)
+    if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13 || e.keyCode == 9|| e.keyCode == 27)
       e.preventDefault()
 
     // up
@@ -239,8 +239,8 @@ exports.mentionBoxKeypress = function(state, e) {
     if (e.keyCode == 27)
       state.suggestBox.active.set(false)
 
-    // enter
-    if (e.keyCode == 13) {
+    // enter or tab
+    if (e.keyCode == 13 || e.keyCode == 9) {
       if (state.suggestBox.filtered.getLength()) {
         var choice = state.suggestBox.filtered.get(state.suggestBox.selection())
         if (choice && choice.value) {
