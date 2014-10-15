@@ -16,6 +16,8 @@ function render(state) {
   var page
   if (state.route == 'network') {
     page = networkPage(state)
+  } else if (state.route == 'inbox') {
+    page = inboxPage(state)
   } else if (state.route.indexOf('profile/') === 0) {
     var profid = state.route.slice(8)
     page = profilePage(state, profid)
@@ -31,22 +33,23 @@ function render(state) {
     mercury.partial(com.suggestBox, state.suggestBox),
     mercury.partial(header, state.events, state.user.idStr, state.isSyncing),
     mercury.partial(comren.connStatus, state.events, state.conn),
-    h('.container-fluid', page)
+    h('.container', page)
   ])
 }
 
 function header(events, uId, isSyncing) {
   return h('.nav.navbar.navbar-default', [
-    h('.container-fluid', [
+    h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
       h('ul.nav.navbar-nav', [
         h('li', a('#/', 'latest')),
+        h('li', a('#/inbox', 'inbox')),
         h('li', a('#/profile/' + uId, 'profile')),
         h('li', a('#/network', 'network'))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li', a('#', 'your intro token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }, { preventDefault: true }) })),
-        h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add friend')),
+        h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add contact')),
         h('li', comren.syncButton(events, isSyncing))
       ])
     ])
@@ -60,23 +63,33 @@ function feedPage(state) {
   var events = state.feed.filter(function(msg) { return msg.type != 'text' && !msg.message.repliesTo })
   var texts = state.feed.filter(function(msg) { return msg.type == 'text' })
   return h('.feed-page.row', comren.columns({
-    left: [comren.feed(state, events, state.pagination)],
+    gutter: '',
     main: [comren.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, texts, state.pagination)],
-    right: [mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
-  }, [['left', 3], ['main', 5], ['right', 4]]))
+    side: [comren.feed(state, events, state.pagination)]
+  }, [['main', 7], ['side', 5]]))
+}
+
+
+// Inbox Page
+// ==========
+
+function inboxPage(state) {
+  return h('.inbox-page.row', comren.columns({
+    main: [mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
+  }, [['main', 12]]))
 }
 
 function notifications(nicknameMap, events, notes) {
-  return h('table.table.table-hover.notifications', h('tbody', notes.map(notification.bind(null, nicknameMap, events)).reverse()))
+  return h('.panel.panel-default', h('table.table.table-hover.notifications', h('tbody', notes.map(notification.bind(null, nicknameMap, events)).reverse())))
 }
 
 function notification(nicknameMap, events, note) {
   return h('tr', { 'ev-click': valueEvents.click(events.openMsg, { idStr: note.msgIdStr }, { preventDefault: true }) }, [
     h('td', note.authorNickname),
-    h('td', new widgets.Markdown(note.msgText, { inline: true, nicknames: nicknameMap }))
+    h('td', new widgets.Markdown(note.msgText, { inline: true, nicknames: nicknameMap })),
+    h('td', util.prettydate(new Date(note.timestamp||0), true))
   ])
 }
-
 
 
 // Profile Page
@@ -91,10 +104,9 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    gutter: [],
     main: [comren.feed(state, profile.feed, state.pagination, true)],
     side: [mercury.partial(profileControls, state.events, profile)]
-  }, [['gutter', 1], ['main', 6], ['side', 3]]))
+  }, [['main', 7], ['side', 5]]))
 }
 
 function profileControls(events, profile) {
@@ -123,9 +135,8 @@ function messagePage(state, msgid) {
 
   // render
   return h('.message-page.row', comren.columns({
-    left: [],
     main: comren.msgThread(state, msg)
-  }, [['left', 1], ['main', 6]]))
+  }, [['main', 8]]))
 }
 
 // Network Page
@@ -133,7 +144,6 @@ function messagePage(state, msgid) {
 
 function networkPage(state) {
   return h('.network-page.row', comren.columns({
-    gutter: [],
     col1: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', [
         'Following',
@@ -152,7 +162,7 @@ function networkPage(state) {
       ])),
       h('.panel-body', serverLinks(state.events, state.servers))
     ])
-  }, [['gutter', 1], ['col1', 2], ['col2', 2], ['col3', 2]]))
+  }, [['col1', 3], ['col2', 3], ['col3', 3]]))
 }
 
 function isFollowing(p) { return p.isFollowing }

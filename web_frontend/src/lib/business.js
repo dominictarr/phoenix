@@ -240,10 +240,10 @@ function indexRebroadcasts(state, msg, msgMap) {
   try {
     var id = util.toHexString(msg.message.rebroadcasts.$msg)
     if (id) {
-      var dr = state.feedRebroadcasts()
-      if (!dr[id]) dr[id] = []
-      dr[id].push({ idStr: msg.idStr })
-      state.feedRebroadcasts.set(dr)
+      var fr = state.feedRebroadcasts()
+      if (!fr[id]) fr[id] = []
+      fr[id].push({ idStr: msg.idStr })
+      state.feedRebroadcasts.set(fr)
 
       // hide the rebroadcast if the original is already in the feed
       if (msgMap[id]) {
@@ -258,15 +258,18 @@ function indexRebroadcasts(state, msg, msgMap) {
 
 function indexMentions(state, msg) {
   // look for mentions of the current user and create notifications for them
+  var fr = state.feedRebroadcasts()
   var mentions = Array.isArray(msg.message.mentions) ? msg.message.mentions : [msg.message.mentions]
   for (var i=0; i < mentions.length; i++) {
     try {
       var mention = mentions[i]
-      if (util.toHexString(mention.$feed) != state.user.idStr()) continue
+      if (util.toHexString(mention.$feed) != state.user.idStr()) continue // not for current user
+      if (msg.message.rebroadcasts && fr[util.toHexString(msg.message.rebroadcasts.$msg)]) continue // already handled
       state.notifications.push(models.notification({
         msgIdStr:       msg.idStr,
         authorNickname: msg.authorNickname,
-        msgText:        msg.message.plain
+        msgText:        msg.message.plain.split('\n')[0],
+        timestamp:      msg.timestamp
       }))
     } catch(e) { console.warn('failed to index mention', e) }
   }
