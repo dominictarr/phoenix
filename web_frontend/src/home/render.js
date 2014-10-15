@@ -33,13 +33,13 @@ function render(state) {
     mercury.partial(com.suggestBox, state.suggestBox),
     mercury.partial(header, state.events, state.user.idStr, state.isSyncing),
     mercury.partial(comren.connStatus, state.events, state.conn),
-    h('.container-fluid', page)
+    h('.container', page)
   ])
 }
 
 function header(events, uId, isSyncing) {
   return h('.nav.navbar.navbar-default', [
-    h('.container-fluid', [
+    h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
       h('ul.nav.navbar-nav', [
         h('li', a('#/', 'latest')),
@@ -66,7 +66,7 @@ function feedPage(state) {
     gutter: '',
     main: [comren.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, texts, state.pagination)],
     side: [comren.feed(state, events, state.pagination)]
-  }, [['gutter', 1], ['main', 5], ['side', 5]]))
+  }, [['main', 7], ['side', 5]]))
 }
 
 
@@ -75,9 +75,8 @@ function feedPage(state) {
 
 function inboxPage(state) {
   return h('.inbox-page.row', comren.columns({
-    gutter: '',
     main: [mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
-  }, [['gutter', 1], ['main', 7]]))
+  }, [['main', 12]]))
 }
 
 function notifications(nicknameMap, events, notes) {
@@ -104,10 +103,9 @@ function profilePage(state, profid) {
     ])
   }
   return h('.profile-page.row', comren.columns({
-    gutter: [],
     main: [comren.feed(state, profile.feed, state.pagination, true)],
     side: [mercury.partial(profileControls, state.events, profile)]
-  }, [['gutter', 1], ['main', 5], ['side', 3]]))
+  }, [['main', 7], ['side', 5]]))
 }
 
 function profileControls(events, profile) {
@@ -136,9 +134,8 @@ function messagePage(state, msgid) {
 
   // render
   return h('.message-page.row', comren.columns({
-    left: [],
     main: comren.msgThread(state, msg)
-  }, [['left', 1], ['main', 6]]))
+  }, [['main', 8]]))
 }
 
 // Network Page
@@ -146,7 +143,6 @@ function messagePage(state, msgid) {
 
 function networkPage(state) {
   return h('.network-page.row', comren.columns({
-    gutter: [],
     col1: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', [
         'Following',
@@ -165,7 +161,7 @@ function networkPage(state) {
       ])),
       h('.panel-body', serverLinks(state.events, state.servers))
     ])
-  }, [['gutter', 1], ['col1', 2], ['col2', 2], ['col3', 2]]))
+  }, [['col1', 3], ['col2', 3], ['col3', 3]]))
 }
 
 function isFollowing(p) { return p.isFollowing }
