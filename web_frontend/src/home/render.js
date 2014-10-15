@@ -49,7 +49,7 @@ function header(events, uId, isSyncing) {
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li', a('#', 'your intro token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }, { preventDefault: true }) })),
-        h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add friend')),
+        h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add contact')),
         h('li', comren.syncButton(events, isSyncing))
       ])
     ])
@@ -86,7 +86,8 @@ function notifications(nicknameMap, events, notes) {
 function notification(nicknameMap, events, note) {
   return h('tr', { 'ev-click': valueEvents.click(events.openMsg, { idStr: note.msgIdStr }, { preventDefault: true }) }, [
     h('td', note.authorNickname),
-    h('td', new widgets.Markdown(note.msgText, { inline: true, nicknames: nicknameMap }))
+    h('td', new widgets.Markdown(note.msgText, { inline: true, nicknames: nicknameMap })),
+    h('td', util.prettydate(new Date(note.timestamp||0), true))
   ])
 }
 

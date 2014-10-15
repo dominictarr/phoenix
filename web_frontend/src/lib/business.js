@@ -266,7 +266,8 @@ function indexMentions(state, msg) {
       state.notifications.push(models.notification({
         msgIdStr:       msg.idStr,
         authorNickname: msg.authorNickname,
-        msgText:        msg.message.plain
+        msgText:        msg.message.plain.split('\n')[0],
+        timestamp:      msg.timestamp
       }))
     } catch(e) { console.warn('failed to index mention', e) }
   }
