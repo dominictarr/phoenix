@@ -213,7 +213,8 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
       var theOthers = reactors.slice(1).map(function(r) { return r.nick })
       str.push(h('a', { href: 'javascript:void()', title: theOthers.join(', ') }, ' and ' + theOthers.length + ' others'))
     }
-    str.push(' ' + react.trim() + ' this')
+    str.push(new widgets.Markdown(' ' + react.trim(), { nicknames: nicknameMap, inline: true }))
+    str.push(' this')
     reactionsStr.push(str)
   }
   if (reactionsStr.length) reactionsStr.push('.')
