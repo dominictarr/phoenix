@@ -171,20 +171,49 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
       userlink(msg.author, msg.authorNickname),
       h('small.message-ctrls', [
         ' - ',
-        util.prettydate(new Date(msg.timestamp), true)
+        a('#/msg/'+msg.idStr, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
       ]),
       (replyIdStr) ?
         h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
-        : '',
+        : ''
     ])
   }
 
-  // replies
+  // footer
   var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
   var replyStr = (nReplies) ? a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
+  var reactionsStr = renderReactions(replies, nicknameMap)
+  var rebroadcastsStr = renderRebroadcasts(rebroadcasts)
 
-  // reactions
-  var reactionsStr = []
+  // body
+  return h('.panel.panel-default', [
+    h('.panel-body', [
+      header,
+      new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
+      (events.replyToMsg && events.reactToMsg && events.shareMsg)
+        ? (h('p', [
+          h('small.message-ctrls', [
+            replyStr,
+            h('span.pull-right', [
+              jsa(icon('pencil'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
+              ' ',
+              jsa(icon('hand-up'), events.reactToMsg, { msg: msg }, { title: 'React' }),
+              ' ',
+              jsa(icon('share-alt'), events.shareMsg, { msg: msg }, { title: 'Share' })
+            ])
+          ]),
+        ]))
+        : ''
+    ]),
+    (reactionsStr.length || rebroadcastsStr.length)
+      ? h('.panel-footer', h('small', [reactionsStr, ' ', rebroadcastsStr]))
+      : ''
+  ])
+}
+
+// list of reactions in the footer of messages
+function renderReactions(replies, nicknameMap) {
+  reactionsStr = []
   var reactMap = {}
   // create a map of reaction-text -> author-nicknames
   ;(replies || []).forEach(function(reply) {
@@ -218,8 +247,11 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
     reactionsStr.push(str)
   }
   if (reactionsStr.length) reactionsStr.push('.')
+  return reactionsStr
+}
 
-  // rebroadcasts
+// list of rebroadcasts in the footer of messages
+function renderRebroadcasts(rebroadcasts) {
   var rebroadcastsStr = []
   if (rebroadcasts.length) {
     rebroadcasts = onePerAuthor(rebroadcasts)
@@ -241,31 +273,7 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
       return false
     })
   }
-
-  // body
-  return h('.panel.panel-default', [
-    h('.panel-body', [
-      header,
-      new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
-      (events.replyToMsg && events.reactToMsg && events.shareMsg)
-        ? (h('p', [
-          h('small.message-ctrls', [
-            replyStr,
-            h('span.pull-right', [
-              jsa(icon('pencil'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
-              ' ',
-              jsa(icon('hand-up'), events.reactToMsg, { msg: msg }, { title: 'React' }),
-              ' ',
-              jsa(icon('share-alt'), events.shareMsg, { msg: msg }, { title: 'Share' })
-            ])
-          ]),
-        ]))
-        : ''
-    ]),
-    (reactionsStr.length || rebroadcastsStr.length)
-      ? h('.panel-footer', h('small', [reactionsStr, ' ', rebroadcastsStr]))
-      : ''
-  ])
+  return rebroadcastsStr
 }
 
 // message event-content renderer
