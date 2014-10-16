@@ -94,32 +94,37 @@ exports.submitPublishForm = function(state, data) {
   var str = (form.textValue()).trim()
   if (!str) return
 
-  // make the post
-  if (!form.parent) {
-    if (form.type() == 'text')     bus.publishText(state, str, after)
-    else if (form.type() == 'act') bus.publishAction(state, str, after)
-  } else {
-    if (form.type() == 'text')     bus.publishReply(state, str, form.parent, after)
-    else if (form.type() == 'act') bus.publishReaction(state, str, form.parent, after)
-  }
-  function after(err) {
-    if (err) throw err // :TODO: put in gui
-    bus.fetchFeed(state) // pull down the update
-  }
+  // wait a tick so that the form.textValue can be process by mercury
+  // if we dont, and submitPublishForm was triggered by ctrl+enter...
+  // ...then mercury will not realize that form.textValue changed, and wont clear the input
+  setTimeout(function() {
+    // make the post
+    if (!form.parent) {
+      if (form.type() == 'text')     bus.publishText(state, str, after)
+      else if (form.type() == 'act') bus.publishAction(state, str, after)
+    } else {
+      if (form.type() == 'text')     bus.publishReply(state, str, form.parent, after)
+      else if (form.type() == 'act') bus.publishReaction(state, str, form.parent, after)
+    }
+    function after(err) {
+      if (err) throw err // :TODO: put in gui
+      bus.fetchFeed(state) // pull down the update
+    }
 
-  if (form.permanent) {
-    // reset the form
-    form.textValue.set('')
-    form.textRows.set(1)
-    form.preview.set('')
-    form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
-  } else {
-    // remove the form
-    var m = state.publishFormMap()
-    state.publishForms.splice(m[form.id], 1, null)
-    m[data.id] = undefined
-    state.publishFormMap.set(m)
-  }
+    if (form.permanent) {
+      // reset the form
+      form.textValue.set('')
+      form.textRows.set(1)
+      form.preview.set('')
+      form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
+    } else {
+      // remove the form
+      var m = state.publishFormMap()
+      state.publishForms.splice(m[form.id], 1, null)
+      m[data.id] = undefined
+      state.publishFormMap.set(m)
+    }
+  }, 0)
 }
 
 exports.cancelPublishForm = function(state, data) {
