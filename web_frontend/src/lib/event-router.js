@@ -14,7 +14,8 @@ function EventRouter() {
     if (
       ev.target.nodeName === "A" &&
       ev.target.origin === window.location.origin &&
-      ev.target.hash
+      ev.target.hash &&
+      ev.target.hash == window.location.hash // and if already on the page
     ) {
       router()
     }
