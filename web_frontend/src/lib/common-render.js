@@ -432,6 +432,7 @@ function publishFormAction(form, events, user, nicknameMap) {
 var canvasSampleCode = '<canvas id="canvas" width="150" height="100"></canvas>\n<script>\n  var ctx = canvas.getContext("2d");\n\n  ctx.fillStyle = "rgb(200,0,0)";\n  ctx.fillRect (10, 10, 55, 50);\n\n  ctx.fillStyle = "rgba(0, 0, 200, 0.5)";\n  ctx.fillRect (30, 30, 55, 50);\n</script>'
 
 function publishFormGui(form, events, user, nicknameMap) {
+  var previewDisplay = (!!form.preview) ? 'block' : 'none'
   var preview
   if (!form.isRunning)
     preview = 'Press "Test" to try your HTML'
@@ -440,16 +441,17 @@ function publishFormGui(form, events, user, nicknameMap) {
 
   var isReply = !!form.parent
   return  h('.publish-wrapper', [
-    h('.panel.panel-default', [
+    h('.panel.panel-default', { style: { display: previewDisplay } }, [
       h('.panel-body', h('.publish-preview', preview))
     ]),
     h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
       h('p', ['Snippet: ', jsa('canvas', events.setPublishFormText, { id: form.id, publishText: canvasSampleCode })]),
       h('p', h('textarea.form-control', {
         name: 'publishText',
-        rows: 10,
+        rows: (!!form.preview) ? 10 : 1,
         value: form.textValue,
-        'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id })
+        'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
+        'ev-keyup': mercury.valueEvent(events.updatePublishFormText, { id: form.id })
       })),
       h('span.pull-right', [
         jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
