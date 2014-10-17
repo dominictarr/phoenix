@@ -1,10 +1,14 @@
-exports.createIframe = function(code) {
+exports.createIframe = function(opts) {
   // prepend CSP
-  code = '<meta http-equiv="Content-Security-Policy" content="default-src \'self\' \'unsafe-inline\'">' + code
+  if (opts.srcdoc)
+    opts.srcdoc = '<meta http-equiv="Content-Security-Policy" content="default-src \'self\' \'unsafe-inline\'">' + opts.srcdoc
   
   // create iframe
   var iframe = document.createElement('iframe')
-  iframe.setAttribute('srcdoc', code)
+  if (opts.srcdoc)
+    iframe.setAttribute('srcdoc', opts.srcdoc)
+  else if (opts.src)
+    iframe.setAttribute('src', opts.src)
   iframe.setAttribute('sandbox', 'allow-scripts')
   iframe.setAttribute('seamless', 'seamless')
 
