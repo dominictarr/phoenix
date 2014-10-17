@@ -77,6 +77,7 @@ var defaults = {
 
   message: {
     id: null,
+    type: null,
     author: null,
     authorStr: '',
     message: null,
@@ -84,8 +85,8 @@ var defaults = {
     sequence: 0,
     signature: null,
     timestamp: 0,
-    type: null,
     authorNickname: '',
+    isRunning: false,
     hidden: false
   },
 
@@ -113,6 +114,7 @@ var defaults = {
     textRows: 1,
     preview: '',
     permanent: false,
+    isRunning: false,
     setValueTrigger: 1 // trigger counter - when changed, will force an overwrite of the form's input value
   },
 
@@ -212,7 +214,8 @@ function createMessage(initialState) {
       return null
     }
   }
-  state.hidden = mercury.value(state.hidden)
+  state.isRunning = mercury.value(state.isRunning)
+  state.hidden    = mercury.value(state.hidden)
   return mercury.struct(state)
 }
 
@@ -239,6 +242,7 @@ function createPublishForm(initialState) {
   state.preview         = mercury.value(state.preview)
   state.textValue       = mercury.value(state.textValue)
   state.textRows        = mercury.value(state.textRows)
+  state.isRunning       = mercury.value(state.isRunning)
   state.setValueTrigger = mercury.value(state.setValueTrigger)
   return mercury.struct(state)
 }

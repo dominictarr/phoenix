@@ -122,6 +122,7 @@ var message = exports.message = function(state, msg) {
     case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.message.nickname, state.nicknameMap)
     case 'act': return mercury.partial(messageEvent, msg, (msg.message.repliesTo) ? 'react' : 'act', msg.message.plain, state.nicknameMap)
     case 'text': main = mercury.partial(messageText, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap); break
+    case 'gui': main = mercury.partial(messageGui, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap); break
     default: return h('em', 'Unknown message type: ' + msg.type)
   }
 
@@ -146,15 +147,74 @@ var message = exports.message = function(state, msg) {
 
 // message text-content renderer
 var messageText = exports.messageText = function(msg, events, replies, rebroadcasts, nicknameMap) {
-  // header
-  var header
+  return renderMsgShell(
+    new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
+    msg, events, replies, rebroadcasts, nicknameMap
+  )
+}
+
+// message gui-content renderer
+var messageGui = exports.messageGui = function(msg, events, replies, rebroadcasts, nicknameMap) {
+  var content
+  if (msg.isRunning) {
+    content = h('div', [
+      new widgets.IframeSandbox(msg.message.html),
+      jsa([icon('stop'), ' ', 'Stop'], events.runMsgGui, { id: msg.idStr, run: false }, { className: 'btn btn-danger' })
+    ])
+  } else {
+    content = h('div', [
+      h('pre', h('code', msg.message.html)),
+      jsa([icon('play'), ' ', 'Run'], events.runMsgGui, { id: msg.idStr, run: true }, { className: 'btn btn-primary' })
+    ])
+  }
+
+  // body
+  return renderMsgShell(
+    content,
+    msg, events, replies, rebroadcasts, nicknameMap
+  )
+}
+
+// renders message with the header and footer
+function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap) {
+  var replyStr = renderMsgReplies(msg, replies)
+  var reactionsStr = renderMsgReactions(replies, nicknameMap)
+  var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts)  
+
+  return h('.panel.panel-default', [
+    h('.panel-body', [
+      renderMsgHeader(msg),
+      content,
+      (events.replyToMsg && events.reactToMsg && events.shareMsg)
+          ? (h('p', [
+            h('small.message-ctrls', [
+              replyStr,
+              h('span.pull-right', [
+                jsa(icon('pencil'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
+                ' ',
+                jsa(icon('hand-up'), events.reactToMsg, { msg: msg }, { title: 'React' }),
+                ' ',
+                jsa(icon('share-alt'), events.shareMsg, { msg: msg }, { title: 'Share' })
+              ])
+            ]),
+          ]))
+          : ''
+    ]),
+    (reactionsStr.length || rebroadcastsStr.length)
+      ? h('.panel-footer', h('small', [reactionsStr, ' ', rebroadcastsStr]))
+      : ''
+  ])
+}
+
+// message header
+function renderMsgHeader(msg) {
   var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
   if (msg.message.rebroadcasts) {
     // duplicated message
     var author = msg.message.rebroadcasts.$feed
     var authorStr = util.toHexString(author)
     var authorNick = nicknameMap[authorStr] || authorStr
-    header = h('p', [
+    return h('p', [
       userlink(author, authorNick),
       h('small.message-ctrls', [
         ' - ',
@@ -165,54 +225,29 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
         : '',
       h('span.repliesto', [' shared by ', userlink(msg.author, msg.authorNickname)])
     ])
-  } else {
-    // normal message
-    header = h('p', [
-      userlink(msg.author, msg.authorNickname),
-      h('small.message-ctrls', [
-        ' - ',
-        a('#/msg/'+msg.idStr, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
-      ]),
-      (replyIdStr) ?
-        h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
-        : ''
-    ])
   }
 
-  // footer
-  var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
-  var replyStr = (nReplies) ? a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
-  var reactionsStr = renderReactions(replies, nicknameMap)
-  var rebroadcastsStr = renderRebroadcasts(rebroadcasts)
-
-  // body
-  return h('.panel.panel-default', [
-    h('.panel-body', [
-      header,
-      new widgets.Markdown(msg.message.plain, { nicknames: nicknameMap }),
-      (events.replyToMsg && events.reactToMsg && events.shareMsg)
-        ? (h('p', [
-          h('small.message-ctrls', [
-            replyStr,
-            h('span.pull-right', [
-              jsa(icon('pencil'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
-              ' ',
-              jsa(icon('hand-up'), events.reactToMsg, { msg: msg }, { title: 'React' }),
-              ' ',
-              jsa(icon('share-alt'), events.shareMsg, { msg: msg }, { title: 'Share' })
-            ])
-          ]),
-        ]))
-        : ''
+  // normal message
+  return h('p', [
+    userlink(msg.author, msg.authorNickname),
+    h('small.message-ctrls', [
+      ' - ',
+      a('#/msg/'+msg.idStr, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
     ]),
-    (reactionsStr.length || rebroadcastsStr.length)
-      ? h('.panel-footer', h('small', [reactionsStr, ' ', rebroadcastsStr]))
+    (replyIdStr) ?
+      h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
       : ''
   ])
 }
 
+// summary of reactions in the bottom of messages
+function renderMsgReplies(msg, replies) {
+  var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
+  return (nReplies) ? a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
+}
+
 // list of reactions in the footer of messages
-function renderReactions(replies, nicknameMap) {
+function renderMsgReactions(replies, nicknameMap) {
   reactionsStr = []
   var reactMap = {}
   // create a map of reaction-text -> author-nicknames
@@ -251,7 +286,7 @@ function renderReactions(replies, nicknameMap) {
 }
 
 // list of rebroadcasts in the footer of messages
-function renderRebroadcasts(rebroadcasts) {
+function renderMsgRebroadcasts(rebroadcasts) {
   var rebroadcastsStr = []
   if (rebroadcasts.length) {
     rebroadcasts = onePerAuthor(rebroadcasts)
@@ -304,81 +339,135 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
 }
 
 var publishForm = exports.publishForm = function(form, events, user, nicknameMap) {
+  if (form.type == 'text') return publishFormText(form, events, user, nicknameMap)
+  if (form.type == 'act')  return publishFormAction(form, events, user, nicknameMap)
+  if (form.type == 'gui')  return publishFormGui(form, events, user, nicknameMap)
+}
+
+function publishFormText(form, events, user, nicknameMap) {
   var isReply = !!form.parent
-  if (form.type == 'text') {
-    var previewDisplay = (!!form.preview) ? 'block' : 'none'
-    return  h('.publish-wrapper', [
-      h('.panel.panel-default', { style: { display: previewDisplay } }, [
-        h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview, { nicknames: nicknameMap })))
+  var previewDisplay = (!!form.preview) ? 'block' : 'none'
+  return  h('.publish-wrapper', [
+    h('.panel.panel-default', { style: { display: previewDisplay } }, [
+      h('.panel-body', h('.publish-preview', new widgets.Markdown(form.preview, { nicknames: nicknameMap })))
+    ]),
+    h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
+      h('p', h('textarea.form-control', {
+        name: 'publishText',
+        placeholder: form.textPlaceholder,
+        rows: form.textRows || 1,
+        value: form.textValue,
+        'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
+        'ev-keyup': mercury.valueEvent(events.updatePublishFormText, { id: form.id }),
+        'ev-keydown': [valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id }), events.mentionBoxKeypress],
+        'ev-input': events.mentionBoxInput,
+        'ev-blur': events.mentionBoxBlur
+      })),
+      h('span.pull-right', [
+        h('strong', jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
+        ' / ',
+        jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }),
+        (!isReply)
+          ? [' / ', jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })]
+          : ''
       ]),
-      h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
-        h('p', h('textarea.form-control', {
-          name: 'publishText',
-          placeholder: form.textPlaceholder,
-          rows: form.textRows || 1,
-          value: form.textValue,
-          'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
-          'ev-keyup': mercury.valueEvent(events.updatePublishFormText, { id: form.id }),
-          'ev-keydown': [valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id }), events.mentionBoxKeypress],
-          'ev-input': events.mentionBoxInput,
-          'ev-blur': events.mentionBoxBlur
-        })),
-        h('span.pull-right', [
-          h('strong', jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
-          ' / ',
-          jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' })
-        ]),
-        h('button.btn.btn-default', 'Post'),
-        ' ',
-        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
-      ])
+      h('button.btn.btn-default', 'Post'),
+      ' ',
+      (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
     ])
-  }
-  if (form.type == 'act') {
-    var previewDisplay = (!!form.preview) ? 'block' : 'none'
-    var hand = (isReply) ? 'up' : 'right'
-    var suggestions = (isReply) ? h('p', [
-      h('span.btn-group', [suggestBtn('Like', 'liked'), suggestBtn('Dislike', 'disliked')]),
-      ' ', h('span.btn-group', [suggestBtn('Love', 'loved'), suggestBtn('Hate', 'hated')]),
-      ' ', h('span.btn-group', [suggestBtn('Agree', 'agreed with'), suggestBtn('Disagree', 'disagreed with')]),
-      ' ', h('span.btn-group', [suggestBtn('Confirm', 'confirmed'), suggestBtn('Deny', 'denied')])
-    ]) : ''
-    var preview = (isReply) ? (form.preview + ' this.') : form.preview
-    return h('.publish-wrapper', [
-      h('.phoenix-event', { style: { display: previewDisplay } }, [
-        h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
-        h('p.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(preview, { inline: true, nicknames: nicknameMap })])
-      ]),      
-      h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
-        suggestions,
-        h('p', h('input.form-control', {
-          name: 'publishText',
-          // placeholder: form.textPlaceholder,
-          value: new CounterTriggerHook(form.textValue||'', form.setValueTrigger),
-          'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
-          'ev-keyup': [
-            events.mentionBoxKeypress,
-            mercury.valueEvent(events.updatePublishFormText, { id: form.id }), 
-            valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id })
-          ],
-          'ev-input': events.mentionBoxInput,
-          'ev-blur': events.mentionBoxBlur
-        })),
-        h('span.pull-right', [
-          jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
-          ' / ',
-          h('strong', jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }))
-        ]),
-        h('button.btn.btn-default', 'Post'),
-        ' ',
-        (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
-      ])
+  ])
+}
+
+function publishFormAction(form, events, user, nicknameMap) {
+  var isReply = !!form.parent
+  var previewDisplay = (!!form.preview) ? 'block' : 'none'
+  var hand = (isReply) ? 'up' : 'right'
+  var suggestions = (isReply) ? h('p', [
+    h('span.btn-group', [suggestBtn('Like', 'liked'), suggestBtn('Dislike', 'disliked')]),
+    ' ', h('span.btn-group', [suggestBtn('Love', 'loved'), suggestBtn('Hate', 'hated')]),
+    ' ', h('span.btn-group', [suggestBtn('Agree', 'agreed with'), suggestBtn('Disagree', 'disagreed with')]),
+    ' ', h('span.btn-group', [suggestBtn('Confirm', 'confirmed'), suggestBtn('Deny', 'denied')])
+  ]) : ''
+  var preview = (isReply) ? (form.preview + ' this.') : form.preview
+
+  return h('.publish-wrapper', [
+    h('.phoenix-event', { style: { display: previewDisplay } }, [
+      h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
+      h('p.event-body', [userlink(user.id, user.nickname), ' ', new widgets.Markdown(preview, { inline: true, nicknames: nicknameMap })])
+    ]),      
+    h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
+      suggestions,
+      h('p', h('input.form-control', {
+        name: 'publishText',
+        // placeholder: form.textPlaceholder,
+        value: new CounterTriggerHook(form.textValue||'', form.setValueTrigger),
+        'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id }),
+        'ev-keyup': [
+          events.mentionBoxKeypress,
+          mercury.valueEvent(events.updatePublishFormText, { id: form.id }), 
+          valueEvents.ctrlEnter(events.submitPublishForm, { id: form.id })
+        ],
+        'ev-input': events.mentionBoxInput,
+        'ev-blur': events.mentionBoxBlur
+      })),
+      h('span.pull-right', [
+        jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
+        ' / ',
+        h('strong', jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' })),
+        (!isReply)
+          ? [' / ', jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })]
+          : ''
+      ]),
+      h('button.btn.btn-default', 'Post'),
+      ' ',
+      (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
     ])
-  }
+  ])
 
   function suggestBtn(label, text) {
     return jsa(label, events.setPublishFormText, { id: form.id, publishText: text }, { className: 'btn btn-default btn-xs' })
   }
+}
+
+var canvasSampleCode = '<canvas id="canvas" width="150" height="100"></canvas>\n<script>\n  var ctx = canvas.getContext("2d");\n\n  ctx.fillStyle = "rgb(200,0,0)";\n  ctx.fillRect (10, 10, 55, 50);\n\n  ctx.fillStyle = "rgba(0, 0, 200, 0.5)";\n  ctx.fillRect (30, 30, 55, 50);\n</script>'
+
+function publishFormGui(form, events, user, nicknameMap) {
+  var preview
+  if (!form.isRunning)
+    preview = 'Press "Test" to try your HTML'
+  else
+    preview = new widgets.IframeSandbox(form.textValue)
+
+  var isReply = !!form.parent
+  return  h('.publish-wrapper', [
+    h('.panel.panel-default', [
+      h('.panel-body', h('.publish-preview', preview))
+    ]),
+    h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
+      h('p', ['Snippet: ', jsa('canvas', events.setPublishFormText, { id: form.id, publishText: canvasSampleCode })]),
+      h('p', h('textarea.form-control', {
+        name: 'publishText',
+        rows: 10,
+        value: form.textValue,
+        'ev-change': mercury.valueEvent(events.setPublishFormText, { id: form.id })
+      })),
+      h('span.pull-right', [
+        jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
+        ' / ',
+        jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }),
+        ' / ',
+        h('strong', jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' }))
+      ]),
+      (form.isRunning)
+        ? h('button.btn.btn-danger',  {'ev-click': valueEvents.click(events.testPublishFormCode, { id: form.id, run: false })}, [icon('stop'),' Stop'])
+        : h('button.btn.btn-success', {'ev-click': valueEvents.click(events.testPublishFormCode, { id: form.id, run: true })},  [icon('play'),' Test'])
+        ,
+      ' ',
+      h('button.btn.btn-default', 'Post'),
+      ' ',
+      (!form.permanent) ? jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
+    ])
+  ])
 }
 
 // Helper Elements

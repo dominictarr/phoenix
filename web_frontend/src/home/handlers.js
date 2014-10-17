@@ -1,6 +1,7 @@
 var constants = require('./const')
 var models = require('../lib/models')
 var bus = require('../lib/business')
+var sandbox = require('../lib/sandbox')
 var textareaCaretPosition = require('../lib/textarea-caret-position')
 var emojiNamedCharacters = require('emoji-named-characters')
 
@@ -94,6 +95,9 @@ exports.submitPublishForm = function(state, data) {
   var str = (form.textValue()).trim()
   if (!str) return
 
+  if (form.type() == 'gui' && !confirm('Post the GUI? (Make sure you test it!)'))
+    return
+
   // wait a tick so that the form.textValue can be process by mercury
   // if we dont, and submitPublishForm was triggered by ctrl+enter...
   // ...then mercury will not realize that form.textValue changed, and wont clear the input
@@ -102,6 +106,7 @@ exports.submitPublishForm = function(state, data) {
     if (!form.parent) {
       if (form.type() == 'text')     bus.publishText(state, str, after)
       else if (form.type() == 'act') bus.publishAction(state, str, after)
+      else if (form.type() == 'gui') bus.publishGui(state, str, after)
     } else {
       if (form.type() == 'text')     bus.publishReply(state, str, form.parent, after)
       else if (form.type() == 'act') bus.publishReaction(state, str, form.parent, after)
@@ -111,19 +116,7 @@ exports.submitPublishForm = function(state, data) {
       bus.fetchFeed(state) // pull down the update
     }
 
-    if (form.permanent) {
-      // reset the form
-      form.textValue.set('')
-      form.textRows.set(1)
-      form.preview.set('')
-      form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
-    } else {
-      // remove the form
-      var m = state.publishFormMap()
-      state.publishForms.splice(m[form.id], 1, null)
-      m[data.id] = undefined
-      state.publishFormMap.set(m)
-    }
+    resetForm(state, form)
   }, 0)
 }
 
@@ -136,18 +129,34 @@ exports.cancelPublishForm = function(state, data) {
   if (form.preview() && !confirm('Are you sure you want to cancel this message?'))
     return
 
+  resetForm(state, form)
+}
+
+function resetForm(state, form) {
   if (form.permanent) {
     // reset the form
+    form.type.set('text')
     form.textValue.set('')
     form.textRows.set(1)
     form.preview.set('')
+    form.isRunning.set(false)
     form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
   } else {
     // remove the form
-    state.publishForms.splice(m[data.id], 1, null)
-    m[data.id] = undefined
+    var m = state.publishFormMap()
+    state.publishForms.splice(m[form.id], 1, null)
+    m[form.id] = undefined
     state.publishFormMap.set(m)
   }
+}
+
+exports.testPublishFormCode = function(state, data) {
+  var m = state.publishFormMap()
+  var form = state.publishForms.get(m[data.id])
+  if (!form)
+    return
+
+  form.isRunning.set(data.run)
 }
 
 // :TODO: refactor into a value-event
@@ -386,6 +395,16 @@ exports.shareMsg = function(state, data) {
     if (err) throw err // :TODO: put in gui
     bus.fetchFeed(state) // pull down the update
   })
+}
+
+exports.runMsgGui = function(state, data) {
+  var mm = state.messageMap()
+  var i = mm[data.id]
+  if (i == void 0) return
+  var msg = state.feed.get(state.feed.getLength() - i - 1)
+  if (!msg) return
+
+  msg.isRunning.set(data.run)
 }
 
 function shortHex(str) {
