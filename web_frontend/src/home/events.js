@@ -1,7 +1,6 @@
-var window = require('global/window')
-var HashRouter = require('hash-router')
-var Event = require('geval')
 var mercury = require('mercury')
+
+var EventRouter = require('../lib/event-router')
 
 module.exports = createEvents
 function createEvents() {
@@ -36,13 +35,4 @@ function createEvents() {
   ])
   events.setRoute = EventRouter()
   return events
-}
-
-function EventRouter() {
-  var router = HashRouter()
-  window.addEventListener('hashchange', router)
-
-  return Event(function (emit) {
-    router.on('hash', emit)
-  })
 }
