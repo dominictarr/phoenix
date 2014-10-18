@@ -240,7 +240,7 @@ function renderMsgHeader(msg) {
 
 // summary of reactions in the bottom of messages
 function renderMsgReplies(msg, replies) {
-  var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text') }).length : 0
+  var nReplies = (replies) ? replies.filter(function(r) { return (r.type == 'text' || r.type == 'gui') }).length : 0
   return (nReplies) ? a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
 }
 
