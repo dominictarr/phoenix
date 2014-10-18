@@ -395,6 +395,14 @@ exports.publishGui = function(state, text, cb) {
   client.api.addMessage('gui', msgpack.encode(preprocessTextPost({html: text})), cb)
 }
 
+// posts to the feed
+var publishGuiply =
+exports.publishGuiply = function(state, text, parent, cb) {
+  if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
+  if (!parent) return cb(new Error('Must provide a parent message to the reply'))
+  client.api.addMessage('gui', msgpack.encode(preprocessTextPost({html: text, repliesTo: {$msg: parent, $rel: 'replies-to'}})), cb)
+}
+
 // posts a copy of the given message to the feed
 var publishRebroadcast =
 exports.publishRebroadcast = function(state, msg, cb) {

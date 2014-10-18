@@ -95,7 +95,7 @@ function msgThreadTree(state, msg) {
     // fetch and render message
     var msgi  = state.messageMap[replyData.idStr] // look up index
     var reply = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
-    if (reply && reply.type == 'text' && notHidden(reply)) {
+    if (reply && (reply.type == 'text' || reply.type == 'gui') && notHidden(reply)) {
       replies.push(message(state, reply))
 
       // build and render subtree
@@ -190,11 +190,9 @@ function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap
             h('small.message-ctrls', [
               replyStr,
               h('span.pull-right', [
-                jsa(icon('pencil'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
+                jsa(icon('comment'), events.replyToMsg, { msg: msg }, { title: 'Reply' }),
                 ' ',
-                jsa(icon('hand-up'), events.reactToMsg, { msg: msg }, { title: 'React' }),
-                ' ',
-                jsa(icon('share-alt'), events.shareMsg, { msg: msg }, { title: 'Share' })
+                jsa(icon('retweet'), events.shareMsg, { msg: msg }, { title: 'Share' })
               ])
             ]),
           ]))
@@ -367,9 +365,8 @@ function publishFormText(form, events, user, nicknameMap) {
         h('strong', jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
         ' / ',
         jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }),
-        (!isReply)
-          ? [' / ', jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })]
-          : ''
+        ' / ',
+        jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
       ]),
       h('button.btn.btn-default', 'Post'),
       ' ',
@@ -414,9 +411,8 @@ function publishFormAction(form, events, user, nicknameMap) {
         jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
         ' / ',
         h('strong', jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' })),
-        (!isReply)
-          ? [' / ', jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })]
-          : ''
+        ' / ',
+        jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
       ]),
       h('button.btn.btn-default', 'Post'),
       ' ',

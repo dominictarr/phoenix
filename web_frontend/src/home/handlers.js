@@ -110,6 +110,7 @@ exports.submitPublishForm = function(state, data) {
     } else {
       if (form.type() == 'text')     bus.publishReply(state, str, form.parent, after)
       else if (form.type() == 'act') bus.publishReaction(state, str, form.parent, after)
+      else if (form.type() == 'gui') bus.publishGuiply(state, str, form.parent, after)
     }
     function after(err) {
       if (err) throw err // :TODO: put in gui
