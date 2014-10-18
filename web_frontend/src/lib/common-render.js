@@ -157,14 +157,13 @@ var messageText = exports.messageText = function(msg, events, replies, rebroadca
 var messageGui = exports.messageGui = function(msg, events, replies, rebroadcasts, nicknameMap) {
   var content
   if (msg.isRunning) {
-    content = h('div', [
+    content = h('.gui-post-wrapper.gui-running', [
       new widgets.IframeSandbox(msg.message.html),
-      jsa([icon('stop'), ' ', 'Stop'], events.runMsgGui, { id: msg.idStr, run: false }, { className: 'btn btn-danger' })
     ])
   } else {
-    content = h('div', [
-      h('pre', h('code', msg.message.html)),
-      jsa([icon('play'), ' ', 'Run'], events.runMsgGui, { id: msg.idStr, run: true }, { className: 'btn btn-primary' })
+    content = h('.gui-post-wrapper', [
+      h('.gui-post-runbtn', {'ev-click': valueEvents.click(events.runMsgGui, { id: msg.idStr, run: true })}),
+      h('pre.gui-post', h('code',msg.message.html))
     ])
   }
 
@@ -183,7 +182,7 @@ function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap
 
   return h('.panel.panel-default', [
     h('.panel-body', [
-      renderMsgHeader(msg),
+      renderMsgHeader(msg, events),
       content,
       (events.replyToMsg && events.reactToMsg && events.shareMsg)
           ? (h('p', [
@@ -205,7 +204,8 @@ function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap
 }
 
 // message header
-function renderMsgHeader(msg) {
+function renderMsgHeader(msg, events) {
+  var stopBtnStr = (msg.isRunning) ? jsa(icon('remove'), events.runMsgGui, { id: msg.idStr, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
   var replyIdStr = (msg.message.repliesTo) ? util.toHexString(msg.message.repliesTo.$msg) : ''
   if (msg.message.rebroadcasts) {
     // duplicated message
@@ -221,7 +221,8 @@ function renderMsgHeader(msg) {
       (replyIdStr) ?
         h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
         : '',
-      h('span.repliesto', [' shared by ', userlink(msg.author, msg.authorNickname)])
+      h('span.repliesto', [' shared by ', userlink(msg.author, msg.authorNickname)]),
+      stopBtnStr
     ])
   }
 
@@ -234,7 +235,8 @@ function renderMsgHeader(msg) {
     ]),
     (replyIdStr) ?
       h('span.repliesto', [' in response to ', a('#/msg/'+replyIdStr, shortHex(replyIdStr))])
-      : ''
+      : '',
+    stopBtnStr
   ])
 }
 

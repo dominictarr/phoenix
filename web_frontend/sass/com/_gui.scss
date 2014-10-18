@@ -1,0 +1,33 @@
+.gui-post-wrapper {
+  position: relative;
+  .gui-post {
+    height: 140px;
+  }
+  .gui-post-runbtn {
+    display: none;
+    cursor: pointer;
+
+    font-family: 'Glyphicons Halflings';
+    font-size: 34px;
+    &::before {
+      content: "\e072";
+    }
+    
+    position: absolute;
+    top: 18px;
+    left: 40%;
+    border-radius: 50%;
+    padding: 30px 36px;
+    
+    background: rgba(0, 0, 0, 0.1);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.25);
+    }
+  }
+  &:hover {
+    .gui-post-runbtn {
+      display: block;
+    }
+  }
+}
