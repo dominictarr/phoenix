@@ -47,37 +47,10 @@ function createServer(port, opts) {
         type('text/html')
         return serve('html/home.html')
       }
-      if (pathStarts('/gui/')) {
-        var guidId = req.url.slice('/gui/'.length)
-
-        // :TODO: the following horrendous beast exists because phoenix-rpc
-        // cant fetch individual messages by hash.
-        // Well obviously such an injustice to common decency wont stand
-        // so ssb-server will need to have a getMessage function.
-        var pull        = require('pull-stream')
-        var toPull      = require('stream-to-pull-stream')
-        var ssbDefaults = require('secure-scuttlebutt/defaults')
-        var msgpack     = require('msgpack-js')
-        function genMsgId(msg) {
-          return ssbDefaults.hash(ssbDefaults.codec.encode(msg))
-        }
-        var guiMsg
-        pull(
-          toPull(backend.createFeedStream()),
-          pull.drain(function(m) {
-            var id = genMsgId(m) // good god
-            if (id.toString('hex') == guidId)
-              guiMsg = m
-          }, function() {
-            if (!guiMsg)
-              return serve404()
-            var msgdata = msgpack.decode(guiMsg.message)
-            res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
-            type('text/html')
-            res.end(msgdata.html || msgdata.plain || 'no content')
-          })
-        )
-        return
+      if (pathStarts('/gui-sandbox')) {
+        res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
+        type('text/html')
+        return serve('html/gui-sandbox.html')
       }
       if (pathEnds('jpg'))        type('image/jpeg')
       else if (pathEnds('jpeg'))  type('image/jpeg')

@@ -158,7 +158,7 @@ var messageGui = exports.messageGui = function(msg, events, replies, rebroadcast
   var content
   if (msg.isRunning) {
     content = h('div', [
-      new widgets.IframeSandbox({ src: '/gui/' + msg.idStr }),
+      new widgets.IframeSandbox(msg.message.html),
       jsa([icon('stop'), ' ', 'Stop'], events.runMsgGui, { id: msg.idStr, run: false }, { className: 'btn btn-danger' })
     ])
   } else {
@@ -437,7 +437,7 @@ function publishFormGui(form, events, user, nicknameMap) {
   if (!form.isRunning)
     preview = 'Press "Test" to try your HTML'
   else
-    preview = new widgets.IframeSandbox({ srcdoc: form.textValue })
+    preview = new widgets.IframeSandbox(form.textValue)
 
   var isReply = !!form.parent
   return  h('.publish-wrapper', [
