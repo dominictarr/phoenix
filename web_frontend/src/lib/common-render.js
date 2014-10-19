@@ -432,10 +432,17 @@ var canvasSampleCode = '<canvas id="canvas" width="150" height="100"></canvas>\n
 function publishFormGui(form, events, user, nicknameMap) {
   var previewDisplay = (!!form.preview) ? 'block' : 'none'
   var preview
-  if (!form.isRunning)
-    preview = 'Press "Test" to try your HTML'
-  else
-    preview = new widgets.IframeSandbox(form.textValue)
+  if (!form.isRunning) {
+    preview = h('.gui-post-wrapper', [
+      h('.gui-post-runbtn', {'ev-click': valueEvents.click(events.testPublishFormCode, { id: form.id, run: true })}),
+      h('pre.gui-post', h('code', form.preview))
+    ])
+  } else {
+    preview =  h('.gui-post-wrapper.gui-running', [
+      jsa(icon('remove'), events.testPublishFormCode, { id: form.id, run: false }, { className: 'pull-right text-danger' }),
+      new widgets.IframeSandbox(form.textValue)
+    ])
+  }
 
   var isReply = !!form.parent
   return  h('.publish-wrapper', [
@@ -458,10 +465,6 @@ function publishFormGui(form, events, user, nicknameMap) {
         ' / ',
         h('strong', jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' }))
       ]),
-      (form.isRunning)
-        ? h('button.btn.btn-danger',  {'ev-click': valueEvents.click(events.testPublishFormCode, { id: form.id, run: false })}, [icon('stop'),' Stop'])
-        : h('button.btn.btn-success', {'ev-click': valueEvents.click(events.testPublishFormCode, { id: form.id, run: true })},  [icon('play'),' Test'])
-        ,
       ' ',
       h('button.btn.btn-default', 'Post'),
       ' ',
