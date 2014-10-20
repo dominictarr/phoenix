@@ -439,7 +439,11 @@ function publishFormGui(form, events, user, nicknameMap) {
     ])
   } else {
     preview =  h('.gui-post-wrapper.gui-running', [
-      jsa(icon('remove'), events.testPublishFormCode, { id: form.id, run: false }, { className: 'pull-right text-danger' }),
+      h('span.pull-right', [
+        jsa(icon('refresh'), events.testPublishFormCode, { id: form.id, restart: true }, { className: 'text-muted' }),
+        ' ',
+        jsa(icon('remove'), events.testPublishFormCode, { id: form.id, run: false }, { className: 'text-danger' })
+      ]),
       new widgets.IframeSandbox(form.textValue)
     ])
   }

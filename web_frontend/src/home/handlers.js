@@ -157,7 +157,16 @@ exports.testPublishFormCode = function(state, data) {
   if (!form)
     return
 
-  form.isRunning.set(data.run)
+  if (data.restart) {
+    form.isRunning.set(false)
+    // this setTimout is hacky, but it works
+    // it gives mercury time to destroy the iframe (responding to isRunning == false)
+    // and gives the textarea blur event time to update the form.textValue
+    setTimeout(function() {
+      form.isRunning.set(true)
+    }, 50)
+  } else
+    form.isRunning.set(data.run)
 }
 
 // :TODO: refactor into a value-event
