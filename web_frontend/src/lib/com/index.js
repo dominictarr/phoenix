@@ -1,4 +1,5 @@
 module.exports = {
-  suggestBox: require('./suggest-box').suggestBox,
-  publishForm: require('./publish-form').publishForm
+  suggestBox:  require('./suggest-box').suggestBox,
+  publishForm: require('./publish-form').publishForm,
+  message:     require('./message').message
 }
