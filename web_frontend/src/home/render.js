@@ -45,7 +45,6 @@ function header(events, uId, isSyncing) {
     h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
       h('ul.nav.navbar-nav', [
-        h('li', a('#/', 'latest')),
         h('li', a('#/inbox', 'inbox')),
         h('li', a('#/profile/' + uId, 'profile')),
         h('li', a('#/network', 'network')),
