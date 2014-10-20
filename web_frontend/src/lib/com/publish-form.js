@@ -61,15 +61,9 @@ function publishFormAction(form, events, user, nicknameMap) {
 
   var helptext
   if (isReply) {
-    helptext = [
-      'Reactions are a free-form "like" button. They are aggregated underneath the post you\'re reacting to.', h('br'), h('br'),
-      'Actions are formatted with GitHub-flavored Markdown. You can mention somebody with an @ symbol, and insert ', comren.a('http://www.emoji-cheat-sheet.com/', 'emojis'), ' with a : symbol.'
-    ]
+    helptext = 'Reactions are a free-form "like" button. They are aggregated underneath the post you\'re reacting to.'
   } else {
-    helptext = [
-      'Actions are a way to say what you\'re doing or thinking without making a conversation out of it. They go on the right of the feed.', h('br'), h('br'),
-      'Actions are formatted with GitHub-flavored Markdown. You can mention somebody with an @ symbol, and insert ', comren.a('http://www.emoji-cheat-sheet.com/', 'emojis'), ' with a : symbol.'
-    ]
+    helptext = 'Actions are a way to say what you\'re doing or thinking without making a conversation out of it. They go on the right of the feed.'
   }
 
   return h('.publish-wrapper', [
