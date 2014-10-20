@@ -3,7 +3,7 @@ var h = require('mercury').h
 
 var helptip = exports.helptip = function(text) {
   return [
-    h('a', { href: 'javascript:void()', 'ev-click': toggleTip }, h('span.glyphicon.glyphicon-question-sign')),
+    h('a.text-muted', { href: 'javascript:void()', 'ev-click': toggleTip, title: 'Help' }, h('span.glyphicon.glyphicon-question-sign')),
     h('.helptip', text)
   ]
 }
