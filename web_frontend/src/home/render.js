@@ -83,6 +83,8 @@ function inboxPage(state) {
 }
 
 function notifications(nicknameMap, events, notes) {
+  if (notes.length === 0)
+    return h('h3', 'Your inbox is empty.')
   return h('.panel.panel-default', h('table.table.table-hover.notifications', h('tbody', notes.map(notification.bind(null, nicknameMap, events)).reverse())))
 }
 
