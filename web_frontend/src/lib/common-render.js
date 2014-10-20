@@ -33,9 +33,9 @@ var notfound = exports.notfound = function(what, suggestion) {
 }
 
 // random cat giferator
-var cats = ['goingdown', 'hophop', 'huuhuuu', 'pillow-spin', 'shred', 'tailbites', 'woahwoah']
+var cats = ['goingdown', 'hophop', 'huuhuuu', 'pillow-spin', 'shred', 'tailbites', 'woahwoah', 'cat-v-cat-v-cat']
 var randomcat = exports.randomcat = function() {
-  var cat = cats[Math.round(Math.random() * 7)] || cats[0]
+  var cat = cats[Math.round(Math.random() * 8)] || cats[0]
   return img('/img/loading/'+cat+'.gif')
 }
 
