@@ -24,6 +24,9 @@ function render(state) {
   } else if (state.route.indexOf('msg/') === 0) {
     var msgid = state.route.slice(4)
     page = messagePage(state, msgid)
+  } else if (state.route.indexOf('help') === 0) {
+    var section = state.route.slice(5) || 'intro'
+    page = helpPage(state, section)
   } else {
     page = feedPage(state)
   }
@@ -45,7 +48,8 @@ function header(events, uId, isSyncing) {
         h('li', a('#/', 'latest')),
         h('li', a('#/inbox', 'inbox')),
         h('li', a('#/profile/' + uId, 'profile')),
-        h('li', a('#/network', 'network'))
+        h('li', a('#/network', 'network')),
+        h('li', a('#/help', 'help'))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li', a('#', 'your intro token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }, { preventDefault: true }) })),
@@ -189,9 +193,53 @@ function profileLink(events, profile) {
   ])
 }
 
+// Help Page
+// =========
+
+function helpPage(state, section) {
+  var content
+  if (section == 'privacy') {
+    content = [
+      panel('How Phoenix Works', 'Phoenix is built on a "distributed" messaging system, like email. Users and their messages are identified by unique, secure keys, allowing us to share messages between devices without relying on central servers.'),
+      panel('Is it Private?', 'Phoenix v1 is only a public broadcast system, like Twitter. In future versions, we\'ll add encryption and direct messages so that you can share messages with individuals and groups.')
+    ]
+  } else {
+    content = [
+      panel('Basics', 'Phoenix v1 is a social feed application. You can broadcast to everyone following you, much like on Twitter. However, unlike Twitter, only people you are following can contact you. This means no unsolicited spam!'),
+      panel('Replies', 'You can reply to other users with text posts, reactions, and guis. When you open a message\'s page, you\'ll see all of the replies in a threaded view, like a message-board. Click the age of a post (eg "5m", "yesterday") to get to its page.'),
+      panel('Sharing', 'If you want to spread somebody\'s message, you can "share" it to your followers. This is just like retweeting, except, in the case of Phoenix, it\'s the ONLY way to spread a message. If somebody replies to you, your non-mutual followers will only see that reply if you share it.'),
+      panel('Mentions', ['Like in most social networks, you can "@-mention" other users. If they follow you, or if somebody shares the message to them, they\'ll be notified of the mention. Check your ', comren.a('#/inbox', 'Inbox'), ' to find your notifications.']),
+      panel('Emojis', ['You can put emojis in your posts using colons. For instance, \':smile:\' will result in ', h('img.emoji', { src: '/img/emoji/smile.png', height: 20, width: 20}), '. Check the ', comren.a('http://www.emoji-cheat-sheet.com/', 'Emoji Cheat Sheet'), ' to see what\'s available']),
+      panel('Contacts', ['If you want to follow somebody and receive their broadcasts and messages, you have to add them as a contact. They\'ll have to do the same if they want to see your messages. ', h('strong', 'TODO: how to add contacts')])
+    ]
+  }
+
+  return h('.help-page.row', comren.columns({
+    content: content,
+    sidenav: h('ul.nav.nav-pills.nav-stacked', nav('#/'+state.route, [
+      ['#/help', 'Getting Started'],
+      ['#/help/privacy', 'Privacy']
+    ]))
+  }, [['content', 7], ['sidenav', 3]]))
+}
+
 // Helpers
 // =======
 
+function nav(current, items) {
+  return items.map(function(item) {
+    if (item[0] == current)
+      return h('li.active', comren.a(item[0], item[1]))
+    return h('li', comren.a(item[0], item[1]))
+  })
+}
+
+function panel(title, content) {
+  return h('.panel.panel-default', [
+    h('.panel-heading', h('h3.panel-title', title)),
+    h('.panel-body', content)
+  ])
+}
 function stylesheet(href) {
   return h('link', { rel: 'stylesheet', href: href })
 }

@@ -4,6 +4,7 @@ var valueEvents = require('../value-events')
 var widgets     = require('../widgets')
 var comren      = require('../common-render')
 var util        = require('../../../../lib/util')
+var publishForm = require('./publish-form').publishForm
 
 // feed message renderer
 var message = exports.message = function(state, msg) {
@@ -25,7 +26,7 @@ var message = exports.message = function(state, msg) {
   var formId = util.toHexString(msg.id)
   if (typeof publishFormMap[formId] != 'undefined') {
     var i = publishFormMap[formId]
-    main = h('div', [main, h('.message-reply', com.publishForm(publishForms[i], state.events, state.user, state.nicknameMap))])
+    main = h('div', [main, h('.message-reply', publishForm(publishForms[i], state.events, state.user, state.nicknameMap))])
   }
 
   // helper to lookup messages

@@ -4,6 +4,7 @@ var valueEvents = require('../value-events')
 var widgets     = require('../widgets')
 var hooks       = require('../hooks')
 var comren      = require('../common-render')
+var helptip     = require('./helptip').helptip
 
 var publishForm = exports.publishForm = function(form, events, user, nicknameMap) {
   if (form.type == 'text') return publishFormText(form, events, user, nicknameMap)
@@ -31,6 +32,8 @@ function publishFormText(form, events, user, nicknameMap) {
         'ev-blur': events.mentionBoxBlur
       })),
       h('span.pull-right', [
+        helptip(['Posts are formatted with GitHub-flavored Markdown. You can mention somebody with an @ symbol, and insert ', comren.a('http://www.emoji-cheat-sheet.com/', 'emojis'), ' with a : symbol.']),
+        ' ',
         h('strong', comren.jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
         ' / ',
         comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }),
@@ -56,6 +59,19 @@ function publishFormAction(form, events, user, nicknameMap) {
   ]) : ''
   var preview = (isReply) ? (form.preview + ' this.') : form.preview
 
+  var helptext
+  if (isReply) {
+    helptext = [
+      'Reactions are a free-form "like" button. They are aggregated underneath the post you\'re reacting to.', h('br'), h('br'),
+      'Actions are formatted with GitHub-flavored Markdown. You can mention somebody with an @ symbol, and insert ', comren.a('http://www.emoji-cheat-sheet.com/', 'emojis'), ' with a : symbol.'
+    ]
+  } else {
+    helptext = [
+      'Actions are a way to say what you\'re doing or thinking without making a conversation out of it. They go on the right of the feed.', h('br'), h('br'),
+      'Actions are formatted with GitHub-flavored Markdown. You can mention somebody with an @ symbol, and insert ', comren.a('http://www.emoji-cheat-sheet.com/', 'emojis'), ' with a : symbol.'
+    ]
+  }
+
   return h('.publish-wrapper', [
     h('.phoenix-event', { style: { display: previewDisplay } }, [
       h('span.event-icon.glyphicon.glyphicon-hand-'+hand),
@@ -79,6 +95,8 @@ function publishFormAction(form, events, user, nicknameMap) {
       h('span.pull-right', [
         comren.jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
         ' / ',
+        helptip(helptext),
+        ' ',
         h('strong', comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' })),
         ' / ',
         comren.jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
@@ -134,6 +152,8 @@ function publishFormGui(form, events, user, nicknameMap) {
         ' / ',
         comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }),
         ' / ',
+        helptip(['GUIs are interactive HTML applets, tightly sandboxed for safety. You can write HTML, CSS, and Javascript, then share it on your feed.']),
+        ' ',
         h('strong', comren.jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' }))
       ]),
       ' ',
