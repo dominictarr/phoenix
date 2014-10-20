@@ -1,0 +1,13 @@
+.publish-wrapper {
+  margin-bottom: 16px;
+  .publish-preview {
+    > div {
+      > :first-child {
+        margin-top: 6px;
+      }
+    }
+  }
+  .phoenix-event {
+    margin-bottom: 24px;
+  }
+}

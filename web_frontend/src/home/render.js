@@ -64,7 +64,7 @@ function feedPage(state) {
   var msgs = state.feed.filter(function(msg) { return msg.type == 'text' || msg.type == 'gui' })
   return h('.feed-page.row', comren.columns({
     gutter: '',
-    main: [comren.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, msgs, state.pagination)],
+    main: [com.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, msgs, state.pagination)],
     side: [comren.feed(state, events, state.pagination)]
   }, [['main', 7], ['side', 5]]))
 }
