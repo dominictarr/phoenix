@@ -47,6 +47,11 @@ function createServer(port, opts) {
         type('text/html')
         return serve('html/home.html')
       }
+      if (pathStarts('/gui-sandbox')) {
+        res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
+        type('text/html')
+        return serve('html/gui-sandbox.html')
+      }
       if (pathEnds('jpg'))        type('image/jpeg')
       else if (pathEnds('jpeg'))  type('image/jpeg')
       else if (pathEnds('gif'))   type('image/gif')

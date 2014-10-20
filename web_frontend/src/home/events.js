@@ -11,6 +11,7 @@ function createEvents() {
     'setPublishFormType',
     'submitPublishForm',
     'cancelPublishForm',
+    'testPublishFormCode',
 
     // mention box behaviors
     'mentionBoxInput',
@@ -29,9 +30,12 @@ function createEvents() {
     'follow',
     'unfollow',
     'sync',
+
+    // msg buttons
     'replyToMsg',
     'reactToMsg',
-    'shareMsg'
+    'shareMsg',
+    'runMsgGui'
   ])
   events.setRoute = EventRouter()
   return events
