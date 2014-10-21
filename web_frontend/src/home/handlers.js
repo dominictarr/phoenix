@@ -322,7 +322,7 @@ exports.loadMore = function(state) {
 exports.addFeed = function(state) {
   var token = prompt('Introduction token of the user:')
   if (!token) return
-  bus.addFeed(state, token, function(err) {
+  bus.followUser(state, token, function(err) {
     if (err) alert(err.toString())
   })
 }
@@ -338,13 +338,13 @@ exports.showIntroToken = function(state, data) {
 }
 
 exports.follow = function(state, data) {
-  bus.addFeed(state, {id: data.id}, function(err) {
+  bus.followUser(state, {id: data.id}, function(err) {
     if (err) alert(err.toString())
   })
 }
 
 exports.unfollow = function(state, data) {
-  bus.removeFeed(state, data.id, function(err) {
+  bus.unfollowUser(state, data.id, function(err) {
     if (err) alert(err.toString())
   })
 }
@@ -396,7 +396,7 @@ exports.reactToMsg = function(state, data) {
 
 exports.shareMsg = function(state, data) {
   var id = data.msg.idStr
-  var text = data.msg.value.plain
+  var text = data.msg.content.plain
   if (text.length > 100)
     text = text.slice(0, 100) + '...'
   if (!confirm('Share with your followers, "' + text + '"?'))

@@ -13,13 +13,13 @@ var message = exports.message = function(state, msg) {
 
   // main content
   var main
-  switch (msg.value.type) {
+  switch (msg.content.type) {
     case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
-    case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.value.nickname, state.nicknameMap)
-    case 'act': return mercury.partial(messageEvent, msg, (msg.value.repliesTo) ? 'react' : 'act', msg.value.plain, state.nicknameMap)
+    case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.content.nickname, state.nicknameMap)
+    case 'act': return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'react' : 'act', msg.content.plain, state.nicknameMap)
     case 'text': main = mercury.partial(messageText, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap); break
     case 'gui': main = mercury.partial(messageGui, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap); break
-    default: return h('em', 'Unknown message type: ' + msg.value.type)
+    default: return h('em', 'Unknown message type: ' + msg.content.type)
   }
 
   // reply/react form
@@ -44,7 +44,7 @@ var message = exports.message = function(state, msg) {
 // message text-content renderer
 var messageText = exports.messageText = function(msg, events, replies, rebroadcasts, nicknameMap) {
   return renderMsgShell(
-    new widgets.Markdown(msg.value.plain, { nicknames: nicknameMap }),
+    new widgets.Markdown(msg.content.plain, { nicknames: nicknameMap }),
     msg, events, replies, rebroadcasts, nicknameMap
   )
 }
@@ -54,12 +54,12 @@ var messageGui = exports.messageGui = function(msg, events, replies, rebroadcast
   var content
   if (msg.isRunning) {
     content = h('.gui-post-wrapper.gui-running', [
-      new widgets.IframeSandbox(msg.value.html),
+      new widgets.IframeSandbox(msg.content.html),
     ])
   } else {
     content = h('.gui-post-wrapper', [
       h('.gui-post-runbtn', {'ev-click': valueEvents.click(events.runMsgGui, { id: msg.idStr, run: true })}),
-      h('pre.gui-post', h('code',msg.value.html))
+      h('pre.gui-post', h('code',msg.content.html))
     ])
   }
 
@@ -102,17 +102,17 @@ function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap
 // message header
 function renderMsgHeader(msg, events) {
   var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.idStr, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
-  var replyIdStr = (msg.value.repliesTo) ? util.toHexString(msg.value.repliesTo.$msg) : ''
-  if (msg.value.rebroadcasts) {
+  var replyIdStr = (msg.content.repliesTo) ? util.toHexString(msg.content.repliesTo.$msg) : ''
+  if (msg.content.rebroadcasts) {
     // duplicated message
-    var author = msg.value.rebroadcasts.$feed
+    var author = msg.content.rebroadcasts.$feed
     var authorStr = util.toHexString(author)
     var authorNick = nicknameMap[authorStr] || authorStr
     return h('p', [
       comren.userlink(author, authorNick),
       h('small.message-ctrls', [
         ' - ',
-        util.prettydate(new Date(msg.value.rebroadcasts.timestamp||0), true)
+        util.prettydate(new Date(msg.content.rebroadcasts.timestamp||0), true)
       ]),
       (replyIdStr) ?
         h('span.repliesto', [' in response to ', comnren.a('#/msg/'+replyIdStr, comren.shortHex(replyIdStr))])
@@ -138,7 +138,7 @@ function renderMsgHeader(msg, events) {
 
 // summary of reactions in the bottom of messages
 function renderMsgReplies(msg, replies) {
-  var nReplies = (replies) ? replies.filter(function(r) { return (r.value.type == 'text' || r.value.type == 'gui') }).length : 0
+  var nReplies = (replies) ? replies.filter(function(r) { return (r.content.type == 'text' || r.content.type == 'gui') }).length : 0
   return (nReplies) ? comren.a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
 }
 
@@ -148,8 +148,8 @@ function renderMsgReactions(replies, nicknameMap) {
   var reactMap = {}
   // create a map of reaction-text -> author-nicknames
   ;(replies || []).forEach(function(reply) {
-    if (reply && reply.value.type == 'act') {
-      var react = ''+reply.value.plain
+    if (reply && reply.content.type == 'act') {
+      var react = ''+reply.content.plain
       if (!reactMap[react])
         reactMap[react] = []
       if (notYetAdded(reactMap[react], reply))
@@ -218,8 +218,8 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
   }
 
   var parentLink = ''
-  if (msg.value.repliesTo) {
-    var id = util.toHexString(msg.value.repliesTo.$msg)
+  if (msg.content.repliesTo) {
+    var id = util.toHexString(msg.content.repliesTo.$msg)
     parentLink = comren.a('#/msg/'+id, comren.shortHex(id))
   }
 

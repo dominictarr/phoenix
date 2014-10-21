@@ -25,8 +25,8 @@ exports.fetchServers = function(state, cb) {
 }
 
 // begins following a feed
-var addFeed =
-exports.addFeed = function(state, token, cb) {
+var followUser =
+exports.followUser = function(state, token, cb) {
   if (typeof token == 'string') {
     try { token = JSON.parse(token) }
     catch (e) { return cb(new Error('Bad intro token - must be valid JSON')) }
@@ -35,12 +35,11 @@ exports.addFeed = function(state, token, cb) {
   // start following the id
   var id = util.toBuffer(token.id)
   if (!id) return cb(new Error('Bad intro token - invalid ID'))
-  // :TODO: replace
-  wsrpc.api.follow(id, function(err) {
+  wsrpc.api.add({ type: 'network', $feed: id, $rel: 'follows' }, function(err) {
     if (err) return cb(err)
 
     // load the profile into the local cache, if possible
-    fetchProfile(state, id, function(err, profile) {
+    profiles.fetchProfile(state, id, function(err, profile) {
       if (profile)
         profile.isFollowing.set(true)
     })
@@ -49,13 +48,13 @@ exports.addFeed = function(state, token, cb) {
     if (!token.relays || token.relays.length === 0)        
       return
     // :TODO: replace
-    wsrpc.api.addNodes(token.relays, cb)
+    // wsrpc.api.addNodes(token.relays, cb)
   })
 }
 
 // stops following a feed
-var removeFeed =
-exports.removeFeed = function(state, id, cb) {
+var unfollowUser =
+exports.unfollowUser = function(state, id, cb) {
   var id = util.toBuffer(id)
   // :TODO: replace
   wsrpc.api.unfollow(util.toBuffer(id), function(err) {

@@ -53,9 +53,9 @@ exports.fetchFeed = function(state, opts, cb) {
         state.messageMap.set(mm)
         
         // index replies
-        if (m.value.repliesTo)    indexReplies(state, m)
-        if (m.value.rebroadcasts) indexRebroadcasts(state, m, mm)
-        if (m.value.mentions)     indexMentions(state, m)
+        if (m.content.repliesTo)    indexReplies(state, m)
+        if (m.content.rebroadcasts) indexRebroadcasts(state, m, mm)
+        if (m.content.mentions)     indexMentions(state, m)
       }, function() {
         cbs(null, state.feed())
       })
@@ -77,11 +77,11 @@ function messageIsCached(state, a) {
 
 function indexReplies(state, msg) {
   try {
-    var id = util.toHexString(msg.value.repliesTo.$msg)
+    var id = util.toHexString(msg.content.repliesTo.$msg)
     if (id) {
       var sr = state.feedReplies()
       if (!sr[id]) sr[id] = []
-      sr[id].push({ idStr: msg.idStr, type: msg.value.type })
+      sr[id].push({ idStr: msg.idStr, type: msg.content.type })
       state.feedReplies.set(sr)
     }
   } catch(e) { console.warn('failed to index reply', e) }
@@ -89,7 +89,7 @@ function indexReplies(state, msg) {
 
 function indexRebroadcasts(state, msg, msgMap) {
   try {
-    var id = util.toHexString(msg.value.rebroadcasts.$msg)
+    var id = util.toHexString(msg.content.rebroadcasts.$msg)
     if (id) {
       var fr = state.feedRebroadcasts()
       if (!fr[id]) fr[id] = []
@@ -110,16 +110,16 @@ function indexRebroadcasts(state, msg, msgMap) {
 function indexMentions(state, msg) {
   // look for mentions of the current user and create notifications for them
   var fr = state.feedRebroadcasts()
-  var mentions = Array.isArray(msg.value.mentions) ? msg.value.mentions : [msg.value.mentions]
+  var mentions = Array.isArray(msg.content.mentions) ? msg.content.mentions : [msg.content.mentions]
   for (var i=0; i < mentions.length; i++) {
     try {
       var mention = mentions[i]
       if (util.toHexString(mention.$feed) != state.user.idStr()) continue // not for current user
-      if (msg.value.rebroadcasts && fr[util.toHexString(msg.value.rebroadcasts.$msg)]) continue // already handled
+      if (msg.content.rebroadcasts && fr[util.toHexString(msg.content.rebroadcasts.$msg)]) continue // already handled
       state.notifications.push(models.notification({
         msgIdStr:       msg.idStr,
         authorNickname: msg.authorNickname,
-        msgText:        msg.value.plain.split('\n')[0],
+        msgText:        msg.content.plain.split('\n')[0],
         timestamp:      msg.timestamp
       }))
     } catch(e) { console.warn('failed to index mention', e) }

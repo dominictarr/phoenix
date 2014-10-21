@@ -68,8 +68,8 @@ exports.publishGuiply = function(state, text, parent, cb) {
 // posts a copy of the given message to the feed
 var publishRebroadcast =
 exports.publishRebroadcast = function(state, msg, cb) {
-  if (!msg.value.rebroadcasts) {
-    msg.value.rebroadcasts = {
+  if (!msg.content.rebroadcasts) {
+    msg.content.rebroadcasts = {
       $rel: 'rebroadcasts',
       $msg: util.toBuffer(msg.id),
       $feed: util.toBuffer(msg.author),
@@ -77,5 +77,5 @@ exports.publishRebroadcast = function(state, msg, cb) {
       timezone: msg.timezone
     }
   }
-  wsrpc.api.add(msg.value, cb)
+  wsrpc.api.add(msg.content, cb)
 }

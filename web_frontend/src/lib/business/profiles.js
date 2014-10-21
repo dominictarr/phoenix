@@ -51,7 +51,7 @@ exports.fetchProfile = function(state, profid, cb) {
   // try to load from backend
   fetchProfileQueue(idStr, cb, function(cbs) {
     pull(
-      wsrpc.api.feedsLinkedTo(idBuf, 'updates-profile'),
+      wsrpc.api.messagesLinkedToFeed(idBuf, 'updates-profile'),
       pull.filter(function (link) {
         // filter out messages by other users
         return util.toHexString(link.source) == idStr
@@ -71,8 +71,8 @@ exports.fetchProfile = function(state, profid, cb) {
         // find the most recent profile data
         for (var i = msgs.length - 1; i >= 0; i--) {
           var msg = msgs[i]
-          if (msg.value.type == 'profile' && msg.value.nickname) {
-            profile.nickname = msg.value.nickname
+          if (msg.content.type == 'profile' && msg.content.nickname) {
+            profile.nickname = msg.content.nickname
             break
           }
         }
@@ -112,7 +112,7 @@ exports.fetchProfileFeed = function(state, profid, cb) {
             m.idStr = util.toHexString(m.id)
             m.authorNickname = profile.nickname
             m = models.message(m)
-            if (m.value.type == 'init') profile.joinDate.set(util.prettydate(new Date(m.timestamp), true))
+            if (m.content.type == 'init') profile.joinDate.set(util.prettydate(new Date(m.timestamp), true))
             if (m) profile.feed.push(m)
           }, done())
         )
@@ -132,4 +132,18 @@ exports.fetchProfileFeed = function(state, profid, cb) {
       done(cbs)
     })
   })
+}
+
+// gets users the given user is following
+var fetchFollowingQueue = util.queue()
+var fetchFollowing = 
+exports.fetchFollowing = function(state, profid, cb) {
+
+}
+
+// gets users that follow the given user
+var fetchFollowersQueue = util.queue()
+var fetchFollowers = 
+exports.fetchFollowers = function(state, profid, cb) {
+
 }
