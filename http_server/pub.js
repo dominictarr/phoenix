@@ -3,25 +3,24 @@ var fs       = require('fs')
 var path     = require('path')
 var pull     = require('pull-stream')
 var toPull   = require('stream-to-pull-stream')
-var concat   = require('concat-stream')
 var WSServer = require('ws').Server
 var WSStream = require('websocket-stream')
-var prpc     = require('phoenix-rpc')
+var ssbapi   = require('secure-scuttlebutt/api')
 var connect  = require('../lib/backend')
 var util     = require('../lib/util')
 
 var allowedPublicMethods = ['createReplicationStream']
 
 function createServer(port) {
-	connect(function(err, backend) {
+	connect(function(err, backendClient, backend) {
 		if (err) return console.error(err)
+    return
 
-		// Read config
-    backend.local = { relayPort: port }
-		loadMembersFile(backend)
+		// Read config :TODO:
+		// loadMembersFile(backendClient)
     
-    // Setup periodic syncs
-    require('../lib/background-sync')(backend, 1000 * 60 * 15)
+    // Setup periodic syncs :TODO:
+    // require('../lib/background-sync')(backendClient, 1000 * 60 * 15)
 
 		// Start server
 		var server = http.createServer(function (req, res) {
@@ -52,11 +51,21 @@ function createServer(port) {
 		})
 
 		server.on('connect', function(req, conn, head) {
-			// RPC-stream connection
-			console.log('Received CONNECT')
-			conn.write('HTTP/1.1 200 Connection Established\r\n\r\n')
-      // :TODO: I think we may need to create a new prpc server here
-			conn.pipe(prpc.proxy(backend, allowedPublicMethods)).pipe(conn)
+      // RPC-stream connection
+      console.log('Received CONNECT')
+
+      if (!backend) {
+        // this is not the RPC server.... this shouldn't happen
+        console.error('Unable to handle CONNECT - this is not the RPC server. Weird! Aborting')
+        conn.close()
+        return
+      }
+
+      // :TODO: authentication, perms
+
+      conn.write('HTTP/1.1 200 Connection Established\r\n\r\n')
+      var connStream = toPull.duplex(conn)
+      pull(connStream, ssbapi.server(backend.ssb, backend.feed).createStream(), connStream)
 		})
 		server.listen(port, '::')
 
@@ -66,25 +75,33 @@ function createServer(port) {
       console.log('WS: new websocket client connected')
       var conn = WSStream(ws)
       conn.on('error', function(err) { console.log('WS ERROR', err) })
-      // :TODO: proper perms
-      // :TODO: I think we may need to create a new prpc server here
-      var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
-      conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
+
+      if (!backend) {
+        // this is not the RPC server.... this shouldn't happen
+        console.error('Unable to handle websocket - this is not the RPC server. Weird! Aborting')
+        conn.close()
+        return
+      }
+      
+      // :TODO: authentication, perms
+      
+      var connStream = toPull.duplex(conn)
+      pull(connStream, ssbapi.server(backend.ssb, backend.feed).createStream(), connStream)
     })
 
-		function onExit() { backend.close(); process.exit() }
+		function onExit() { backendClient.close(); process.exit() }
 		process.on('SIGINT', onExit).on('SIGTERM', onExit)
 	})
 }
 
 
-function loadMembersFile(backend) {
+function loadMembersFile(backendClient) {
 	fs.readFile(path.join(__dirname, '../../.relay-members'), 'utf8', function(err, data) {
 		if (err || !data) return
 		data.replace(/\r/g, '').split('\n').forEach(function (key) {
 			if (!key) return
 			// :TODO: validate the key
-			backend.follow(new Buffer(key, 'hex'))
+			backendClient.follow(new Buffer(key, 'hex'))
 		})
 	})
 }

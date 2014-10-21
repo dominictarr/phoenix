@@ -35,7 +35,7 @@ exports.setup = function(opts) {
 
 	// :TODO: dont publish new profile if one already exists
 
-	connect(function(err, backend) {
+	connect(function(err, backendClient) {
 		if (err) return console.error(err);
 
 		// Setup profile
@@ -43,7 +43,7 @@ exports.setup = function(opts) {
 		function handleNickname(input) {
 			if (!nicknameRE.test(input)) {
 				console.log('Letters, numbers, dashes and underscores only. Must start with a letter.');
-				return rl.close(), backend.close();
+				return rl.close();
 			}
 			nickname = input;
 			console.log('\nNickname is \'' + nickname + '\'');
@@ -53,23 +53,23 @@ exports.setup = function(opts) {
 			console.log('');
 			rl.close();
 			if (input.toLowerCase() != 'y')
-				return console.log('Aborted.'), backend.close();
+				return console.log('Aborted.');
 
 			// Setup keys
-			backend.createKeys(opts['force-new-keypair'], handleKeycreate);
+			backendClient.createKeys(opts['force-new-keypair'], handleKeycreate);
 		}
 		function handleKeycreate(err) {
 			if (err && err.fatal)
-				return console.error(err.toString()), backend.close();
+				return console.error(err.toString());
 
 			// Publish profile
-			backend.profile_setNickname(nickname, handleProfpublish);
+			backendClient.profile_setNickname(nickname, handleProfpublish);
 		}
 		function handleProfpublish(err) {
 			if (err) return console.error('Failed to publish profile', err);
 			console.log('Ok.');
 			introHelp();
-			backend.close();
+			backendClient.close();
 		}
 	});
 }

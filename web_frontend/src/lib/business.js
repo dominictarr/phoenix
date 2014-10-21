@@ -1,6 +1,3 @@
-var WSStream    = require('websocket-stream')
-var prpc        = require('phoenix-rpc')
-var through     = require('through')
 var pull        = require('pull-stream')
 var toPull      = require('stream-to-pull-stream')
 var multicb     = require('multicb')
@@ -8,9 +5,8 @@ var ssbDefaults = require('secure-scuttlebutt/defaults')
 var msgpack     = require('msgpack-js')
 
 var util        = require('../../../lib/util')
+var wsrpc       = require('./ws-rpc')
 var models      = require('./models')
-
-var client = exports.client = null
 
 function genMsgId(msg) {
   return ssbDefaults.hash(ssbDefaults.codec.encode(msg))
@@ -18,89 +14,31 @@ function genMsgId(msg) {
 function convertMsgBuffers(msg) {
   msg.previous = new Buffer(msg.previous)
   msg.author = new Buffer(msg.author)
-  msg.message = new Buffer(msg.message)
-  msg.type = new Buffer(msg.type)
   msg.signature = new Buffer(msg.signature) 
-}
-
-// establishes the server api connection
-function setupClient(state) {
-  if (client) return
-
-  var conn = WSStream('ws://' + window.location.host + '/ws')
-  conn.on('error', handleClientError.bind(null, state))
-  conn.on('close', handleClientClose.bind(null, state))
-
-  client = exports.client = prpc.client()
-  client.pipe(through(toBuffer)).pipe(conn).pipe(client)
-
-  state.conn.hasError.set(false)
-  state.conn.explanation.set('')
-}
-
-// server api connection error handler
-function handleClientError(state, e) {
-  console.error('Connection to phoenix server error', e)
-}
-
-// server api connection close handler
-function handleClientClose(state, e) {
-  console.error('Lost connection to phoenix server')
-  state.conn.hasError.set(true)
-  countdownToClientReconnect(state, 10000, 'Lost connection with the backend. Has the phoenix server been closed? Retrying $TIME')
-}
-
-// helper to do client reconnects on drop
-function countdownToClientReconnect(state, dT, msg) {
-  var interval
-  var target = Date.now() + dT
-  function step() {
-    var remaining = target - Date.now()
-    if (remaining <= 0) {
-      // stop countdown
-      clearInterval(interval)
-      state.conn.explanation.set(msg.replace('$TIME', 'now...'))
-
-      // reconnect
-      client = exports.client = null
-      setupClient(state)
-    } else {
-      // update message
-      state.conn.explanation.set(msg.replace('$TIME', 'in ' + Math.round(remaining / 1000) + 's.'))
-    }
-  }
-  interval = setInterval(step, 1000)
-  step()
-}
-
-function toBuffer(chunk) {
-  this.queue((Buffer.isBuffer(chunk)) ? chunk : new Buffer(chunk))
 }
 
 // pulls down remote data for the session
 exports.setupHomeApp = function(state) {
-  setupClient(state)
+  wsrpc.connect(state)
   // session
-  client.api.getKeys(function(err, keys) {
+  wsrpc.api.whoami(function(err, data) {
     if (err) throw err
-    state.user.id.set(util.toBuffer(keys.name))
-    state.user.idStr.set(util.toHexString(keys.name))
-    state.user.pubkey.set(util.toBuffer(keys.public))
-    state.user.pubkeyStr.set(util.toHexString(keys.public))
+    state.user.id.set(util.toBuffer(data.id))
+    state.user.idStr.set(util.toHexString(data.id))
+    state.user.pubkey.set(util.toBuffer(data.public))
+    state.user.pubkeyStr.set(util.toHexString(data.public))
   })
-  client.api.getSyncState(function(err, syncState) {
-    if (syncState && syncState.lastSync)
-      state.lastSync.set(new Date(syncState.lastSync))
-  })
-  // followed profiles
-  pull(toPull(client.api.following()), pull.drain(function (entry) { fetchProfile(state, entry.key) }))
+  
+  // followed profiles 
+  // :TODO:
+  // pull(toPull(wsrpc.api.following()), pull.drain(function (entry) { fetchProfile(state, entry.key) }))
 }
 
 // pulls down remote data for the session
 exports.setupPubApp = function(state) {
-  setupClient(state)
-  // followed profiles
-  pull(toPull(client.api.following()), pull.drain(function (entry) { fetchProfile(state, entry.key) }))
+  wsrpc.connect(state)
+  // followed profiles :TODO:
+  // pull(toPull(wsrpc.api.following()), pull.drain(function (entry) { fetchProfile(state, entry.key) }))
 }
 
 // adds a new profile
@@ -143,7 +81,8 @@ exports.fetchProfile = function(state, profid, cb) {
 
   // try to load from backend
   fetchProfileQueue(idStr, cb, function(cbs) {
-    client.api.profile_getProfile(idBuf, function(err, profile) {
+    // :TODO: replace
+    wsrpc.api.profile_getProfile(idBuf, function(err, profile) {
       if (err && !err.notFound) return cb(err)
       profile = profile || {}
       
@@ -181,11 +120,11 @@ exports.fetchFeed = function(state, opts, cb) {
     // fetch feed stream
     // :TODO: start from where we currently are if there are already messages in the feed
     pull(
-      toPull(client.api.createFeedStream()),
+      wsrpc.api.createFeedStream(),
       pull.asyncMap(function(m, cb) {
         convertMsgBuffers(m)
-        m.id = genMsgId(m)
-        m.idStr = util.toHexString(m.id)
+        m.id = 'TODO' + m.sequence //genMsgId(m)
+        m.idStr = m.id //util.toHexString(m.id)
 
         fetchProfile(state, m.author, function(err, profile) {
           if (err) console.error('Error loading profile for message', err, m)
@@ -207,7 +146,10 @@ exports.fetchFeed = function(state, opts, cb) {
         if (m.message.repliesTo)    indexReplies(state, m)
         if (m.message.rebroadcasts) indexRebroadcasts(state, m, mm)
         if (m.message.mentions)     indexMentions(state, m)
-      }, function() { cbs(null, state.feed()) })
+      }, function() {
+        console.log('Im finished!')
+        cbs(null, state.feed())
+      })
     )
   })
 }
@@ -289,7 +231,7 @@ exports.fetchProfileFeed = function(state, profid, cb) {
       // fetch feed if not empty :TODO: just see if there are any new
       if (!profile.feed.getLength()) { 
         pull(
-          toPull(client.api.createHistoryStream(util.toBuffer(profid), 0)),
+          wsrpc.api.createHistoryStream(util.toBuffer(profid), 0),
           pull.drain(function (m) {
             convertMsgBuffers(m)
             m.id = genMsgId(m)
@@ -305,7 +247,8 @@ exports.fetchProfileFeed = function(state, profid, cb) {
       // fetch isFollowing state
       if (state.user && state.user.idStr() != idStr) {
         var cb2 = done()
-        client.api.isFollowing(util.toBuffer(profid), function(err) {
+        // :TODO: replace
+        wsrpc.api.isFollowing(util.toBuffer(profid), function(err) {
           profile.isFollowing.set(!err)
           cb2()
         })
@@ -323,7 +266,8 @@ var fetchServers =
 exports.fetchServers = function(state, cb) {
   fetchServersQueue(cb, function(cbs) {
     // fetch nodes
-    client.api.getNodes(function(err, nodes) {
+    // :TODO: replace
+    wsrpc.api.getNodes(function(err, nodes) {
       if (err) return cbs(err)
 
       // clear if not empty
@@ -360,7 +304,7 @@ exports.preprocessTextPost = function(msg) {
 var publishText =
 exports.publishText = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  client.api.addMessage('text', msgpack.encode(preprocessTextPost({plain: text})), cb)
+  wsrpc.api.add(preprocessTextPost({type: 'text', plain: text}), cb)
 }
 
 // posts to the feed
@@ -369,14 +313,14 @@ exports.publishReply = function(state, text, parent, cb) {
   parent = util.toBuffer(parent)
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  client.api.addMessage('text', msgpack.encode(preprocessTextPost({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}})), cb)
+  wsrpc.api.add(preprocessTextPost({type: 'text', plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
 }
 
 // posts to the feed
 var publishAction =
 exports.publishAction = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  client.api.addMessage('act', msgpack.encode(preprocessTextPost({plain: text})), cb)
+  wsrpc.api.add(preprocessTextPost({type: 'act', plain: text}), cb)
 }
 
 // posts to the feed
@@ -385,14 +329,14 @@ exports.publishReaction = function(state, text, parent, cb) {
   parent = util.toBuffer(parent)
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  client.api.addMessage('act', msgpack.encode(preprocessTextPost({plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}})), cb)
+  wsrpc.api.add(preprocessTextPost({type: 'act', plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
 }
 
 // posts to the feed
 var publishGui =
 exports.publishGui = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  client.api.addMessage('gui', msgpack.encode(preprocessTextPost({html: text})), cb)
+  wsrpc.api.add(preprocessTextPost({type: 'gui', html: text}), cb)
 }
 
 // posts to the feed
@@ -400,7 +344,7 @@ var publishGuiply =
 exports.publishGuiply = function(state, text, parent, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  client.api.addMessage('gui', msgpack.encode(preprocessTextPost({html: text, repliesTo: {$msg: parent, $rel: 'replies-to'}})), cb)
+  wsrpc.api.add(preprocessTextPost({type: 'gui', html: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
 }
 
 // posts a copy of the given message to the feed
@@ -415,7 +359,7 @@ exports.publishRebroadcast = function(state, msg, cb) {
       timezone: msg.timezone
     }
   }
-  client.api.addMessage(msg.type, msgpack.encode(msg.message), cb)
+  wsrpc.api.add(msg.type, msgpack.encode(msg.message), cb)
 }
 
 // begins following a feed
@@ -429,7 +373,8 @@ exports.addFeed = function(state, token, cb) {
   // start following the id
   var id = util.toBuffer(token.id)
   if (!id) return cb(new Error('Bad intro token - invalid ID'))
-  client.api.follow(id, function(err) {
+  // :TODO: replace
+  wsrpc.api.follow(id, function(err) {
     if (err) return cb(err)
 
     // load the profile into the local cache, if possible
@@ -441,7 +386,8 @@ exports.addFeed = function(state, token, cb) {
     // add their relays
     if (!token.relays || token.relays.length === 0)        
       return
-    client.api.addNodes(token.relays, cb)
+    // :TODO: replace
+    wsrpc.api.addNodes(token.relays, cb)
   })
 }
 
@@ -449,7 +395,8 @@ exports.addFeed = function(state, token, cb) {
 var removeFeed =
 exports.removeFeed = function(state, id, cb) {
   var id = util.toBuffer(id)
-  client.api.unfollow(util.toBuffer(id), function(err) {
+  // :TODO: replace
+  wsrpc.api.unfollow(util.toBuffer(id), function(err) {
     if (err) return cb(err)
     fetchProfile(state, id, function(err, profile) {
       if (profile)
@@ -467,7 +414,8 @@ exports.addServer = function(state, addr, cb) {
   if (!addr[0]) return cb(new Error('Invalid address'))
   addr[1] = +addr[1] || 80
   
-  client.api.addNode(addr[0], addr[1], function(err) {
+  // :TODO: replace
+  wsrpc.api.addNode(addr[0], addr[1], function(err) {
     if (err) return cb(err)
     state.servers.push(models.server({ hostname: addr[0], port: addr[1] }))
   })
@@ -481,7 +429,8 @@ exports.removeServer = function(state, addr, cb) {
   if (!addr[0]) return cb(new Error('Invalid address'))
   addr[1] = +addr[1] || 80
 
-  client.api.delNode(addr[0], addr[1], function(err) {
+  // :TODO: replace
+  wsrpc.api.delNode(addr[0], addr[1], function(err) {
     if (err) return cb(err)
 
     // find and remove from the local cache

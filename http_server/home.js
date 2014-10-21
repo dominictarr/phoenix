@@ -1,37 +1,19 @@
 var http     = require('http');
 var fs       = require('fs');
 var path     = require('path');
-var concat   = require('concat-stream')
 var WSServer = require('ws').Server
 var WSStream = require('websocket-stream')
-var prpc     = require('phoenix-rpc')
+var ssbapi   = require('secure-scuttlebutt/api')
+var pull     = require('pull-stream')
+var toPull   = require('stream-to-pull-stream')
 var connect  = require('../lib/backend')
 
 function createServer(port, opts) {
-  connect(function (err, backend) {
+  connect(function (err, backendClient, backend) {
     if (err) return console.error(err);
 
-    // Pull state from the backend
-    backend.local = { userid: null, userpubkey: null, lastSync: null, lastSyncResults: null }
-    backend.getKeys(function(err, keys) {
-      if (err) throw err
-      if (!keys.exist) {
-        console.log('')
-        console.log('  No profile found.')
-        console.log('  Please run "node phoenix setup" first.')
-        console.log('')
-        process.exit(0)
-      }
-      backend.local.userid = keys.name
-      backend.local.userpubkey = keys.public
-    })
-    backend.getSyncState(function(err, state) {
-      if (state && state.lastSync)
-        backend.local.lastSync = new Date(state.lastSync)
-    })
-
-    // Setup periodic syncs
-    require('../lib/background-sync')(backend, 1000 * 60 * 15)
+    // Setup periodic syncs :TODO:
+    // require('../lib/background-sync')(backendClient, 1000 * 60 * 15)
 
     // Create HTTP server
     var server = http.createServer(function (req, res) {
@@ -68,27 +50,44 @@ function createServer(port, opts) {
     server.on('connect', function(req, conn, head) {
       // RPC-stream connection
       console.log('Received CONNECT')
+
+      if (!backend) {
+        // this is not the RPC server.... this shouldn't happen
+        console.error('Unable to handle CONNECT - this is not the RPC server. Weird! Aborting')
+        conn.close()
+        return
+      }
+
+      // :TODO: authentication, perms
+
       conn.write('HTTP/1.1 200 Connection Established\r\n\r\n')
-      // :TODO: proper perms
-      // :TODO: I think we may need to create a new prpc server here
-      var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
-      conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
+      var connStream = toPull.duplex(conn)
+      pull(connStream, ssbapi.server(backend.ssb, backend.feed).createStream(), connStream)
+      
     })
     server.listen(port, '::')
 
     // Setup the websocket host
     var wss = new WSServer({server: server, path: '/ws'})
     wss.on('connection', function(ws) {
-      console.log('WS: new websocket client connected')
+      console.log('WS: new websocket client connected to home server')
       var conn = WSStream(ws)
       conn.on('error', function(err) { console.log('WS ERROR', err) })
-      // :TODO: proper perms
-      // :TODO: I think we may need to create a new prpc server here
-      var allowedMethods = Object.keys(backend).filter(function(name) { return typeof backend[name] == 'function' })
-      conn.pipe(prpc.proxy(backend, allowedMethods)).pipe(conn)
+
+      if (!backend) {
+        // this is not the RPC server.... this shouldn't happen
+        console.error('Unable to handle websocket - this is not the RPC server. Weird! Aborting')
+        conn.close()
+        return
+      }
+      
+      // :TODO: authentication, perms
+
+      var connStream = toPull.duplex(conn)
+      pull(connStream, ssbapi.server(backend.ssb, backend.feed).createStream(), connStream)
     })
 
-    function onExit() { backend.close(); process.exit() }
+    function onExit() { /* :TODO: any cleanup? */ process.exit() }
     process.on('SIGINT', onExit).on('SIGTERM', onExit)
   })
 }
