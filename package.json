@@ -4,7 +4,6 @@
     "level": "~0.18.0",
     "level-sublevel": "~6.3.8",
     
-    "proquint-": "~1.1.0",
     "eccjs": "git://github.com/dominictarr/eccjs.git#586f6d47507184a2efe84684ed0a30605cbc43a5",
     "blake2s": "~1.0.0",
 

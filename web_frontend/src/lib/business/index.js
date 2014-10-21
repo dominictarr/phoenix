@@ -4,9 +4,9 @@ var multicb     = require('multicb')
 var ssbDefaults = require('secure-scuttlebutt/defaults')
 var msgpack     = require('msgpack-js')
 
-var util        = require('../../../lib/util')
-var wsrpc       = require('./ws-rpc')
-var models      = require('./models')
+var util        = require('../../../../lib/util')
+var wsrpc       = require('../ws-rpc')
+var models      = require('../models')
 
 function genMsgId(msg) {
   return ssbDefaults.hash(ssbDefaults.codec.encode(msg))
@@ -81,25 +81,45 @@ exports.fetchProfile = function(state, profid, cb) {
 
   // try to load from backend
   fetchProfileQueue(idStr, cb, function(cbs) {
-    // :TODO: replace
-    // wsrpc.api.profile_getProfile(idBuf, function(err, profile) {
-      // if (err && !err.notFound) return cb(err)
-      profile = profile || {}
-      
-      // cache the profile
-      profile.id = idBuf
-      profile.idStr = idStr
-      profile.nickname = idStr // :TEMP:
-      profile = addProfile(state, profile)
+    pull(
+      wsrpc.api.feedsLinkedTo(idBuf, 'updates-profile'),
+      pull.filter(function (link) {
+        // filter out messages by other users
+        return util.toHexString(link.source) == idStr
+      }),
+      pull.asyncMap(function(link, cb) {
+        wsrpc.api.get(link.message, cb)
+      }),
+      pull.collect(function(err, msgs) {
+        if (err) return cb(err)
 
-      // pull into current user data
-      if (profile.idStr == state.user.idStr())
-        state.user.nickname.set(profile.nickname)
+        var profile = {
+          id: idBuf,
+          idStr: idStr,
+          nickname: idStr
+        }
 
-      // drain the queue
-      cbs(null, profile)
-    })
-  // })
+        // find the most recent profile data
+        for (var i = msgs.length - 1; i >= 0; i--) {
+          var msg = msgs[i]
+          if (msg.value.type == 'profile' && msg.value.nickname) {
+            profile.nickname = msg.value.nickname
+            break
+          }
+        }
+
+        // cache the profile
+        profile = addProfile(state, profile)
+
+        // pull into current user data
+        if (profile.idStr == state.user.idStr())
+          state.user.nickname.set(profile.nickname)
+
+        // drain the queue
+        cbs(null, profile)
+      })
+    )
+  })
 }
 
 // loads the full feed

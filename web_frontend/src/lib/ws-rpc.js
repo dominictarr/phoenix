@@ -19,6 +19,7 @@ var connect = exports.connect = function(state) {
   pull(clientStream, toPull.duplex(conn), clientStream)
 
   // :DEBUG:
+  window.Buffer = Buffer
   window.rpcapi = api
 
   state.conn.hasError.set(false)

@@ -1,4 +1,8 @@
+var cfg        = require('../lib/config');
 var connect    = require('../lib/backend');
+var keys       = require('../lib/keys')
+var level      = require('level')
+var sublevel   = require('level-sublevel/bytewise')
 var prettydate = require('pretty-date');
 var pull       = require('pull-stream');
 var toPull     = require('stream-to-pull-stream');
@@ -16,15 +20,9 @@ function namefileHelp() {
 }
 
 function introHelp() {
-	console.log('');
-	console.log('Getting started:');
-	console.log('');
-	console.log(' - Follow feeds with \'./phoenix add <public key>\'');
-	console.log(' - Post messages with \'./phoenix post "<your message>"\'');
-	console.log(' - Add hosts to your network with \'./phoenix sync <host address>\'');
-	console.log(' - Get more help with \'./phoenix -h\'');
 	console.log('')
-	console.log('Or, use the web interface with \'./phoenix serve\'')
+	console.log('Get started by running \'./phoenix serve\'')
+	console.log('For help, use the -h switch')
 	console.log('');
 }
 
@@ -33,45 +31,66 @@ exports.setup = function(opts) {
 	var nickname;
 	var rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
 
-	// :TODO: dont publish new profile if one already exists
+	// key overwriting
+	var keypair = keys.load(cfg.namefile)
+  if(keypair && !opts['force-new-keypair']) {
+    console.error('Keyfile already exists.')
+    console.log('')
+    console.log('Use --force-new-keypair to destroy the old keyfile and create a new one.')
+    console.log('(Warning: this will destroy your account!)')
+    console.log('')
+    rl.close()
+    return
+  }
 
-	connect(function(err, backendClient) {
-		if (err) return console.error(err);
-
-		// Setup profile
+	var opts = require('secure-scuttlebutt/defaults')
+	var ssb = require('secure-scuttlebutt')(sublevel(level(cfg.dbpath, { valueEncoding: opts.codec }, handleDbOpen)), opts)
+	function handleDbOpen(err) {
+		if (err) {
+			if (err.type == 'OpenError')
+				console.error('Can not open the database because it is already open. If the phoenix server is running, please stop it first.')
+			else if (err.type == 'InitializationError')
+				console.error('Can not open the database because no path was found in the config. Please check that .phoenixrc contains a valid `datadir` setting.')
+			else
+				console.error(err.toString())
+			rl.close()
+			return
+		}
+		// setup profile
 		rl.question('Nickname? > ', handleNickname);
-		function handleNickname(input) {
-			if (!nicknameRE.test(input)) {
-				console.log('Letters, numbers, dashes and underscores only. Must start with a letter.');
-				return rl.close();
+	}
+	function handleNickname(input) {
+		if (!nicknameRE.test(input)) {
+			console.log('Letters, numbers, dashes and underscores only. Must start with a letter.');
+			return rl.close();
+		}
+		nickname = input;
+		console.log('\nNickname is \'' + nickname + '\'');
+		rl.question('Is this correct? [y/N]> ', handlePublish);
+	}
+	function handlePublish(input) {
+		console.log('');
+		rl.close();
+		if (input.toLowerCase() != 'y')
+			return console.log('Aborted.');
+
+		// setup keys
+		var keypair = keys.createKeys(cfg.namefile, function(err, keypair) {
+			if (err) {
+				console.error('Error creating keys:')
+				console.error(err.toString())
+				return
 			}
-			nickname = input;
-			console.log('\nNickname is \'' + nickname + '\'');
-			rl.question('Publish? [y/N]> ', handlePublish);
-		}
-		function handlePublish(input) {
-			console.log('');
-			rl.close();
-			if (input.toLowerCase() != 'y')
-				return console.log('Aborted.');
-
-			// Setup keys
-			backendClient.createKeys(opts['force-new-keypair'], handleKeycreate);
-		}
-		function handleKeycreate(err) {
-			if (err && err.fatal)
-				return console.error(err.toString());
-
-			// Publish profile
-			backendClient.profile_setNickname(nickname, handleProfpublish);
-		}
-		function handleProfpublish(err) {
-			if (err) return console.error('Failed to publish profile', err);
-			console.log('Ok.');
-			introHelp();
-			backendClient.close();
-		}
-	});
+			
+			// publish profile
+			var feed = ssb.createFeed(keypair)
+			feed.add({ type: 'profile', nickname: nickname, updatesProfile: { $feed: keypair.id, $rel: 'updates-profile' } }, function(err) {
+				if (err) return console.error('Failed to publish profile', err);
+				console.log('Ok.');
+				introHelp();
+			})
+		})
+	}
 }
 
 exports.list = function(opts) {
