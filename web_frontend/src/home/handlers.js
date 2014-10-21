@@ -396,7 +396,7 @@ exports.reactToMsg = function(state, data) {
 
 exports.shareMsg = function(state, data) {
   var id = data.msg.idStr
-  var text = data.msg.message.plain
+  var text = data.msg.value.plain
   if (text.length > 100)
     text = text.slice(0, 100) + '...'
   if (!confirm('Share with your followers, "' + text + '"?'))

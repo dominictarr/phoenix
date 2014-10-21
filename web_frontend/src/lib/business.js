@@ -82,13 +82,14 @@ exports.fetchProfile = function(state, profid, cb) {
   // try to load from backend
   fetchProfileQueue(idStr, cb, function(cbs) {
     // :TODO: replace
-    wsrpc.api.profile_getProfile(idBuf, function(err, profile) {
-      if (err && !err.notFound) return cb(err)
+    // wsrpc.api.profile_getProfile(idBuf, function(err, profile) {
+      // if (err && !err.notFound) return cb(err)
       profile = profile || {}
       
       // cache the profile
       profile.id = idBuf
       profile.idStr = idStr
+      profile.nickname = idStr // :TEMP:
       profile = addProfile(state, profile)
 
       // pull into current user data
@@ -98,7 +99,7 @@ exports.fetchProfile = function(state, profid, cb) {
       // drain the queue
       cbs(null, profile)
     })
-  })
+  // })
 }
 
 // loads the full feed
@@ -123,8 +124,8 @@ exports.fetchFeed = function(state, opts, cb) {
       wsrpc.api.createFeedStream(),
       pull.asyncMap(function(m, cb) {
         convertMsgBuffers(m)
-        m.id = 'TODO' + m.sequence //genMsgId(m)
-        m.idStr = m.id //util.toHexString(m.id)
+        m.id = new Buffer('TODO' + m.sequence) // :TODO: replace genMsgId(m)
+        m.idStr = util.toHexString(m.id)
 
         fetchProfile(state, m.author, function(err, profile) {
           if (err) console.error('Error loading profile for message', err, m)
@@ -143,9 +144,9 @@ exports.fetchFeed = function(state, opts, cb) {
         state.messageMap.set(mm)
         
         // index replies
-        if (m.message.repliesTo)    indexReplies(state, m)
-        if (m.message.rebroadcasts) indexRebroadcasts(state, m, mm)
-        if (m.message.mentions)     indexMentions(state, m)
+        if (m.value.repliesTo)    indexReplies(state, m)
+        if (m.value.rebroadcasts) indexRebroadcasts(state, m, mm)
+        if (m.value.mentions)     indexMentions(state, m)
       }, function() {
         console.log('Im finished!')
         cbs(null, state.feed())
@@ -168,11 +169,11 @@ function messageIsCached(state, a) {
 
 function indexReplies(state, msg) {
   try {
-    var id = util.toHexString(msg.message.repliesTo.$msg)
+    var id = util.toHexString(msg.value.repliesTo.$msg)
     if (id) {
       var sr = state.feedReplies()
       if (!sr[id]) sr[id] = []
-      sr[id].push({ idStr: msg.idStr, type: msg.type })
+      sr[id].push({ idStr: msg.idStr, type: msg.value.type })
       state.feedReplies.set(sr)
     }
   } catch(e) { console.warn('failed to index reply', e) }
@@ -180,7 +181,7 @@ function indexReplies(state, msg) {
 
 function indexRebroadcasts(state, msg, msgMap) {
   try {
-    var id = util.toHexString(msg.message.rebroadcasts.$msg)
+    var id = util.toHexString(msg.value.rebroadcasts.$msg)
     if (id) {
       var fr = state.feedRebroadcasts()
       if (!fr[id]) fr[id] = []
@@ -201,16 +202,16 @@ function indexRebroadcasts(state, msg, msgMap) {
 function indexMentions(state, msg) {
   // look for mentions of the current user and create notifications for them
   var fr = state.feedRebroadcasts()
-  var mentions = Array.isArray(msg.message.mentions) ? msg.message.mentions : [msg.message.mentions]
+  var mentions = Array.isArray(msg.value.mentions) ? msg.value.mentions : [msg.value.mentions]
   for (var i=0; i < mentions.length; i++) {
     try {
       var mention = mentions[i]
       if (util.toHexString(mention.$feed) != state.user.idStr()) continue // not for current user
-      if (msg.message.rebroadcasts && fr[util.toHexString(msg.message.rebroadcasts.$msg)]) continue // already handled
+      if (msg.value.rebroadcasts && fr[util.toHexString(msg.value.rebroadcasts.$msg)]) continue // already handled
       state.notifications.push(models.notification({
         msgIdStr:       msg.idStr,
         authorNickname: msg.authorNickname,
-        msgText:        msg.message.plain.split('\n')[0],
+        msgText:        msg.value.plain.split('\n')[0],
         timestamp:      msg.timestamp
       }))
     } catch(e) { console.warn('failed to index mention', e) }
@@ -234,11 +235,11 @@ exports.fetchProfileFeed = function(state, profid, cb) {
           wsrpc.api.createHistoryStream(util.toBuffer(profid), 0),
           pull.drain(function (m) {
             convertMsgBuffers(m)
-            m.id = genMsgId(m)
+            m.id = new Buffer('TODO' + m.sequence) // :TODO: replace genMsgId(m)
             m.idStr = util.toHexString(m.id)
             m.authorNickname = profile.nickname
             m = models.message(m)
-            if (m.type == 'init') profile.joinDate.set(util.prettydate(new Date(m.timestamp), true))
+            if (m.value.type == 'init') profile.joinDate.set(util.prettydate(new Date(m.timestamp), true))
             if (m) profile.feed.push(m)
           }, done())
         )
@@ -336,7 +337,7 @@ exports.publishReaction = function(state, text, parent, cb) {
 var publishGui =
 exports.publishGui = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  wsrpc.api.add(preprocessTextPost({type: 'gui', html: text}), cb)
+  wsrpc.api.add({type: 'gui', html: text}, cb)
 }
 
 // posts to the feed
@@ -344,14 +345,14 @@ var publishGuiply =
 exports.publishGuiply = function(state, text, parent, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  wsrpc.api.add(preprocessTextPost({type: 'gui', html: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  wsrpc.api.add({type: 'gui', html: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}, cb)
 }
 
 // posts a copy of the given message to the feed
 var publishRebroadcast =
 exports.publishRebroadcast = function(state, msg, cb) {
-  if (!msg.message.rebroadcasts) {
-    msg.message.rebroadcasts = {
+  if (!msg.value.rebroadcasts) {
+    msg.value.rebroadcasts = {
       $rel: 'rebroadcasts',
       $msg: util.toBuffer(msg.id),
       $feed: util.toBuffer(msg.author),
@@ -359,7 +360,7 @@ exports.publishRebroadcast = function(state, msg, cb) {
       timezone: msg.timezone
     }
   }
-  wsrpc.api.add(msg.type, msgpack.encode(msg.message), cb)
+  wsrpc.api.add(msg.value, cb)
 }
 
 // begins following a feed

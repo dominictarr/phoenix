@@ -80,7 +80,7 @@ var defaults = {
     type: null,
     author: null,
     authorStr: '',
-    message: null,
+    value: null,
     previous: null,
     sequence: 0,
     signature: null,
@@ -204,16 +204,7 @@ function createPubApp(events, initialState) {
 
 function createMessage(initialState) {
   var state = extend(defaults.message, initialState)
-  try {
-    state.type = state.type.toString()
-    state.authorStr = state.author.toString('hex')
-    state.message = msgpack.decode(new Buffer(state.message))
-  } catch(e) {
-    if (state.type != 'init') { // :TODO: may need to remove in the future? not sure if the init message will adopt msgpack
-      console.log('Bad message encoding', state)
-      return null
-    }
-  }
+  state.authorStr = state.author.toString('hex')
   state.isRunning = mercury.value(state.isRunning)
   state.hidden    = mercury.value(state.hidden)
   return mercury.struct(state)
