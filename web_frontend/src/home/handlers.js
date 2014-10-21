@@ -12,20 +12,6 @@ exports.setRoute = function(state, route) {
   state.pagination.start.set(0)
   state.pagination.end.set(constants.PAGE_SIZE)
 
-  if (route.indexOf('profile/') === 0) {
-    var profid = route.slice(8)
-    bus.fetchProfileFeed(state, profid)
-  }
-  else if (route.indexOf('msg/') === 0) {
-    var msgid = route.slice(4)
-    bus.fetchFeed(state)
-  }
-  else if (route == 'network') {
-    bus.fetchServers(state)
-  }
-  else {
-    bus.fetchFeed(state)
-  }
   state.route.set(route)
 }
 
@@ -114,7 +100,7 @@ exports.submitPublishForm = function(state, data) {
     }
     function after(err) {
       if (err) throw err // :TODO: put in gui
-      bus.fetchFeed(state) // pull down the update
+      bus.syncView(state) // pull down the update
     }
 
     resetForm(state, form)
@@ -358,8 +344,7 @@ exports.sync = function(state) {
     // :TODO:
     // if (results && Object.keys(results).length)
       // backend.local.lastSyncResults = results
-    if (state.route() == 'feed')
-      bus.fetchFeed(state)
+    bus.syncView(state)
   })
 }
 
@@ -403,7 +388,7 @@ exports.shareMsg = function(state, data) {
     return
   bus.publishRebroadcast(state, data.msg, function(err) {
     if (err) throw err // :TODO: put in gui
-    bus.fetchFeed(state) // pull down the update
+    bus.syncView(state) // pull down the update
   })
 }
 

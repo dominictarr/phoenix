@@ -39,7 +39,7 @@ exports.followUser = function(state, token, cb) {
     if (err) return cb(err)
 
     // load the profile into the local cache, if possible
-    profiles.fetchProfile(state, id, function(err, profile) {
+    profiles.getProfile(state, id, function(err, profile) {
       if (profile)
         profile.isFollowing.set(true)
     })
@@ -59,7 +59,7 @@ exports.unfollowUser = function(state, id, cb) {
   // :TODO: replace
   wsrpc.api.unfollow(util.toBuffer(id), function(err) {
     if (err) return cb(err)
-    fetchProfile(state, id, function(err, profile) {
+    profiles.getProfile(state, id, function(err, profile) {
       if (profile)
         profile.isFollowing.set(false)
       cb()

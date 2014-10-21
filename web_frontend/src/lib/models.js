@@ -93,9 +93,9 @@ var defaults = {
   profile: {
     id: null,
     idStr: '',
+    feed: [],
     nickname: '',
     joinDate: '',
-    feed: [],
     isFollowing: false
   },
 
@@ -213,6 +213,7 @@ function createMessage(initialState) {
 function createProfile(initialState) {
   var state = extend(defaults.profile, initialState)
   state.feed = mercury.array(state.feed.map(createMessage))
+  state.nickname = mercury.value(state.nickname)
   state.joinDate = mercury.value(state.joinDate)
   state.isFollowing = mercury.value(state.isFollowing)
   return mercury.struct(state)

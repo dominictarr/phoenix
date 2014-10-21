@@ -1,6 +1,7 @@
-var pull        = require('pull-stream')
-var util        = require('../../../../lib/util')
-var wsrpc       = require('../ws-rpc')
+var pull  = require('pull-stream')
+var merge = require('pull-merge')
+var util  = require('../../../../lib/util')
+var wsrpc = require('../ws-rpc')
 
 function include(m) {
   for (var k in m)
@@ -22,16 +23,52 @@ exports.setupHomeApp = function(state) {
     state.user.pubkey.set(util.toBuffer(data.public))
     state.user.pubkeyStr.set(util.toHexString(data.public))
   })
-  
-  // followed profiles 
-  // :TODO:
-  // pull(toPull(wsrpc.api.following()), pull.drain(function (entry) { fetchProfile(state, entry.key) }))
+
+  // construct local state
+  exports.syncView(state)
 }
 
 // pulls down remote data for the session
 exports.setupPubApp = function(state) {
   wsrpc.connect(state)
-  // followed profiles :TODO:
-  // pull(toPull(wsrpc.api.following()), pull.drain(function (entry) { fetchProfile(state, entry.key) }))
+
+  // construct local state
+  exports.syncView(state)
 }
 
+// pulls down any new messages and constructs our materialized views
+var lastFetchTS = 0
+exports.syncView = function(state, cb) {
+  cb = cb || function(err) { if (err) { throw err }}
+  var newTS = Date.now()
+  // process profiles first
+  pull(
+    wsrpc.api.messagesByType({ type: 'profile', keys: true, gt: lastFetchTS }),
+    pull.through(exports.processProfileMsg.bind(null, state)),
+    pull.collect(function(err, profileMsgs) {
+      if (err) return cb(err)
+
+      // now process the feed
+      pull(
+        merge([
+          pull.values(profileMsgs),
+          wsrpc.api.messagesByType({ type: 'init',   keys: true, gt: lastFetchTS }),
+          wsrpc.api.messagesByType({ type: 'text',   keys: true, gt: lastFetchTS }),
+          wsrpc.api.messagesByType({ type: 'follow', keys: true, gt: lastFetchTS }),
+          wsrpc.api.messagesByType({ type: 'pub',    keys: true, gt: lastFetchTS })
+        ], msgstreamCmp),
+        pull.drain(exports.processFeedMsg.bind(null, state), function(err) {
+          if (err) return cb(err)
+          lastFetchTS = newTS
+          cb()
+        })
+      )
+    })
+  )
+}
+
+function msgstreamCmp(a, b) {
+  if (a.value.timestamp < b.value.timestamp) return -1
+  if (a.value.timestamp === b.value.timestamp) return 0
+  return 1
+}
