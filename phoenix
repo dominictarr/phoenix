@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 var nomnom     = require('nomnom');
 
-
 nomnom.script('phoenix')
 	.nocolors()
 	.option('config', {
@@ -15,7 +14,7 @@ nomnom.command('setup')
 	})
 	.callback(require('./cli_tool/core').setup);
 nomnom.command('serve')
-  .help('Starts the web server.')
+  .help('Starts the phoenix server.')
   .options({
     pub: {
       flag: true,
@@ -39,8 +38,8 @@ nomnom.command('serve')
       help: 'Don\'t open the page in the browser once the server starts.'
     }*/
   })
-  .callback(require('./cli_tool/http-server').start);
+  .callback(require('./cli_tool/net-server').start);
 nomnom.command('stop')
   .help('Stops the web-server daemon if it\'s active.')
-  .callback(require('./cli_tool/http-server').stop);
+  .callback(require('./cli_tool/net-server').stop);
 nomnom.parse();

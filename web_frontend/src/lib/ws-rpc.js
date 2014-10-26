@@ -2,7 +2,7 @@ var pull        = require('pull-stream')
 var toPull      = require('stream-to-pull-stream')
 var WSStream    = require('websocket-stream')
 var through     = require('through')
-var ssbapi      = require('secure-scuttlebutt/api')
+var rpcapi      = require('../../../lib/rpcapi')
 
 var api = exports.api = null
 
@@ -14,13 +14,21 @@ var connect = exports.connect = function(state) {
   conn.on('error', handleClientError.bind(null, state))
   conn.on('close', handleClientClose.bind(null, state))
 
-  api = exports.api = ssbapi.client()
+  api = exports.api = rpcapi.client()
   var clientStream = api.createStream()
   pull(clientStream, toPull.duplex(conn), clientStream)
 
   // :DEBUG:
   window.Buffer = Buffer
   window.rpcapi = api
+
+  // :DOUBLE-DEBUG:
+  window.sync = function(host, port) {
+    pull(
+      api.sync(host, port),
+      pull.drain(console.log.bind(console), console.log.bind(console))
+    )
+  }
 
   state.conn.hasError.set(false)
   state.conn.explanation.set('')

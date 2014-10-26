@@ -1,8 +1,7 @@
-var pull        = require('pull-stream')
-var multicb     = require('multicb')
-var util        = require('../../../../lib/util')
-var wsrpc       = require('../ws-rpc')
-var models      = require('../models')
+var pull    = require('pull-stream')
+var multicb = require('multicb')
+var util    = require('../../../../lib/util')
+var models  = require('../models')
 
 
 // consumes a new profile message into the materialized view

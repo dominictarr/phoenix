@@ -1,7 +1,6 @@
 var pull        = require('pull-stream')
 var multicb     = require('multicb')
 var util        = require('../../../../lib/util')
-var wsrpc       = require('../ws-rpc')
 var models      = require('../models')
 var profiles    = require('./profiles')
 

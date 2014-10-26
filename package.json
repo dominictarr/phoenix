@@ -11,8 +11,12 @@
     "pull-stream-to-stream": "~1.3.0",
     "stream-to-pull-stream": "~1.6.0",
     "pull-merge": "~1.0.2",
+    "pull-pushable": "~1.1.3",
+    "pull-serializer": "~0.3.1",
     "msgpack-js": "~0.3.0",
+    "json-human-buffer": "~1.0.2",
     "through": "~2.3.4",
+    "muxrpc": "~0.3.0",
     "ws": "~0.4.32",
     "websocket-stream": "~1.0.2",
     

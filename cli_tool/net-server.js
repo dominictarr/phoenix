@@ -13,7 +13,7 @@ exports.start = function(opts) {
     if (opts.config)
       argv.push('--config'), argv.push(opts.config);
     var daemon = require("daemonize2").setup({
-      main: "../http_server/daemon.js",
+      main: "../net_server/daemon.js",
       name: "phoenix-server",
       pidfile: path.join(cfg.datadir, "./phoenix-server.pid"),
       argv: argv
@@ -21,11 +21,11 @@ exports.start = function(opts) {
     daemon.start();
   } else {
     // FG mode
-    require('../http_server/home').createServer(homePort, opts);
+    require('../net_server/home').createServer(homePort, opts);
     console.log('Phoenix Home Server....listening privately on localhost:' + homePort);
 
     if (opts.pub) {
-      require('../http_server/pub').createServer(pubPort, opts);
+      require('../net_server/pub').createServer(pubPort, opts);
       console.log('Phoenix Pub Server.....listening publicly on localhost:' + pubPort);
     }
   }
@@ -39,7 +39,7 @@ exports.start = function(opts) {
 
 exports.stop = function(opts) {
   var daemon = require("daemonize2").setup({
-    main: "../http_server/daemon.js",
+    main: "../net_server/daemon.js",
     name: "phoenix-server",
     pidfile: path.join(cfg.datadir, "./phoenix-server.pid")
   });

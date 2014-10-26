@@ -16,6 +16,7 @@ var message = exports.message = function(state, msg) {
   switch (msg.content.type) {
     case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
     case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.content.nickname, state.nicknameMap)
+    case 'follow': return mercury.partial(messageFollow, msg, state.nicknameMap)
     case 'post':
       if (msg.content.postType == 'action')
         return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, state.nicknameMap)
@@ -237,6 +238,20 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
       new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap }),
       ' ',
       parentLink
+    ])
+  ])
+}
+
+var messageFollow = exports.messageFollow = function(msg, nicknameMap) {
+  var target = util.toHexString(msg.content.$feed)
+  var targetNickname = nicknameMap[target] || comren.shortHex(target)
+
+  return h('.phoenix-event', [
+    h('span.event-icon.glyphicon.glyphicon-road'),
+    h('p.event-body', [
+      comren.userlink(msg.author, msg.authorNickname),
+      ' is now following ',
+      comren.userlink(target, targetNickname)
     ])
   ])
 }

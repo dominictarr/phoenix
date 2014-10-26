@@ -1,5 +1,5 @@
-var util        = require('../../../../lib/util')
-var wsrpc       = require('../ws-rpc')
+var util = require('../../../../lib/util')
+var ws   = require('../ws-rpc')
 
 // loads the network nodes
 var fetchServersQueue = util.queue().bind(null, 'servers')
@@ -8,7 +8,7 @@ exports.fetchServers = function(state, cb) {
   fetchServersQueue(cb, function(cbs) {
     // fetch nodes
     // :TODO: replace
-    wsrpc.api.getNodes(function(err, nodes) {
+    ws.api.getNodes(function(err, nodes) {
       if (err) return cbs(err)
 
       // clear if not empty
@@ -35,7 +35,7 @@ exports.followUser = function(state, token, cb) {
   // start following the id
   var id = util.toBuffer(token.id)
   if (!id) return cb(new Error('Bad intro token - invalid ID'))
-  wsrpc.api.add({ type: 'network', $feed: id, $rel: 'follows' }, function(err) {
+  ws.api.add({ type: 'network', $feed: id, $rel: 'follows' }, function(err) {
     if (err) return cb(err)
 
     // load the profile into the local cache, if possible
@@ -48,7 +48,7 @@ exports.followUser = function(state, token, cb) {
     if (!token.relays || token.relays.length === 0)        
       return
     // :TODO: replace
-    // wsrpc.api.addNodes(token.relays, cb)
+    // ws.api.addNodes(token.relays, cb)
   })
 }
 
@@ -57,7 +57,7 @@ var unfollowUser =
 exports.unfollowUser = function(state, id, cb) {
   var id = util.toBuffer(id)
   // :TODO: replace
-  wsrpc.api.unfollow(util.toBuffer(id), function(err) {
+  ws.api.unfollow(util.toBuffer(id), function(err) {
     if (err) return cb(err)
     profiles.getProfile(state, id, function(err, profile) {
       if (profile)
@@ -76,7 +76,7 @@ exports.addServer = function(state, addr, cb) {
   addr[1] = +addr[1] || 80
   
   // :TODO: replace
-  wsrpc.api.addNode(addr[0], addr[1], function(err) {
+  ws.api.addNode(addr[0], addr[1], function(err) {
     if (err) return cb(err)
     state.servers.push(models.server({ hostname: addr[0], port: addr[1] }))
   })
@@ -91,7 +91,7 @@ exports.removeServer = function(state, addr, cb) {
   addr[1] = +addr[1] || 80
 
   // :TODO: replace
-  wsrpc.api.delNode(addr[0], addr[1], function(err) {
+  ws.api.delNode(addr[0], addr[1], function(err) {
     if (err) return cb(err)
 
     // find and remove from the local cache

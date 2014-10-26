@@ -1,7 +1,7 @@
 var pull  = require('pull-stream')
 var merge = require('pull-merge')
 var util  = require('../../../../lib/util')
-var wsrpc = require('../ws-rpc')
+var ws    = require('../ws-rpc')
 
 function include(m) {
   for (var k in m)
@@ -14,9 +14,9 @@ include(require('./network'))
 
 // pulls down remote data for the session
 exports.setupHomeApp = function(state) {
-  wsrpc.connect(state)
+  ws.connect(state)
   // session
-  wsrpc.api.whoami(function(err, data) {
+  ws.api.whoami(function(err, data) {
     if (err) throw err
     state.user.id.set(util.toBuffer(data.id))
     state.user.idStr.set(util.toHexString(data.id))
@@ -30,7 +30,7 @@ exports.setupHomeApp = function(state) {
 
 // pulls down remote data for the session
 exports.setupPubApp = function(state) {
-  wsrpc.connect(state)
+  ws.connect(state)
 
   // construct local state
   exports.syncView(state)
@@ -43,7 +43,7 @@ exports.syncView = function(state, cb) {
   var newTS = Date.now()
   // process profiles first
   pull(
-    wsrpc.api.messagesByType({ type: 'profile', keys: true, gt: lastFetchTS }),
+    ws.api.messagesByType({ type: 'profile', keys: true, gt: lastFetchTS }),
     pull.through(exports.processProfileMsg.bind(null, state)),
     pull.collect(function(err, profileMsgs) {
       if (err) return cb(err)
@@ -52,10 +52,10 @@ exports.syncView = function(state, cb) {
       pull(
         merge([
           pull.values(profileMsgs),
-          wsrpc.api.messagesByType({ type: 'init',   keys: true, gt: lastFetchTS }),
-          wsrpc.api.messagesByType({ type: 'post',   keys: true, gt: lastFetchTS }),
-          wsrpc.api.messagesByType({ type: 'follow', keys: true, gt: lastFetchTS }),
-          wsrpc.api.messagesByType({ type: 'pub',    keys: true, gt: lastFetchTS })
+          ws.api.messagesByType({ type: 'init',   keys: true, gt: lastFetchTS }),
+          ws.api.messagesByType({ type: 'post',   keys: true, gt: lastFetchTS }),
+          ws.api.messagesByType({ type: 'follow', keys: true, gt: lastFetchTS }),
+          ws.api.messagesByType({ type: 'pub',    keys: true, gt: lastFetchTS })
         ], msgstreamCmp),
         pull.drain(exports.processFeedMsg.bind(null, state), function(err) {
           if (err) return cb(err)
