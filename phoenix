@@ -32,12 +32,12 @@ nomnom.command('serve')
     },
     pubport: {
     	help: 'Sets the port for the pub server.'
-    },
+    }/*,
     dontopen: {
       flag: true,
       abbr: 'n',
       help: 'Don\'t open the page in the browser once the server starts.'
-    }
+    }*/
   })
   .callback(require('./cli_tool/http-server').start);
 nomnom.command('stop')

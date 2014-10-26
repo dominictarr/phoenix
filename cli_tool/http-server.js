@@ -30,11 +30,11 @@ exports.start = function(opts) {
     }
   }
 
-  if (!opts.dontopen) {
+  /*if (!opts.dontopen) {
     setTimeout(function() {
       open('http://localhost:' + homePort)
     }, 500)
-  }
+  }*/
 }
 
 exports.stop = function(opts) {

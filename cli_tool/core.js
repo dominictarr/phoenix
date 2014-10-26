@@ -84,7 +84,7 @@ exports.setup = function(opts) {
 			
 			// publish profile
 			var feed = ssb.createFeed(keypair)
-			feed.add({ type: 'profile', nickname: nickname, updatesProfile: { $feed: keypair.id, $rel: 'updates-profile' } }, function(err) {
+			feed.add({ type: 'profile', nickname: nickname }, function(err) {
 				if (err) return console.error('Failed to publish profile', err);
 				console.log('Ok.');
 				introHelp();
