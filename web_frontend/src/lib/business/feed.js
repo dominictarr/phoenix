@@ -26,8 +26,11 @@ exports.processFeedMsg = function(state, msg) {
   state.messageMap.set(mm)
 
   // add to profile's feed
-  if (authorProf)
+  if (authorProf) {
     authorProf.feed.push(m)
+    if (m.content.type == 'init')
+      authorProf.joinDate.set(util.prettydate(new Date(m.timestamp), true))
+  }
   
   // index replies
   if (m.content.repliesTo)    indexReplies(state, m)
