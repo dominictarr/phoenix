@@ -63,8 +63,8 @@ function header(events, uId, isSyncing) {
 // =========
 
 function feedPage(state) {
-  var events = state.feed.filter(function(msg) { return !(msg.content.type == 'text' || msg.content.type == 'gui') && !msg.content.repliesTo })
-  var msgs = state.feed.filter(function(msg) { return msg.content.type == 'text' || msg.content.type == 'gui' })
+  var events = state.feed.filter(function(msg) { return msg.content.postType != 'text' && msg.content.postType != 'gui' && !msg.content.repliesTo })
+  var msgs = state.feed.filter(function(msg) { return msg.content.postType == 'text' || msg.content.postType == 'gui' })
   return h('.feed-page.row', comren.columns({
     gutter: '',
     main: [com.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, msgs, state.pagination)],

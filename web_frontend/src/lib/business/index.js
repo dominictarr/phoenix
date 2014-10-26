@@ -53,7 +53,7 @@ exports.syncView = function(state, cb) {
         merge([
           pull.values(profileMsgs),
           wsrpc.api.messagesByType({ type: 'init',   keys: true, gt: lastFetchTS }),
-          wsrpc.api.messagesByType({ type: 'text',   keys: true, gt: lastFetchTS }),
+          wsrpc.api.messagesByType({ type: 'post',   keys: true, gt: lastFetchTS }),
           wsrpc.api.messagesByType({ type: 'follow', keys: true, gt: lastFetchTS }),
           wsrpc.api.messagesByType({ type: 'pub',    keys: true, gt: lastFetchTS })
         ], msgstreamCmp),

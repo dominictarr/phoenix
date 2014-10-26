@@ -42,8 +42,8 @@ exports.processProfileMsg = function(state, msg) {
 
       // update the nickname->profile map
       var nm = state.nicknameMap()
-      nm[pidStr] = p.nickname
-      state.nicknameMap.set(profile.nickname())
+      nm[pidStr] = profile.nickname()
+      state.nicknameMap.set(nm)
     }
   } catch(e) {}
 

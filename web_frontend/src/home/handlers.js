@@ -90,13 +90,13 @@ exports.submitPublishForm = function(state, data) {
   setTimeout(function() {
     // make the post
     if (!form.parent) {
-      if (form.type() == 'text')     bus.publishText(state, str, after)
-      else if (form.type() == 'act') bus.publishAction(state, str, after)
-      else if (form.type() == 'gui') bus.publishGui(state, str, after)
+      if (form.type() == 'text')        bus.publishText(state, str, after)
+      else if (form.type() == 'action') bus.publishAction(state, str, after)
+      else if (form.type() == 'gui')    bus.publishGui(state, str, after)
     } else {
-      if (form.type() == 'text')     bus.publishReply(state, str, form.parent, after)
-      else if (form.type() == 'act') bus.publishReaction(state, str, form.parent, after)
-      else if (form.type() == 'gui') bus.publishGuiply(state, str, form.parent, after)
+      if (form.type() == 'text')        bus.publishReply(state, str, form.parent, after)
+      else if (form.type() == 'action') bus.publishReaction(state, str, form.parent, after)
+      else if (form.type() == 'gui')    bus.publishGuiply(state, str, form.parent, after)
     }
     function after(err) {
       if (err) throw err // :TODO: put in gui
@@ -200,7 +200,7 @@ exports.mentionBoxInput = function(state, e) {
     state.suggestBox.options.splice(0, state.suggestBox.options.getLength())
     if (mentionType == 'profile') {
       state.profiles.forEach(function(profile) {
-        state.suggestBox.options.push({ title: profile.nickname, subtitle: shortHex(profile.idStr), value: profile.idStr })
+        state.suggestBox.options.push({ title: profile.nickname(), subtitle: shortHex(profile.idStr), value: profile.idStr })
       })
     } else {
       for (var emoji in emojiNamedCharacters) {
@@ -374,14 +374,14 @@ exports.replyToMsg = function(state, data) {
 exports.reactToMsg = function(state, data) {
   var id = data.msg.idStr
   var form = addPublishForm(state, id, data.msg.id)
-  form.type.set('act')
+  form.type.set('action')
   form.textPlaceholder.set('Likes, wants, agrees with, etc...')
   form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.shareMsg = function(state, data) {
   var id = data.msg.idStr
-  var text = data.msg.content.plain
+  var text = data.msg.content.text
   if (text.length > 100)
     text = text.slice(0, 100) + '...'
   if (!confirm('Share with your followers, "' + text + '"?'))

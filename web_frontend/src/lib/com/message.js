@@ -16,10 +16,16 @@ var message = exports.message = function(state, msg) {
   switch (msg.content.type) {
     case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
     case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.content.nickname, state.nicknameMap)
-    case 'act': return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'react' : 'act', msg.content.plain, state.nicknameMap)
-    case 'text': main = mercury.partial(messageText, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap); break
-    case 'gui': main = mercury.partial(messageGui, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap); break
-    default: return h('em', 'Unknown message type: ' + msg.content.type)
+    case 'post':
+      if (msg.content.postType == 'action')
+        return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, state.nicknameMap)
+      else if (msg.content.postType == 'gui')
+        main = mercury.partial(messageGui, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap)
+      else
+        main = mercury.partial(messageText, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap)
+      break
+    default:
+      return ''
   }
 
   // reply/react form
@@ -44,7 +50,7 @@ var message = exports.message = function(state, msg) {
 // message text-content renderer
 var messageText = exports.messageText = function(msg, events, replies, rebroadcasts, nicknameMap) {
   return renderMsgShell(
-    new widgets.Markdown(msg.content.plain, { nicknames: nicknameMap }),
+    new widgets.Markdown(msg.content.text, { nicknames: nicknameMap }),
     msg, events, replies, rebroadcasts, nicknameMap
   )
 }
@@ -54,12 +60,12 @@ var messageGui = exports.messageGui = function(msg, events, replies, rebroadcast
   var content
   if (msg.isRunning) {
     content = h('.gui-post-wrapper.gui-running', [
-      new widgets.IframeSandbox(msg.content.html),
+      new widgets.IframeSandbox(msg.content.text),
     ])
   } else {
     content = h('.gui-post-wrapper', [
       h('.gui-post-runbtn', {'ev-click': valueEvents.click(events.runMsgGui, { id: msg.idStr, run: true })}),
-      h('pre.gui-post', h('code',msg.content.html))
+      h('pre.gui-post', h('code',msg.content.text))
     ])
   }
 
@@ -78,7 +84,7 @@ function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap
 
   return h('.panel.panel-default', [
     h('.panel-body', [
-      renderMsgHeader(msg, events),
+      renderMsgHeader(msg, events, nicknameMap),
       content,
       (events.replyToMsg && events.reactToMsg && events.shareMsg)
           ? (h('p', [
@@ -100,9 +106,10 @@ function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap
 }
 
 // message header
-function renderMsgHeader(msg, events) {
+function renderMsgHeader(msg, events, nicknameMap) {
   var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.idStr, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
   var replyIdStr = (msg.content.repliesTo) ? util.toHexString(msg.content.repliesTo.$msg) : ''
+
   if (msg.content.rebroadcasts) {
     // duplicated message
     var author = msg.content.rebroadcasts.$feed
@@ -115,7 +122,7 @@ function renderMsgHeader(msg, events) {
         util.prettydate(new Date(msg.content.rebroadcasts.timestamp||0), true)
       ]),
       (replyIdStr) ?
-        h('span.repliesto', [' in response to ', comnren.a('#/msg/'+replyIdStr, comren.shortHex(replyIdStr))])
+        h('span.repliesto', [' in response to ', comren.a('#/msg/'+replyIdStr, comren.shortHex(replyIdStr))])
         : '',
       h('span.repliesto', [' shared by ', comren.userlink(msg.author, msg.authorNickname)]),
       stopBtnStr
@@ -138,7 +145,7 @@ function renderMsgHeader(msg, events) {
 
 // summary of reactions in the bottom of messages
 function renderMsgReplies(msg, replies) {
-  var nReplies = (replies) ? replies.filter(function(r) { return (r.content.type == 'text' || r.content.type == 'gui') }).length : 0
+  var nReplies = (replies) ? replies.filter(function(r) { return r.content.type == 'post' && (r.content.postType == 'text' || r.content.postType == 'gui') }).length : 0
   return (nReplies) ? comren.a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
 }
 
@@ -148,8 +155,8 @@ function renderMsgReactions(replies, nicknameMap) {
   var reactMap = {}
   // create a map of reaction-text -> author-nicknames
   ;(replies || []).forEach(function(reply) {
-    if (reply && reply.content.type == 'act') {
-      var react = ''+reply.content.plain
+    if (reply && reply.content.postType == 'action') {
+      var react = ''+reply.content.text
       if (!reactMap[react])
         reactMap[react] = []
       if (notYetAdded(reactMap[react], reply))
@@ -213,7 +220,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
   switch (type) {
     case 'account-created': icon = '.glyphicon-home'; break
     case 'account-change': icon = '.glyphicon-user'; break
-    case 'react': icon = '.glyphicon-hand-up'; break
+    case 'reaction': icon = '.glyphicon-hand-up'; break
     default: icon = '.glyphicon-hand-right'
   }
 

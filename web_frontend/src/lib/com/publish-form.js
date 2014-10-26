@@ -8,7 +8,7 @@ var helptip     = require('./helptip').helptip
 
 var publishForm = exports.publishForm = function(form, events, user, nicknameMap) {
   if (form.type == 'text') return publishFormText(form, events, user, nicknameMap)
-  if (form.type == 'act')  return publishFormAction(form, events, user, nicknameMap)
+  if (form.type == 'action')  return publishFormAction(form, events, user, nicknameMap)
   if (form.type == 'gui')  return publishFormGui(form, events, user, nicknameMap)
 }
 
@@ -36,7 +36,7 @@ function publishFormText(form, events, user, nicknameMap) {
         ' ',
         h('strong', comren.jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
         ' / ',
-        comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }),
+        comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'action' }),
         ' / ',
         comren.jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
       ]),
@@ -91,7 +91,7 @@ function publishFormAction(form, events, user, nicknameMap) {
         ' / ',
         helptip(helptext),
         ' ',
-        h('strong', comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' })),
+        h('strong', comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'action' })),
         ' / ',
         comren.jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
       ]),
@@ -144,7 +144,7 @@ function publishFormGui(form, events, user, nicknameMap) {
       h('span.pull-right', [
         comren.jsa('text', events.setPublishFormType, { id: form.id, type: 'text' }),
         ' / ',
-        comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'act' }),
+        comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'action' }),
         ' / ',
         helptip(['GUIs are interactive HTML applets, tightly sandboxed for safety. You can write HTML, CSS, and Javascript, then share it on your feed.']),
         ' ',

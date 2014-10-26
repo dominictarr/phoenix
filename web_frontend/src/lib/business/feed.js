@@ -79,7 +79,7 @@ function indexMentions(state, msg) {
       state.notifications.push(models.notification({
         msgIdStr:       msg.idStr,
         authorNickname: msg.authorNickname,
-        msgText:        msg.content.plain.split('\n')[0],
+        msgText:        msg.content.text.split('\n')[0],
         timestamp:      msg.timestamp
       }))
     } catch(e) { console.warn('failed to index mention', e) }

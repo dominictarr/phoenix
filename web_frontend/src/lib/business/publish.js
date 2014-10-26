@@ -1,19 +1,21 @@
 var util        = require('../../../../lib/util')
 var wsrpc       = require('../ws-rpc')
 
+var localTZ = new Date().getTimezoneOffset();
+
 // does pre-processing on text-based messages
-var preprocessTextPost =
-exports.preprocessTextPost = function(msg) {
+var preprocessPost =
+exports.preprocessPost = function(msg) {
   // extract any @-mentions
   var match
   var mentionRegex = /(\s|^)@([A-z0-9]+)/g;
-  while ((match = mentionRegex.exec(msg.plain))) {
+  while ((match = mentionRegex.exec(msg.text))) {
     var mention = match[2]
     if (!msg.mentions)
       msg.mentions = []
     try {
       msg.mentions.push({ $feed: util.toBuffer(mention), $rel: 'mentions' })
-    } catch (e) { /* bad hash, ignore */ }
+    } catch (e) { /* :TODO: bad hash, tell user? */ console.warn('Invalid hash used in @-mention', mention) }
   }
   return msg
 }
@@ -22,7 +24,7 @@ exports.preprocessTextPost = function(msg) {
 var publishText =
 exports.publishText = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  wsrpc.api.add(preprocessTextPost({type: 'text', plain: text}), cb)
+  wsrpc.api.add(preprocessPost({type: 'post', postType: 'text', text: text, timezone: localTZ}), cb)
 }
 
 // posts to the feed
@@ -31,14 +33,14 @@ exports.publishReply = function(state, text, parent, cb) {
   parent = util.toBuffer(parent)
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  wsrpc.api.add(preprocessTextPost({type: 'text', plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  wsrpc.api.add(preprocessPost({type: 'post', postType: 'text', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
 }
 
 // posts to the feed
 var publishAction =
 exports.publishAction = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  wsrpc.api.add(preprocessTextPost({type: 'act', plain: text}), cb)
+  wsrpc.api.add(preprocessPost({type: 'post', postType: 'action', text: text, timezone: localTZ}), cb)
 }
 
 // posts to the feed
@@ -47,14 +49,14 @@ exports.publishReaction = function(state, text, parent, cb) {
   parent = util.toBuffer(parent)
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  wsrpc.api.add(preprocessTextPost({type: 'act', plain: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  wsrpc.api.add(preprocessPost({type: 'post', postType: 'action', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
 }
 
 // posts to the feed
 var publishGui =
 exports.publishGui = function(state, text, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  wsrpc.api.add({type: 'gui', html: text}, cb)
+  wsrpc.api.add({type: 'post', postType: 'gui', text: text, timezone: localTZ}, cb)
 }
 
 // posts to the feed
@@ -62,7 +64,7 @@ var publishGuiply =
 exports.publishGuiply = function(state, text, parent, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  wsrpc.api.add({type: 'gui', html: text, repliesTo: {$msg: parent, $rel: 'replies-to'}}, cb)
+  wsrpc.api.add({type: 'post', postType: 'gui', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}, cb)
 }
 
 // posts a copy of the given message to the feed
@@ -74,7 +76,7 @@ exports.publishRebroadcast = function(state, msg, cb) {
       $msg: util.toBuffer(msg.id),
       $feed: util.toBuffer(msg.author),
       timestamp: msg.timestamp,
-      timezone: msg.timezone
+      timezone: msg.content.timezone || 0
     }
   }
   wsrpc.api.add(msg.content, cb)
