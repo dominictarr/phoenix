@@ -63,8 +63,8 @@ function header(events, uId, isSyncing) {
 // =========
 
 function feedPage(state) {
-  var events = state.feed.filter(function(msg) { return !(msg.type == 'text' || msg.type == 'gui') && !msg.message.repliesTo })
-  var msgs = state.feed.filter(function(msg) { return msg.type == 'text' || msg.type == 'gui' })
+  var events = state.feed.filter(function(msg) { return msg.content.type == 'profile' || (msg.content.postType == 'action' && !msg.content.repliesTo) })
+  var msgs = state.feed.filter(function(msg) { return msg.content.postType == 'text' || msg.content.postType == 'gui' })
   return h('.feed-page.row', comren.columns({
     gutter: '',
     main: [com.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, msgs, state.pagination)],
@@ -108,19 +108,26 @@ function profilePage(state, profid) {
       h('.col-xs-7', [comren.notfound('that user')])
     ])
   }
+  var isYou = (state.user.idStr == profid)
+  var followsYou = (state.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
     main: [comren.feed(state, profile.feed, state.pagination, true)],
-    side: [mercury.partial(profileControls, state.events, profile)]
+    side: [mercury.partial(profileControls, state.events, profile, isYou, followsYou)]
   }, [['main', 7], ['side', 5]]))
 }
 
-function profileControls(events, profile) {
+function profileControls(events, profile, isYou, followsYou) {
   var followBtn = (profile.isFollowing) ?
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Remove from contacts') :
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Add to contacts')
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Unfollow') :
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Follow')
   return h('.profile-ctrls', [
-    h('.panel.panel-default', h('.panel-body', h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]))),
-    h('p', followBtn),
+    h('.panel.panel-default',
+      h('.panel-body', [
+        h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]),
+        (followsYou) ? [h('span.label.label-primary', 'Follows You'), ' '] : ''
+      ])
+    ),
+    (!isYou) ? h('p', followBtn) : '',
     h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
   ])
 }
@@ -148,29 +155,37 @@ function messagePage(state, msgid) {
 // ============
 
 function networkPage(state) {
+  function getProfile(idStr) {
+    return state.profiles[state.profileMap[idStr]] || { id: util.toBuffer(idStr), idStr: idStr }
+  }
+  var followedProfiles = state.followedUsers.map(getProfile)
+  var followerProfiles = state.followerUsers.map(getProfile)
+
   return h('.network-page.row', comren.columns({
     col1: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', [
         'Following',
         h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addFeed}, 'add')
       ])),
-      h('.panel-body', profileLinks(state.events, state.profiles.filter(isFollowing)))
+      h('.panel-body', profileLinks(state.events, followedProfiles, true))
     ]),
     col2: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', 'Followers')),
-      h('.panel-body', '')
+      h('.panel-body', profileLinks(state.events, followerProfiles, false))
     ]),
     col3: h('.panel.panel-default', [
+      h('.panel-heading', h('h3.panel-title', 'Known Users')),
+      h('.panel-body', profileLinks(state.events, state.profiles, false))
+    ]),
+    col4: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', [
         'Known Servers',
         h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addServer}, 'add')
       ])),
       h('.panel-body', serverLinks(state.events, state.servers))
-    ])
-  }, [['col1', 3], ['col2', 3], ['col3', 3]]))
+    ]),
+  }, [['col1', 3], ['col2', 3], ['col3', 3], ['col4', 3]]))
 }
-
-function isFollowing(p) { return p.isFollowing }
 
 function serverLinks(events, servers) {
   return h('.servers', servers.map(serverLink.bind(null, events)))
@@ -183,14 +198,16 @@ function serverLink(events, server) {
   ])
 }
 
-function profileLinks(events, profiles) {
-  return profiles.map(profileLink.bind(null, events))
+function profileLinks(events, profiles, canRemove) {
+  return profiles.map(profileLink.bind(null, events, canRemove))
 }
 
-function profileLink(events, profile) {
+function profileLink(events, canRemove, profile) {
   return h('h3', [
-    a('/#/profile/'+profile.idStr, profile.nickname || '???'),
-    h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
+    a('/#/profile/'+profile.idStr, profile.nickname || comren.shortHex(profile.idStr)),
+    (canRemove)
+      ? h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
+      : ''
   ])
 }
 

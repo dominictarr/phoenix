@@ -2,11 +2,11 @@ var document = require('global/document')
 var window = require('global/window')
 var mercury = require('mercury')
 
-var models = require('./lib/models.js')
-var bus = require('./lib/business.js')
-var createEvents = require('./home/events.js')
-var render = require('./home/render.js')
-var handlers = require('./home/handlers.js')
+var models = require('./lib/models')
+var bus = require('./lib/business')
+var createEvents = require('./home/events')
+var render = require('./home/render')
+var handlers = require('./home/handlers')
 
 // init app
 var state = createApp()

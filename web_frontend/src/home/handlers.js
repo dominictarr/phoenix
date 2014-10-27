@@ -12,20 +12,6 @@ exports.setRoute = function(state, route) {
   state.pagination.start.set(0)
   state.pagination.end.set(constants.PAGE_SIZE)
 
-  if (route.indexOf('profile/') === 0) {
-    var profid = route.slice(8)
-    bus.fetchProfileFeed(state, profid)
-  }
-  else if (route.indexOf('msg/') === 0) {
-    var msgid = route.slice(4)
-    bus.fetchFeed(state)
-  }
-  else if (route == 'network') {
-    bus.fetchServers(state)
-  }
-  else {
-    bus.fetchFeed(state)
-  }
   state.route.set(route)
 }
 
@@ -104,17 +90,17 @@ exports.submitPublishForm = function(state, data) {
   setTimeout(function() {
     // make the post
     if (!form.parent) {
-      if (form.type() == 'text')     bus.publishText(state, str, after)
-      else if (form.type() == 'act') bus.publishAction(state, str, after)
-      else if (form.type() == 'gui') bus.publishGui(state, str, after)
+      if (form.type() == 'text')        bus.publishText(state, str, after)
+      else if (form.type() == 'action') bus.publishAction(state, str, after)
+      else if (form.type() == 'gui')    bus.publishGui(state, str, after)
     } else {
-      if (form.type() == 'text')     bus.publishReply(state, str, form.parent, after)
-      else if (form.type() == 'act') bus.publishReaction(state, str, form.parent, after)
-      else if (form.type() == 'gui') bus.publishGuiply(state, str, form.parent, after)
+      if (form.type() == 'text')        bus.publishReply(state, str, form.parent, after)
+      else if (form.type() == 'action') bus.publishReaction(state, str, form.parent, after)
+      else if (form.type() == 'gui')    bus.publishGuiply(state, str, form.parent, after)
     }
     function after(err) {
       if (err) throw err // :TODO: put in gui
-      bus.fetchFeed(state) // pull down the update
+      bus.syncView(state) // pull down the update
     }
 
     resetForm(state, form)
@@ -214,7 +200,7 @@ exports.mentionBoxInput = function(state, e) {
     state.suggestBox.options.splice(0, state.suggestBox.options.getLength())
     if (mentionType == 'profile') {
       state.profiles.forEach(function(profile) {
-        state.suggestBox.options.push({ title: profile.nickname, subtitle: shortHex(profile.idStr), value: profile.idStr })
+        state.suggestBox.options.push({ title: profile.nickname(), subtitle: shortHex(profile.idStr), value: profile.idStr })
       })
     } else {
       for (var emoji in emojiNamedCharacters) {
@@ -322,7 +308,7 @@ exports.loadMore = function(state) {
 exports.addFeed = function(state) {
   var token = prompt('Introduction token of the user:')
   if (!token) return
-  bus.addFeed(state, token, function(err) {
+  bus.followUser(state, token, function(err) {
     if (err) alert(err.toString())
   })
 }
@@ -338,13 +324,13 @@ exports.showIntroToken = function(state, data) {
 }
 
 exports.follow = function(state, data) {
-  bus.addFeed(state, {id: data.id}, function(err) {
+  bus.followUser(state, data.id, function(err) {
     if (err) alert(err.toString())
   })
 }
 
 exports.unfollow = function(state, data) {
-  bus.removeFeed(state, data.id, function(err) {
+  bus.unfollowUser(state, data.id, function(err) {
     if (err) alert(err.toString())
   })
 }
@@ -358,8 +344,7 @@ exports.sync = function(state) {
     // :TODO:
     // if (results && Object.keys(results).length)
       // backend.local.lastSyncResults = results
-    if (state.route() == 'feed')
-      bus.fetchFeed(state)
+    bus.syncView(state)
   })
 }
 
@@ -389,21 +374,21 @@ exports.replyToMsg = function(state, data) {
 exports.reactToMsg = function(state, data) {
   var id = data.msg.idStr
   var form = addPublishForm(state, id, data.msg.id)
-  form.type.set('act')
+  form.type.set('action')
   form.textPlaceholder.set('Likes, wants, agrees with, etc...')
   form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.shareMsg = function(state, data) {
   var id = data.msg.idStr
-  var text = data.msg.message.plain
+  var text = data.msg.content.text
   if (text.length > 100)
     text = text.slice(0, 100) + '...'
   if (!confirm('Share with your followers, "' + text + '"?'))
     return
   bus.publishRebroadcast(state, data.msg, function(err) {
     if (err) throw err // :TODO: put in gui
-    bus.fetchFeed(state) // pull down the update
+    bus.syncView(state) // pull down the update
   })
 }
 

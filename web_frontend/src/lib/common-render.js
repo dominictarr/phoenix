@@ -82,7 +82,7 @@ function msgThreadTree(state, msg) {
     // fetch and render message
     var msgi  = state.messageMap[replyData.idStr] // look up index
     var reply = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
-    if (reply && (reply.type == 'text' || reply.type == 'gui') && notHidden(reply)) {
+    if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && notHidden(reply)) {
       replies.push(com.message(state, reply))
 
       // build and render subtree

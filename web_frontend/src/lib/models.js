@@ -49,6 +49,8 @@ var defaults = {
     profiles: [],
     profileMap: {},
     nicknameMap: {},
+    followedUsers: [],
+    followerUsers: [],
     servers: [],
     user: {
       id: null,
@@ -80,7 +82,7 @@ var defaults = {
     type: null,
     author: null,
     authorStr: '',
-    message: null,
+    value: null,
     previous: null,
     sequence: 0,
     signature: null,
@@ -93,9 +95,9 @@ var defaults = {
   profile: {
     id: null,
     idStr: '',
+    feed: [],
     nickname: '',
     joinDate: '',
-    feed: [],
     isFollowing: false
   },
 
@@ -165,6 +167,8 @@ function createHomeApp(events, initialState) {
     profiles:         mercury.array(state.profiles.map(createProfile)),
     profileMap:       mercury.value(state.profileMap),
     nicknameMap:      mercury.value(state.nicknameMap),
+    followedUsers:    mercury.array(state.followedUsers),
+    followerUsers:    mercury.array(state.followerUsers),
     servers:          mercury.array(state.servers.map(createServer)),
     user:             mercury.struct({
       id:               mercury.value(state.user.id),
@@ -204,16 +208,7 @@ function createPubApp(events, initialState) {
 
 function createMessage(initialState) {
   var state = extend(defaults.message, initialState)
-  try {
-    state.type = state.type.toString()
-    state.authorStr = state.author.toString('hex')
-    state.message = msgpack.decode(new Buffer(state.message))
-  } catch(e) {
-    if (state.type != 'init') { // :TODO: may need to remove in the future? not sure if the init message will adopt msgpack
-      console.log('Bad message encoding', state)
-      return null
-    }
-  }
+  state.authorStr = state.author.toString('hex')
   state.isRunning = mercury.value(state.isRunning)
   state.hidden    = mercury.value(state.hidden)
   return mercury.struct(state)
@@ -222,6 +217,7 @@ function createMessage(initialState) {
 function createProfile(initialState) {
   var state = extend(defaults.profile, initialState)
   state.feed = mercury.array(state.feed.map(createMessage))
+  state.nickname = mercury.value(state.nickname)
   state.joinDate = mercury.value(state.joinDate)
   state.isFollowing = mercury.value(state.isFollowing)
   return mercury.struct(state)
