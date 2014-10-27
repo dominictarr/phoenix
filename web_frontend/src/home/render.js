@@ -108,18 +108,24 @@ function profilePage(state, profid) {
       h('.col-xs-7', [comren.notfound('that user')])
     ])
   }
+  var followsYou = (state.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
     main: [comren.feed(state, profile.feed, state.pagination, true)],
-    side: [mercury.partial(profileControls, state.events, profile)]
+    side: [mercury.partial(profileControls, state.events, profile, followsYou)]
   }, [['main', 7], ['side', 5]]))
 }
 
-function profileControls(events, profile) {
+function profileControls(events, profile, followsYou) {
   var followBtn = (profile.isFollowing) ?
     h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Remove from contacts') :
     h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Add to contacts')
   return h('.profile-ctrls', [
-    h('.panel.panel-default', h('.panel-body', h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]))),
+    h('.panel.panel-default',
+      h('.panel-body', [
+        h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]),
+        (followsYou) ? [h('span.label.label-primary', 'Follows You'), ' '] : ''
+      ])
+    ),
     h('p', followBtn),
     h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
   ])
