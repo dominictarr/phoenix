@@ -16,7 +16,10 @@ var message = exports.message = function(state, msg) {
   switch (msg.content.type) {
     case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
     case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.content.nickname, state.nicknameMap)
-    case 'follow': return mercury.partial(messageFollow, msg, state.nicknameMap)
+    case 'follow':
+      if (msg.content.$rel == 'follows')
+        return mercury.partial(messageFollow, msg, state.nicknameMap)
+      return ''
     case 'post':
       if (msg.content.postType == 'action')
         return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, state.nicknameMap)

@@ -32,20 +32,50 @@ exports.processFeedMsg = function(state, msg) {
   }
   
   // additional indexing
-  if (m.content.$rel == 'follows') indexFollow(state, m)
-  if (m.content.repliesTo)         indexReply(state, m)
-  if (m.content.rebroadcasts)      indexRebroadcast(state, m, mm)
-  if (m.content.mentions)          indexMentions(state, m)
+  if (m.content.$rel == 'follows')   indexFollow(state, m)
+  if (m.content.$rel == 'unfollows') indexUnfollow(state, m)
+  if (m.content.repliesTo)           indexReply(state, m)
+  if (m.content.rebroadcasts)        indexRebroadcast(state, m, mm)
+  if (m.content.mentions)            indexMentions(state, m)
 }
 
 function indexFollow(state, msg) {
   try {
     var authorIdStr = util.toHexString(msg.author)
     var targetIdStr = util.toHexString(msg.content.$feed)
-    if (authorIdStr == state.user.idStr())
+    if (authorIdStr == state.user.idStr()) {
+      // add to list
       state.followedUsers.push(targetIdStr)
-    if (targetIdStr == state.user.idStr())
+
+      // update profile if present
+      var targetProf = profiles.getProfile(state, targetIdStr)
+      if (targetProf)
+        targetProf.isFollowing.set(true)
+    }
+    if (targetIdStr == state.user.idStr()) {
+      // add to list
       state.followerUsers.push(authorIdStr)
+    }
+  } catch(e) { console.warn('failed to index follow', e) }
+}
+
+function indexUnfollow(state, msg) {
+  try {
+    var authorIdStr = util.toHexString(msg.author)
+    var targetIdStr = util.toHexString(msg.content.$feed)
+    if (authorIdStr == state.user.idStr()) {
+      // remove from list
+      state.followedUsers.splice(state.followedUsers.indexOf(targetIdStr), 1)
+
+      // update profile if present
+      var targetProf = profiles.getProfile(state, targetIdStr)
+      if (targetProf)
+        targetProf.isFollowing.set(false)
+    }
+    if (targetIdStr == state.user.idStr()) {
+      // remove from list
+      state.followerUsers.splice(state.followerUsers.indexOf(authorIdStr), 1)
+    }
   } catch(e) { console.warn('failed to index follow', e) }
 }
 

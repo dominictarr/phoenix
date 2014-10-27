@@ -61,15 +61,3 @@ exports.getProfile = function(state, pid) {
     return state.profiles.get(pm[pidStr])
   return null
 }
-
-// gets users the given user is following
-var getFollowing = 
-exports.getFollowing = function(state, pid, cb) {
-  // :TODO:
-}
-
-// gets users that follow the given user
-var getFollowers = 
-exports.getFollowers = function(state, pid, cb) {
-
-}
