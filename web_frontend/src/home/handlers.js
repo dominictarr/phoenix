@@ -324,7 +324,7 @@ exports.showIntroToken = function(state, data) {
 }
 
 exports.follow = function(state, data) {
-  bus.followUser(state, {id: data.id}, function(err) {
+  bus.followUser(state, data.id, function(err) {
     if (err) alert(err.toString())
   })
 }

@@ -26,29 +26,22 @@ exports.fetchServers = function(state, cb) {
 
 // begins following a feed
 var followUser =
-exports.followUser = function(state, token, cb) {
-  if (typeof token == 'string') {
-    try { token = JSON.parse(token) }
-    catch (e) { return cb(new Error('Bad intro token - must be valid JSON')) }
-  }
+exports.followUser = function(state, id, cb) {
+  var id = util.toBuffer(id)
+  if (!id) return cb(new Error('Invalid ID'))
 
-  // start following the id
-  var id = util.toBuffer(token.id)
-  if (!id) return cb(new Error('Bad intro token - invalid ID'))
-  ws.api.add({ type: 'network', $feed: id, $rel: 'follows' }, function(err) {
+  // publish follows link
+  ws.api.add({ type: 'follow', $feed: id, $rel: 'follows' }, function(err) {
     if (err) return cb(err)
 
-    // load the profile into the local cache, if possible
-    profiles.getProfile(state, id, function(err, profile) {
-      if (profile)
-        profile.isFollowing.set(true)
-    })
-
-    // add their relays
-    if (!token.relays || token.relays.length === 0)        
-      return
     // :TODO: replace
+    // add their relays
+    // if (!token.relays || token.relays.length === 0)        
+      // return
     // ws.api.addNodes(token.relays, cb)
+
+    // sync
+    require('./index').syncView(state, cb)
   })
 }
 
@@ -56,14 +49,14 @@ exports.followUser = function(state, token, cb) {
 var unfollowUser =
 exports.unfollowUser = function(state, id, cb) {
   var id = util.toBuffer(id)
-  // :TODO: replace
-  ws.api.unfollow(util.toBuffer(id), function(err) {
+  if (!id) return cb(new Error('Invalid ID'))
+
+  // publish unfollows link
+  ws.api.add({ type: 'follow', $feed: id, $rel: 'unfollows' }, function(err) {
     if (err) return cb(err)
-    profiles.getProfile(state, id, function(err, profile) {
-      if (profile)
-        profile.isFollowing.set(false)
-      cb()
-    })
+    
+    // sync
+    require('./index').syncView(state, cb)
   })
 }
 
