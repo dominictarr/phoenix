@@ -108,14 +108,15 @@ function profilePage(state, profid) {
       h('.col-xs-7', [comren.notfound('that user')])
     ])
   }
+  var isYou = (state.user.idStr == profid)
   var followsYou = (state.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
     main: [comren.feed(state, profile.feed, state.pagination, true)],
-    side: [mercury.partial(profileControls, state.events, profile, followsYou)]
+    side: [mercury.partial(profileControls, state.events, profile, isYou, followsYou)]
   }, [['main', 7], ['side', 5]]))
 }
 
-function profileControls(events, profile, followsYou) {
+function profileControls(events, profile, isYou, followsYou) {
   var followBtn = (profile.isFollowing) ?
     h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Unfollow') :
     h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Follow')
@@ -126,7 +127,7 @@ function profileControls(events, profile, followsYou) {
         (followsYou) ? [h('span.label.label-primary', 'Follows You'), ' '] : ''
       ])
     ),
-    h('p', followBtn),
+    (!isYou) ? h('p', followBtn) : '',
     h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
   ])
 }
