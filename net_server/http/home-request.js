@@ -9,6 +9,9 @@ module.exports = function(opts, backendClient, backend) {
     function read(file) { return fs.createReadStream(path.join(__dirname, '../../web_frontend/' + file)); }
     function serve(file) { return read(file).on('error', serve404).pipe(res) }
     function serve404() {  res.writeHead(404); res.end('Not found'); }
+
+    // CORS
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + opts.homeport)
     
     // Static asset routes
     if (req.url == '/' || req.url == '/index.html') {
