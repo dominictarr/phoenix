@@ -63,7 +63,7 @@ function header(events, uId, isSyncing) {
 // =========
 
 function feedPage(state) {
-  var events = state.feed.filter(function(msg) { return msg.content.type != 'post' || (msg.content.postType == 'action' && !msg.content.repliesTo) })
+  var events = state.feed.filter(function(msg) { return msg.content.type == 'profile' || (msg.content.postType == 'action' && !msg.content.repliesTo) })
   var msgs = state.feed.filter(function(msg) { return msg.content.postType == 'text' || msg.content.postType == 'gui' })
   return h('.feed-page.row', comren.columns({
     gutter: '',
