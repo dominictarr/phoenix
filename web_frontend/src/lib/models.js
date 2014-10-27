@@ -49,6 +49,8 @@ var defaults = {
     profiles: [],
     profileMap: {},
     nicknameMap: {},
+    followedUsers: [],
+    followerUsers: [],
     servers: [],
     user: {
       id: null,
@@ -165,6 +167,8 @@ function createHomeApp(events, initialState) {
     profiles:         mercury.array(state.profiles.map(createProfile)),
     profileMap:       mercury.value(state.profileMap),
     nicknameMap:      mercury.value(state.nicknameMap),
+    followedUsers:    mercury.array(state.followedUsers),
+    followerUsers:    mercury.array(state.followerUsers),
     servers:          mercury.array(state.servers.map(createServer)),
     user:             mercury.struct({
       id:               mercury.value(state.user.id),

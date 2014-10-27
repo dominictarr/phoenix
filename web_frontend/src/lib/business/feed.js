@@ -31,13 +31,25 @@ exports.processFeedMsg = function(state, msg) {
       authorProf.joinDate.set(util.prettydate(new Date(m.timestamp), true))
   }
   
-  // index replies
-  if (m.content.repliesTo)    indexReplies(state, m)
-  if (m.content.rebroadcasts) indexRebroadcasts(state, m, mm)
-  if (m.content.mentions)     indexMentions(state, m)
+  // additional indexing
+  if (m.content.$rel == 'follows') indexFollow(state, m)
+  if (m.content.repliesTo)         indexReply(state, m)
+  if (m.content.rebroadcasts)      indexRebroadcast(state, m, mm)
+  if (m.content.mentions)          indexMentions(state, m)
 }
 
-function indexReplies(state, msg) {
+function indexFollow(state, msg) {
+  try {
+    var authorIdStr = util.toHexString(msg.author)
+    var targetIdStr = util.toHexString(msg.content.$feed)
+    if (authorIdStr == state.user.idStr())
+      state.followedUsers.push(targetIdStr)
+    if (targetIdStr == state.user.idStr())
+      state.followerUsers.push(authorIdStr)
+  } catch(e) { console.warn('failed to index follow', e) }
+}
+
+function indexReply(state, msg) {
   try {
     var id = util.toHexString(msg.content.repliesTo.$msg)
     if (id) {
@@ -49,7 +61,7 @@ function indexReplies(state, msg) {
   } catch(e) { console.warn('failed to index reply', e) }
 }
 
-function indexRebroadcasts(state, msg, msgMap) {
+function indexRebroadcast(state, msg, msgMap) {
   try {
     var id = util.toHexString(msg.content.rebroadcasts.$msg)
     if (id) {

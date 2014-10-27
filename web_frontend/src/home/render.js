@@ -148,29 +148,37 @@ function messagePage(state, msgid) {
 // ============
 
 function networkPage(state) {
+  function getProfile(idStr) {
+    return state.profiles[state.profileMap[idStr]] || { id: util.toBuffer(idStr), idStr: idStr }
+  }
+  var followedProfiles = state.followedUsers.map(getProfile)
+  var followerProfiles = state.followerUsers.map(getProfile)
+
   return h('.network-page.row', comren.columns({
     col1: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', [
         'Following',
         h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addFeed}, 'add')
       ])),
-      h('.panel-body', profileLinks(state.events, state.profiles.filter(isFollowing)))
+      h('.panel-body', profileLinks(state.events, followedProfiles, true))
     ]),
     col2: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', 'Followers')),
-      h('.panel-body', '')
+      h('.panel-body', profileLinks(state.events, followerProfiles, false))
     ]),
     col3: h('.panel.panel-default', [
+      h('.panel-heading', h('h3.panel-title', 'Known Users')),
+      h('.panel-body', profileLinks(state.events, state.profiles, false))
+    ]),
+    col4: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', [
         'Known Servers',
         h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addServer}, 'add')
       ])),
       h('.panel-body', serverLinks(state.events, state.servers))
-    ])
-  }, [['col1', 3], ['col2', 3], ['col3', 3]]))
+    ]),
+  }, [['col1', 3], ['col2', 3], ['col3', 3], ['col4', 3]]))
 }
-
-function isFollowing(p) { return p.isFollowing }
 
 function serverLinks(events, servers) {
   return h('.servers', servers.map(serverLink.bind(null, events)))
@@ -183,14 +191,16 @@ function serverLink(events, server) {
   ])
 }
 
-function profileLinks(events, profiles) {
-  return profiles.map(profileLink.bind(null, events))
+function profileLinks(events, profiles, canRemove) {
+  return profiles.map(profileLink.bind(null, events, canRemove))
 }
 
-function profileLink(events, profile) {
+function profileLink(events, canRemove, profile) {
   return h('h3', [
-    a('/#/profile/'+profile.idStr, profile.nickname || '???'),
-    h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
+    a('/#/profile/'+profile.idStr, profile.nickname || comren.shortHex(profile.idStr)),
+    (canRemove)
+      ? h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
+      : ''
   ])
 }
 
