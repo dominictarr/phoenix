@@ -27,7 +27,7 @@ exports.createIframe = function(html, mid, replies, onReply) {
         onReply({ postType: postType, text: text, mid: mid, cb: cb })
       } else {
         // emulate it
-        console.debug('Your GUI posted a',postType,'post with the content:', text)
+        alert('Your GUI posted a '+postType+' post with the content: '+text)
         iframe.replies.push({ content: { type: 'post', postType: postType, text: text }, timestamp: Date.now() })
         cb()
       }
