@@ -53,10 +53,8 @@ var message = exports.message = function(state, msg) {
 
 // message text-content renderer
 var messageText = exports.messageText = function(msg, events, replies, rebroadcasts, nicknameMap) {
-  return renderMsgShell(
-    new widgets.Markdown(msg.content.text, { nicknames: nicknameMap }),
-    msg, events, replies, rebroadcasts, nicknameMap
-  )
+  var content = new widgets.Markdown(msg.content.text, { nicknames: nicknameMap })
+  return renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap)
 }
 
 // message gui-content renderer
@@ -64,7 +62,7 @@ var messageGui = exports.messageGui = function(msg, events, replies, rebroadcast
   var content
   if (msg.isRunning) {
     content = h('.gui-post-wrapper.gui-running', [
-      new widgets.IframeSandbox(msg.content.text),
+      new widgets.IframeSandbox(msg.content.text, msg.idStr, replies, events.onGuipostReply)
     ])
   } else {
     content = h('.gui-post-wrapper', [
@@ -74,10 +72,7 @@ var messageGui = exports.messageGui = function(msg, events, replies, rebroadcast
   }
 
   // body
-  return renderMsgShell(
-    content,
-    msg, events, replies, rebroadcasts, nicknameMap
-  )
+  return renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap)
 }
 
 // renders message with the header and footer

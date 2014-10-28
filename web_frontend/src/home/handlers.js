@@ -402,6 +402,18 @@ exports.runMsgGui = function(state, data) {
   msg.isRunning.set(data.run)
 }
 
+exports.onGuipostReply = function(state, data) {
+  if (!confirm('This GUI would like to post to your feed. Allow it?'))
+    return data.cb(new Error('Access denied'))
+  if (data.postType == 'text')        bus.publishReply(state, data.text, data.mid, after)
+  else if (data.postType == 'action') bus.publishReaction(state, data.text, data.mid, after)
+  else if (data.postType == 'gui')    bus.publishGuiply(state, data.text, data.mid, after)
+  function after(err, result) {
+    if (!err) bus.syncView(state) // pull down the update
+    data.cb(err, result)
+  }
+}
+
 function shortHex(str) {
   return str.slice(0, 6) + '..' + str.slice(-2)
 }

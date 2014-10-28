@@ -35,7 +35,10 @@ function createEvents() {
     'replyToMsg',
     'reactToMsg',
     'shareMsg',
-    'runMsgGui'
+    'runMsgGui',
+
+    // guipost behaviors
+    'onGuipostReply'
   ])
   events.setRoute = EventRouter()
   return events

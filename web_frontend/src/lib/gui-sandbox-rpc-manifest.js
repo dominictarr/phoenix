@@ -6,6 +6,5 @@ exports.iframe = {
 
 // rpc api served by the container page
 exports.container = {
-  async: ['ready', 'post'],
-  source: ['replies']
+  async: ['ready', 'addReply', 'getReplies']
 }

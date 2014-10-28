@@ -3,7 +3,7 @@ var pull = require('pull-stream')
 var pushable = require('pull-pushable')
 var manifest = require('./gui-sandbox-rpc-manifest')
 
-exports.createIframe = function(html) {
+exports.createIframe = function(html, mid, replies, onReply) {
   // create iframe
   var iframe = document.createElement('iframe')
   iframe.setAttribute('src', '/gui-sandbox')
@@ -11,17 +11,29 @@ exports.createIframe = function(html) {
   iframe.setAttribute('seamless', 'seamless')
 
   // create rpc api
+  iframe.replies = replies || []
   var rpc = MRPC(manifest.iframe, manifest.container)({
     ready: function() {
       rpc.inject(html, function(){})
     },
-    post: function(msg, cb) {
-      alert(JSON.stringify(msg))
-      cb()
+    addReply: function(postType, text, cb) {
+      if (postType != 'text' && postType != 'action' && postType != 'gui')
+        return cb(new Error('postType must be text, action, or gui'))
+      if (!text)
+        return cb(new Error('Can not post an empty string'))
+
+      if (onReply) {
+        // use provided handler
+        onReply({ postType: postType, text: text, mid: mid, cb: cb })
+      } else {
+        // emulate it
+        console.debug('Your GUI posted a',postType,'post with the content:', text)
+        iframe.replies.push({ content: { type: 'post', postType: postType, text: text }, timestamp: Date.now() })
+        cb()
+      }
     },
-    replies: function() {
-      alert ('replies TODO')
-      return null
+    getReplies: function(cb) {
+      cb(null, iframe.replies)
     }
   })
 
