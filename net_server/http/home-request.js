@@ -24,11 +24,14 @@ module.exports = function(opts, backendClient, backend) {
       var loaded = multicb()
       fs.readFile(resolve('html/gui-sandbox.html'), { encoding: 'utf-8' }, loaded())
       fs.readFile(resolve('js/gui-sandbox.js'), { encoding: 'utf-8' }, loaded())
+      fs.readFile(resolve('css/gui-sandbox.css'), { encoding: 'utf-8' }, loaded())
       loaded(function(err, results) {
         if (err) return console.error(err), serve404()
         var html = results[0][1]
         var script = results[1][1]
+        var style = results[2][1]
         html = html.replace('$SCRIPT', script)
+        html = html.replace('$STYLE', style)
 
         res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
         type('text/html')
