@@ -106,6 +106,8 @@ function publishFormAction(form, events, user, nicknameMap) {
   }
 }
 
+var replyerSampleCode = '<h1>Reply Generator</h1>\nPost:\n<button onclick="text()">Text</button>\n<button onclick="reaction()">Reaction</button>\n<button onclick="gui()">GUI</button>\n<script>\nvar log = console.log.bind(console)\nfunction text() { guipost.addReply(\'text\', \'A text reply\', log) }\nfunction reaction() { guipost.addReply(\'action\', \'reacted\', log) }\nfunction gui() { guipost.addReply(\'gui\', \'<h1>A Guiply</h1>\', log) }\n</script>'
+var injectorSampleCode = '<h1>Reply to me!</h1>\n<p>Any replies will be injected into the original post.</p>\n<script>\nguipost.getReplies(function(err, replies) {\n  replies.forEach(function(reply) {\n    inject(reply.content.text)\n  })\n})\n</script>'
 var canvasSampleCode = '<canvas id="canvas" width="150" height="100"></canvas>\n<script>\n  var ctx = canvas.getContext("2d");\n\n  ctx.fillStyle = "rgb(200,0,0)";\n  ctx.fillRect (10, 10, 55, 50);\n\n  ctx.fillStyle = "rgba(0, 0, 200, 0.5)";\n  ctx.fillRect (30, 30, 55, 50);\n</script>'
 
 function publishFormGui(form, events, user, nicknameMap) {
@@ -133,7 +135,14 @@ function publishFormGui(form, events, user, nicknameMap) {
       h('.panel-body', h('.publish-preview', preview))
     ]),
     h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
-      h('p', ['Snippet: ', comren.jsa('canvas', events.setPublishFormText, { id: form.id, publishText: canvasSampleCode })]),
+      h('p', [
+        'Snippet: ',
+        comren.jsa('replyer', events.setPublishFormText, { id: form.id, publishText: replyerSampleCode }),
+        ' ',
+        comren.jsa('injector', events.setPublishFormText, { id: form.id, publishText: injectorSampleCode }),
+        ' ',
+        comren.jsa('canvas', events.setPublishFormText, { id: form.id, publishText: canvasSampleCode })
+      ]),
       h('p', h('textarea.form-control', {
         name: 'publishText',
         rows: (!!form.preview) ? 10 : 1,
