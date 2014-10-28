@@ -4,22 +4,24 @@ var pushable = require('pull-pushable')
 var manifest = require('./lib/gui-sandbox-rpc-manifest')
 
 // define local api
+window.inject = function(html) {
+  // add content
+  var div = document.createElement('div')
+  div.innerHTML = html
+  document.body.appendChild(div)
+
+  // run scripts
+  var scripts = div.querySelectorAll('script')
+  for (var i=0; i < scripts.length; i++) {
+    scripts[i].parentNode.removeChild(scripts[i])
+    var script = document.createElement('script')
+    script.innerHTML = scripts[i].innerHTML
+    div.appendChild(script)
+  }
+}
 window.guipost = MRPC(manifest.container, manifest.iframe)({
   inject: function(html, cb) {
-    // add content
-    var div = document.createElement('div')
-    div.innerHTML = html
-    document.body.appendChild(div)
-
-    // run scripts
-    var scripts = div.querySelectorAll('script')
-    for (var i=0; i < scripts.length; i++) {
-      scripts[i].parentNode.removeChild(scripts[i])
-      var script = document.createElement('script')
-      script.innerHTML = scripts[i].innerHTML
-      div.appendChild(script)
-    }
-
+    inject(html)
     cb()
   }
 })
