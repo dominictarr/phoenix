@@ -6,7 +6,7 @@
 // Reset and dependencies
 @import "bootstrap/normalize";
 @import "bootstrap/print";
-@import "bootstrap/glyphicons";
+// @import "bootstrap/glyphicons";
 
 // Core CSS
 @import "bootstrap/scaffolding";
@@ -49,3 +49,7 @@
 // Utility classes
 @import "bootstrap/utilities";
 // @import "bootstrap/responsive-utilities";
+
+body > *:first-child {
+  margin-top: 0
+}
