@@ -348,6 +348,10 @@ exports.sync = function(state) {
   })
 }
 
+exports.toggleFilter = function(state, data) {
+  state.feedFilters[data.filter].set(data.set)
+}
+
 exports.addServer = function(state) {
   var address = prompt('Address of the server (address[:port]).')
   if (!address) return

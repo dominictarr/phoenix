@@ -116,6 +116,26 @@ $timeline-staff-pos-x: 22px;
   }
 }
 
+.feed-filters {
+  label {
+    position: relative;
+    top: 2px;
+    font-weight: normal;
+    span {
+      display: none;
+      position: absolute;
+      left: 0;
+      top: -16px;
+      width: 200px;
+    }
+    &:hover {
+      span {
+        display: inline-block;
+      }
+    }
+  }
+}
+
 .repliesto {
   margin: 0;
   font-size: 85%;

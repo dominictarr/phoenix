@@ -39,6 +39,12 @@ var defaults = {
       hasError: false,
       explanation: ''
     },
+    feedFilters: {
+      replies: true,
+      shares: true,
+      textPosts: true,
+      guiPosts: true
+    },
 
     // app data
     feed: [],
@@ -156,6 +162,12 @@ function createHomeApp(events, initialState) {
     conn:             mercury.struct({
       hasError:         mercury.value(state.conn.hasError),
       explanation:      mercury.value(state.conn.explanation)
+    }),
+    feedFilters:      mercury.struct({
+      replies:          mercury.value(state.feedFilters.replies),
+      shares:           mercury.value(state.feedFilters.shares),
+      textPosts:        mercury.value(state.feedFilters.textPosts),
+      guiPosts:         mercury.value(state.feedFilters.guiPosts)
     }),
     events:           events,
 

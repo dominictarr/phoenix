@@ -31,6 +31,9 @@ function createEvents() {
     'unfollow',
     'sync',
 
+    // feed buttons
+    'toggleFilter',
+
     // msg buttons
     'replyToMsg',
     'reactToMsg',

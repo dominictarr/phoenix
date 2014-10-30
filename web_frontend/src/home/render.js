@@ -64,12 +64,45 @@ function header(events, uId, isSyncing) {
 
 function feedPage(state) {
   var events = state.feed.filter(function(msg) { return msg.content.type == 'profile' || (msg.content.postType == 'action' && !msg.content.repliesTo) })
-  var msgs = state.feed.filter(function(msg) { return msg.content.postType == 'text' || msg.content.postType == 'gui' })
+  var msgs = state.feed.filter(function(msg) {
+    if (!state.feedFilters.replies   && msg.content.repliesTo) return false
+    if (!state.feedFilters.shares    && msg.content.rebroadcasts) return false
+    if (!state.feedFilters.textPosts && msg.content.postType == 'text') return false
+    if (!state.feedFilters.guiPosts  && msg.content.postType == 'gui') return false
+    return msg.content.postType == 'text' || msg.content.postType == 'gui'
+  })
   return h('.feed-page.row', comren.columns({
-    gutter: '',
-    main: [com.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), comren.feed(state, msgs, state.pagination)],
+    main: [
+      mercury.partial(feedFilters, state.events, state.feedFilters), 
+      com.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), 
+      comren.feed(state, msgs, state.pagination)
+    ],
     side: [comren.feed(state, events, state.pagination)]
   }, [['main', 7], ['side', 5]]))
+}
+
+function feedFilters(events, filters) {
+  function feedFilter(name, label) {
+    return h('label', [
+      h('input', {
+        type: 'checkbox',
+        checked: (filters[name]) ? 'checked' : '',
+        'ev-event': mercury.changeEvent(events.toggleFilter, { filter: name, set: !filters[name] })
+      }), 
+      h('span', label)
+    ])
+  }
+
+  return h('p.feed-filters.text-muted', [
+    'Filters: ',
+    feedFilter('replies', 'replies'),
+    ' ',
+    feedFilter('shares', 'shares'),
+    ' ',
+    feedFilter('textPosts', 'text posts'),
+    ' ',
+    feedFilter('guiPosts', 'gui posts')
+  ])
 }
 
 
