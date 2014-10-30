@@ -1,6 +1,6 @@
 var cfg        = require('../lib/config');
 var connect    = require('../lib/backend');
-var keys       = require('../lib/keys')
+var keys       = require('ssb-keys')
 var level      = require('level')
 var sublevel   = require('level-sublevel/bytewise')
 var prettydate = require('pretty-date');
@@ -32,7 +32,7 @@ exports.setup = function(opts) {
 	var rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
 
 	// key overwriting
-	var keypair = keys.load(cfg.namefile)
+	var keypair = keys.loadSync(cfg.namefile)
   if(keypair && !opts['force-new-keypair']) {
     console.error('Keyfile already exists.')
     console.log('')
@@ -75,7 +75,7 @@ exports.setup = function(opts) {
 			return console.log('Aborted.');
 
 		// setup keys
-		var keypair = keys.createKeys(cfg.namefile, function(err, keypair) {
+		keys.create(cfg.namefile, function(err, keypair) {
 			if (err) {
 				console.error('Error creating keys:')
 				console.error(err.toString())

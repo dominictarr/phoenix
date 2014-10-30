@@ -18,6 +18,6 @@ module.exports = function(opts, backendClient, backend) {
 
     conn.write('HTTP/1.1 200 Connection Established\r\n\r\n')
     var connStream = toPull.duplex(conn)
-    pull(connStream, rpcapi.server(backend.ssb, backend.feed).createStream(), connStream)   
+    pull(connStream, rpcapi.server(backend.ssb, backend.feed).createStream(), connStream)
   }
 }
