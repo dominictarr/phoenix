@@ -83,10 +83,26 @@ function indexReply(state, msg) {
   try {
     var id = util.toHexString(msg.content.repliesTo.$msg)
     if (id) {
-      var sr = state.feedReplies()
-      if (!sr[id]) sr[id] = []
-      sr[id].push({ idStr: msg.idStr, type: msg.content.type })
-      state.feedReplies.set(sr)
+      // index the reply
+      var fr = state.feedReplies()
+      if (!fr[id]) fr[id] = []
+      fr[id].push({ idStr: msg.idStr, type: msg.content.type })
+      state.feedReplies.set(fr)
+
+      // add a notification if it's a reply to the user's message
+      var mm = state.messageMap()
+      var targetMsg = state.feed.get(state.feed.getLength() - mm[id] - 1)
+      if (targetMsg && targetMsg.authorStr == state.user.idStr()) {
+        var type = 'reply'
+        if (msg.content.postType == 'action') type = 'reaction'
+        state.notifications.push(models.notification({
+          type:           type,
+          msgIdStr:       targetMsg.idStr,
+          authorNickname: msg.authorNickname,
+          msgText:        msg.content.text.split('\n')[0],
+          timestamp:      msg.timestamp
+        }))
+      }
     }
   } catch(e) { console.warn('failed to index reply', e) }
 }
@@ -121,6 +137,7 @@ function indexMentions(state, msg) {
       if (util.toHexString(mention.$feed) != state.user.idStr()) continue // not for current user
       if (msg.content.rebroadcasts && fr[util.toHexString(msg.content.rebroadcasts.$msg)]) continue // already handled
       state.notifications.push(models.notification({
+        type:          'mention',
         msgIdStr:       msg.idStr,
         authorNickname: msg.authorNickname,
         msgText:        msg.content.text.split('\n')[0],
