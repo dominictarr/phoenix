@@ -85,11 +85,13 @@ function inboxPage(state) {
 function notifications(nicknameMap, events, notes) {
   if (notes.length === 0)
     return h('h3', 'Your inbox is empty.')
+
   return h('.panel.panel-default', h('table.table.table-hover.notifications', h('tbody', notes.map(notification.bind(null, nicknameMap, events)).reverse())))
 }
 
-function notification(nicknameMap, events, note) {
+function notification(nicknameMap, events, note, noteIndex) {
   return h('tr', { 'ev-click': valueEvents.click(events.openMsg, { idStr: note.msgIdStr }, { preventDefault: true }) }, [
+    h('td', h('span.label.label-default', note.type)),
     h('td', note.authorNickname),
     h('td', new widgets.Markdown(note.msgText, { inline: true, nicknames: nicknameMap })),
     h('td', util.prettydate(new Date(note.timestamp||0), true))

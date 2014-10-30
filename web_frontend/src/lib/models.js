@@ -121,10 +121,10 @@ var defaults = {
   },
 
   notification: {
+    type: '',
     msgIdStr: '',
     authorNickname: '',
-    msgText: '',
-    read: false
+    msgText: ''
   }
 }
 
@@ -245,6 +245,5 @@ function createPublishForm(initialState) {
 
 function createNotification(initialState) {
   var state = extend(defaults.notification, initialState)
-  state.read = mercury.value(state.read)
   return mercury.struct(state)
 }
