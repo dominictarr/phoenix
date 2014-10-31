@@ -20,7 +20,9 @@ exports.setup = function(opts) {
 	var rl = require('readline').createInterface({ input: process.stdin, output: process.stdout });
 
 	// key overwriting
-	var keypair = keys.loadSync(cfg.namefile)
+	var keypair
+	try { keypair = keys.loadSync(cfg.namefile) }
+	catch (e) {}
   if(keypair && !opts['force-new-keypair']) {
     console.error('Keyfile already exists.')
     console.log('')

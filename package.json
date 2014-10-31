@@ -3,7 +3,7 @@
   "dependencies": {
     "level": "~0.18.0",
     "level-sublevel": "~6.3.8",
-    
+    "scuttlebot": "~0.1.0",
     "eccjs": "git://github.com/dominictarr/eccjs.git#586f6d47507184a2efe84684ed0a30605cbc43a5",
     "blake2s": "~1.0.0",
     "ssb-keys": "~0.1.0",
@@ -17,7 +17,7 @@
     "msgpack-js": "~0.3.0",
     "json-human-buffer": "~1.0.2",
     "through": "~2.3.4",
-    "muxrpc": "~0.3.0",
+    "muxrpc": "~0.4.0",
     "ws": "~0.4.32",
     "websocket-stream": "~1.0.2",
     
