@@ -1,5 +1,4 @@
 var cfg        = require('../lib/config');
-var connect    = require('../lib/backend');
 var keys       = require('ssb-keys')
 var level      = require('level')
 var sublevel   = require('level-sublevel/bytewise')

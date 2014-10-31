@@ -2,12 +2,12 @@ var fs       = require('fs');
 var path     = require('path');
 var multicb  = require('multicb')
 
-module.exports = function(opts, backendClient, backend) {
+module.exports = function(opts) {
   return function (req, res) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
     function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
     function type (t) { res.writeHead(200, {'Content-Type': t}) }
-    function resolve(file) { return path.join(__dirname, '../../web_frontend/' + file) }
+    function resolve(file) { return path.join(__dirname, '../web_frontend/' + file) }
     function read(file) { return fs.createReadStream(resolve(file)); }
     function serve(file) { return read(file).on('error', serve404).pipe(res) }
     function serve404() {  res.writeHead(404); res.end('Not found'); }
