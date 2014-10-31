@@ -43,6 +43,7 @@ var defaults = {
       replies: true,
       shares: true,
       textPosts: true,
+      actionPosts: true,
       guiPosts: true
     },
 
@@ -153,6 +154,7 @@ function createHomeApp(events, initialState) {
       replies:          mercury.value(state.feedFilters.replies),
       shares:           mercury.value(state.feedFilters.shares),
       textPosts:        mercury.value(state.feedFilters.textPosts),
+      actionPosts:      mercury.value(state.feedFilters.actionPosts),
       guiPosts:         mercury.value(state.feedFilters.guiPosts)
     }),
     events:           events,
