@@ -1,3 +1,4 @@
+var pull = require('pull-stream')
 var constants = require('./const')
 var models = require('../lib/models')
 var bus = require('../lib/business')
@@ -336,16 +337,17 @@ exports.unfollow = function(state, data) {
 }
 
 exports.sync = function(state) {
+  // :DEBUG: this is a temporary sync function
+  var ws = require('../lib/ws-rpc')
   state.isSyncing.set(true)
-  bus.client.api.syncNetwork(function(err, results) {
-    state.isSyncing.set(false)
-    if (err) return res.writeHead(500), res.end(err)
-    state.lastSync.set(new Date())
-    // :TODO:
-    // if (results && Object.keys(results).length)
-      // backend.local.lastSyncResults = results
-    bus.syncView(state)
-  })
+  pull(
+    ws.api.sync('grimwire.com', 2000),
+    pull.drain(console.log.bind(console), function() {
+      console.log(arguments)
+      state.isSyncing.set(false)
+      bus.syncView(state)
+    })
+  )
 }
 
 exports.toggleFilter = function(state, data) {
