@@ -63,7 +63,10 @@ function header(events, uId, isSyncing) {
 // =========
 
 function feedPage(state) {
-  var events = state.feed.filter(function(msg) { return msg.content.type == 'profile' || (msg.content.postType == 'action' && !msg.content.repliesTo) })
+  var events = state.feed.filter(function(msg) {
+    if (!state.feedFilters.actionPosts && msg.content.postType == 'action') return false
+    return msg.content.type == 'profile' || (msg.content.postType == 'action' && !msg.content.repliesTo)
+  })
   var msgs = state.feed.filter(function(msg) {
     if (!state.feedFilters.replies   && msg.content.repliesTo) return false
     if (!state.feedFilters.shares    && msg.content.rebroadcasts) return false
@@ -97,9 +100,11 @@ function feedFilters(events, filters) {
     'Filters: ',
     feedFilter('replies', 'replies'),
     ' ',
-    feedFilter('shares', 'shares'),
+    feedFilter('shares', 'shared posts'),
     ' ',
     feedFilter('textPosts', 'text posts'),
+    ' ',
+    feedFilter('actionPosts', 'action posts'),
     ' ',
     feedFilter('guiPosts', 'gui posts')
   ])

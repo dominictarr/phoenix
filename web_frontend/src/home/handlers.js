@@ -352,6 +352,15 @@ exports.sync = function(state) {
 
 exports.toggleFilter = function(state, data) {
   state.feedFilters[data.filter].set(data.set)
+
+  // persist in localstorage
+  localStorage.setItem('feed-filters', JSON.stringify({
+    replies: state.feedFilters.replies(),
+    shares: state.feedFilters.shares(),
+    textPosts: state.feedFilters.textPosts(),
+    actionPosts: state.feedFilters.actionPosts(),
+    guiPosts: state.feedFilters.guiPosts()
+  }))
 }
 
 exports.addServer = function(state) {

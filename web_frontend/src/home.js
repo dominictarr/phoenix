@@ -19,6 +19,10 @@ window.models = models
 
 module.exports = createApp
 function createApp() {
+  var feedFilters
+  try { feedFilters = JSON.parse(localStorage.getItem('feed-filters')) }
+  catch (e) {}
+
   var initState = {
     publishFormMap: { feed: 0 },
     publishForms: [{
@@ -26,7 +30,14 @@ function createApp() {
       type: 'text',
       textPlaceholder: 'Publish...',
       permanent: true
-    }]
+    }],
+    feedFilters: feedFilters || {
+      replies: true,
+      shares: true,
+      textPosts: true,
+      actionPosts: true,
+      guiPosts: true
+    }
   }
 
   var events = createEvents()
