@@ -69,20 +69,6 @@ var defaults = {
     isSyncing: false
   },
 
-  pubApp: {
-    // gui state
-    route: '',
-    layout: [['side', 4], ['main', 8]],
-    conn: {
-      hasError: false,
-      explanation: ''
-    },
-
-    // app data
-    profiles: [],
-    profileMap: {}
-  },
-
   message: {
     id: null,
     type: null,

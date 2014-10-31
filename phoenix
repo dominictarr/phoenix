@@ -16,27 +16,15 @@ nomnom.command('setup')
 nomnom.command('serve')
   .help('Starts the phoenix server.')
   .options({
-    pub: {
-      flag: true,
-      abbr: 'p',
-    	help: 'Run the pub server in addition to the home server (advanced feature).'
-    },
     daemon: {
       flag: true,
       abbr: 'd',
       help: 'Run the server in the background as a daemon.'
     },
-    homeport: {
-      help: 'Sets the port for the home server.'
-    },
-    pubport: {
-    	help: 'Sets the port for the pub server.'
-    }/*,
-    dontopen: {
-      flag: true,
-      abbr: 'n',
-      help: 'Don\'t open the page in the browser once the server starts.'
-    }*/
+    port: {
+      help: 'Sets the port for the server.',
+      default: 65000
+    }
   })
   .callback(require('./cli_tool/net-server').start);
 nomnom.command('stop')
