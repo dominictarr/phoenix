@@ -10,9 +10,10 @@ module.exports = function(opts) {
     var conn = WSStream(ws)
     conn.on('error', function(err) { console.log('WS ERROR', err) })
     
-    // :TODO: authentication, perms
+    // :TODO: authentication? this listens on the localhost only, with CORS enabled
 
+    // expose the owner-perms-level API
     var connStream = toPull.duplex(conn)
-    pull(connStream, rpcapi.server(backend.ssb, backend.feed).createStream(), connStream)
+    pull(connStream, rpcapi.server(backend.ssb, backend.feed, 'owner').createStream(), connStream)
   }
 }

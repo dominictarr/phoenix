@@ -4,8 +4,8 @@ var rpcapi   = require('../lib/rpcapi')
 
 module.exports = function(backend) {
   return function(conn) {
-    // :TODO: need to reduce to safe API
+    // expose the anon-perms-level API
     var connStream = toPull.duplex(conn)
-    pull(connStream, rpcapi.server(backend.ssb, backend.feed).createStream(), connStream)
+    pull(connStream, rpcapi.server(backend.ssb, backend.feed, 'anon').createStream(), connStream)
   }
 }
