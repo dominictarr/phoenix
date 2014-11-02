@@ -5,7 +5,7 @@ Phoenix v1
 
 Social feeds without ads or owners. Be free!
 
-Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Relay servers optionally aggregate and redistribute the feeds.
+Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Bot users aggregate and redistribute the feeds.
 
 Join us in #scuttlebutt on freenode.
 
@@ -17,30 +17,8 @@ Join us in #scuttlebutt on freenode.
 git clone https://github.com/pfraze/phoenix.git
 cd phoenix
 npm install
-make
 ./phoenix setup
 ./phoenix serve
-```
-
-The home server runs a private instance on `localhost:65000`.
-
-**To setup a relay**
-
-```
-git clone https://github.com/pfraze/phoenix.git
-cd phoenix
-npm install
-make
-./phoenix setup
-sudo ./phoenix serve -p -d
-```
-
-This will start the home server on 65000 and the pub server on port 80 (`-p`). The `-d` will put the server in daemon mode.
-
-To stop it, run:
-
-```
-sudo ./phoenix stop
 ```
 
 
