@@ -1,0 +1,100 @@
+// Core variables and mixins
+//@import "bootstrap/variables.less";
+@import "variables.less";
+@import "bootstrap/mixins.less";
+
+// Reset and dependencies
+@import "bootstrap/normalize.less";
+@import "bootstrap/print.less";
+@import "bootstrap/glyphicons.less";
+
+// Core CSS
+@import "bootstrap/scaffolding.less";
+@import "bootstrap/type.less";
+@import "bootstrap/code.less";
+@import "bootstrap/grid.less";
+@import "bootstrap/tables.less";
+@import "bootstrap/forms.less";
+@import "bootstrap/buttons.less";
+
+// Components
+// @import "bootstrap/component-animations.less";
+@import "bootstrap/dropdowns.less";
+@import "bootstrap/button-groups.less";
+// @import "bootstrap/input-groups.less";
+@import "bootstrap/navs.less";
+@import "bootstrap/navbar.less";
+// @import "bootstrap/breadcrumbs.less";
+// @import "bootstrap/pagination.less";
+// @import "bootstrap/pager.less";
+@import "bootstrap/labels.less";
+// @import "bootstrap/badges.less";
+// @import "bootstrap/jumbotron.less";
+// @import "bootstrap/thumbnails.less";
+@import "bootstrap/alerts.less";
+// @import "bootstrap/progress-bars.less";
+// @import "bootstrap/media.less";
+// @import "bootstrap/list-group.less";
+@import "bootstrap/panels.less";
+// @import "bootstrap/responsive-embed.less";
+// @import "bootstrap/wells.less";
+// @import "bootstrap/close.less";
+
+// Components w/ JavaScript
+// @import "bootstrap/modals.less";
+// @import "bootstrap/tooltip.less";
+// @import "bootstrap/popovers.less";
+// @import "bootstrap/carousel.less";
+
+// Utility classes
+@import "bootstrap/utilities.less";
+// @import "bootstrap/responsive-utilities.less";
+
+// Phoenix styles
+@import "notifications.less";
+@import "feed.less";
+@import "profile.less";
+@import "network.less";
+@import "com/gui.less";
+@import "com/suggest-box.less";
+@import "com/publish-form.less";
+@import "com/helptip.less";
+
+// Home styles
+.homeapp {
+  visibility: visible !important;
+}
+.feed-page > .col-xs-5 {
+  padding-top: 34px; // adjust for the filters in the left column
+}
+
+#conn-status {
+  position: fixed;
+  top: 30px;
+  z-index: 1000;
+  width: auto;
+  .alert {
+    box-shadow: 1px 3px 3px rgba(0,0,0,0.25);
+  }
+}
+
+.navbar-nav {
+  li {
+    button {
+      margin: 10px 6px;
+    }
+  }
+}
+
+.user-link {
+  font-weight: bold;
+  color: #555;
+}
+
+iframe[seamless]{
+  background-color: transparent;
+  border: 0px none transparent;
+  padding: 0px;
+  overflow: hidden;
+  width: 100%;
+}
