@@ -30,7 +30,7 @@ var connect = exports.connect = function(state) {
     )
   }
 
-  conn.on('open', function () {
+  conn.on('connect', function () {
     state.conn.hasError.set(false)
     state.conn.explanation.set('')
   })
