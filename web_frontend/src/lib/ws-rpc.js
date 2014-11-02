@@ -30,8 +30,10 @@ var connect = exports.connect = function(state) {
     )
   }
 
-  state.conn.hasError.set(false)
-  state.conn.explanation.set('')
+  conn.on('connect', function () {
+    state.conn.hasError.set(false)
+    state.conn.explanation.set('')
+  })
 }
 
 // server api connection error handler
