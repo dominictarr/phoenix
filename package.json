@@ -1,6 +1,7 @@
 {
   "name": "phoenix",
   "dependencies": {
+    "secure-scuttlebutt": "~4.1.0",
     "level": "~0.18.0",
     "level-sublevel": "~6.3.8",
     "scuttlebot": "~0.1.0",
