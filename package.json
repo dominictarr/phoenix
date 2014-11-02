@@ -35,6 +35,7 @@
     "form-data-set": "~1.1.1",
     "dom-walk": "~0.1.0",
     "marked": "git://github.com/clehner/marked#8af8ae018ba452b5c7f936a474dbce265f2ae732",
-    "emoji-named-characters": "^1.0.1"
+    "emoji-named-characters": "^1.0.1",
+    "less": "~1.7.5"
   }
 }
