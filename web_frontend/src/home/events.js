@@ -26,7 +26,7 @@ function createEvents() {
     'openMsg',
     'loadMore',
     'addFeed',
-    'showIntroToken',
+    'showId',
     'follow',
     'unfollow',
     'sync',
