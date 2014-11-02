@@ -68,3 +68,12 @@
 .feed-page > .col-xs-5 {
   padding-top: 34px; // adjust for the filters in the left column
 }
+#conn-status {
+  position: fixed;
+  top: 30px;
+  z-index: 1000;
+  width: auto;
+  .alert {
+    box-shadow: 1px 3px 3px rgba(0,0,0,0.25);
+  }
+}

@@ -20,7 +20,7 @@ var columns = exports.columns = function(parts, layout) {
 var connStatus = exports.connStatus = function(events, connStatus) {
   if (!connStatus.hasError)
     return h('div')
-  return h('.container', h('.alert.alert-danger', connStatus.explanation))
+  return h('#conn-status.container', h('.alert.alert-danger', connStatus.explanation))
 }
 
 // not found message
