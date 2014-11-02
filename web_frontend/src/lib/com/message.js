@@ -248,7 +248,7 @@ var messageFollow = exports.messageFollow = function(msg, nicknameMap) {
     h('span.event-icon.glyphicon.glyphicon-road'),
     h('p.event-body', [
       comren.userlink(msg.author, msg.authorNickname),
-      ' is now following ',
+      ' followed ',
       comren.userlink(target, targetNickname)
     ])
   ])

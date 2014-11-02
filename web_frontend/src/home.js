@@ -36,7 +36,8 @@ function createApp() {
       shares: true,
       textPosts: true,
       actionPosts: true,
-      guiPosts: true
+      guiPosts: true,
+      follows: true
     }
   }
 
