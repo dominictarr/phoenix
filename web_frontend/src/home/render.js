@@ -172,7 +172,9 @@ function profileControls(events, profile, isYou, followsYou) {
       ])
     ),
     (!isYou) ? h('p', followBtn) : '',
-    h('p', a('#', 'User\'s Contact ID', { 'ev-click': valueEvents.click(events.showId, { id: profile.idStr }, { preventDefault: true }) }))
+    h('div.text-muted', [
+      h('p', h('small', [h('strong', 'User\'s Contact ID: '), profile.idStr]))
+    ])
   ])
 }
 
@@ -191,8 +193,16 @@ function messagePage(state, msgid) {
 
   // render
   return h('.message-page.row', comren.columns({
-    main: comren.msgThread(state, msg)
-  }, [['main', 8]]))
+    main: comren.msgThread(state, msg),
+    info: mercury.partial(messageInfo, msg)
+  }, [['main', 8], ['info', 4]]))
+}
+
+function messageInfo(msg) {
+  return h('div.text-muted', [
+    h('p', h('small', [h('strong', 'Message ID:'), ' ', msg.idStr])),
+    h('p', h('small', [h('strong', 'Author\'s Contact ID:'), ' ', msg.authorStr]))
+  ])
 }
 
 // Network Page
