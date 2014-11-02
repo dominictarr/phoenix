@@ -44,7 +44,8 @@ var defaults = {
       shares: true,
       textPosts: true,
       actionPosts: true,
-      guiPosts: true
+      guiPosts: true,
+      follows: true
     },
 
     // app data
@@ -155,7 +156,8 @@ function createHomeApp(events, initialState) {
       shares:           mercury.value(state.feedFilters.shares),
       textPosts:        mercury.value(state.feedFilters.textPosts),
       actionPosts:      mercury.value(state.feedFilters.actionPosts),
-      guiPosts:         mercury.value(state.feedFilters.guiPosts)
+      guiPosts:         mercury.value(state.feedFilters.guiPosts),
+      follows:          mercury.value(state.feedFilters.follows)
     }),
     events:           events,
 

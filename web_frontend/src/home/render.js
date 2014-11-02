@@ -64,8 +64,10 @@ function header(events, uId, isSyncing) {
 
 function feedPage(state) {
   var events = state.feed.filter(function(msg) {
-    if (!state.feedFilters.actionPosts && msg.content.postType == 'action') return false
-    return msg.content.type == 'profile' || (msg.content.postType == 'action' && !msg.content.repliesTo)
+    if (msg.content.type == 'profile') return true
+    if (msg.content.type == 'follow') return state.feedFilters.follows
+    if (msg.content.postType == 'action' && !msg.content.repliesTo) return state.feedFilters.actionPosts
+    return false
   })
   var msgs = state.feed.filter(function(msg) {
     if (!state.feedFilters.replies   && msg.content.repliesTo) return false
@@ -106,7 +108,9 @@ function feedFilters(events, filters) {
     ' ',
     feedFilter('actionPosts', 'action posts'),
     ' ',
-    feedFilter('guiPosts', 'gui posts')
+    feedFilter('guiPosts', 'gui posts'),
+    ' ',
+    feedFilter('follows', 'follows')
   ])
 }
 
