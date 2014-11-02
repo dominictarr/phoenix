@@ -1,7 +1,8 @@
-var fs       = require('fs')
-var path     = require('path')
-var multicb  = require('multicb')
-var less     = require('less')
+var fs         = require('fs')
+var path       = require('path')
+var multicb    = require('multicb')
+var less       = require('less')
+var browserify = require('browserify')
 
 module.exports = function(opts) {
   return function (req, res) {
@@ -63,16 +64,35 @@ module.exports = function(opts) {
       return
     }
 
+    // JS
+    if (pathStarts('/js/')) {
+      var b = browserify({ basedir: resolve('src') })
+      b.add(resolve('src/'+path.basename(req.url)))
+      b.ignore('proquint-')
+      b.ignore('http')
+      b.ignore('level')
+      b.ignore('level/sublevel')
+      b.ignore('level-sublevel/bytewise')
+      b.ignore('pull-level')
+      type('application/javascript')
+      b.bundle()
+        .on('error', function(err) {
+          console.error(err.toString())
+          serve404()
+        })
+        .pipe(res)
+      return
+    }
+
     // Static asset routes
     if (pathEnds('jpg'))        type('image/jpeg')
     else if (pathEnds('jpeg'))  type('image/jpeg')
     else if (pathEnds('gif'))   type('image/gif')
     else if (pathEnds('ico'))   type('image/x-icon');
     else if (pathEnds('png'))   type('image/png');
-    else if (pathEnds('js'))    type('application/javascript')
     else if (pathEnds('woff'))  type('application/x-font-woff')
     else if (pathEnds('woff2')) type('application/font-woff2')
-    if (pathStarts('/js/') || pathStarts('/img/') || pathStarts('/fonts/'))
+    if (pathStarts('/img/') || pathStarts('/fonts/'))
       return serve(req.url)
     serve404();
   }
