@@ -51,7 +51,7 @@ function header(events, uId, isSyncing) {
         h('li', a('#/help', 'help'))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
-        h('li', a('#', 'your intro token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: uId }, { preventDefault: true }) })),
+        h('li', a('#', 'your contact id', { 'ev-click': valueEvents.click(events.showId, { id: uId }, { preventDefault: true }) })),
         h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add contact')),
         h('li', comren.syncButton(events, isSyncing))
       ])
@@ -168,7 +168,7 @@ function profileControls(events, profile, isYou, followsYou) {
       ])
     ),
     (!isYou) ? h('p', followBtn) : '',
-    h('p', a('#', 'Intro Token', { 'ev-click': valueEvents.click(events.showIntroToken, { id: profile.idStr }, { preventDefault: true }) }))
+    h('p', a('#', 'User\'s Contact ID', { 'ev-click': valueEvents.click(events.showId, { id: profile.idStr }, { preventDefault: true }) }))
   ])
 }
 

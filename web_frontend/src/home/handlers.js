@@ -307,21 +307,15 @@ exports.loadMore = function(state) {
 }
 
 exports.addFeed = function(state) {
-  var token = prompt('Introduction token of the user:')
+  var token = prompt('User ID of your contact:')
   if (!token) return
   bus.followUser(state, token, function(err) {
     if (err) alert(err.toString())
   })
 }
 
-exports.showIntroToken = function(state, data) {
-  bus.fetchServers(state, function() {
-    // :TODO: it's not actually accurate that the user might be at all of these ndoes
-    //        Get an accurate list!
-    var servers = state.servers().map(function(s) { return [s.hostname, s.port] })
-    var t = JSON.stringify({id: data.id, relays: servers})
-    prompt('Intro Token', t)
-  })
+exports.showId = function(state, data) {
+  prompt('User Contact ID', data.id)
 }
 
 exports.follow = function(state, data) {
