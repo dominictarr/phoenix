@@ -1,4 +1,4 @@
-  {
+{
   "name": "phoenix",
   "dependencies": {
     "level": "~0.18.0",
@@ -7,7 +7,6 @@
     "eccjs": "git://github.com/dominictarr/eccjs.git#586f6d47507184a2efe84684ed0a30605cbc43a5",
     "blake2s": "~1.0.0",
     "ssb-keys": "~0.1.0",
-
     "pull-stream": "~2.24.1",
     "pull-stream-to-stream": "~1.3.0",
     "stream-to-pull-stream": "~1.6.0",
@@ -19,15 +18,13 @@
     "through": "~2.3.4",
     "muxrpc": "~0.4.0",
     "ws": "~0.4.32",
-    "websocket-stream": "~1.0.2",
-    
+    "websocket-stream": "~1.1.0",
     "nomnom": "1.8.0",
     "osenv": "0.0.3",
     "pretty-date": "0.2.0",
     "daemonize2": "0.4.2",
     "rc": "~0.5.1",
     "open": "~0.0.5",
-    
     "mercury": "~8.0.0",
     "global": "~4.2.1",
     "geval": "~2.1.1",
