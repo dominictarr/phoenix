@@ -215,14 +215,6 @@ function renderMsgRebroadcasts(rebroadcasts) {
 
 // message event-content renderer
 var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap) {
-  var icon;
-  switch (type) {
-    case 'account-created': icon = '.glyphicon-home'; break
-    case 'account-change': icon = '.glyphicon-user'; break
-    case 'reaction': icon = '.glyphicon-hand-up'; break
-    default: icon = '.glyphicon-hand-right'
-  }
-
   var parentLink = ''
   if (msg.content.repliesTo) {
     var id = util.toHexString(msg.content.repliesTo.$msg)
@@ -230,7 +222,6 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
   }
 
   return h('.phoenix-event', [
-    h('span.event-icon.glyphicon'+icon),
     h('p.event-body', [
       comren.userlink(msg.author, msg.authorNickname),
       new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap }),
@@ -245,7 +236,6 @@ var messageFollow = exports.messageFollow = function(msg, nicknameMap) {
   var targetNickname = nicknameMap[target] || comren.shortHex(target)
 
   return h('.phoenix-event', [
-    h('span.event-icon.glyphicon.glyphicon-road'),
     h('p.event-body', [
       comren.userlink(msg.author, msg.authorNickname),
       ' followed ',
