@@ -37,18 +37,6 @@ function addPublishForm(state, id, parent) {
   return publishForm
 }
 
-exports.updatePublishFormText = function(state, data) {
-  var form = getPublishForm(state, data.id)
-  if (!form)
-    return
-
-  // expand/contract field if there's content in there
-  if (form.preview() !== data.publishText) {
-    form.textRows.set((data.publishText) ? 3 : 1)
-    form.preview.set(data.publishText)
-  }
-}
-
 exports.setPublishFormText = function(state, data) {
   var form = getPublishForm(state, data.id)
   if (!form)
@@ -56,9 +44,6 @@ exports.setPublishFormText = function(state, data) {
 
   // update internal data
   form.textValue.set(data.publishText)
-  form.textRows.set((data.publishText) ? 3 : 1)
-  form.preview.set(data.publishText)
-  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.setPublishFormType = function(state, data) {
@@ -68,8 +53,6 @@ exports.setPublishFormType = function(state, data) {
 
   // update internal data
   form.type.set(data.type)
-  form.textPlaceholder.set('Publish...')
-  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.submitPublishForm = function(state, data) {
@@ -114,7 +97,7 @@ exports.cancelPublishForm = function(state, data) {
   if (!form)
     return
 
-  if (form.preview() && !confirm('Are you sure you want to cancel this message?'))
+  if (form.textValue() && !confirm('Are you sure you want to cancel this message?'))
     return
 
   resetForm(state, form)
@@ -125,10 +108,7 @@ function resetForm(state, form) {
     // reset the form
     form.type.set('text')
     form.textValue.set('')
-    form.textRows.set(1)
-    form.preview.set('')
     form.isRunning.set(false)
-    form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
   } else {
     // remove the form
     var m = state.publishFormMap()
