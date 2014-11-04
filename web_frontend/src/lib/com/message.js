@@ -89,8 +89,7 @@ function renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, 
   var parentHeader
   if (parentMsg) {
     parentHeader = h('.panel-heading', [
-      renderMsgHeader(parentMsg, events, nicknameMap, true),
-      new widgets.Markdown(parentMsg.content.text, { nicknames: nicknameMap })
+      're: ', comren.a('#/msg/'+parentMsg.idStr, new widgets.Markdown(comren.firstWords(parentMsg.content.text, 5), { nicknames: nicknameMap, inline: true }))
     ])
   }
 

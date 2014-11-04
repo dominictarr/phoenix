@@ -104,6 +104,12 @@ function msgThreadTree(state, msg) {
 // Helper Elements
 // ===============
 
+var firstWords = exports.firstWords = function(str, n) {
+  var words = str.split(/\s/g)
+  if (words.length < n) return words.join(' ')
+  return words.slice(0, n).join(' ') + '...'
+}
+
 var syncButton = exports.syncButton = function(events, isSyncing) {
   if (isSyncing) {
     return h('button.btn.btn-default', { disabled: true }, 'Syncing...')
