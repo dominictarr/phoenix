@@ -32,11 +32,14 @@ exports.processFeedMsg = function(state, msg) {
   }
   
   // additional indexing
+  var notified = false
   if (m.content.$rel == 'follows')   indexFollow(state, m)
   if (m.content.$rel == 'unfollows') indexUnfollow(state, m)
-  if (m.content.repliesTo)           indexReply(state, m)
   if (m.content.rebroadcasts)        indexRebroadcast(state, m, mm)
-  if (m.content.mentions)            indexMentions(state, m)
+  if (m.content.repliesTo)
+    notified = indexReply(state, m)
+  if (!notified && m.content.mentions)
+    indexMentions(state, m)
 }
 
 function indexFollow(state, msg) {
@@ -102,9 +105,11 @@ function indexReply(state, msg) {
           msgText:        msg.content.text.split('\n')[0],
           timestamp:      msg.timestamp
         }))
+        return true
       }
     }
   } catch(e) { console.warn('failed to index reply', e) }
+  return false
 }
 
 function indexRebroadcast(state, msg, msgMap) {

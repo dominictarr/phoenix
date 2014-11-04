@@ -6,7 +6,6 @@ module.exports = createEvents
 function createEvents() {
   var events = mercury.input([
     // publish forms
-    'updatePublishFormText',
     'setPublishFormText',
     'setPublishFormType',
     'submitPublishForm',

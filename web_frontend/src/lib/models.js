@@ -105,13 +105,9 @@ var defaults = {
     id: '',
     type: '',
     parent: undefined,
-    textPlaceholder: '',
     textValue: '',
-    textRows: 1,
-    preview: '',
     permanent: false,
-    isRunning: false,
-    setValueTrigger: 1 // trigger counter - when changed, will force an overwrite of the form's input value
+    isRunning: false
   },
 
   notification: {
@@ -235,13 +231,9 @@ function createServer(initialState) {
 
 function createPublishForm(initialState) {
   var state = extend(defaults.replyForm, initialState)
-  state.type            = mercury.value(state.type)
-  state.textPlaceholder = mercury.value(state.textPlaceholder)
-  state.preview         = mercury.value(state.preview)
-  state.textValue       = mercury.value(state.textValue)
-  state.textRows        = mercury.value(state.textRows)
-  state.isRunning       = mercury.value(state.isRunning)
-  state.setValueTrigger = mercury.value(state.setValueTrigger)
+  state.type      = mercury.value(state.type)
+  state.textValue = mercury.value(state.textValue)
+  state.isRunning = mercury.value(state.isRunning)
   return mercury.struct(state)
 }
 
