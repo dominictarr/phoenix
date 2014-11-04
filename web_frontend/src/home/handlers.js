@@ -329,7 +329,6 @@ exports.toggleFilter = function(state, data) {
 
   // persist in localstorage
   localStorage.setItem('feed-filters', JSON.stringify({
-    replies:     state.feedFilters.replies(),
     shares:      state.feedFilters.shares(),
     textPosts:   state.feedFilters.textPosts(),
     actionPosts: state.feedFilters.actionPosts(),

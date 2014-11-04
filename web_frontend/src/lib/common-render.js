@@ -48,7 +48,8 @@ function notHidden(msg) {
 // - `feed`: which feed to render
 // - `pagination`: { start:, end: }
 // - `reverse`: bool, reverse the feed?
-var feed = exports.feed = function(state, feed, pagination, reverse) {
+// - `threaded`: bool, render threads?
+var feed = exports.feed = function(state, feed, pagination, reverse, threaded) {
   var moreBtn
   feed = feed.filter(notHidden)
   if (reverse) feed.reverse()
@@ -58,7 +59,8 @@ var feed = exports.feed = function(state, feed, pagination, reverse) {
     }
     feed = feed.slice(pagination.start, pagination.end)
   }
-  feed = feed.map(msgThread.bind(null, state))
+  var renderfn = (threaded) ? msgThread : com.message
+  feed = feed.map(function(msg) { return renderfn(state, msg, true) })
   if (moreBtn)
     feed.push(moreBtn)
   return h('.feed', feed)
@@ -67,9 +69,10 @@ var feed = exports.feed = function(state, feed, pagination, reverse) {
 // message thread view
 // - `state`: full application state
 // - `msg`: which message's thread to render
-var msgThread = exports.msgThread = function(state, msg) {
+// - `isTopRender`: is the thread the topmost being rendered now?
+var msgThread = exports.msgThread = function(state, msg, isTopRender) {
   return h('.feed', [
-    com.message(state, msg),
+    com.message(state, msg, isTopRender),
     msgThreadTree(state, msg)
   ])
 }
@@ -83,10 +86,10 @@ function msgThreadTree(state, msg) {
     var msgi  = state.messageMap[replyData.idStr] // look up index
     var reply = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
     if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && notHidden(reply)) {
-      replies.push(com.message(state, reply))
+      replies.push(com.message(state, reply, false))
 
       // build and render subtree
-      var subtree = msgThreadTree(state, reply)
+      var subtree = msgThreadTree(state, reply, false)
       if (subtree)
         replies.push(subtree)
     }
@@ -100,6 +103,12 @@ function msgThreadTree(state, msg) {
 
 // Helper Elements
 // ===============
+
+var firstWords = exports.firstWords = function(str, n) {
+  var words = str.split(/\s/g)
+  if (words.length < n) return words.join(' ')
+  return words.slice(0, n).join(' ') + '...'
+}
 
 var syncButton = exports.syncButton = function(events, isSyncing) {
   if (isSyncing) {

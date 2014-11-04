@@ -32,7 +32,6 @@ function createApp() {
       permanent: true
     }],
     feedFilters: feedFilters || {
-      replies: true,
       shares: true,
       textPosts: true,
       actionPosts: true,

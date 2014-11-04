@@ -7,7 +7,10 @@ var util        = require('../../../../lib/util')
 var publishForm = require('./publish-form').publishForm
 
 // feed message renderer
-var message = exports.message = function(state, msg) {
+// - `state`: full app state object
+// - `msg`: message object to render
+// - `isTopRender`: bool, is the message the topmost being rendered now, regardless of its position in the thread?
+var message = exports.message = function(state, msg, isTopRender) {
   var publishFormMap = state.publishFormMap
   var publishForms = state.publishForms
 
@@ -21,12 +24,13 @@ var message = exports.message = function(state, msg) {
         return mercury.partial(messageFollow, msg, state.nicknameMap)
       return ''
     case 'post':
+      var parentMsg = (isTopRender && msg.content.repliesTo) ? lookup({ idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
       if (msg.content.postType == 'action')
         return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, state.nicknameMap)
       else if (msg.content.postType == 'gui')
-        main = mercury.partial(messageGui, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap)
+        main = mercury.partial(messageGui, msg, state.events, parentMsg, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap)
       else
-        main = mercury.partial(messageText, msg, state.events, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap)
+        main = mercury.partial(messageText, msg, state.events, parentMsg, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap)
       break
     default:
       return ''
@@ -40,25 +44,26 @@ var message = exports.message = function(state, msg) {
   }
 
   // helper to lookup messages
+  function lookup(entry) {
+    var msgi  = state.messageMap[entry.idStr]
+    return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+  }
   function lookupAll(index) {
     if (!index || !index.length) return []
-    return index.map(function(entry) {
-      var msgi  = state.messageMap[entry.idStr]
-      return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
-    })
+    return index.map(lookup)
   }
 
   return main
 }
 
 // message text-content renderer
-var messageText = exports.messageText = function(msg, events, replies, rebroadcasts, nicknameMap) {
+var messageText = exports.messageText = function(msg, events, parentMsg, replies, rebroadcasts, nicknameMap) {
   var content = new widgets.Markdown(msg.content.text, { nicknames: nicknameMap })
-  return renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap)
+  return renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, nicknameMap)
 }
 
 // message gui-content renderer
-var messageGui = exports.messageGui = function(msg, events, replies, rebroadcasts, nicknameMap) {
+var messageGui = exports.messageGui = function(msg, events, parentMsg, replies, rebroadcasts, nicknameMap) {
   var content
   if (msg.isRunning) {
     content = h('.gui-post-wrapper.gui-running', [
@@ -72,16 +77,24 @@ var messageGui = exports.messageGui = function(msg, events, replies, rebroadcast
   }
 
   // body
-  return renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap)
+  return renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, nicknameMap)
 }
 
 // renders message with the header and footer
-function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap) {
+function renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, nicknameMap) {
   var replyStr = renderMsgReplies(msg, replies)
   var reactionsStr = renderMsgReactions(replies, nicknameMap)
   var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts)  
 
+  var parentHeader
+  if (parentMsg) {
+    parentHeader = h('.panel-heading', [
+      're: ', comren.a('#/msg/'+parentMsg.idStr, new widgets.Markdown(comren.firstWords(parentMsg.content.text, 5), { nicknames: nicknameMap, inline: true }))
+    ])
+  }
+
   return h('.panel.panel-default', [
+    parentHeader,
     h('.panel-body', [
       renderMsgHeader(msg, events, nicknameMap),
       content,
@@ -107,7 +120,6 @@ function renderMsgShell(content, msg, events, replies, rebroadcasts, nicknameMap
 // message header
 function renderMsgHeader(msg, events, nicknameMap) {
   var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.idStr, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
-  var replyIdStr = (msg.content.repliesTo) ? util.toHexString(msg.content.repliesTo.$msg) : ''
 
   if (msg.content.rebroadcasts) {
     // duplicated message
@@ -120,9 +132,6 @@ function renderMsgHeader(msg, events, nicknameMap) {
         ' - ',
         util.prettydate(new Date(msg.content.rebroadcasts.timestamp||0), true)
       ]),
-      (replyIdStr) ?
-        h('span.repliesto', [' in response to ', comren.a('#/msg/'+replyIdStr, comren.shortHex(replyIdStr))])
-        : '',
       h('span.repliesto', [' shared by ', comren.userlink(msg.author, msg.authorNickname)]),
       stopBtnStr
     ])
@@ -135,9 +144,6 @@ function renderMsgHeader(msg, events, nicknameMap) {
       ' - ',
       comren.a('#/msg/'+msg.idStr, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
     ]),
-    (replyIdStr) ?
-      h('span.repliesto', [' in response to ', comren.a('#/msg/'+replyIdStr, comren.shortHex(replyIdStr))])
-      : '',
     stopBtnStr
   ])
 }

@@ -70,7 +70,7 @@ function feedPage(state) {
     return false
   })
   var msgs = state.feed.filter(function(msg) {
-    if (!state.feedFilters.replies   && msg.content.repliesTo) return false
+    if (msg.content.repliesTo) return false
     if (!state.feedFilters.shares    && msg.content.rebroadcasts) return false
     if (!state.feedFilters.textPosts && msg.content.postType == 'text') return false
     if (!state.feedFilters.guiPosts  && msg.content.postType == 'gui') return false
@@ -80,7 +80,7 @@ function feedPage(state) {
     main: [
       mercury.partial(feedFilters, state.events, state.feedFilters), 
       com.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), 
-      comren.feed(state, msgs, state.pagination)
+      comren.feed(state, msgs, state.pagination, false, true)
     ],
     side: [comren.feed(state, events, state.pagination)]
   }, [['main', 7], ['side', 5]]))
@@ -100,8 +100,6 @@ function feedFilters(events, filters) {
 
   return h('p.feed-filters.text-muted', [
     'Filters: ',
-    feedFilter('replies', 'replies'),
-    ' ',
     feedFilter('shares', 'shared posts'),
     ' ',
     feedFilter('textPosts', 'text posts'),
@@ -119,25 +117,19 @@ function feedFilters(events, filters) {
 // ==========
 
 function inboxPage(state) {
+  var msgs = state.notifications.map(function(note) {
+    var msgi  = state.messageMap[note.msgIdStr]
+    return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+  })
+  var events = state.feed.filter(function(msg) {
+    if (msg.content.type == 'follow' && util.toHexString(msg.content.$feed) === state.user.idStr) return true
+    return false
+  })
+
   return h('.inbox-page.row', comren.columns({
-    main: [mercury.partial(notifications, state.nicknameMap, state.events, state.notifications)]
-  }, [['main', 12]]))
-}
-
-function notifications(nicknameMap, events, notes) {
-  if (notes.length === 0)
-    return h('h3', 'Your inbox is empty.')
-
-  return h('.panel.panel-default', h('table.table.table-hover.notifications', h('tbody', notes.map(notification.bind(null, nicknameMap, events)).reverse())))
-}
-
-function notification(nicknameMap, events, note, noteIndex) {
-  return h('tr', { 'ev-click': valueEvents.click(events.openMsg, { idStr: note.msgIdStr }, { preventDefault: true }) }, [
-    h('td', h('span.label.label-default', note.type)),
-    h('td', note.authorNickname),
-    h('td', new widgets.Markdown(note.msgText, { inline: true, nicknames: nicknameMap })),
-    h('td', util.prettydate(new Date(note.timestamp||0), true))
-  ])
+    main: [comren.feed(state, msgs, state.pagination, true)],
+    side: [comren.feed(state, events, state.pagination)],
+  }, [['main', 7], ['side', 5]]))
 }
 
 
@@ -193,7 +185,7 @@ function messagePage(state, msgid) {
 
   // render
   return h('.message-page.row', comren.columns({
-    main: comren.msgThread(state, msg),
+    main: comren.msgThread(state, msg, true),
     info: mercury.partial(messageInfo, msg)
   }, [['main', 8], ['info', 4]]))
 }

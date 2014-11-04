@@ -100,7 +100,7 @@ function indexReply(state, msg) {
         if (msg.content.postType == 'action') type = 'reaction'
         state.notifications.push(models.notification({
           type:           type,
-          msgIdStr:       targetMsg.idStr,
+          msgIdStr:       msg.idStr,
           authorNickname: msg.authorNickname,
           msgText:        msg.content.text.split('\n')[0],
           timestamp:      msg.timestamp
