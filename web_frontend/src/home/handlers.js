@@ -145,7 +145,7 @@ exports.mentionBoxInput = function(state, e) {
 
   // are we in a word that starts with @ or :
   var v = e.target.value
-  var i = e.target.selectionStart
+  var i = e.target.selectionStart - 1
   for (i; i >= 0; i--) {
     if (wordBoundary.test(v.charAt(i))) {
       if (active)
