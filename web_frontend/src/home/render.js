@@ -117,20 +117,19 @@ function feedFilters(events, filters) {
 // ==========
 
 function inboxPage(state) {
-  var content
-  if (state.notifications.length === 0)
-    content = h('h3', 'Your inbox is empty.')
-  else {
-    var msgs = state.notifications.map(function(note) {
-      var msgi  = state.messageMap[note.msgIdStr]
-      return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
-    })
-    content = comren.feed(state, msgs, state.pagination, true)
-  }
+  var msgs = state.notifications.map(function(note) {
+    var msgi  = state.messageMap[note.msgIdStr]
+    return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+  })
+  var events = state.feed.filter(function(msg) {
+    if (msg.content.type == 'follow' && util.toHexString(msg.content.$feed) === state.user.idStr) return true
+    return false
+  })
 
   return h('.inbox-page.row', comren.columns({
-    main: [content]
-  }, [['main', 8]]))
+    main: [comren.feed(state, msgs, state.pagination, true)],
+    side: [comren.feed(state, events, state.pagination)],
+  }, [['main', 7], ['side', 5]]))
 }
 
 
