@@ -48,7 +48,8 @@ function notHidden(msg) {
 // - `feed`: which feed to render
 // - `pagination`: { start:, end: }
 // - `reverse`: bool, reverse the feed?
-var feed = exports.feed = function(state, feed, pagination, reverse) {
+// - `threaded`: bool, render threads?
+var feed = exports.feed = function(state, feed, pagination, reverse, threaded) {
   var moreBtn
   feed = feed.filter(notHidden)
   if (reverse) feed.reverse()
@@ -58,7 +59,8 @@ var feed = exports.feed = function(state, feed, pagination, reverse) {
     }
     feed = feed.slice(pagination.start, pagination.end)
   }
-  feed = feed.map(msgThread.bind(null, state))
+  var renderfn = (threaded) ? msgThread : com.message
+  feed = feed.map(renderfn.bind(null, state))
   if (moreBtn)
     feed.push(moreBtn)
   return h('.feed', feed)
