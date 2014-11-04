@@ -40,7 +40,6 @@ var defaults = {
       explanation: ''
     },
     feedFilters: {
-      replies: true,
       shares: true,
       textPosts: true,
       actionPosts: true,
@@ -148,7 +147,6 @@ function createHomeApp(events, initialState) {
       explanation:      mercury.value(state.conn.explanation)
     }),
     feedFilters:      mercury.struct({
-      replies:          mercury.value(state.feedFilters.replies),
       shares:           mercury.value(state.feedFilters.shares),
       textPosts:        mercury.value(state.feedFilters.textPosts),
       actionPosts:      mercury.value(state.feedFilters.actionPosts),

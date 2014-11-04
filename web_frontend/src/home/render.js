@@ -70,7 +70,7 @@ function feedPage(state) {
     return false
   })
   var msgs = state.feed.filter(function(msg) {
-    if (!state.feedFilters.replies   && msg.content.repliesTo) return false
+    if (msg.content.repliesTo) return false
     if (!state.feedFilters.shares    && msg.content.rebroadcasts) return false
     if (!state.feedFilters.textPosts && msg.content.postType == 'text') return false
     if (!state.feedFilters.guiPosts  && msg.content.postType == 'gui') return false
@@ -100,8 +100,6 @@ function feedFilters(events, filters) {
 
   return h('p.feed-filters.text-muted', [
     'Filters: ',
-    feedFilter('replies', 'replies'),
-    ' ',
     feedFilter('shares', 'shared posts'),
     ' ',
     feedFilter('textPosts', 'text posts'),
