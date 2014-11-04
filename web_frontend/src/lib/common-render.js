@@ -58,7 +58,7 @@ var feed = exports.feed = function(state, feed, pagination, reverse) {
     }
     feed = feed.slice(pagination.start, pagination.end)
   }
-  feed = feed.map(com.message.bind(null, state))
+  feed = feed.map(msgThread.bind(null, state))
   if (moreBtn)
     feed.push(moreBtn)
   return h('.feed', feed)
