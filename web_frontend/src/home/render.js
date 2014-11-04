@@ -186,7 +186,7 @@ function messagePage(state, msgid) {
 
   // render
   return h('.message-page.row', comren.columns({
-    main: comren.msgThread(state, msg),
+    main: comren.msgThread(state, msg, true),
     info: mercury.partial(messageInfo, msg)
   }, [['main', 8], ['info', 4]]))
 }

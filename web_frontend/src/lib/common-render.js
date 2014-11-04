@@ -60,8 +60,7 @@ var feed = exports.feed = function(state, feed, pagination, reverse, threaded) {
     feed = feed.slice(pagination.start, pagination.end)
   }
   var renderfn = (threaded) ? msgThread : com.message
-  var showParent = !threaded
-  feed = feed.map(function(msg) { return renderfn(state, msg, showParent) })
+  feed = feed.map(function(msg) { return renderfn(state, msg, true) })
   if (moreBtn)
     feed.push(moreBtn)
   return h('.feed', feed)
@@ -70,9 +69,10 @@ var feed = exports.feed = function(state, feed, pagination, reverse, threaded) {
 // message thread view
 // - `state`: full application state
 // - `msg`: which message's thread to render
-var msgThread = exports.msgThread = function(state, msg) {
+// - `isTopRender`: is the thread the topmost being rendered now?
+var msgThread = exports.msgThread = function(state, msg, isTopRender) {
   return h('.feed', [
-    com.message(state, msg),
+    com.message(state, msg, isTopRender),
     msgThreadTree(state, msg)
   ])
 }
@@ -86,10 +86,10 @@ function msgThreadTree(state, msg) {
     var msgi  = state.messageMap[replyData.idStr] // look up index
     var reply = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
     if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && notHidden(reply)) {
-      replies.push(com.message(state, reply))
+      replies.push(com.message(state, reply, false))
 
       // build and render subtree
-      var subtree = msgThreadTree(state, reply)
+      var subtree = msgThreadTree(state, reply, false)
       if (subtree)
         replies.push(subtree)
     }

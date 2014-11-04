@@ -9,8 +9,8 @@ var publishForm = require('./publish-form').publishForm
 // feed message renderer
 // - `state`: full app state object
 // - `msg`: message object to render
-// - `showParent`: bool, should the parent of replies be inlined in the header?
-var message = exports.message = function(state, msg, showParent) {
+// - `isTopRender`: bool, is the message the topmost being rendered now, regardless of its position in the thread?
+var message = exports.message = function(state, msg, isTopRender) {
   var publishFormMap = state.publishFormMap
   var publishForms = state.publishForms
 
@@ -24,7 +24,7 @@ var message = exports.message = function(state, msg, showParent) {
         return mercury.partial(messageFollow, msg, state.nicknameMap)
       return ''
     case 'post':
-      var parentMsg = (showParent && msg.content.repliesTo) ? lookup({ idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
+      var parentMsg = (isTopRender && msg.content.repliesTo) ? lookup({ idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
       if (msg.content.postType == 'action')
         return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, state.nicknameMap)
       else if (msg.content.postType == 'gui')
@@ -96,7 +96,7 @@ function renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, 
   return h('.panel.panel-default', [
     parentHeader,
     h('.panel-body', [
-      renderMsgHeader(msg, events, nicknameMap, (!!msg.content.repliesTo && !parentMsg)),
+      renderMsgHeader(msg, events, nicknameMap),
       content,
       (events.replyToMsg && events.reactToMsg && events.shareMsg)
           ? (h('p', [
@@ -118,8 +118,7 @@ function renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, 
 }
 
 // message header
-function renderMsgHeader(msg, events, nicknameMap, showInResponseTo) {
-  var replyIdStr = (showInResponseTo && msg.content.repliesTo) ? util.toHexString(msg.content.repliesTo.$msg) : ''
+function renderMsgHeader(msg, events, nicknameMap) {
   var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.idStr, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
 
   if (msg.content.rebroadcasts) {
@@ -133,9 +132,6 @@ function renderMsgHeader(msg, events, nicknameMap, showInResponseTo) {
         ' - ',
         util.prettydate(new Date(msg.content.rebroadcasts.timestamp||0), true)
       ]),
-      (replyIdStr) ?
-        h('span.repliesto', [' in response to ', comren.a('#/msg/'+replyIdStr, comren.shortHex(replyIdStr))])
-        : '',
       h('span.repliesto', [' shared by ', comren.userlink(msg.author, msg.authorNickname)]),
       stopBtnStr
     ])
@@ -148,9 +144,6 @@ function renderMsgHeader(msg, events, nicknameMap, showInResponseTo) {
       ' - ',
       comren.a('#/msg/'+msg.idStr, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
     ]),
-    (replyIdStr) ?
-      h('span.repliesto', [' in response to ', comren.a('#/msg/'+replyIdStr, comren.shortHex(replyIdStr))])
-      : '',
     stopBtnStr
   ])
 }
