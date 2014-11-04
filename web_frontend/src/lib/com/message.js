@@ -7,7 +7,10 @@ var util        = require('../../../../lib/util')
 var publishForm = require('./publish-form').publishForm
 
 // feed message renderer
-var message = exports.message = function(state, msg) {
+// - `state`: full app state object
+// - `msg`: message object to render
+// - `showParent`: bool, should the parent of replies be inlined in the header?
+var message = exports.message = function(state, msg, showParent) {
   var publishFormMap = state.publishFormMap
   var publishForms = state.publishForms
 
@@ -21,7 +24,7 @@ var message = exports.message = function(state, msg) {
         return mercury.partial(messageFollow, msg, state.nicknameMap)
       return ''
     case 'post':
-      var parentMsg = (msg.content.repliesTo) ? lookup({ idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
+      var parentMsg = (showParent && msg.content.repliesTo) ? lookup({ idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
       if (msg.content.postType == 'action')
         return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, state.nicknameMap)
       else if (msg.content.postType == 'gui')

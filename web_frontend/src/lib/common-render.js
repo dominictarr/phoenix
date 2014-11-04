@@ -60,7 +60,8 @@ var feed = exports.feed = function(state, feed, pagination, reverse, threaded) {
     feed = feed.slice(pagination.start, pagination.end)
   }
   var renderfn = (threaded) ? msgThread : com.message
-  feed = feed.map(renderfn.bind(null, state))
+  var showParent = !threaded
+  feed = feed.map(function(msg) { return renderfn(state, msg, showParent) })
   if (moreBtn)
     feed.push(moreBtn)
   return h('.feed', feed)
