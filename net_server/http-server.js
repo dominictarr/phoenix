@@ -13,6 +13,24 @@ module.exports = function(opts) {
     function read(file) { return fs.createReadStream(resolve(file)); }
     function serve(file) { return read(file).on('error', serve404).pipe(res) }
     function serve404() {  res.writeHead(404); res.end('Not found'); }
+    function renderCss(name, cb) {
+      var filepath = resolve('less/'+name)
+      fs.readFile(filepath, { encoding: 'utf-8' }, function(err, lessStr) {
+        if (err) return cb(err)
+        less.render(lessStr, { paths: [resolve('less')], filename: name + '.less' }, cb)
+      })
+    }
+    function renderJs(name, cb) {
+      var b = browserify({ basedir: resolve('src') })
+      b.add(resolve('src/'+name))
+      b.ignore('proquint-')
+      b.ignore('http')
+      b.ignore('level')
+      b.ignore('level/sublevel')
+      b.ignore('level-sublevel/bytewise')
+      b.ignore('pull-level')
+      b.bundle(cb)
+    }
 
     // CORS
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + opts.homeport)
@@ -25,9 +43,9 @@ module.exports = function(opts) {
     if (pathStarts('/gui-sandbox')) {
       var loaded = multicb()
       fs.readFile(resolve('html/gui-sandbox.html'), { encoding: 'utf-8' }, loaded())
-      fs.readFile(resolve('js/gui-sandbox.js'), { encoding: 'utf-8' }, loaded())
-      fs.readFile(resolve('css/gui-sandbox.css'), { encoding: 'utf-8' }, loaded())
-      loaded(function(err, results) {
+      renderJs('gui-sandbox.js', loaded())
+      renderCss('gui-sandbox.less', loaded())
+      return loaded(function(err, results) {
         if (err) return console.error(err), serve404()
         var html = results[0][1]
         var script = results[1][1]
@@ -40,48 +58,36 @@ module.exports = function(opts) {
         res.writeHead(200)
         res.end(html)
       })
-      return
     }
 
     // CSS
-    if (pathStarts('/css/')) {
-      var name = path.basename(req.url, '.css')
-      var filepath = resolve('less/'+name+'.less')
-      fs.readFile(filepath, { encoding: 'utf-8' }, function(err, lessStr) {
-        if (err) return serve404()
-        less.render(lessStr, { paths: [resolve('less')], filename: name + '.less' }, function(err, cssStr) {
-          if (err) {
-            res.writeHead(500)
-            res.end(err.toString())
-            console.error(err)
-          } else {
-            type('text/css')
-            res.writeHead(200)
-            res.end(cssStr)
-          }
-        })
+    if (pathStarts('/css/') && pathEnds('.css')) {
+      return renderCss(path.basename(req.url, '.css')+'.less', function(err, cssStr) {
+        if (err) {
+          res.writeHead(500)
+          res.end(err.toString())
+          console.error(err)
+        } else {
+          type('text/css')
+          res.writeHead(200)
+          res.end(cssStr)
+        }
       })
-      return
     }
 
     // JS
-    if (pathStarts('/js/')) {
-      var b = browserify({ basedir: resolve('src') })
-      b.add(resolve('src/'+path.basename(req.url)))
-      b.ignore('proquint-')
-      b.ignore('http')
-      b.ignore('level')
-      b.ignore('level/sublevel')
-      b.ignore('level-sublevel/bytewise')
-      b.ignore('pull-level')
-      type('application/javascript')
-      b.bundle()
-        .on('error', function(err) {
-          console.error(err.toString())
-          serve404()
-        })
-        .pipe(res)
-      return
+    if (pathStarts('/js/') && pathEnds('.js')) {
+      return renderJs(path.basename(req.url), function(err, jsStr) {
+        if (err) {
+          res.writeHead(500)
+          res.end(err.toString())
+          console.error(err)
+        } else {
+          type('application/javascript')
+          res.writeHead(200)
+          res.end(jsStr)
+        }        
+      })
     }
 
     // Static asset routes
