@@ -52,7 +52,6 @@ function notHidden(msg) {
 // - `reverse`: bool, reverse the feed?
 // - `threaded`: bool, render threads?
 var feed = exports.feed = function(messages, feedView, events, user, nicknameMap, reverse, threaded) {
-  console.log('yep')
   var moreBtn
   messages = messages.filter(notHidden)
   if (reverse) messages.reverse()

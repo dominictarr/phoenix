@@ -30,20 +30,20 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
   // main content
   var main
   switch (msg.content.type) {
-    case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', nicknameMap)
-    case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.content.nickname, nicknameMap)
+    case 'init': return messageEvent(msg, 'account-created', 'Account created', nicknameMap)
+    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.content.nickname, nicknameMap)
     case 'follow':
       if (msg.content.$rel == 'follows')
-        return mercury.partial(messageFollow, msg, nicknameMap)
+        return messageFollow(msg, nicknameMap)
       return ''
     case 'post':
-      var parentMsg = (isTopRender && msg.content.repliesTo) ? lookup({ idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
+      var parentMsg = (isTopRender && msg.content.repliesTo) ? lookup(feedView.messages, feedView.messageMap, { idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
       if (msg.content.postType == 'action')
-        return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, nicknameMap)
+        return messageEvent(msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, nicknameMap)
       else if (msg.content.postType == 'gui')
-        main = mercury.partial(messageGui, msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
+        main = messageGui(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
       else
-        main = mercury.partial(messageText, msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
+        main = messageText(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
       break
     default:
       return ''
