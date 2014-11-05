@@ -3,9 +3,9 @@ Phoenix v1
 
 ![phoenix](phoenix.png) **It's distributed!**
 
-Social feeds without ads or owners. Be free!
+Web applications without servers, social networks without advertisers, messaging without surveillance, and gardens without walls.
 
-Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Bot users aggregate and redistribute the feeds.
+Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Public bot users aggregate and redistribute the feeds, but phoenix has no "servers." Every node is equal, and the network is fully open!
 
 Join us in #scuttlebutt on freenode.
 
