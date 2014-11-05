@@ -5,7 +5,6 @@ var msgpack = require('msgpack-js')
 
 module.exports = {
   homeApp: createHomeApp,
-  pubApp: createPubApp,
   message: createMessage,
   profile: createProfile,
   server: createServer,
@@ -18,10 +17,39 @@ module.exports = {
 
 var defaults = {
   homeApp: {
-    // gui state
     route: '',
-    publishForms: [],
-    publishFormMap: {},
+
+    conn: {
+      hasError: false,
+      explanation: ''
+    },
+
+    feedView: {
+      messages: [],
+      messageMap: {},
+      publishFormMap: { feed: 0 },
+      publishForms: [{
+        id: 'feed',
+        type: 'text',
+        textPlaceholder: 'Publish...',
+        permanent: true
+      }],
+      pagination: {
+        start: 0,
+        end: 0
+      },
+      filters: {
+        shares: true,
+        textPosts: true,
+        actionPosts: true,
+        guiPosts: true,
+        follows: true
+      },
+      replies: {},
+      rebroadcasts: {}
+    },
+
+    notifications: [],
     suggestBox: {
       active: false,
       positionX: 0,
@@ -31,28 +59,7 @@ var defaults = {
       options: [],
       filtered: []
     },
-    pagination: {
-      start: 0,
-      end: 0
-    },
-    conn: {
-      hasError: false,
-      explanation: ''
-    },
-    feedFilters: {
-      shares: true,
-      textPosts: true,
-      actionPosts: true,
-      guiPosts: true,
-      follows: true
-    },
 
-    // app data
-    feed: [],
-    messageMap: {},
-    feedReplies: {},
-    feedRebroadcasts: {},
-    notifications: [],
     profiles: [],
     profileMap: {},
     nicknameMap: {},
@@ -66,6 +73,7 @@ var defaults = {
       pubkeyStr: '',
       nickname: ''
     },
+
     lastSync: '',
     isSyncing: false
   },
@@ -126,9 +134,34 @@ function createHomeApp(events, initialState) {
   // create object
   return mercury.struct({
     route:            mercury.value(state.route),
-    layout:           mercury.value(state.layout),
-    publishForms:     mercury.array(state.publishForms.map(createPublishForm)),
-    publishFormMap:   mercury.value(state.publishFormMap),
+    events:           events,
+
+    conn:             mercury.struct({
+      hasError:         mercury.value(state.conn.hasError),
+      explanation:      mercury.value(state.conn.explanation)
+    }),
+
+    feedView:         mercury.struct({
+      messages:         mercury.array(state.feedView.messages.map(createMessage)),
+      messageMap:       mercury.value(state.feedView.messageMap),
+      publishForms:     mercury.array(state.feedView.publishForms.map(createPublishForm)),
+      publishFormMap:   mercury.value(state.feedView.publishFormMap),
+      pagination:       mercury.struct({
+        start:            mercury.value(state.feedView.pagination.start),
+        end:              mercury.value(state.feedView.pagination.end)
+      }),
+      filters:          mercury.struct({
+        shares:           mercury.value(state.feedView.filters.shares),
+        textPosts:        mercury.value(state.feedView.filters.textPosts),
+        actionPosts:      mercury.value(state.feedView.filters.actionPosts),
+        guiPosts:         mercury.value(state.feedView.filters.guiPosts),
+        follows:          mercury.value(state.feedView.filters.follows)
+      }),
+      replies:          mercury.value(state.feedView.replies),
+      rebroadcasts:     mercury.value(state.feedView.rebroadcasts),
+    }),
+
+    notifications:    mercury.array(state.notifications.map(createNotification)),
     suggestBox:       mercury.struct({
       active:           mercury.value(state.suggestBox.active),
       positionX:        mercury.value(state.suggestBox.positionX),
@@ -138,28 +171,7 @@ function createHomeApp(events, initialState) {
       options:          mercury.array(state.suggestBox.options),
       filtered:         mercury.array(state.suggestBox.filtered)
     }),
-    pagination:       mercury.struct({
-      start:            mercury.value(state.pagination.start),
-      end:              mercury.value(state.pagination.end)
-    }),
-    conn:             mercury.struct({
-      hasError:         mercury.value(state.conn.hasError),
-      explanation:      mercury.value(state.conn.explanation)
-    }),
-    feedFilters:      mercury.struct({
-      shares:           mercury.value(state.feedFilters.shares),
-      textPosts:        mercury.value(state.feedFilters.textPosts),
-      actionPosts:      mercury.value(state.feedFilters.actionPosts),
-      guiPosts:         mercury.value(state.feedFilters.guiPosts),
-      follows:          mercury.value(state.feedFilters.follows)
-    }),
-    events:           events,
 
-    feed:             mercury.array(state.feed.map(createMessage)),
-    messageMap:       mercury.value(state.messageMap),
-    feedReplies:      mercury.value(state.feedReplies),
-    feedRebroadcasts: mercury.value(state.feedRebroadcasts),
-    notifications:    mercury.array(state.notifications.map(createNotification)),
     profiles:         mercury.array(state.profiles.map(createProfile)),
     profileMap:       mercury.value(state.profileMap),
     nicknameMap:      mercury.value(state.nicknameMap),
@@ -173,32 +185,9 @@ function createHomeApp(events, initialState) {
       pubkeyStr:        mercury.value(state.user.pubkeyStr),
       nickname:         mercury.value(state.user.nickname)
     }), 
+
     lastSync:         mercury.value(state.lastSync),
     isSyncing:        mercury.value(state.isSyncing)
-  })
-}
-
-function createPubApp(events, initialState) {
-  var state = extend(defaults.pubApp, initialState)
-
-  // create a map of profile ids to their indexes
-  var profileMap = {}
-  state.profiles.forEach(function(prof, i) {
-    profileMap[prof.id.toString('hex')] = i
-  })
-
-  // create object
-  return mercury.struct({
-    route:       mercury.value(state.route),
-    layout:      mercury.value(state.layout),
-    conn:        mercury.struct({
-      hasError:       mercury.value(state.conn.hasError),
-      explanation:    mercury.value(state.conn.explanation)
-    }),
-    events:      events,
-
-    profiles:    mercury.array(state.profiles.map(createProfile)),
-    profileMap:  mercury.value(profileMap),
   })
 }
 

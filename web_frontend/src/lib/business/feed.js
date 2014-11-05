@@ -19,10 +19,10 @@ exports.processFeedMsg = function(state, msg) {
   m = models.message(m)
 
   // add to feed
-  state.feed.unshift(m)
-  var mm = state.messageMap()
-  mm[m.idStr] = state.feed.getLength() - 1
-  state.messageMap.set(mm)
+  state.feedView.messages.unshift(m)
+  var mm = state.feedView.messageMap()
+  mm[m.idStr] = state.feedView.messages.getLength() - 1
+  state.feedView.messageMap.set(mm)
 
   // add to profile's feed
   if (authorProf) {
@@ -87,14 +87,14 @@ function indexReply(state, msg) {
     var id = util.toHexString(msg.content.repliesTo.$msg)
     if (id) {
       // index the reply
-      var fr = state.feedReplies()
+      var fr = state.feedView.replies()
       if (!fr[id]) fr[id] = []
       fr[id].push({ idStr: msg.idStr, type: msg.content.type })
-      state.feedReplies.set(fr)
+      state.feedView.replies.set(fr)
 
       // add a notification if it's a reply to the user's message
-      var mm = state.messageMap()
-      var targetMsg = state.feed.get(state.feed.getLength() - mm[id] - 1)
+      var mm = state.feedView.messageMap()
+      var targetMsg = state.feedView.messages.get(state.feedView.messages.getLength() - mm[id] - 1)
       if (targetMsg && targetMsg.authorStr == state.user.idStr()) {
         var type = 'reply'
         if (msg.content.postType == 'action') type = 'reaction'
@@ -116,17 +116,17 @@ function indexRebroadcast(state, msg, msgMap) {
   try {
     var id = util.toHexString(msg.content.rebroadcasts.$msg)
     if (id) {
-      var fr = state.feedRebroadcasts()
+      var fr = state.feedView.rebroadcasts()
       if (!fr[id]) fr[id] = []
       fr[id].push({ idStr: msg.idStr })
-      state.feedRebroadcasts.set(fr)
+      state.feedView.rebroadcasts.set(fr)
 
       // hide the rebroadcast if the original is already in the feed
       if (msgMap[id]) {
         msg.hidden.set(true)
       } else {
         // use this one to represent the original
-        msgMap[id] = state.feed.getLength() - 1
+        msgMap[id] = state.feedView.messages.getLength() - 1
       }
     }
   } catch(e) { console.warn('failed to index rebroadcast', e) }
@@ -134,7 +134,7 @@ function indexRebroadcast(state, msg, msgMap) {
 
 function indexMentions(state, msg) {
   // look for mentions of the current user and create notifications for them
-  var fr = state.feedRebroadcasts()
+  var fr = state.feedView.rebroadcasts()
   var mentions = Array.isArray(msg.content.mentions) ? msg.content.mentions : [msg.content.mentions]
   for (var i=0; i < mentions.length; i++) {
     try {

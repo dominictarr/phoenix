@@ -24,13 +24,6 @@ function createApp() {
   catch (e) {}
 
   var initState = {
-    publishFormMap: { feed: 0 },
-    publishForms: [{
-      id: 'feed',
-      type: 'text',
-      textPlaceholder: 'Publish...',
-      permanent: true
-    }],
     feedFilters: feedFilters || {
       shares: true,
       textPosts: true,
