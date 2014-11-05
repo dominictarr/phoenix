@@ -4,6 +4,9 @@ var multicb    = require('multicb')
 var less       = require('less')
 var browserify = require('browserify')
 
+// stupid-simple etag solution: cache everything!
+var eTag       = (Math.random() * 100000)|0
+
 module.exports = function(opts) {
   return function (req, res) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
@@ -32,8 +35,15 @@ module.exports = function(opts) {
       b.bundle(cb)
     }
 
+    // Caching
+    if (req.headers['if-none-match'] == eTag) {
+      res.writeHead(304)
+      return res.end()
+    }
+    res.setHeader('ETag', eTag)
+
     // CORS
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + opts.homeport)
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + opts.port)
     
     // Homepage
     if (req.url == '/' || req.url == '/index.html') {
