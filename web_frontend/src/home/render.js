@@ -63,27 +63,35 @@ function header(events, uId, isSyncing) {
 // =========
 
 function feedPage(state) {
-  var events = state.feed.filter(function(msg) {
-    if (msg.content.type == 'profile') return true
-    if (msg.content.type == 'follow') return state.feedFilters.follows
-    if (msg.content.postType == 'action' && !msg.content.repliesTo) return state.feedFilters.actionPosts
-    return false
-  })
-  var msgs = state.feed.filter(function(msg) {
-    if (msg.content.repliesTo) return false
-    if (!state.feedFilters.shares    && msg.content.rebroadcasts) return false
-    if (!state.feedFilters.textPosts && msg.content.postType == 'text') return false
-    if (!state.feedFilters.guiPosts  && msg.content.postType == 'gui') return false
-    return msg.content.postType == 'text' || msg.content.postType == 'gui'
-  })
   return h('.feed-page.row', comren.columns({
     main: [
-      mercury.partial(feedFilters, state.events, state.feedFilters), 
-      com.publishForm(state.publishForms[0], state.events, state.user, state.nicknameMap), 
-      comren.feed(state, msgs, state.pagination, false, true)
+      mercury.partial(feedFilters, state.events, state.feedView.filters), 
+      mercury.partial(com.publishForm, state.feedView.publishForms[0], state.events, state.user, state.nicknameMap), 
+      mercury.partial(mainFeed, state.feedView, state.events, state.user, state.nicknameMap)
     ],
-    side: [comren.feed(state, events, state.pagination)]
+    side: [mercury.partial(sideFeed, state.feedView, state.events, state.user, state.nicknameMap)]
   }, [['main', 7], ['side', 5]]))
+}
+
+function mainFeed(feedView, events, user, nicknameMap) {
+  var msgs = feedView.messages.filter(function(msg) {
+    if (msg.content.repliesTo) return false
+    if (!feedView.filters.shares    && msg.content.rebroadcasts) return false
+    if (!feedView.filters.textPosts && msg.content.postType == 'text') return false
+    if (!feedView.filters.guiPosts  && msg.content.postType == 'gui') return false
+    return msg.content.postType == 'text' || msg.content.postType == 'gui'
+  })
+  return comren.feed(msgs, feedView, events, user, nicknameMap, false, true)
+}
+
+function sideFeed(feedView, events, user, nicknameMap) {
+  var events = feedView.messages.filter(function(msg) {
+    if (msg.content.type == 'profile') return true
+    if (msg.content.type == 'follow') return feedView.filters.follows
+    if (msg.content.postType == 'action' && !msg.content.repliesTo) return feedView.filters.actionPosts
+    return false
+  })
+  return comren.feed(events, feedView, events, user, nicknameMap, false, false)
 }
 
 function feedFilters(events, filters) {
@@ -118,17 +126,17 @@ function feedFilters(events, filters) {
 
 function inboxPage(state) {
   var msgs = state.notifications.map(function(note) {
-    var msgi  = state.messageMap[note.msgIdStr]
-    return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+    var msgi  = state.feedView.messageMap[note.msgIdStr]
+    return (typeof msgi != 'undefined') ? state.feedView.messages[state.feedView.messages.length - msgi - 1] : null
   })
-  var events = state.feed.filter(function(msg) {
+  var events = state.feedView.messages.filter(function(msg) {
     if (msg.content.type == 'follow' && util.toHexString(msg.content.$feed) === state.user.idStr) return true
     return false
   })
 
   return h('.inbox-page.row', comren.columns({
-    main: [comren.feed(state, msgs, state.pagination, true)],
-    side: [comren.feed(state, events, state.pagination)],
+    main: [comren.feed(msgs, state.feedView, state.events, state.user, state.nicknameMap, true)],
+    side: [comren.feed(events, state.feedView, state.events, state.user, state.nicknameMap)],
   }, [['main', 7], ['side', 5]]))
 }
 
@@ -147,7 +155,7 @@ function profilePage(state, profid) {
   var isYou = (state.user.idStr == profid)
   var followsYou = (state.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(state, profile.feed, state.pagination, true)],
+    main: [comren.feed(profile.feed, state.feedView, state.events, state.user, state.nicknameMap, true)],
     side: [mercury.partial(profileControls, state.events, profile, isYou, followsYou)]
   }, [['main', 7], ['side', 5]]))
 }
@@ -175,8 +183,8 @@ function profileControls(events, profile, isYou, followsYou) {
 
 function messagePage(state, msgid) {
   // lookup the main message
-  var msgi = state.messageMap[msgid]
-  var msg = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : undefined
+  var msgi = state.feedView.messageMap[msgid]
+  var msg = (typeof msgi != 'undefined') ? state.feedView.messages[state.feedView.messages.length - msgi - 1] : undefined
   if (!msg) {
     return h('.message-page.row', [
       h('.col-xs-7', [comren.notfound('that message')])
@@ -185,7 +193,7 @@ function messagePage(state, msgid) {
 
   // render
   return h('.message-page.row', comren.columns({
-    main: comren.msgThread(state, msg, true),
+    main: comren.msgThread(msg, state.feedView, state.events, state.user, state.nicknameMap, true),
     info: mercury.partial(messageInfo, msg)
   }, [['main', 8], ['info', 4]]))
 }

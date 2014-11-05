@@ -44,52 +44,63 @@ function notHidden(msg) {
 }
 
 // feed view
-// - `state`: full application state
 // - `feed`: which feed to render
-// - `pagination`: { start:, end: }
+// - `feedView`: app state object
+// - `events`: app state object
+// - `user`: app state object
+// - `nicknameMap`: app state object
 // - `reverse`: bool, reverse the feed?
 // - `threaded`: bool, render threads?
-var feed = exports.feed = function(state, feed, pagination, reverse, threaded) {
+var feed = exports.feed = function(messages, feedView, events, user, nicknameMap, reverse, threaded) {
+  console.log('yep')
   var moreBtn
-  feed = feed.filter(notHidden)
-  if (reverse) feed.reverse()
-  if (pagination) {
-    if (pagination.end < feed.length) {
-      moreBtn = h('div.load-more', jsa('Load More', state.events.loadMore, undefined, { className: 'btn btn-default' }))
+  messages = messages.filter(notHidden)
+  if (reverse) messages.reverse()
+  if (feedView.pagination) {
+    if (feedView.pagination.end < messages.length) {
+      moreBtn = h('div.load-more', jsa('Load More', events.loadMore, undefined, { className: 'btn btn-default' }))
     }
-    feed = feed.slice(pagination.start, pagination.end)
+    messages = messages.slice(feedView.pagination.start, feedView.pagination.end)
   }
   var renderfn = (threaded) ? msgThread : com.message
-  feed = feed.map(function(msg) { return renderfn(state, msg, true) })
+  messages = messages.map(function(msg) { return renderfn(msg, feedView, events, user, nicknameMap, true) })
   if (moreBtn)
-    feed.push(moreBtn)
-  return h('.feed', feed)
+    messages.push(moreBtn)
+  return h('.feed', messages)
 }
 
 // message thread view
-// - `state`: full application state
-// - `msg`: which message's thread to render
-// - `isTopRender`: is the thread the topmost being rendered now?
-var msgThread = exports.msgThread = function(state, msg, isTopRender) {
+// - `msg`: message object to render
+// - `feedView`: app state object
+// - `events`: app state object
+// - `user`: app state object
+// - `nicknameMap`: app state object
+// - `isTopRender`: bool, is the message the topmost being rendered now, regardless of its position in the thread?
+var msgThread = exports.msgThread = function(msg, feedView, events, user, nicknameMap, isTopRender) {
   return h('.feed', [
-    com.message(state, msg, isTopRender),
-    msgThreadTree(state, msg)
+    com.message(msg, feedView, events, user, nicknameMap, isTopRender),
+    msgThreadTree(msg, feedView, events, user, nicknameMap)
   ])
 }
 
 // helper, recursively renders reply-tree of a thread
-function msgThreadTree(state, msg) {
+// - `msg`: message object to render
+// - `feedView`: app state object
+// - `events`: app state object
+// - `user`: app state object
+// - `nicknameMap`: app state object
+function msgThreadTree(msg, feedView, events, user, nicknameMap) {
   // collect replies
   var replies = []
-  ;(state.feedReplies[msg.idStr] || []).forEach(function(replyData) {
+  ;(feedView.replies[msg.idStr] || []).forEach(function(replyData) {
     // fetch and render message
-    var msgi  = state.messageMap[replyData.idStr] // look up index
-    var reply = (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
+    var msgi  = feedView.messageMap[replyData.idStr] // look up index
+    var reply = (typeof msgi != 'undefined') ? feedView.messages[feedView.messages.length - msgi - 1] : null
     if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && notHidden(reply)) {
-      replies.push(com.message(state, reply, false))
+      replies.push(com.message(reply, feedView, events, user, nicknameMap, false))
 
       // build and render subtree
-      var subtree = msgThreadTree(state, reply, false)
+      var subtree = msgThreadTree(reply, feedView, events, user, nicknameMap, false)
       if (subtree)
         replies.push(subtree)
     }

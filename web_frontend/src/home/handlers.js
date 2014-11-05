@@ -10,29 +10,29 @@ exports.setRoute = function(state, route) {
   // run any business needed, then update route
   route = route.substr(2) || 'feed'
   
-  state.pagination.start.set(0)
-  state.pagination.end.set(constants.PAGE_SIZE)
+  state.feedView.pagination.start.set(0)
+  state.feedView.pagination.end.set(constants.PAGE_SIZE)
 
   state.route.set(route)
 }
 
 function getPublishForm(state, id) {
-  var m = state.publishFormMap()
-  return state.publishForms.get(m[id])
+  var m = state.feedView.publishFormMap()
+  return state.feedView.publishForms.get(m[id])
 }
 
 function addPublishForm(state, id, parent) {
-  var m = state.publishFormMap()
+  var m = state.feedView.publishFormMap()
   if (m[id])
-    return state.publishForms.get(m[id])
+    return state.feedView.publishForms.get(m[id])
 
   // construct the new form
   var publishForm = models.publishForm({ id: id, parent: parent })
-  state.publishForms.push(publishForm)
+  state.feedView.publishForms.push(publishForm)
 
   // add to the map
-  m[id] = state.publishForms.getLength() - 1
-  state.publishFormMap.set(m)
+  m[id] = state.feedView.publishForms.getLength() - 1
+  state.feedView.publishFormMap.set(m)
 
   return publishForm
 }
@@ -92,8 +92,8 @@ exports.submitPublishForm = function(state, data) {
 }
 
 exports.cancelPublishForm = function(state, data) {
-  var m = state.publishFormMap()
-  var form = state.publishForms.get(m[data.id])
+  var m = state.feedView.publishFormMap()
+  var form = state.feedView.publishForms.get(m[data.id])
   if (!form)
     return
 
@@ -111,16 +111,16 @@ function resetForm(state, form) {
     form.isRunning.set(false)
   } else {
     // remove the form
-    var m = state.publishFormMap()
-    state.publishForms.splice(m[form.id], 1, null)
+    var m = state.feedView.publishFormMap()
+    state.feedView.publishForms.splice(m[form.id], 1, null)
     m[form.id] = undefined
-    state.publishFormMap.set(m)
+    state.feedView.publishFormMap.set(m)
   }
 }
 
 exports.testPublishFormCode = function(state, data) {
-  var m = state.publishFormMap()
-  var form = state.publishForms.get(m[data.id])
+  var m = state.feedView.publishFormMap()
+  var form = state.feedView.publishForms.get(m[data.id])
   if (!form)
     return
 
@@ -283,7 +283,7 @@ exports.openMsg = function(state, data) {
 }
 
 exports.loadMore = function(state) {
-  state.pagination.end.set(state.pagination.end() + constants.PAGE_SIZE)
+  state.feedView.pagination.end.set(state.feedView.pagination.end() + constants.PAGE_SIZE)
 }
 
 exports.addFeed = function(state) {
@@ -325,15 +325,15 @@ exports.sync = function(state) {
 }
 
 exports.toggleFilter = function(state, data) {
-  state.feedFilters[data.filter].set(data.set)
+  state.feedView.filters[data.filter].set(data.set)
 
   // persist in localstorage
   localStorage.setItem('feed-filters', JSON.stringify({
-    shares:      state.feedFilters.shares(),
-    textPosts:   state.feedFilters.textPosts(),
-    actionPosts: state.feedFilters.actionPosts(),
-    guiPosts:    state.feedFilters.guiPosts(),
-    follows:     state.feedFilters.follows()
+    shares:      state.feedView.filters.shares(),
+    textPosts:   state.feedView.filters.textPosts(),
+    actionPosts: state.feedView.filters.actionPosts(),
+    guiPosts:    state.feedView.filters.guiPosts(),
+    follows:     state.feedView.filters.follows()
   }))
 }
 
@@ -356,16 +356,12 @@ exports.replyToMsg = function(state, data) {
   var id = data.msg.idStr
   var form = addPublishForm(state, id, data.msg.id)
   form.type.set('text')
-  form.textPlaceholder.set('Reply...')
-  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.reactToMsg = function(state, data) {
   var id = data.msg.idStr
   var form = addPublishForm(state, id, data.msg.id)
   form.type.set('action')
-  form.textPlaceholder.set('Likes, wants, agrees with, etc...')
-  form.setValueTrigger.set(form.setValueTrigger() + 1) // trigger a value overwrite
 }
 
 exports.shareMsg = function(state, data) {
@@ -382,10 +378,10 @@ exports.shareMsg = function(state, data) {
 }
 
 exports.runMsgGui = function(state, data) {
-  var mm = state.messageMap()
+  var mm = state.feedView.messageMap()
   var i = mm[data.id]
   if (i == void 0) return
-  var msg = state.feed.get(state.feed.getLength() - i - 1)
+  var msg = state.feedView.messages.get(state.feedView.messages.getLength() - i - 1)
   if (!msg) return
 
   msg.isRunning.set(data.run)

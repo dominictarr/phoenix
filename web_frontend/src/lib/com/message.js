@@ -6,31 +6,44 @@ var comren      = require('../common-render')
 var util        = require('../../../../lib/util')
 var publishForm = require('./publish-form').publishForm
 
+// helpers to lookup messages
+function lookup(messages, messageMap, entry) {
+  var msgi  = messageMap[entry.idStr]
+  return (typeof msgi != 'undefined') ? messages[messages.length - msgi - 1] : null
+}
+function lookupAll(messages, messageMap, index) {
+  if (!index || !index.length) return []
+  return index.map(lookup.bind(null, messages, messageMap))
+}
+
 // feed message renderer
-// - `state`: full app state object
 // - `msg`: message object to render
+// - `feedView`: app state object
+// - `events`: app state object
+// - `user`: app state object
+// - `nicknameMap`: app state object
 // - `isTopRender`: bool, is the message the topmost being rendered now, regardless of its position in the thread?
-var message = exports.message = function(state, msg, isTopRender) {
-  var publishFormMap = state.publishFormMap
-  var publishForms = state.publishForms
+var message = exports.message = function(msg, feedView, events, user, nicknameMap, isTopRender) {
+  var publishFormMap = feedView.publishFormMap
+  var publishForms = feedView.publishForms
 
   // main content
   var main
   switch (msg.content.type) {
-    case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', state.nicknameMap)
-    case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.content.nickname, state.nicknameMap)
+    case 'init': return mercury.partial(messageEvent, msg, 'account-created', 'Account created', nicknameMap)
+    case 'profile': return mercury.partial(messageEvent, msg, 'account-change', 'Is now known as ' + msg.content.nickname, nicknameMap)
     case 'follow':
       if (msg.content.$rel == 'follows')
-        return mercury.partial(messageFollow, msg, state.nicknameMap)
+        return mercury.partial(messageFollow, msg, nicknameMap)
       return ''
     case 'post':
       var parentMsg = (isTopRender && msg.content.repliesTo) ? lookup({ idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
       if (msg.content.postType == 'action')
-        return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, state.nicknameMap)
+        return mercury.partial(messageEvent, msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, nicknameMap)
       else if (msg.content.postType == 'gui')
-        main = mercury.partial(messageGui, msg, state.events, parentMsg, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap)
+        main = mercury.partial(messageGui, msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
       else
-        main = mercury.partial(messageText, msg, state.events, parentMsg, lookupAll(state.feedReplies[msg.idStr]), lookupAll(state.feedRebroadcasts[msg.idStr]), state.nicknameMap)
+        main = mercury.partial(messageText, msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
       break
     default:
       return ''
@@ -40,30 +53,20 @@ var message = exports.message = function(state, msg, isTopRender) {
   var formId = util.toHexString(msg.id)
   if (typeof publishFormMap[formId] != 'undefined') {
     var i = publishFormMap[formId]
-    main = h('div', [main, h('.message-reply', publishForm(publishForms[i], state.events, state.user, state.nicknameMap))])
-  }
-
-  // helper to lookup messages
-  function lookup(entry) {
-    var msgi  = state.messageMap[entry.idStr]
-    return (typeof msgi != 'undefined') ? state.feed[state.feed.length - msgi - 1] : null
-  }
-  function lookupAll(index) {
-    if (!index || !index.length) return []
-    return index.map(lookup)
+    main = h('div', [main, h('.message-reply', publishForm(publishForms[i], events, user, nicknameMap))])
   }
 
   return main
 }
 
 // message text-content renderer
-var messageText = exports.messageText = function(msg, events, parentMsg, replies, rebroadcasts, nicknameMap) {
+var messageText = exports.messageText = function(msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
   var content = new widgets.Markdown(msg.content.text, { nicknames: nicknameMap })
-  return renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, nicknameMap)
+  return renderMsgShell(content, msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
 }
 
 // message gui-content renderer
-var messageGui = exports.messageGui = function(msg, events, parentMsg, replies, rebroadcasts, nicknameMap) {
+var messageGui = exports.messageGui = function(msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
   var content
   if (msg.isRunning) {
     content = h('.gui-post-wrapper.gui-running', [
@@ -77,11 +80,14 @@ var messageGui = exports.messageGui = function(msg, events, parentMsg, replies, 
   }
 
   // body
-  return renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, nicknameMap)
+  return renderMsgShell(content, msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
 }
 
 // renders message with the header and footer
-function renderMsgShell(content, msg, events, parentMsg, replies, rebroadcasts, nicknameMap) {
+function renderMsgShell(content, msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
+  replies = lookupAll(messages, messageMap, replies)
+  rebroadcasts = lookupAll(messages, messageMap, rebroadcasts)
+
   var replyStr = renderMsgReplies(msg, replies)
   var reactionsStr = renderMsgReactions(replies, nicknameMap)
   var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts)  
