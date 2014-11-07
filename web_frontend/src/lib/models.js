@@ -32,7 +32,8 @@ var defaults = {
         id: 'feed',
         type: 'text',
         textPlaceholder: 'Publish...',
-        permanent: true
+        permanent: true,
+        error: false
       }],
       pagination: {
         start: 0,
@@ -114,7 +115,8 @@ var defaults = {
     parent: undefined,
     textValue: '',
     permanent: false,
-    isRunning: false
+    isRunning: false,
+    error: false
   },
 
   notification: {
@@ -221,6 +223,7 @@ function createPublishForm(initialState) {
   state.type      = mercury.value(state.type)
   state.textValue = mercury.value(state.textValue)
   state.isRunning = mercury.value(state.isRunning)
+  state.error     = mercury.value(state.error)
   return mercury.struct(state)
 }
 

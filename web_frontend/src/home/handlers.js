@@ -83,13 +83,26 @@ exports.submitPublishForm = function(state, data) {
       else if (form.type() == 'gui')    bus.publishGuiply(state, str, form.parent, after)
     }
     function after(err) {
-      if (err) throw err // :TODO: put in gui
-      else {
+      if (err) {
+        if (typeof err.message == 'string' && err.message.indexOf('value out of bounds') === 0) {
+          var bytes = /value out of bounds\:(\d+)/.exec(err.message)
+          form.error.set('Your post is too big. Posts must be under 1024 bytes, and this is '+((bytes)?bytes[1]:'too many')+' bytes.')
+        } else
+          console.log(err), form.error.set(err.message || err.toString())
+      } else {
         resetForm(state, form)
         bus.syncView(state) // pull down the update
       }
     }
   }, 0)
+}
+
+exports.dismissPublishFormError = function(state, data) {
+  var m = state.feedView.publishFormMap()
+  var form = state.feedView.publishForms.get(m[data.id])
+  if (!form)
+    return
+  form.error.set(false)
 }
 
 exports.cancelPublishForm = function(state, data) {
@@ -110,6 +123,7 @@ function resetForm(state, form) {
     form.type.set('text')
     form.textValue.set('')
     form.isRunning.set(false)
+    form.error.set(false)
   } else {
     // remove the form
     var m = state.feedView.publishFormMap()
