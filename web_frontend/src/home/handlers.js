@@ -84,10 +84,11 @@ exports.submitPublishForm = function(state, data) {
     }
     function after(err) {
       if (err) throw err // :TODO: put in gui
-      bus.syncView(state) // pull down the update
+      else {
+        resetForm(state, form)
+        bus.syncView(state) // pull down the update
+      }
     }
-
-    resetForm(state, form)
   }, 0)
 }
 
