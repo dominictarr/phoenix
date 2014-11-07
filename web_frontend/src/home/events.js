@@ -9,6 +9,7 @@ function createEvents() {
     'setPublishFormText',
     'setPublishFormType',
     'submitPublishForm',
+    'dismissPublishFormError',
     'cancelPublishForm',
     'testPublishFormCode',
 

@@ -16,6 +16,7 @@ function publishFormText(form, events, user, nicknameMap) {
   var isReply = !!form.parent
   var previewDisplay = (!!form.textValue) ? 'block' : 'none'
   return  h('.publish-wrapper', [
+    formError(form, events),
     h('.panel.panel-default', { style: { display: previewDisplay } }, [
       h('.panel-body', h('.publish-preview', new widgets.Markdown(form.textValue, { nicknames: nicknameMap })))
     ]),
@@ -65,6 +66,7 @@ function publishFormAction(form, events, user, nicknameMap) {
   }
 
   return h('.publish-wrapper', [
+    formError(form, events),
     h('.phoenix-event', { style: { display: previewDisplay } }, [
       h('p.event-body', [comren.userlink(user.id, user.nickname), ' ', new widgets.Markdown(textValue, { inline: true, nicknames: nicknameMap })])
     ]),      
@@ -127,6 +129,7 @@ function publishFormGui(form, events, user, nicknameMap) {
 
   var isReply = !!form.parent
   return  h('.publish-wrapper', [
+    formError(form, events),
     h('.panel.panel-default', { style: { display: previewDisplay } }, [
       h('.panel-body', h('.publish-preview', preview))
     ]),
@@ -160,5 +163,13 @@ function publishFormGui(form, events, user, nicknameMap) {
       ' ',
       (!form.permanent) ? comren.jsa(['cancel'], events.cancelPublishForm, { id: form.id }, { className: 'cancel' }) : ''
     ])
+  ])
+}
+
+function formError(form, events) {
+  if (!form.error) return ''
+  return h('.alert.alert-danger', [
+    form.error,
+    h('a.close', { 'ev-click': valueEvents.click(events.dismissPublishFormError, { id: form.id }), innerHTML: '&times;' })
   ])
 }
