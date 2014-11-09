@@ -26,6 +26,7 @@ module.exports = function(opts) {
     function renderJs(name, cb) {
       var b = browserify({ basedir: resolve('src') })
       b.add(resolve('src/'+name))
+      // :TODO: remove these ignores? these are from the old phoenix-rpc days
       b.ignore('proquint-')
       b.ignore('http')
       b.ignore('level')
@@ -50,6 +51,8 @@ module.exports = function(opts) {
       type('text/html')
       return serve('html/home.html')
     }
+
+    // Gui sandbox
     if (pathStarts('/gui-sandbox')) {
       var loaded = multicb()
       fs.readFile(resolve('html/gui-sandbox.html'), { encoding: 'utf-8' }, loaded())
@@ -96,8 +99,26 @@ module.exports = function(opts) {
           type('application/javascript')
           res.writeHead(200)
           res.end(jsStr)
-        }        
+        }
       })
+    }
+
+    // User JS
+    if (pathStarts('/user/') && pathEnds('.js')) {
+      var dir = path.join(__dirname, '..', path.dirname(req.url))
+      return browserify({ basedir: dir })
+        .add(path.join(dir, path.basename(req.url)))
+        .bundle(function(err, jsStr) {
+          if (err) {
+            res.writeHead(500)
+            res.end(err.toString())
+            console.error(err)
+          } else {
+            type('application/javascript')
+            res.writeHead(200)
+            res.end(jsStr)
+          }
+        })
     }
 
     // Static asset routes
