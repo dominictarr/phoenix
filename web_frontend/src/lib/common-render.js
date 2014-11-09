@@ -39,10 +39,6 @@ var randomcat = exports.randomcat = function() {
   return img('/img/loading/'+cat+'.gif')
 }
 
-function notHidden(msg) {
-  return !msg.hidden
-}
-
 // feed view
 // - `feed`: which feed to render
 // - `feedView`: app state object
@@ -53,8 +49,7 @@ function notHidden(msg) {
 // - `threaded`: bool, render threads?
 var feed = exports.feed = function(messages, feedView, events, user, nicknameMap, reverse, threaded) {
   var moreBtn
-  messages = messages.filter(notHidden)
-  if (reverse) messages.reverse()
+  if (reverse) messages = [].concat(messages).reverse()
   if (feedView.pagination) {
     if (feedView.pagination.end < messages.length) {
       moreBtn = h('div.load-more', jsa('Load More', events.loadMore, undefined, { className: 'btn btn-default' }))
@@ -95,7 +90,7 @@ function msgThreadTree(msg, feedView, events, user, nicknameMap) {
     // fetch and render message
     var msgi  = feedView.messageMap[replyData.idStr] // look up index
     var reply = (typeof msgi != 'undefined') ? feedView.messages[feedView.messages.length - msgi - 1] : null
-    if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && notHidden(reply)) {
+    if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && !reply.hidden) {
       replies.push(com.message(reply, feedView, events, user, nicknameMap, false))
 
       // build and render subtree
