@@ -1,5 +1,6 @@
 var pull        = require('pull-stream')
 var multicb     = require('multicb')
+var mlib        = require('ssb-msgs')
 var util        = require('../../../../lib/util')
 var models      = require('../models')
 var profiles    = require('./profiles')
@@ -33,19 +34,20 @@ exports.processFeedMsg = function(state, msg) {
   
   // additional indexing
   var notified = false
-  if (m.content.$rel == 'follows')   indexFollow(state, m)
-  if (m.content.$rel == 'unfollows') indexUnfollow(state, m)
-  if (m.content.rebroadcasts)        indexRebroadcast(state, m, mm)
-  if (m.content.repliesTo)
-    notified = indexReply(state, m)
-  if (!notified && m.content.mentions)
-    indexMentions(state, m)
+  mlib.indexLinks(m.content, function(link) {
+    if (link.$rel == 'follows')      indexFollow(state, m, link)
+    if (link.$rel == 'unfollows')    indexUnfollow(state, m, link)
+    if (link.$rel == 'rebroadcasts') indexRebroadcast(state, m, link, mm)
+    if (link.$rel == 'replies-to')   notified = indexReply(state, m, link)
+    if (!notified &&
+        link.$rel == 'mentions')     indexMentions(state, m, link)
+  })
 }
 
-function indexFollow(state, msg) {
+function indexFollow(state, msg, link) {
   try {
     var authorIdStr = util.toHexString(msg.author)
-    var targetIdStr = util.toHexString(msg.content.$feed)
+    var targetIdStr = util.toHexString(link.$feed)
     if (authorIdStr == state.user.idStr()) {
       // add to list
       state.followedUsers.push(targetIdStr)
@@ -62,10 +64,10 @@ function indexFollow(state, msg) {
   } catch(e) { console.warn('failed to index follow', e) }
 }
 
-function indexUnfollow(state, msg) {
+function indexUnfollow(state, msg, link) {
   try {
     var authorIdStr = util.toHexString(msg.author)
-    var targetIdStr = util.toHexString(msg.content.$feed)
+    var targetIdStr = util.toHexString(link.$feed)
     if (authorIdStr == state.user.idStr()) {
       // remove from list
       state.followedUsers.splice(state.followedUsers.indexOf(targetIdStr), 1)
@@ -82,15 +84,18 @@ function indexUnfollow(state, msg) {
   } catch(e) { console.warn('failed to index follow', e) }
 }
 
-function indexReply(state, msg) {
+function indexReply(state, msg, link) {
   try {
-    var id = util.toHexString(msg.content.repliesTo.$msg)
+    var id = util.toHexString(link.$msg)
     if (id) {
       // index the reply
       var fr = state.feedView.replies()
       if (!fr[id]) fr[id] = []
       fr[id].push({ idStr: msg.idStr, type: msg.content.type })
       state.feedView.replies.set(fr)
+
+      // put this link in a consistent place on the msssage
+      msg.repliesToLink.set(link)
 
       // add a notification if it's a reply to the user's message
       var mm = state.feedView.messageMap()
@@ -112,14 +117,17 @@ function indexReply(state, msg) {
   return false
 }
 
-function indexRebroadcast(state, msg, msgMap) {
+function indexRebroadcast(state, msg, link, msgMap) {
   try {
-    var id = util.toHexString(msg.content.rebroadcasts.$msg)
+    var id = util.toHexString(link.$msg)
     if (id) {
       var fr = state.feedView.rebroadcasts()
       if (!fr[id]) fr[id] = []
       fr[id].push({ idStr: msg.idStr })
       state.feedView.rebroadcasts.set(fr)
+
+      // put this link in a consistent place on the msssage
+      msg.rebroadcastsLink.set(link)
 
       // hide the rebroadcast if the original is already in the feed
       if (msgMap[id]) {
@@ -132,22 +140,18 @@ function indexRebroadcast(state, msg, msgMap) {
   } catch(e) { console.warn('failed to index rebroadcast', e) }
 }
 
-function indexMentions(state, msg) {
+function indexMentions(state, msg, link) {
   // look for mentions of the current user and create notifications for them
   var fr = state.feedView.rebroadcasts()
-  var mentions = Array.isArray(msg.content.mentions) ? msg.content.mentions : [msg.content.mentions]
-  for (var i=0; i < mentions.length; i++) {
-    try {
-      var mention = mentions[i]
-      if (util.toHexString(mention.$feed) != state.user.idStr()) continue // not for current user
-      if (msg.content.rebroadcasts && fr[util.toHexString(msg.content.rebroadcasts.$msg)]) continue // already handled
-      state.notifications.push(models.notification({
-        type:          'mention',
-        msgIdStr:       msg.idStr,
-        authorNickname: msg.authorNickname,
-        msgText:        msg.content.text.split('\n')[0],
-        timestamp:      msg.timestamp
-      }))
-    } catch(e) { console.warn('failed to index mention', e) }
-  }
+  try {
+    if (util.toHexString(link.$feed) != state.user.idStr()) return // not for current user
+    if (msg.rebroadcastsLink && fr[util.toHexString(msg.rebroadcastsLink.$msg)]) return // already handled
+    state.notifications.push(models.notification({
+      type:          'mention',
+      msgIdStr:       msg.idStr,
+      authorNickname: msg.authorNickname,
+      msgText:        msg.content.text.split('\n')[0],
+      timestamp:      msg.timestamp
+    }))
+  } catch(e) { console.warn('failed to index mention', e) }
 }

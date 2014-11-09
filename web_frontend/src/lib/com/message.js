@@ -37,9 +37,9 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
         return messageFollow(msg, nicknameMap)
       return ''
     case 'post':
-      var parentMsg = (isTopRender && msg.content.repliesTo) ? lookup(feedView.messages, feedView.messageMap, { idStr: msg.content.repliesTo.$msg.toString('hex') }) : null
+      var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { idStr: msg.repliesToLink.$msg.toString('hex') }) : null
       if (msg.content.postType == 'action')
-        return messageEvent(msg, (msg.content.repliesTo) ? 'reaction' : 'action', msg.content.text, nicknameMap)
+        return messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap)
       else if (msg.content.postType == 'gui')
         main = messageGui(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
       else
@@ -127,16 +127,16 @@ function renderMsgShell(content, msg, events, parentMsg, messages, messageMap, r
 function renderMsgHeader(msg, events, nicknameMap) {
   var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.idStr, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
 
-  if (msg.content.rebroadcasts) {
+  if (msg.rebroadcastsLink) {
     // duplicated message
-    var author = msg.content.rebroadcasts.$feed
+    var author = msg.rebroadcastsLink.$feed
     var authorStr = util.toHexString(author)
     var authorNick = nicknameMap[authorStr] || authorStr
     return h('p', [
       comren.userlink(author, authorNick),
       h('small.message-ctrls', [
         ' - ',
-        util.prettydate(new Date(msg.content.rebroadcasts.timestamp||0), true)
+        util.prettydate(new Date(msg.rebroadcastsLink.timestamp||0), true)
       ]),
       h('span.repliesto', [' shared by ', comren.userlink(msg.author, msg.authorNickname)]),
       stopBtnStr
@@ -228,8 +228,8 @@ function renderMsgRebroadcasts(rebroadcasts) {
 // message event-content renderer
 var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap) {
   var parentLink = ''
-  if (msg.content.repliesTo) {
-    var id = util.toHexString(msg.content.repliesTo.$msg)
+  if (msg.repliesToLink) {
+    var id = util.toHexString(msg.repliesToLink.$msg)
     parentLink = comren.a('#/msg/'+id, comren.shortHex(id))
   }
 

@@ -74,8 +74,9 @@ function feedPage(state) {
 
 function mainFeed(feedView, events, user, nicknameMap) {
   var msgs = feedView.messages.filter(function(msg) {
-    if (msg.content.repliesTo) return false
-    if (!feedView.filters.shares    && msg.content.rebroadcasts) return false
+    if (msg.hidden) return false
+    if (msg.repliesToLink) return false
+    if (!feedView.filters.shares    && msg.rebroadcastsLink) return false
     if (!feedView.filters.textPosts && msg.content.postType == 'text') return false
     if (!feedView.filters.guiPosts  && msg.content.postType == 'gui') return false
     return msg.content.postType == 'text' || msg.content.postType == 'gui'
@@ -85,9 +86,10 @@ function mainFeed(feedView, events, user, nicknameMap) {
 
 function sideFeed(feedView, events, user, nicknameMap) {
   var events = feedView.messages.filter(function(msg) {
+    if (msg.hidden) return false
     if (msg.content.type == 'profile') return true
     if (msg.content.type == 'follow') return feedView.filters.follows
-    if (msg.content.postType == 'action' && !msg.content.repliesTo) return feedView.filters.actionPosts
+    if (msg.content.postType == 'action' && !msg.repliesToLink) return feedView.filters.actionPosts
     return false
   })
   return comren.feed(events, feedView, events, user, nicknameMap, false, false)

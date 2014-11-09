@@ -84,14 +84,16 @@ var defaults = {
     type: null,
     author: null,
     authorStr: '',
-    value: null,
+    content: null,
     previous: null,
     sequence: 0,
     signature: null,
     timestamp: 0,
     authorNickname: '',
     isRunning: false,
-    hidden: false
+    hidden: false,
+    rebroadcastsLink: null,
+    repliesToLink: null
   },
 
   profile: {
@@ -195,9 +197,11 @@ function createHomeApp(events, initialState) {
 
 function createMessage(initialState) {
   var state = extend(defaults.message, initialState)
-  state.authorStr = state.author.toString('hex')
-  state.isRunning = mercury.value(state.isRunning)
-  state.hidden    = mercury.value(state.hidden)
+  state.authorStr        = state.author.toString('hex')
+  state.isRunning        = mercury.value(state.isRunning)
+  state.hidden           = mercury.value(state.hidden)
+  state.rebroadcastsLink = mercury.value(state.rebroadcastsLink)
+  state.repliesToLink    = mercury.value(state.repliesToLink)
   return mercury.struct(state)
 }
 
