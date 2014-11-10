@@ -63,9 +63,10 @@ function nav(state) {
   var pages = [
     ['', 'feed'],
     ['inbox', 'inbox'],
-    ['profile/' + state.user.idStr, 'profile'],
-    ['app/localhost:65000/user/demo.js', 'demo.js']
-  ]
+    ['profile/' + state.user.idStr, 'profile']
+  ].concat(state.userPages.map(function(page) {
+    return ['app/'+page.url, page.name]
+  }))
 
   var route = state.route
   if (route == 'feed') route = ''

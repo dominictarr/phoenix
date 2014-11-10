@@ -23,6 +23,9 @@ exports.setupHomeApp = function(state) {
     state.user.pubkey.set(util.toBuffer(data.public))
     state.user.pubkeyStr.set(util.toHexString(data.public))
   })
+  ws.api.getUserPages(function(err, pages) {
+    state.userPages.set(pages)
+  })
 
   // construct local state
   exports.syncView(state)

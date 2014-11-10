@@ -83,7 +83,7 @@ module.exports = function(opts) {
       var loaded = multicb()
       var addr = req.url.slice('/sandbox/'.length)
       if (addr.indexOf('//') == -1)
-        addr = 'http://' + addr
+        addr = 'http://localhost:'+opts.port+'/user/'+addr
       request({ url: addr, headers: { 'X-From-Sandbox': 1 } }, loaded())
       renderCss('gui-sandbox.less', loaded())
       return loaded(function (err, results) {
