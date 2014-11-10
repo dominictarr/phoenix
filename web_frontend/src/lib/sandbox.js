@@ -6,7 +6,7 @@ var manifest = require('./user-page-rpc-manifest')
 var bus      = require('./business')
 var ws       = require('./ws-rpc')
 
-exports.addListeners = function() {
+exports.addListeners = function(state) {
   window.addEventListener('message', function(e) {
     // find the origin iframe
     var iframe
@@ -21,14 +21,14 @@ exports.addListeners = function() {
     
     // handle RPC
     if (!iframe.rpc)
-      setupIframeRPC(iframe)
+      setupIframeRPC(state, iframe)
     iframe.rpc.recv(e.data)
   }, false)
 }
 
-function setupIframeRPC(iframe) {
+function setupIframeRPC(state, iframe) {
   // create rpc
-  iframe.rpc = MRPC(manifest.iframe, manifest.container)(createApi(iframe))
+  iframe.rpc = MRPC(manifest.iframe, manifest.container)(createApi(state, iframe))
   var rpcStream = iframe.rpc.createStream()
 
   // in
@@ -42,14 +42,14 @@ function setupIframeRPC(iframe) {
   }))
 }
 
-function createApi(iframe) {
+function createApi(state, iframe) {
   return {
     add: function(msg, cb) {
       if (!confirm('This page would like to post to your feed. Allow it?'))
         return cb(new Error('Access denied'))
       ws.api.add(msg, function(err) {
         if (!err)
-          bus.syncView()
+          bus.syncView(state)
         cb(err)
       })
     },

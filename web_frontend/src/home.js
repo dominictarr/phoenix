@@ -38,7 +38,7 @@ function createApp() {
   var state = models.homeApp(events, initState)
   bus.setupHomeApp(state)
   wireUpEvents(state, events)
-  sandbox.addListeners()
+  sandbox.addListeners(state)
   return state
 }
 
