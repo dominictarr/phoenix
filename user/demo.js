@@ -12,7 +12,7 @@ pull(
   phoenix.createFeedStream(),
   pull.drain(function(msg) {
     // add to doc
-    document.body.innerHTML += '<pre>'+JSONH.stringify(msg.content, null, 2).replace(/</g, '&lt;').replace(/>/, '&gt;')+'</pre>'
+    document.body.innerHTML += '<pre>'+JSONH.stringify(msg, null, 2).replace(/</g, '&lt;').replace(/>/, '&gt;')+'</pre>'
 
     // resize iframe
     var body = document.body,
