@@ -1,4 +1,5 @@
 var pull = require('pull-stream')
+var JSONH = require('json-human-buffer')
 
 document.body.innerHTML += '<h1 style="margin-top:0">Your Feed</h1>'
 document.body.innerHTML += '<p><button onclick="post()">Post "hello from demo.js" to your feed</button></p>'
@@ -11,7 +12,7 @@ pull(
   phoenix.createFeedStream(),
   pull.drain(function(msg) {
     // add to doc
-    document.body.innerHTML += '<pre>'+JSON.stringify(msg.content).replace(/</g, '&lt;').replace(/>/, '&gt;')+'</pre>'
+    document.body.innerHTML += '<pre>'+JSONH.stringify(msg.content, null, 2).replace(/</g, '&lt;').replace(/>/, '&gt;')+'</pre>'
 
     // resize iframe
     var body = document.body,
