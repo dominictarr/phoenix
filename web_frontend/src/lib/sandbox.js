@@ -6,6 +6,13 @@ var manifest = require('./user-page-rpc-manifest')
 var bus      = require('./business')
 var ws       = require('./ws-rpc')
 
+var Serializer = require('pull-serializer')
+var JSONH = require('json-human-buffer')
+
+function serialize (stream) {
+  return Serializer(stream, JSONH, {split: '\n\n'})
+}
+
 exports.addListeners = function(state) {
   window.addEventListener('message', function(e) {
     // find the origin iframe
@@ -28,7 +35,7 @@ exports.addListeners = function(state) {
 
 function setupIframeRPC(state, iframe) {
   // create rpc
-  iframe.rpc = MRPC(manifest.iframe, manifest.container)(createApi(state, iframe))
+  iframe.rpc = MRPC(manifest.iframe, manifest.container, serialize)(createApi(state, iframe))
   var rpcStream = iframe.rpc.createStream()
 
   // in
