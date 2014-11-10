@@ -406,6 +406,7 @@ exports.refreshIframe = function() {
   var iframes = document.querySelectorAll('iframe')
   for (var i=0; i < iframes.length; i++) {
     iframes[i].setAttribute('src', iframes[i].src)
+    iframes[i].rpc = null
   }
 }
 

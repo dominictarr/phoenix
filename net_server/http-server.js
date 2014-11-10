@@ -136,6 +136,7 @@ module.exports = function(opts) {
       // browserify and serve the js
       var dir = path.join(__dirname, '..', path.dirname(req.url))
       return browserify({ basedir: dir })
+        .add(path.join(__dirname, '../web_frontend/src/user-page.js')) // :TODO: publish user-page.js as an npm module and remove this add() call
         .add(path.join(dir, path.basename(req.url)))
         .bundle(function(err, jsStr) {
           if (err) {

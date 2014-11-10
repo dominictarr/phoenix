@@ -10,6 +10,11 @@ function IframeSandbox(html, mid, replies, onReply) {
 IframeSandbox.prototype.type = 'Widget';
 
 IframeSandbox.prototype.init = function () {
+  var div = document.createElement('div')
+  div.innerHTML = 'temporarily disabled'
+  return div
+
+  // :TODO: decide what should be done here
   var iframe = sandbox.createIframe(this.html, this.mid, this.replies, this.onReply)
   this.update(null, iframe)
   return iframe
