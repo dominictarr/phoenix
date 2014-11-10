@@ -23,6 +23,9 @@ function render(state) {
   } else if (state.route.indexOf('msg/') === 0) {
     var msgid = state.route.slice(4)
     page = messagePage(state, msgid)
+  } else if (state.route.indexOf('app/') === 0) {
+    var pageAddress = state.route.slice(4)
+    page = appPage(state, pageAddress)
   } else if (state.route.indexOf('help') === 0) {
     var section = state.route.slice(5) || 'intro'
     page = helpPage(state, section)
@@ -60,16 +63,17 @@ function nav(state) {
   var pages = [
     ['', 'feed'],
     ['inbox', 'inbox'],
-    ['profile/' + state.user.idStr, 'profile']
+    ['profile/' + state.user.idStr, 'profile'],
+    ['app/localhost:65000/user/demo.js', 'demo-app']
   ]
 
   var route = state.route
   if (route == 'feed') route = ''
-  return pages.map(function(page) {
+  return h('.side-nav', pages.map(function(page) {
     if (page[0] == route)
       return h('p', h('strong', comren.a('#/'+page[0], page[1])))
     return h('p', comren.a('#/'+page[0], page[1]))
-  })
+  }))
 }
 
 // Feed Page
@@ -279,6 +283,19 @@ function profileLink(events, canRemove, profile) {
       ? h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
       : ''
   ])
+}
+
+// App Page
+// ========
+
+function appPage(state, address) {
+  return h('.app-page.row', comren.columns({
+    nav: nav(state),
+    main: [
+      h('p', h('button.btn.btn-default.btn-xs',  {'ev-click': valueEvents.click(state.events.refreshIframe)}, 'refresh')),
+      h('iframe', { src: '/sandbox/'+address, sandbox: 'allow-scripts' })
+    ],
+  }, [['nav', 1], ['main', 11]]))
 }
 
 // Help Page

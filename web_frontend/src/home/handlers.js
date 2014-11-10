@@ -402,6 +402,13 @@ exports.runMsgGui = function(state, data) {
   msg.isRunning.set(data.run)
 }
 
+exports.refreshIframe = function() {
+  var iframes = document.querySelectorAll('iframe')
+  for (var i=0; i < iframes.length; i++) {
+    iframes[i].setAttribute('src', iframes[i].src)
+  }
+}
+
 exports.onGuipostReply = function(state, data) {
   if (!confirm('This GUI would like to post to your feed. Allow it?'))
     return data.cb(new Error('Access denied'))

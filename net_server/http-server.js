@@ -3,6 +3,7 @@ var path       = require('path')
 var multicb    = require('multicb')
 var less       = require('less')
 var browserify = require('browserify')
+var request    = require('request');
 
 // stupid-simple etag solution: cache everything!
 var eTag       = (Math.random() * 100000)|0
@@ -73,6 +74,33 @@ module.exports = function(opts) {
       })
     }
 
+    // Remote sandbox
+    if (pathStarts('/sandbox/')) {
+      // abort endless loops
+      if (req.headers['x-from-sandbox'] == '1')
+        return serve404()
+
+      var loaded = multicb()
+      var addr = req.url.slice('/sandbox/'.length)
+      if (addr.indexOf('//') == -1)
+        addr = 'http://' + addr
+      request({ url: addr, headers: { 'X-From-Sandbox': 1 } }, loaded())
+      renderCss('gui-sandbox.less', loaded())
+      return loaded(function (err, results) {
+        if (err) return console.error(err), serve404()
+
+        var response = results[0][1]
+        if (response.statusCode != 200) return console.error(addr + ': ' + response.statusCode), serve404()
+        var js = results[0][2]
+        var css = results[1][1]
+
+        res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
+        type('text/html')
+        res.writeHead(200)
+        res.end('<html><head><style>'+css+'</style></head><body></body><script>'+js+'</script></html>')
+      })
+    }
+
     // CSS
     if (pathStarts('/css/') && pathEnds('.css')) {
       return renderCss(path.basename(req.url, '.css')+'.less', function(err, cssStr) {
@@ -115,6 +143,7 @@ module.exports = function(opts) {
             console.error(err)
           } else {
             type('application/javascript')
+            res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
             res.writeHead(200)
             res.end(jsStr)
           }

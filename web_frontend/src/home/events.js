@@ -41,6 +41,7 @@ function createEvents() {
     'runMsgGui',
 
     // guipost behaviors
+    'refreshIframe',
     'onGuipostReply'
   ])
   events.setRoute = EventRouter()
