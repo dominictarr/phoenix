@@ -133,6 +133,8 @@ var dropdown = exports.dropdown = function (text, items) {
   return h('.dropdown', [
     new widgets.DropdownBtn(text),
     h('ul.dropdown-menu', items.map(function(item) {
+      if (item.length == 2)
+        return h('li', a(item[0], item[1]))
       return h('li', jsa(item[0], item[1], item[2]))
     }))
   ])

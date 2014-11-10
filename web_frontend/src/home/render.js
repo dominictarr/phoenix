@@ -64,16 +64,18 @@ function nav(state) {
     ['', 'feed'],
     ['inbox', 'inbox'],
     ['profile/' + state.user.idStr, 'profile'],
-    ['app/localhost:65000/user/demo.js', 'demo-app']
+    ['app/localhost:65000/user/demo.js', 'demo.js']
   ]
 
   var route = state.route
   if (route == 'feed') route = ''
-  return h('.side-nav', pages.map(function(page) {
-    if (page[0] == route)
-      return h('p', h('strong', comren.a('#/'+page[0], page[1])))
-    return h('p', comren.a('#/'+page[0], page[1]))
-  }))
+  return h('.side-nav', [
+    pages.map(function(page) {
+      if (page[0] == route)
+        return h('p', h('strong', comren.a('#/'+page[0], page[1])))
+      return h('p', comren.a('#/'+page[0], page[1]))
+    })
+  ])
 }
 
 // Feed Page

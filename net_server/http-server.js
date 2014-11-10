@@ -131,38 +131,23 @@ module.exports = function(opts) {
       })
     }
 
-    // User JS
-    if (pathStarts('/user/')) {
-      res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
-      if (pathEnds('.js')) {
-        var dir = path.join(__dirname, '..', path.dirname(req.url))
-        return browserify({ basedir: dir })
-          .add(path.join(dir, path.basename(req.url)))
-          .bundle(function(err, jsStr) {
-            if (err) {
-              res.writeHead(500)
-              res.end(err.toString())
-              console.error(err)
-            } else {
-              type('application/javascript')
-              res.writeHead(200)
-              res.end(jsStr)
-            }
-          })
-      } else {
-        var fullpath = path.join(__dirname, '..', req.url)
-        return fs.readdir(fullpath, function(err, files) {
+    // User files
+    if (pathStarts('/user/') && pathEnds('.js')) {
+      // browserify and serve the js
+      var dir = path.join(__dirname, '..', path.dirname(req.url))
+      return browserify({ basedir: dir })
+        .add(path.join(dir, path.basename(req.url)))
+        .bundle(function(err, jsStr) {
           if (err) {
-            if (err.code == 'ENOENT')
-              return serve404()
-            if (err.code == 'ENOTDIR')
-              return fs.createReadStream(fullpath).on('error', serve404).pipe(res)
+            res.writeHead(500)
+            res.end(err.toString())
+            console.error(err)
+          } else {
+            type('application/javascript')
+            res.writeHead(200)
+            res.end(jsStr)
           }
-          type('application/json')
-          res.writeHead(200)
-          res.end(JSON.stringify(files))
         })
-      }
     }
 
     // Static asset routes
