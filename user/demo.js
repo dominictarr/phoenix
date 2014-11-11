@@ -13,7 +13,7 @@ pull(
   pull.drain(function(msg) {
     // add to doc
     document.body.innerHTML += '<pre>'+JSONH.stringify(msg, null, 2).replace(/</g, '&lt;').replace(/>/, '&gt;')+'</pre>'
-
+  }, function() {
     // resize iframe
     var body = document.body,
     html = document.documentElement;

@@ -23,9 +23,9 @@ function render(state) {
   } else if (state.route.indexOf('msg/') === 0) {
     var msgid = state.route.slice(4)
     page = messagePage(state, msgid)
-  } else if (state.route.indexOf('app/') === 0) {
-    var pageAddress = state.route.slice(4)
-    page = appPage(state, pageAddress)
+  } else if (state.route.indexOf('user-page/') === 0) {
+    var pageAddress = state.route.slice(10)
+    page = userPage(state, pageAddress)
   } else if (state.route.indexOf('help') === 0) {
     var section = state.route.slice(5) || 'intro'
     page = helpPage(state, section)
@@ -65,7 +65,7 @@ function nav(state) {
     ['inbox', 'inbox'],
     ['profile/' + state.user.idStr, 'profile']
   ].concat(state.userPages.map(function(page) {
-    return ['app/'+page.url, page.name]
+    return ['user-page/'+page.url, page.name]
   }))
 
   var route = state.route
@@ -291,12 +291,11 @@ function profileLink(events, canRemove, profile) {
 // App Page
 // ========
 
-function appPage(state, address) {
-  return h('.app-page.row', comren.columns({
+function userPage(state, address) {
+  return h('.user-page.row', comren.columns({
     nav: nav(state),
     main: [
-      h('p', h('button.btn.btn-default.btn-xs',  {'ev-click': valueEvents.click(state.events.refreshIframe)}, 'refresh')),
-      h('iframe', { src: '/sandbox/'+address, sandbox: 'allow-scripts' })
+      h('iframe', { src: '/user/'+address, sandbox: 'allow-scripts' })
     ],
   }, [['nav', 1], ['main', 11]]))
 }

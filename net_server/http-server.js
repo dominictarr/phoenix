@@ -74,25 +74,20 @@ module.exports = function(opts) {
       })
     }
 
-    // Remote sandbox
-    if (pathStarts('/sandbox/')) {
-      // abort endless loops
-      if (req.headers['x-from-sandbox'] == '1')
-        return serve404()
-
+    // User page sandbox
+    if (pathStarts('/user/') && pathEnds('.js')) {
       var loaded = multicb()
-      var addr = req.url.slice('/sandbox/'.length)
-      if (addr.indexOf('//') == -1)
-        addr = 'http://localhost:'+opts.port+'/user/'+addr
-      request({ url: addr, headers: { 'X-From-Sandbox': 1 } }, loaded())
+      var dir = path.join(__dirname, '..', path.dirname(req.url))
       renderCss('gui-sandbox.less', loaded())
+      browserify({ basedir: dir })
+        .add(path.join(__dirname, '../web_frontend/src/user-page.js')) // :TODO: publish user-page.js as an npm module and remove this add() call
+        .add(path.join(dir, path.basename(req.url)))
+        .bundle(loaded())
       return loaded(function (err, results) {
         if (err) return console.error(err), serve404()
 
-        var response = results[0][1]
-        if (response.statusCode != 200) return console.error(addr + ': ' + response.statusCode), serve404()
-        var js = results[0][2]
-        var css = results[1][1]
+        var css = results[0][1]
+        var js  = results[1][1]
 
         res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
         type('text/html')
@@ -129,26 +124,6 @@ module.exports = function(opts) {
           res.end(jsStr)
         }
       })
-    }
-
-    // User files
-    if (pathStarts('/user/') && pathEnds('.js')) {
-      // browserify and serve the js
-      var dir = path.join(__dirname, '..', path.dirname(req.url))
-      return browserify({ basedir: dir })
-        .add(path.join(__dirname, '../web_frontend/src/user-page.js')) // :TODO: publish user-page.js as an npm module and remove this add() call
-        .add(path.join(dir, path.basename(req.url)))
-        .bundle(function(err, jsStr) {
-          if (err) {
-            res.writeHead(500)
-            res.end(err.toString())
-            console.error(err)
-          } else {
-            type('application/javascript')
-            res.writeHead(200)
-            res.end(jsStr)
-          }
-        })
     }
 
     // Static asset routes
