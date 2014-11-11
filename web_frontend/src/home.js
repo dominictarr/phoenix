@@ -4,6 +4,7 @@ var mercury = require('mercury')
 
 var models = require('./lib/models')
 var bus = require('./lib/business')
+var sandbox = require('./lib/sandbox') 
 var createEvents = require('./home/events')
 var render = require('./home/render')
 var handlers = require('./home/handlers')
@@ -37,6 +38,7 @@ function createApp() {
   var state = models.homeApp(events, initState)
   bus.setupHomeApp(state)
   wireUpEvents(state, events)
+  sandbox.addListeners(state)
   return state
 }
 

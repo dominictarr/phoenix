@@ -40,9 +40,11 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
       var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { idStr: msg.repliesToLink.$msg.toString('hex') }) : null
       if (msg.content.postType == 'action')
         return messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap)
-      else if (msg.content.postType == 'gui')
-        main = messageGui(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
-      else
+      else if (msg.content.postType == 'gui') {
+        // :TODO: gui posts are disabled for now
+        // main = messageGui(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
+        return ''
+      } else
         main = messageText(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
       break
     default:

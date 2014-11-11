@@ -23,6 +23,9 @@ function render(state) {
   } else if (state.route.indexOf('msg/') === 0) {
     var msgid = state.route.slice(4)
     page = messagePage(state, msgid)
+  } else if (state.route.indexOf('user-page/') === 0) {
+    var pageAddress = state.route.slice(10)
+    page = userPage(state, pageAddress)
   } else if (state.route.indexOf('help') === 0) {
     var section = state.route.slice(5) || 'intro'
     page = helpPage(state, section)
@@ -44,8 +47,6 @@ function header(events, uId, isSyncing) {
     h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
       h('ul.nav.navbar-nav', [
-        h('li', a('#/inbox', 'inbox')),
-        h('li', a('#/profile/' + uId, 'profile')),
         h('li', a('#/network', 'network')),
         h('li', a('#/help', 'help'))
       ]),
@@ -58,41 +59,56 @@ function header(events, uId, isSyncing) {
   ])
 }
 
+function nav(state) {
+  var pages = [
+    ['', 'feed'],
+    ['inbox', 'inbox'],
+    ['profile/' + state.user.idStr, 'profile']
+  ].concat(state.userPages.map(function(page) {
+    return ['user-page/'+page.url, page.name]
+  }))
+
+  var route = state.route
+  if (route == 'feed') route = ''
+  return h('.side-nav', [
+    pages.map(function(page) {
+      if (page[0] == route)
+        return h('p', h('strong', comren.a('#/'+page[0], page[1])))
+      return h('p', comren.a('#/'+page[0], page[1]))
+    })
+  ])
+}
+
 // Feed Page
 // =========
 
 function feedPage(state) {
   return h('.feed-page.row', comren.columns({
     main: [
-      mercury.partial(feedFilters, state.events, state.feedView.filters), 
       mercury.partial(com.publishForm, state.feedView.publishForms[0], state.events, state.user, state.nicknameMap), 
       mercury.partial(mainFeed, state.feedView, state.events, state.user, state.nicknameMap)
     ],
-    side: [mercury.partial(sideFeed, state.feedView, state.events, state.user, state.nicknameMap)]
-  }, [['main', 7], ['side', 5]]))
+    nav: nav(state),
+    side: [
+      mercury.partial(feedFilters, state.events, state.feedView.filters), 
+    ]
+  }, [['nav', 1], ['main', 7], ['side', 4]]))
 }
 
+var msgtypes = ['post', 'follow', 'profile']
 function mainFeed(feedView, events, user, nicknameMap) {
   var msgs = feedView.messages.filter(function(msg) {
     if (msg.hidden) return false
     if (msg.repliesToLink) return false
-    if (!feedView.filters.shares    && msg.rebroadcastsLink) return false
-    if (!feedView.filters.textPosts && msg.content.postType == 'text') return false
-    if (!feedView.filters.guiPosts  && msg.content.postType == 'gui') return false
-    return msg.content.postType == 'text' || msg.content.postType == 'gui'
+    if (msgtypes.indexOf(msg.content.type) === -1) return false
+    if (!feedView.filters.shares      && msg.rebroadcastsLink) return false
+    if (!feedView.filters.textPosts   && msg.content.postType == 'text') return false
+    if (!feedView.filters.actionPosts && msg.content.postType == 'action' && !msg.repliesToLink) return false
+    if (!feedView.filters.guiPosts    && msg.content.postType == 'gui') return false
+    if (!feedView.filters.follows     && msg.content.type == 'follow') return false
+    return true
   })
   return comren.feed(msgs, feedView, events, user, nicknameMap, false, true)
-}
-
-function sideFeed(feedView, events, user, nicknameMap) {
-  var events = feedView.messages.filter(function(msg) {
-    if (msg.hidden) return false
-    if (msg.content.type == 'profile') return true
-    if (msg.content.type == 'follow') return feedView.filters.follows
-    if (msg.content.postType == 'action' && !msg.repliesToLink) return feedView.filters.actionPosts
-    return false
-  })
-  return comren.feed(events, feedView, events, user, nicknameMap, false, false)
 }
 
 function feedFilters(events, filters) {
@@ -136,9 +152,9 @@ function inboxPage(state) {
   })
 
   return h('.inbox-page.row', comren.columns({
-    main: [comren.feed(msgs, state.feedView, state.events, state.user, state.nicknameMap, true)],
-    side: [comren.feed(events, state.feedView, state.events, state.user, state.nicknameMap)],
-  }, [['main', 7], ['side', 5]]))
+    nav: nav(state),
+    main: [comren.feed(msgs, state.feedView, state.events, state.user, state.nicknameMap, true)]
+  }, [['nav', 1], ['main', 7]]))
 }
 
 
@@ -156,9 +172,14 @@ function profilePage(state, profid) {
   var isYou = (state.user.idStr == profid)
   var followsYou = (state.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
-    main: [comren.feed(profile.feed, state.feedView, state.events, state.user, state.nicknameMap, true)],
-    side: [mercury.partial(profileControls, state.events, profile, isYou, followsYou)]
-  }, [['main', 7], ['side', 5]]))
+    nav: nav(state),
+    main: [
+      comren.feed(profile.feed, state.feedView, state.events, state.user, state.nicknameMap, true)
+    ],
+    side: [
+      mercury.partial(profileControls, state.events, profile, isYou, followsYou)
+    ]
+  }, [['nav', 1], ['main', 7], ['side', 4]]))
 }
 
 function profileControls(events, profile, isYou, followsYou) {
@@ -194,9 +215,10 @@ function messagePage(state, msgid) {
 
   // render
   return h('.message-page.row', comren.columns({
+    nav: nav(state),
     main: comren.msgThread(msg, state.feedView, state.events, state.user, state.nicknameMap, true),
     info: mercury.partial(messageInfo, msg)
-  }, [['main', 8], ['info', 4]]))
+  }, [['nav', 1], ['main', 7], ['info', 4]]))
 }
 
 function messageInfo(msg) {
@@ -266,6 +288,18 @@ function profileLink(events, canRemove, profile) {
   ])
 }
 
+// App Page
+// ========
+
+function userPage(state, address) {
+  return h('.user-page.row', comren.columns({
+    nav: nav(state),
+    main: [
+      h('iframe', { src: '/user/'+address, sandbox: 'allow-scripts' })
+    ],
+  }, [['nav', 1], ['main', 11]]))
+}
+
 // Help Page
 // =========
 
@@ -294,7 +328,7 @@ function helpPage(state, section) {
 
   return h('.help-page.row', comren.columns({
     content: content,
-    sidenav: h('ul.nav.nav-pills.nav-stacked', nav('#/'+state.route, [
+    sidenav: h('ul.nav.nav-pills.nav-stacked', helpnav('#/'+state.route, [
       ['#/help', 'Getting Started'],
       ['#/help/networking', 'Networking'],
       ['#/help/privacy', 'Privacy']
@@ -302,16 +336,17 @@ function helpPage(state, section) {
   }, [['content', 7], ['sidenav', 3]]))
 }
 
-// Helpers
-// =======
-
-function nav(current, items) {
+function helpnav(current, items) {
   return items.map(function(item) {
     if (item[0] == current)
       return h('li.active', comren.a(item[0], item[1]))
     return h('li', comren.a(item[0], item[1]))
   })
 }
+
+
+// Helpers
+// =======
 
 function panel(title, content) {
   return h('.panel.panel-default', [

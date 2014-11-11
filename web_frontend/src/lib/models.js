@@ -75,6 +75,8 @@ var defaults = {
       nickname: ''
     },
 
+    userPages: [],
+
     lastSync: '',
     isSyncing: false
   },
@@ -189,6 +191,8 @@ function createHomeApp(events, initialState) {
       pubkeyStr:        mercury.value(state.user.pubkeyStr),
       nickname:         mercury.value(state.user.nickname)
     }), 
+
+    userPages:        mercury.value(state.userPages),
 
     lastSync:         mercury.value(state.lastSync),
     isSyncing:        mercury.value(state.isSyncing)

@@ -3,6 +3,7 @@ var path       = require('path')
 var multicb    = require('multicb')
 var less       = require('less')
 var browserify = require('browserify')
+var request    = require('request');
 
 // stupid-simple etag solution: cache everything!
 var eTag       = (Math.random() * 100000)|0
@@ -26,6 +27,7 @@ module.exports = function(opts) {
     function renderJs(name, cb) {
       var b = browserify({ basedir: resolve('src') })
       b.add(resolve('src/'+name))
+      // :TODO: remove these ignores? these are from the old phoenix-rpc days
       b.ignore('proquint-')
       b.ignore('http')
       b.ignore('level')
@@ -50,6 +52,8 @@ module.exports = function(opts) {
       type('text/html')
       return serve('html/home.html')
     }
+
+    // Gui sandbox
     if (pathStarts('/gui-sandbox')) {
       var loaded = multicb()
       fs.readFile(resolve('html/gui-sandbox.html'), { encoding: 'utf-8' }, loaded())
@@ -67,6 +71,28 @@ module.exports = function(opts) {
         type('text/html')
         res.writeHead(200)
         res.end(html)
+      })
+    }
+
+    // User page sandbox
+    if (pathStarts('/user/') && pathEnds('.js')) {
+      var loaded = multicb()
+      var dir = path.join(__dirname, '..', path.dirname(req.url))
+      renderCss('gui-sandbox.less', loaded())
+      browserify({ basedir: dir })
+        .add(path.join(__dirname, '../web_frontend/src/user-page.js')) // :TODO: publish user-page.js as an npm module and remove this add() call
+        .add(path.join(dir, path.basename(req.url)))
+        .bundle(loaded())
+      return loaded(function (err, results) {
+        if (err) return console.error(err), serve404()
+
+        var css = results[0][1]
+        var js  = results[1][1]
+
+        res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
+        type('text/html')
+        res.writeHead(200)
+        res.end('<html><head><style>'+css+'</style></head><body></body><script>'+js+'</script></html>')
       })
     }
 
@@ -96,7 +122,7 @@ module.exports = function(opts) {
           type('application/javascript')
           res.writeHead(200)
           res.end(jsStr)
-        }        
+        }
       })
     }
 

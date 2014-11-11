@@ -1,60 +1,104 @@
-var MRPC = require('muxrpc')
-var pull = require('pull-stream')
+var MRPC     = require('muxrpc')
+var pull     = require('pull-stream')
 var pushable = require('pull-pushable')
-var manifest = require('./gui-sandbox-rpc-manifest')
 
-exports.createIframe = function(html, mid, replies, onReply) {
-  // create iframe
-  var iframe = document.createElement('iframe')
-  iframe.setAttribute('src', '/gui-sandbox')
-  iframe.setAttribute('sandbox', 'allow-scripts')
-  iframe.setAttribute('seamless', 'seamless')
+var manifest = require('./user-page-rpc-manifest')
+var bus      = require('./business')
+var ws       = require('./ws-rpc')
 
-  // create rpc api
-  iframe.replies = replies || []
-  var rpc = MRPC(manifest.iframe, manifest.container)({
-    ready: function() {
-      rpc.inject(html, function(){})
-    },
-    addReply: function(postType, text, cb) {
-      if (postType != 'text' && postType != 'action' && postType != 'gui')
-        return cb(new Error('postType must be text, action, or gui'))
-      if (!text)
-        return cb(new Error('Can not post an empty string'))
+var Serializer = require('pull-serializer')
+var JSONH = require('json-human-buffer')
 
-      if (onReply) {
-        // use provided handler
-        onReply({ postType: postType, text: text, mid: mid, cb: cb })
-      } else {
-        // emulate it
-        alert('Your GUI posted a '+postType+' post with the content: '+text)
-        iframe.replies.push({ content: { type: 'post', postType: postType, text: text }, timestamp: Date.now() })
-        cb()
-      }
-    },
-    getReplies: function(cb) {
-      cb(null, iframe.replies)
-    }
-  })
+function serialize (stream) {
+  return Serializer(stream, JSONH, {split: '\n\n'})
+}
 
-  // wire up the rpc stream
-  // :TODO: this needs to cleanup when the iframe is destroyed
-  if (rpc) {
-    var rpcStream = rpc.createStream()
-
-    // in
-    var rpcPush = pushable()
-    pull(rpcPush, rpcStream.sink)
-    window.addEventListener('message', function(e) {
+exports.addListeners = function(state) {
+  window.addEventListener('message', function(e) {
+    // find the origin iframe
+    var iframe
+    var iframes = document.querySelectorAll('iframe')
+    for (var i = 0; i < iframes.length; i++) {
+      iframe = iframes[i]
       if (e.source == iframe.contentWindow)
-        rpcPush.push(e.data)
-    }, false);
+        break
+    }
+    if (!iframe)
+      return
+    
+    // handle RPC
+    if (!iframe.rpc)
+      setupIframeRPC(state, iframe)
+    iframe.rpc.recv(e.data)
+  }, false)
+}
 
-    // out
-    pull(rpcStream.source, pull.drain(function(chunk) {
-      iframe.contentWindow.postMessage(chunk, '*')
-    }))
+function setupIframeRPC(state, iframe) {
+  // create rpc
+  iframe.rpc = MRPC(manifest.iframe, manifest.container, serialize)(createApi(state, iframe))
+  var rpcStream = iframe.rpc.createStream()
+
+  // in
+  var rpcPush = pushable()
+  pull(rpcPush, rpcStream.sink)
+  iframe.rpc.recv = rpcPush.push.bind(rpcPush)
+
+  // out
+  pull(rpcStream.source, pull.drain(function(chunk) {
+    iframe.contentWindow.postMessage(chunk, '*')
+  }))
+}
+
+function createApi(state, iframe) {
+  return {
+    add: function(msg, cb) {
+      if (!confirm('This page would like to post to your feed. Allow it?'))
+        return cb(new Error('Access denied'))
+      ws.api.add(msg, function(err) {
+        if (!err)
+          bus.syncView(state)
+        cb(err)
+      })
+    },
+    get: function(key, cb) {
+      ws.api.get(key, cb)
+    },
+    getPublicKey: function(id, cb) {
+      ws.api.getPublicKey(id, cb)
+    },
+    whoami: function(cb) {
+      ws.api.whoami(cb)
+    },
+    setIframeHeight: function(h, cb) {
+      iframe.style.height = h
+      cb()
+    },
+    createFeedStream: function(opts) {
+      return ws.api.createFeedStream(opts)
+    },
+    createHistoryStream: function(id, seq, live) {
+      return ws.api.createHistoryStream(id, seq, live)
+    },
+    createLogStream: function(opts) {
+      return ws.api.createLogStream(opts)
+    },
+    messagesByType: function(opts) {
+      return ws.api.messagesByType(opts)
+    },
+    messagesLinkedToMessage: function(id, rel) {
+      return ws.api.messagesLinkedToMessage(id, rel)
+    },
+    messagesLinkedToFeed: function(id, rel) {
+      return ws.api.messagesLinkedToFeed(id, rel)
+    },
+    messagesLinkedFromFeed: function(id, rel) {
+      return ws.api.messagesLinkedFromFeed(id, rel)
+    },
+    feedsLinkedToFeed: function(id, rel) {
+      return ws.api.feedsLinkedToFeed(id, rel)
+    },
+    feedsLinkedFromFeed: function(id, rel) {
+      return ws.api.feedsLinkedFromFeed(id, rel)
+    }
   }
-
-  return iframe
 }
