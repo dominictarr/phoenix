@@ -37,8 +37,8 @@ function publishFormText(form, events, user, nicknameMap) {
         h('strong', comren.jsa('text', events.setPublishFormType, { id: form.id, type: 'text' })),
         ' / ',
         comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'action' }),
-        ' / ',
-        comren.jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
+        // ' / ', :TODO: gui posts are disabled for now
+        // comren.jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
       ]),
       h('button.btn.btn-default', 'Post'),
       ' ',
@@ -90,8 +90,8 @@ function publishFormAction(form, events, user, nicknameMap) {
         helptip(helptext),
         ' ',
         h('strong', comren.jsa((isReply ? 're' : '') + 'action', events.setPublishFormType, { id: form.id, type: 'action' })),
-        ' / ',
-        comren.jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
+        // ' / ', :TODO: gui posts are disabled for now
+        // comren.jsa('gui', events.setPublishFormType, { id: form.id, type: 'gui' })
       ]),
       h('button.btn.btn-default', 'Post'),
       ' ',
