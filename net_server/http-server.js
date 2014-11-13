@@ -89,7 +89,7 @@ module.exports = function(opts) {
         var css = results[0][1]
         var js  = results[1][1]
 
-        res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
+        res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\' \'unsafe-eval\'')
         type('text/html')
         res.writeHead(200)
         res.end('<html><head><style>'+css+'</style></head><body></body><script>'+js+'</script></html>')
