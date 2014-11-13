@@ -40,7 +40,7 @@ Markdown.prototype.update = function (prev, elem) {
   var opts = {}
   if (this.isInline)
     opts.renderer = inlineRenderer
-  elem.innerHTML = this.mentionLinks(marked(util.escapePlain(this.rawtext), opts))
+  elem.innerHTML = this.mentionLinks(marked(this.rawtext||'', opts))
 }
 
 var mentionRegex = /(\s|>|^)@([A-z0-9]+)/g;
