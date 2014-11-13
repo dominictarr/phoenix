@@ -292,10 +292,11 @@ function profileLink(events, canRemove, profile) {
 // ========
 
 function userPage(state, address) {
+  var id = (Math.random()*10000)|0
   return h('.user-page.row', comren.columns({
     nav: nav(state),
     main: [
-      h('iframe', { src: '/user/'+address, sandbox: 'allow-scripts' })
+      h('iframe#user-page-'+id, { src: '/user/'+address, sandbox: 'allow-scripts' })
     ],
   }, [['nav', 1], ['main', 11]]))
 }

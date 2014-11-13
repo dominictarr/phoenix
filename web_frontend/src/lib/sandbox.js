@@ -13,6 +13,8 @@ function serialize (stream) {
   return Serializer(stream, JSONH, {split: '\n\n'})
 }
 
+var curRPC
+var curFrameID
 exports.addListeners = function(state) {
   window.addEventListener('message', function(e) {
     // find the origin iframe
@@ -27,21 +29,23 @@ exports.addListeners = function(state) {
       return
     
     // handle RPC
-    if (!iframe.rpc)
+    if (iframe.id != curFrameID) {
       setupIframeRPC(state, iframe)
-    iframe.rpc.recv(e.data)
+      curFrameID = iframe.id
+    }
+    curRPC.recv(e.data)
   }, false)
 }
 
 function setupIframeRPC(state, iframe) {
   // create rpc
-  iframe.rpc = MRPC(manifest.iframe, manifest.container, serialize)(createApi(state, iframe))
-  var rpcStream = iframe.rpc.createStream()
+  curRPC = MRPC(manifest.iframe, manifest.container, serialize)(createApi(state, iframe))
+  var rpcStream = curRPC.createStream()
 
   // in
   var rpcPush = pushable()
   pull(rpcPush, rpcStream.sink)
-  iframe.rpc.recv = rpcPush.push.bind(rpcPush)
+  curRPC.recv = rpcPush.push.bind(rpcPush)
 
   // out
   pull(rpcStream.source, pull.drain(function(chunk) {
