@@ -31,6 +31,16 @@ Make sure your submissions are licensed for free use. All code in Phoenix (inclu
 You can get help in #scuttlebutt on freenode.
 
 
+## Project Repos
+
+The phoenix project is broken into four main repositories:
+
+ - [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt): a library on top of leveldb that adds the data structures, crypto, and indexing of the ssb protocol.
+ - [scuttlebot](https://github.com/pfraze/scuttlebot): a network server & server-library which wraps ssb
+ - [muxrpc](https://github.com/dominictarr/muxrpc): the RPC protocol used by scuttlebot and phoenix
+ - [phoenix](https://github.com/pfraze/phoenix): a social-feeds application
+
+
 ## License
 
 Copyright (c) 2014 Dominic Tarr and Paul Frazee
