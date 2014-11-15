@@ -195,7 +195,9 @@ function profileControls(events, profile, isYou, followsYou) {
     ),
     (!isYou) ? h('p', followBtn) : '',
     h('div.text-muted', [
-      h('p', h('small', [h('strong', 'User\'s Contact ID: '), profile.idStr]))
+      h('small', h('strong', 'Emoj-ID:')),
+      h('br'),
+      h('div', { style: { width: '160px' }, innerHTML: comren.toEmoji(profile.id) })
     ])
   ])
 }
