@@ -52,6 +52,7 @@ function header(events, uId, isSyncing) {
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li', a('#', 'your contact id', { 'ev-click': valueEvents.click(events.showId, { id: uId }, { preventDefault: true }) })),
+        h('li', a('#/profile/' + uId, 'profile')),
         h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add contact')),
         h('li', comren.syncButton(events, isSyncing))
       ])
@@ -63,7 +64,6 @@ function nav(state) {
   var pages = [
     ['', 'feed'],
     ['inbox', 'inbox'],
-    ['profile/' + state.user.idStr, 'profile']
   ].concat(state.userPages.map(function(page) {
     return ['user-page/'+page.url, page.name]
   }))
@@ -195,7 +195,7 @@ function profileControls(events, profile, isYou, followsYou) {
     ),
     (!isYou) ? h('p', followBtn) : '',
     h('div.text-muted', [
-      h('small', h('strong', 'Emoj-ID:')),
+      h('small', h('strong', 'Contact ID:')),
       h('br'),
       h('div', { style: { width: '160px' }, innerHTML: comren.toEmoji(profile.id) })
     ])
