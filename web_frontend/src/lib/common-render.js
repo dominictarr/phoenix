@@ -186,10 +186,11 @@ var numberToHex = exports.numberToHex = function (v) {
   return x
 }
 
-var toEmoji = exports.toEmoji = function (buf) {
+var toEmoji = exports.toEmoji = function (buf, size) {
+  size = size || 20
   if (!buf)
     return ''
   return baseEmoji.toCustom(buf, function(v, emoji) {
-    return '<img class="emoji" width="20" height="20" src="/img/emoji/'+emoji.name+'.png" alt="'+numberToHex(v)+'" title="'+((+v).toString(16))+'">'
+    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt="'+numberToHex(v)+'" title="'+((+v).toString(16))+'">'
   })
 }
