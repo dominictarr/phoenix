@@ -148,7 +148,7 @@ function renderMsgHeader(msg, events, nicknameMap) {
   // normal message
   return h('p', [
     comren.userlink(msg.author, msg.authorNickname),
-    ' ', h('span', { innerHTML: comren.toEmoji(msg.authorStr.slice(0,6), 10) }),
+    ' ', h('span', { innerHTML: comren.toEmoji(msg.authorStr.slice(0,4), 12) }),
     h('small.message-ctrls', [
       ' - ',
       comren.a('#/msg/'+msg.idStr, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
