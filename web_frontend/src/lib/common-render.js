@@ -1,5 +1,6 @@
 var mercury     = require('mercury')
 var h           = require('mercury').h
+var baseEmoji   = require('base-emoji')
 var valueEvents = require('./value-events')
 var widgets     = require('./widgets')
 var com         = require('./com')
@@ -176,4 +177,20 @@ var img = exports.img = function (src) {
 
 var shortHex = exports.shortHex = function (str) {
   return str.slice(0, 6) + '...' + str.slice(-2)
+}
+
+var numberToHex = exports.numberToHex = function (v) {
+  var x = (+v).toString(16)
+  if (x.length === 1)
+    return '0'+x
+  return x
+}
+
+var toEmoji = exports.toEmoji = function (buf, size) {
+  size = size || 20
+  if (!buf)
+    return ''
+  return baseEmoji.toCustom(buf, function(v, emoji) {
+    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt="'+numberToHex(v)+'" title="'+((+v).toString(16))+'">'
+  })
 }
