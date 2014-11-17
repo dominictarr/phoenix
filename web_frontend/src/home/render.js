@@ -196,7 +196,14 @@ function profileControls(events, profile, isYou, followsYou) {
     (!isYou) ? h('p', followBtn) : '',
     h('div.text-muted', [
       h('p', h('small', [h('strong', 'User\'s Contact ID: '), profile.idStr]))
-    ])
+    ]),
+    (profile.statuses||[]).map(function(status) {
+      if (Date.now() > status.endsAt)
+        return
+      return h('div', [
+        h('a', { style: { color: util.escapePlain(status.textColor||'#000')}, href: '#/msg/'+util.toHexString(status.msg) }, status.text),
+      ])
+    })
   ])
 }
 
