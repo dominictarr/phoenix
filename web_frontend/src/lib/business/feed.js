@@ -41,6 +41,7 @@ exports.processFeedMsg = function(state, msg) {
     if (link.$rel == 'replies-to')   notified = indexReply(state, m, link)
     if (!notified &&
         link.$rel == 'mentions')     indexMentions(state, m, link)
+    if (link.$rel == 'adds-status')  indexAddStatus(state, m, link)
   })
 }
 
@@ -154,4 +155,29 @@ function indexMentions(state, msg, link) {
       timestamp:      msg.timestamp
     }))
   } catch(e) { console.warn('failed to index mention', e) }
+}
+
+function indexAddStatus(state, msg, link) {
+  try {    
+    // update profile if present
+    var targetProf = profiles.getProfile(state, link.$feed)
+    if (targetProf) {
+      var endsAt
+      if (!link.text)
+        throw "adds-status link requires a 'text' field"
+      if (link.duration) {
+        endsAt = msg.timestamp + link.duration
+        if (Date.now() > endsAt)
+          return
+      }
+      targetProf.statuses.push({
+        msg:       msg.id,
+        author:    msg.author,
+        text:      link.text,
+        textColor: link.textColor,
+        endsAt:    endsAt
+      })
+    }
+    
+  } catch(e) { console.warn('failed to index adds-status', e) }
 }
