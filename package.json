@@ -35,7 +35,7 @@
     "scuttlebot": "~0.1.2",
     "secure-scuttlebutt": "~4.1.0",
     "ssb-keys": "~0.2.1",
-    "ssb-msgs": "~0.1.1",
+    "ssb-msgs": "~0.2.0",
     "stream-to-pull-stream": "~1.6.0",
     "through": "~2.3.4",
     "value-event": "~3.2.0",
