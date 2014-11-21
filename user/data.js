@@ -53,8 +53,12 @@ window.runQuery = function(e) {
   // execute query code
   try {
     queryError.textContent = ''
-    var filter = new Function('msg', 'return '+query)
-    renderMessages(_msgs.filter(filter))
+    var msgs = _msgs
+    if (query) {
+      var filter = new Function('msg', 'return '+query)
+      msgs =_msgs.filter(filter)
+    }
+    renderMessages(msgs)
   } catch (e) {
     queryError.textContent = e.toString()
     console.error(e)
