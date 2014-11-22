@@ -215,11 +215,39 @@ exports.mentionBoxInput = function(state, e) {
   state.suggestBox.textValue.set(word)
   state.suggestBox.selection.set(0)
   state.suggestBox.filtered.splice(0, state.suggestBox.filtered.getLength())
-  for (var i=0; i < state.suggestBox.options.getLength() && state.suggestBox.filtered.getLength() < 10; i++) {
+
+  var match = []
+  if(!word)
+    return state.suggestBox.active.set(false)
+
+  for (var i=0; i < state.suggestBox.options.getLength(); i++) {
     var opt = state.suggestBox.options.get(i)
-    if (opt.title.indexOf(word) === 0 || opt.subtitle.indexOf(word) === 0)
-      state.suggestBox.filtered.push(opt)
+    
+    var title = opt.title.indexOf(word), subtitle = opt.subtitle.indexOf(word)
+
+    var rank = (
+      title === -1
+    ? subtitle : subtitle === -1
+    ? title : Math.min(title, subtitle)
+    )
+
+    if(rank > -1) {
+      opt.rank = rank
+      match.push(opt)
+    }
   }
+
+  function compare (a, b) {
+    return a === b ? 0 : a < b ? -1 : 1
+  }
+
+  match = match.sort(function (a, b) {
+    return compare(a.rank, b.rank) || compare(a.title, b.title)
+  }).slice(0, 20)
+
+
+  while(match.length)
+    state.suggestBox.filtered.push(match.shift())
 
   // cancel if there's nothing available
   if (state.suggestBox.filtered.getLength() == 0)
@@ -230,6 +258,7 @@ exports.mentionBoxInput = function(state, e) {
 exports.mentionBoxKeypress = function(state, e) {
   if (state.suggestBox.active()) {
     var sel = state.suggestBox.selection()
+
     if (e.keyCode == 38 || e.keyCode == 40 || e.keyCode == 13 || e.keyCode == 9|| e.keyCode == 27)
       e.preventDefault()
 
