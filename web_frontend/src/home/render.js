@@ -1,5 +1,6 @@
 var mercury     = require('mercury')
 var h           = require('mercury').h
+var JSONH       = require('json-human-buffer')
 var util        = require('../../../lib/util')
 var valueEvents = require('../lib/value-events')
 var comren      = require('../lib/common-render')
@@ -232,9 +233,17 @@ function messagePage(state, msgid) {
 }
 
 function messageInfo(msg) {
-  return h('div.text-muted', [
-    h('p', h('small', [h('strong', 'Message ID:'), ' ', msg.idStr])),
-    h('p', h('small', [h('strong', 'Author\'s Contact ID:'), ' ', msg.authorStr]))
+  var info = {
+    content: msg.content,
+    sequence: msg.sequence,
+    previous: msg.previous,
+    author: msg.author,
+    signature: msg.signature,
+    timestamp: msg.timestamp
+  }
+  return h('div.message-info.text-muted', [
+    h('pre', msg.idStr),
+    h('pre', JSONH.stringify(info, null, 2))
   ])
 }
 
