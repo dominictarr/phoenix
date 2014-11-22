@@ -316,12 +316,24 @@ exports.showId = function(state, data) {
 exports.follow = function(state, data) {
   bus.followUser(state, data.id, function(err) {
     if (err) alert(err.toString())
+    else {
+      var pm = state.profileMap()
+      var profile = state.profiles.get(pm[data.id])
+
+      bubbleNotification('info', profile().nickname + ' followed')
+    }
   })
 }
 
 exports.unfollow = function(state, data) {
   bus.unfollowUser(state, data.id, function(err) {
     if (err) alert(err.toString())
+    else {
+      var pm = state.profileMap()
+      var profile = state.profiles.get(pm[data.id])
+
+      bubbleNotification('warning', profile().nickname + ' unfollowed')
+    }
   })
 }
 
@@ -424,4 +436,15 @@ exports.onGuipostReply = function(state, data) {
 
 function shortHex(str) {
   return str.slice(0, 6) + '..' + str.slice(-2)
+}
+
+function bubbleNotification(className, msg, t) {
+  t = t || 1500
+
+  state.bubble.show.set(true)
+  state.bubble.type.set(className)
+  state.bubble.msg.set(msg)
+  setTimeout(function() {
+    state.bubble.show.set(false)
+  }, t)
 }

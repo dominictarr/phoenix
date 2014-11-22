@@ -24,6 +24,12 @@ var defaults = {
       explanation: ''
     },
 
+    bubble: {
+      show: false,
+      msg: '',
+      type: ''
+    },
+
     feedView: {
       messages: [],
       messageMap: {},
@@ -148,6 +154,12 @@ function createHomeApp(events, initialState) {
       explanation:      mercury.value(state.conn.explanation)
     }),
 
+    bubble:           mercury.struct({
+      show:             mercury.value(state.bubble.show),
+      type:             mercury.value(state.bubble.type),
+      msg:              mercury.value(state.bubble.msg)
+    }),
+
     feedView:         mercury.struct({
       messages:         mercury.array(state.feedView.messages.map(createMessage)),
       messageMap:       mercury.value(state.feedView.messageMap),
@@ -191,7 +203,7 @@ function createHomeApp(events, initialState) {
       pubkey:           mercury.value(state.user.pubkey),
       pubkeyStr:        mercury.value(state.user.pubkeyStr),
       nickname:         mercury.value(state.user.nickname)
-    }), 
+    }),
 
     userPages:        mercury.value(state.userPages),
 

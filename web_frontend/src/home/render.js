@@ -38,6 +38,7 @@ function render(state) {
     mercury.partial(com.suggestBox, state.suggestBox),
     mercury.partial(header, state.events, state.user.idStr, state.isSyncing),
     mercury.partial(comren.connStatus, state.events, state.conn),
+    mercury.partial(comren.actionFeedback, state.events, state.bubble),
     h('.container', page)
   ])
 }

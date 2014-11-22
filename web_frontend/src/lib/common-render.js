@@ -24,6 +24,13 @@ var connStatus = exports.connStatus = function(events, connStatus) {
   return h('#conn-status.container', h('.alert.alert-danger', connStatus.explanation))
 }
 
+// notification system, types are "info", "warning", "error" and "success"
+var actionFeedback = exports.actionFeedback = function(events, bubble) {
+  if (!bubble.show)
+    return h('div')
+  return h('#action-feedback.container', h('.alert.alert-' + bubble.type, bubble.msg))
+}
+
 // not found message
 var notfound = exports.notfound = function(what, suggestion) {
   return h('div', [
