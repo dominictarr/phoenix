@@ -128,21 +128,18 @@ var userlink = exports.userlink = function(id, text, opts) {
   opts.className = (opts.className || '') + ' user-link'
   var idStr = util.toHexString(id)
   var profileLink = a('#/profile/'+idStr, text, opts)
-  var followLink = togglefollowlink(idStr, state.events)
+  var followLink = followlink(idStr, state.events)
 
   return h('span', [profileLink, [' '], followLink])
 }
 
-var togglefollowlink = exports.togglefollowlink = function(idStr, events) {
+var followlink = exports.followlink = function(idStr, events) {
   var notMe = state.user().idStr !== idStr
   var notFollowed = state.followedUsers().indexOf(idStr) < 0
 
-  if (notMe)
-    return notFollowed ?
-      a('javascript:;', 'follow', valueEvents.click(events.follow, { id: idStr })) :
-      a('javascript:;', 'unfollow', valueEvents.click(events.unfollow, { id: idStr }))
-  else
-    return ''
+  return notMe && notFollowed ?
+    a('javascript:;', '', { className: 'glyphicon glyphicon-plus', 'ev-click': valueEvents.click(events.follow, { id: idStr }) }) :
+    ''
 }
 
 var dropdown = exports.dropdown = function (text, items) {
