@@ -85,12 +85,12 @@ function nav(state) {
 function feedPage(state) {
   return h('.feed-page.row', comren.columns({
     main: [
-      mercury.partial(com.publishForm, state.feedView.publishForms[0], state.events, state.user, state.nicknameMap), 
+      mercury.partial(com.publishForm, state.feedView.publishForms[0], state.events, state.user, state.nicknameMap),
       mercury.partial(mainFeed, state.feedView, state.events, state.user, state.nicknameMap)
     ],
     nav: nav(state),
     side: [
-      mercury.partial(feedFilters, state.events, state.feedView.filters), 
+      mercury.partial(feedFilters, state.events, state.feedView.filters),
     ]
   }, [['nav', 1], ['main', 7], ['side', 4]]))
 }
@@ -118,7 +118,7 @@ function feedFilters(events, filters) {
         type: 'checkbox',
         checked: (filters[name]) ? 'checked' : '',
         'ev-event': mercury.changeEvent(events.toggleFilter, { filter: name, set: !filters[name] })
-      }), 
+      }),
       h('span', label)
     ])
   }

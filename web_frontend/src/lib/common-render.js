@@ -127,7 +127,22 @@ var userlink = exports.userlink = function(id, text, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
   var idStr = util.toHexString(id)
-  return a('#/profile/'+idStr, text, opts)
+  var profileLink = a('#/profile/'+idStr, text, opts)
+  var followLink = togglefollowlink(idStr, state.events)
+
+  return h('span', [profileLink, [' '], followLink])
+}
+
+var togglefollowlink = exports.togglefollowlink = function(idStr, events) {
+  var notMe = state.user().idStr !== idStr
+  var notFollowed = state.followedUsers().indexOf(idStr) < 0
+
+  if (notMe)
+    return notFollowed ?
+      a('javascript:;', 'follow', valueEvents.click(events.follow, { id: idStr })) :
+      a('javascript:;', 'unfollow', valueEvents.click(events.unfollow, { id: idStr }))
+  else
+    return ''
 }
 
 var dropdown = exports.dropdown = function (text, items) {
