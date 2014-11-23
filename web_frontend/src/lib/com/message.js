@@ -92,7 +92,7 @@ function renderMsgShell(content, msg, events, parentMsg, messages, messageMap, r
 
   var replyStr = renderMsgReplies(msg, replies)
   var reactionsStr = renderMsgReactions(replies, nicknameMap)
-  var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts)  
+  var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts)
 
   var parentHeader
   if (parentMsg) {

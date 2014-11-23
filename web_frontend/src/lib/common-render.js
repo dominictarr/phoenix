@@ -24,6 +24,13 @@ var connStatus = exports.connStatus = function(events, connStatus) {
   return h('#conn-status.container', h('.alert.alert-danger', connStatus.explanation))
 }
 
+// notification system, types are "info", "warning", "error" and "success"
+var actionFeedback = exports.actionFeedback = function(events, bubble) {
+  if (!bubble.show)
+    return h('div')
+  return h('#action-feedback.container', h('.alert.alert-' + bubble.type, bubble.msg))
+}
+
 // not found message
 var notfound = exports.notfound = function(what, suggestion) {
   return h('div', [
@@ -127,7 +134,19 @@ var userlink = exports.userlink = function(id, text, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
   var idStr = util.toHexString(id)
-  return a('#/profile/'+idStr, text, opts)
+  var profileLink = a('#/profile/'+idStr, text, opts)
+  var followLink = followlink(idStr, state.events)
+
+  return h('span', [profileLink, [' '], followLink])
+}
+
+var followlink = exports.followlink = function(idStr, events) {
+  var notMe = state.user().idStr !== idStr
+  var notFollowed = state.followedUsers().indexOf(idStr) < 0
+
+  return notMe && notFollowed ?
+    a('javascript:;', '', { className: 'glyphicon glyphicon-plus', 'ev-click': valueEvents.click(events.follow, { id: idStr }) }) :
+    ''
 }
 
 var dropdown = exports.dropdown = function (text, items) {
