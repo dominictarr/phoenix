@@ -14,6 +14,7 @@ exports.setRoute = function(state, route) {
     var at = Date.now()
     state.accessTime.set(at)
     localStorage.setItem('accessTime', at)
+    state.unreadMessages.set(0)
   }
   
   state.feedView.pagination.start.set(0)
