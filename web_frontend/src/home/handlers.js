@@ -9,6 +9,12 @@ var emojiNamedCharacters = require('emoji-named-characters')
 exports.setRoute = function(state, route) {
   // run any business needed, then update route
   route = route.substr(2) || 'feed'
+
+  if (route == 'inbox') {
+    var at = Date.now()
+    state.accessTime.set(at)
+    localStorage.setItem('accessTime', at)
+  }
   
   state.feedView.pagination.start.set(0)
   state.feedView.pagination.end.set(constants.PAGE_SIZE)
