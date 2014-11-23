@@ -137,9 +137,8 @@ var defaults = {
 
 function createHomeApp(events, initialState) {
   var state = extend(defaults.homeApp, initialState)
-
   // create object
-  return mercury.struct({
+  return window.STATE = mercury.struct({
     route:            mercury.value(state.route),
     events:           events,
 
@@ -168,6 +167,8 @@ function createHomeApp(events, initialState) {
       rebroadcasts:     mercury.value(state.feedView.rebroadcasts),
     }),
 
+    accessTime:         mercury.value(+(localStorage.accessTime || 0)),
+    unreadMessages:     mercury.value(0),
     notifications:    mercury.array(state.notifications.map(createNotification)),
     suggestBox:       mercury.struct({
       active:           mercury.value(state.suggestBox.active),

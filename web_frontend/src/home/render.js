@@ -64,7 +64,7 @@ function header(events, uId, isSyncing) {
 function nav(state) {
   var pages = [
     ['', 'feed'],
-    ['inbox', 'inbox'],
+    ['inbox', 'inbox ('+state.unreadMessages+')'],
   ].concat(state.userPages.map(function(page) {
     return ['user-page/'+page.url, page.name]
   }))
