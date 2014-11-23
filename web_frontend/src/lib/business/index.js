@@ -62,6 +62,13 @@ exports.syncView = function(state, cb) {
         ], msgstreamCmp),
         pull.drain(exports.processFeedMsg.bind(null, state), function(err) {
           if (err) return cb(err)
+          var count = 0
+          var accessed = state.accessTime()
+          state.notifications.forEach(function (note) {
+            if(note.timestamp > accessed)
+              count ++
+          })
+          state.unreadMessages.set(count)
           lastFetchTS = newTS
           cb()
         })
