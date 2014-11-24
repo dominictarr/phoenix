@@ -1,4 +1,5 @@
 var pull = require('pull-stream')
+var util = require('../../../lib/util')
 var constants = require('./const')
 var models = require('../lib/models')
 var bus = require('../lib/business')
@@ -357,7 +358,7 @@ exports.follow = function(state, data) {
       var profile = state.profiles.get(pm[data.id])
       var nickname = (profile) ? profile().nickname : shortHex(data.id)
 
-      bubbleNotification('info',  nickname + ' followed')
+      bubbleNotification(state, 'info',  nickname + ' followed')
     }
   })
 }
@@ -370,7 +371,7 @@ exports.unfollow = function(state, data) {
       var profile = state.profiles.get(pm[data.id])
       var nickname = (profile) ? profile().nickname : shortHex(data.id)
 
-      bubbleNotification('warning', nickname + ' unfollowed')
+      bubbleNotification(state, 'warning', nickname + ' unfollowed')
     }
   })
 }
@@ -473,10 +474,11 @@ exports.onGuipostReply = function(state, data) {
 }
 
 function shortHex(str) {
+  if (typeof str != 'string') str = util.toHexString(str)
   return str.slice(0, 6) + '..' + str.slice(-2)
 }
 
-function bubbleNotification(className, msg, t) {
+function bubbleNotification(state, className, msg, t) {
   t = t || 1500
 
   state.bubble.show.set(true)
