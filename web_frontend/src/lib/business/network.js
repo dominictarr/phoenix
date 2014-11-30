@@ -27,7 +27,6 @@ exports.fetchServers = function(state, cb) {
 // begins following a feed
 var followUser =
 exports.followUser = function(state, id, cb) {
-  var id = util.toBuffer(id)
   if (!id) return cb(new Error('Invalid ID'))
 
   // publish follows link
@@ -48,7 +47,6 @@ exports.followUser = function(state, id, cb) {
 // stops following a feed
 var unfollowUser =
 exports.unfollowUser = function(state, id, cb) {
-  var id = util.toBuffer(id)
   if (!id) return cb(new Error('Invalid ID'))
 
   // publish unfollows link

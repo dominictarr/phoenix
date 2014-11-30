@@ -94,9 +94,9 @@ var msgThread = exports.msgThread = function(msg, feedView, events, user, nickna
 function msgThreadTree(msg, feedView, events, user, nicknameMap) {
   // collect replies
   var replies = []
-  ;(feedView.replies[msg.idStr] || []).forEach(function(replyData) {
+  ;(feedView.replies[msg.id] || []).forEach(function(replyData) {
     // fetch and render message
-    var msgi  = feedView.messageMap[replyData.idStr] // look up index
+    var msgi  = feedView.messageMap[replyData.id] // look up index
     var reply = (typeof msgi != 'undefined') ? feedView.messages[feedView.messages.length - msgi - 1] : null
     if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && !reply.hidden) {
       replies.push(com.message(reply, feedView, events, user, nicknameMap, false))
@@ -133,19 +133,20 @@ var syncButton = exports.syncButton = function(events, isSyncing) {
 var userlink = exports.userlink = function(id, text, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
-  var idStr = util.toHexString(id)
-  var profileLink = a('#/profile/'+idStr, text, opts)
-  var followLink = followlink(idStr, state.events)
+  var profileLink = a('#/profile/'+id, text, opts)
+  var followLink = followlink(id, state.events)
 
   return h('span', [profileLink, [' '], followLink])
 }
 
-var followlink = exports.followlink = function(idStr, events) {
-  var notMe = state.user().idStr !== idStr
-  var notFollowed = state.followedUsers().indexOf(idStr) < 0
+var followlink = exports.followlink = function(id, events) {
+  // :TODO: this is wrong - state should not be referenced as a global
+  // replace an state references with proper arguments to this function
+  var notMe = state.user().id !== id
+  var notFollowed = state.followedUsers().indexOf(id) < 0
 
   return notMe && notFollowed ?
-    a('javascript:;', '', { className: 'glyphicon glyphicon-plus', 'ev-click': valueEvents.click(events.follow, { id: idStr }) }) :
+    a('javascript:;', '', { className: 'glyphicon glyphicon-plus', 'ev-click': valueEvents.click(events.follow, { id: id }) }) :
     ''
 }
 

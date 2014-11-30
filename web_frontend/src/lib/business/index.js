@@ -24,10 +24,8 @@ exports.setupHomeApp = function(state) {
     // session
     ws.api.whoami(function(err, data) {
       if (err) throw err
-      state.user.id.set(util.toBuffer(data.id))
-      state.user.idStr.set(util.toHexString(data.id))
-      state.user.pubkey.set(util.toBuffer(data.public))
-      state.user.pubkeyStr.set(util.toHexString(data.public))
+      state.user.id.set(data.id)
+      state.user.pubkey.set(data.public)
     })
     
     // :TODO: add when getUserPages is reimplmeneted

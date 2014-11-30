@@ -9,20 +9,18 @@ exports.processProfileMsg = function(state, msg) {
   console.log('PROFILE consumed', msg)
 
   var pid = msg.value.author
-  var pidStr = util.toHexString(pid)
   
   // lookup/create the profile
   var profile
   var pm = state.profileMap()
-  if (pidStr in pm) {
-    profile = state.profiles.get(pm[pidStr])
+  if (pid in pm) {
+    profile = state.profiles.get(pm[pid])
   } else {
     // new profile
     var i = state.profiles().length
     profile = { 
       id: pid,
-      idStr: pidStr,
-      nickname: pidStr
+      nickname: pid
     }
 
     // add to profiles    
@@ -30,7 +28,7 @@ exports.processProfileMsg = function(state, msg) {
     state.profiles.push(profile)
     
     // add to id->profile map
-    pm[pidStr] = i
+    pm[pid] = i
     state.profileMap.set(pm)
   }
 
@@ -41,23 +39,21 @@ exports.processProfileMsg = function(state, msg) {
 
       // update the nickname->profile map
       var nm = state.nicknameMap()
-      nm[pidStr] = profile.nickname()
+      nm[pid] = profile.nickname()
       state.nicknameMap.set(nm)
     }
   } catch(e) {}
 
   // pull into current user data
-  if (pidStr == state.user.idStr())
+  if (pid == state.user.id())
     state.user.nickname.set(profile.nickname())
 }
 
 // fetches a profile from the cache
 var getProfile =
 exports.getProfile = function(state, pid) {
-  var pidStr = (typeof pid == 'string') ? pid : util.toHexString(pid)
-
   var pm = state.profileMap()
-  if (pidStr in pm)
-    return state.profiles.get(pm[pidStr])
+  if (pid in pm)
+    return state.profiles.get(pm[pid])
   return null
 }

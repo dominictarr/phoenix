@@ -7,10 +7,9 @@ var bus      = require('./business')
 var ws       = require('./ws-rpc')
 
 var Serializer = require('pull-serializer')
-var JSONH = require('json-human-buffer')
 
 function serialize (stream) {
-  return Serializer(stream, JSONH, {split: '\n\n'})
+  return Serializer(stream, JSON, {split: '\n\n'})
 }
 
 var curRPC

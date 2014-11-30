@@ -75,9 +75,7 @@ var defaults = {
     servers: [],
     user: {
       id: null,
-      idStr: '',
       pubkey: null,
-      pubkeyStr: '',
       nickname: ''
     },
 
@@ -91,7 +89,6 @@ var defaults = {
     id: null,
     type: null,
     author: null,
-    authorStr: '',
     content: null,
     previous: null,
     sequence: 0,
@@ -106,7 +103,6 @@ var defaults = {
 
   profile: {
     id: null,
-    idStr: '',
     feed: [],
     nickname: '',
     joinDate: '',
@@ -132,7 +128,6 @@ var defaults = {
 
   notification: {
     type: '',
-    msgIdStr: '',
     authorNickname: '',
     msgText: ''
   }
@@ -200,9 +195,7 @@ function createHomeApp(events, initialState) {
     servers:          mercury.array(state.servers.map(createServer)),
     user:             mercury.struct({
       id:               mercury.value(state.user.id),
-      idStr:            mercury.value(state.user.idStr),
       pubkey:           mercury.value(state.user.pubkey),
-      pubkeyStr:        mercury.value(state.user.pubkeyStr),
       nickname:         mercury.value(state.user.nickname)
     }),
 
@@ -215,7 +208,6 @@ function createHomeApp(events, initialState) {
 
 function createMessage(initialState) {
   var state = extend(defaults.message, initialState)
-  state.authorStr        = state.author.toString('hex')
   state.isRunning        = mercury.value(state.isRunning)
   state.hidden           = mercury.value(state.hidden)
   state.rebroadcastsLink = mercury.value(state.rebroadcastsLink)

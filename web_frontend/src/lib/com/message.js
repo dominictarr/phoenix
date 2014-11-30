@@ -8,7 +8,7 @@ var publishForm = require('./publish-form').publishForm
 
 // helpers to lookup messages
 function lookup(messages, messageMap, entry) {
-  var msgi  = messageMap[entry.idStr]
+  var msgi  = messageMap[entry.id]
   return (typeof msgi != 'undefined') ? messages[messages.length - msgi - 1] : null
 }
 function lookupAll(messages, messageMap, index) {
@@ -37,24 +37,23 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
         return messageFollow(msg, nicknameMap)
       return ''
     case 'post':
-      var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { idStr: msg.repliesToLink.$msg.toString('hex') }) : null
+      var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { id: msg.repliesToLink.$msg }) : null
       if (msg.content.postType == 'action')
         return messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap)
       else if (msg.content.postType == 'gui') {
         // :TODO: gui posts are disabled for now
-        // main = messageGui(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
+        // main = messageGui(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
         return ''
       } else
-        main = messageText(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.idStr], feedView.rebroadcasts[msg.idStr], nicknameMap)
+        main = messageText(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
       break
     default:
       return ''
   }
 
   // reply/react form
-  var formId = util.toHexString(msg.id)
-  if (typeof publishFormMap[formId] != 'undefined') {
-    var i = publishFormMap[formId]
+  if (typeof publishFormMap[msg.id] != 'undefined') {
+    var i = publishFormMap[msg.id]
     main = h('div', [main, h('.message-reply', publishForm(publishForms[i], events, user, nicknameMap))])
   }
 
@@ -72,11 +71,11 @@ var messageGui = exports.messageGui = function(msg, events, parentMsg, messages,
   var content
   if (msg.isRunning) {
     content = h('.gui-post-wrapper.gui-running', [
-      new widgets.IframeSandbox(msg.content.text, msg.idStr, replies, events.onGuipostReply)
+      new widgets.IframeSandbox(msg.content.text, msg.id, replies, events.onGuipostReply)
     ])
   } else {
     content = h('.gui-post-wrapper', [
-      h('.gui-post-runbtn', {'ev-click': valueEvents.click(events.runMsgGui, { id: msg.idStr, run: true })}),
+      h('.gui-post-runbtn', {'ev-click': valueEvents.click(events.runMsgGui, { id: msg.id, run: true })}),
       h('pre.gui-post', h('code',msg.content.text))
     ])
   }
@@ -97,7 +96,7 @@ function renderMsgShell(content, msg, events, parentMsg, messages, messageMap, r
   var parentHeader
   if (parentMsg) {
     parentHeader = h('.panel-heading', [
-      're: ', comren.a('#/msg/'+parentMsg.idStr, new widgets.Markdown(comren.firstWords(parentMsg.content.text, 5), { nicknames: nicknameMap, inline: true }))
+      're: ', comren.a('#/msg/'+parentMsg.id, new widgets.Markdown(comren.firstWords(parentMsg.content.text, 5), { nicknames: nicknameMap, inline: true }))
     ])
   }
 
@@ -127,13 +126,12 @@ function renderMsgShell(content, msg, events, parentMsg, messages, messageMap, r
 
 // message header
 function renderMsgHeader(msg, events, nicknameMap) {
-  var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.idStr, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
+  var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.id, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
 
   if (msg.rebroadcastsLink) {
     // duplicated message
     var author = msg.rebroadcastsLink.$feed
-    var authorStr = util.toHexString(author)
-    var authorNick = nicknameMap[authorStr] || authorStr
+    var authorNick = nicknameMap[author] || author
     return h('p', [
       comren.userlink(author, authorNick),
       h('small.message-ctrls', [
@@ -148,10 +146,10 @@ function renderMsgHeader(msg, events, nicknameMap) {
   // normal message
   return h('p', [
     comren.userlink(msg.author, msg.authorNickname),
-    ' ', h('span', { innerHTML: comren.toEmoji(msg.authorStr.slice(0,16), 12) }),
+    ' ', h('span', { innerHTML: comren.toEmoji(msg.author.slice(0,16), 12) }),
     h('small.message-ctrls', [
       ' - ',
-      comren.a('#/msg/'+msg.idStr, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
+      comren.a('#/msg/'+msg.id, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
     ]),
     stopBtnStr
   ])
@@ -160,7 +158,7 @@ function renderMsgHeader(msg, events, nicknameMap) {
 // summary of reactions in the bottom of messages
 function renderMsgReplies(msg, replies) {
   var nReplies = (replies) ? replies.filter(function(r) { return r.content.type == 'post' && (r.content.postType == 'text' || r.content.postType == 'gui') }).length : 0
-  return (nReplies) ? comren.a('#/msg/'+msg.idStr, nReplies + ' replies') : ''
+  return (nReplies) ? comren.a('#/msg/'+msg.id, nReplies + ' replies') : ''
 }
 
 // list of reactions in the footer of messages
@@ -218,8 +216,8 @@ function renderMsgRebroadcasts(rebroadcasts) {
     // helper to reduce the list of messages to 1 per author
     var ids = {}
     return list.filter(function(msg) {
-      if (!ids[msg.authorStr]) {
-        ids[msg.authorStr] = 1
+      if (!ids[msg.author]) {
+        ids[msg.author] = 1
         return true
       }
       return false
@@ -232,8 +230,8 @@ function renderMsgRebroadcasts(rebroadcasts) {
 var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap) {
   var parentLink = ''
   if (msg.repliesToLink) {
-    var id = util.toHexString(msg.repliesToLink.$msg)
-    parentLink = comren.a('#/msg/'+id, comren.shortHex(id))
+    var id = msg.repliesToLink.$msg
+    parentLink = comren.a('#/msg/'+id, id)
   }
 
   return h('.phoenix-event', [
@@ -247,8 +245,8 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
 }
 
 var messageFollow = exports.messageFollow = function(msg, nicknameMap) {
-  var target = util.toHexString(msg.content.$feed)
-  var targetNickname = nicknameMap[target] || comren.shortHex(target)
+  var target = msg.content.$feed
+  var targetNickname = nicknameMap[target] || target
 
   return h('.phoenix-event', [
     h('p.event-body', [

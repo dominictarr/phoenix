@@ -10,19 +10,15 @@ exports.processFeedMsg = function(state, msg) {
   
   // prep message  
   var m = msg.value
-  m.id             = new Buffer(msg.key)
-  m.idStr          = util.toHexString(m.id)
-  m.previous       = new Buffer(m.previous)
-  m.author         = new Buffer(m.author)
-  m.signature      = new Buffer(m.signature) 
+  m.id             = msg.key
   var authorProf   = profiles.getProfile(state, m.author)
-  m.authorNickname = (authorProf) ? authorProf.nickname() : util.toHexString(m.author)
+  m.authorNickname = (authorProf) ? authorProf.nickname() : m.author
   m = models.message(m)
 
   // add to feed
   state.feedView.messages.unshift(m)
   var mm = state.feedView.messageMap()
-  mm[m.idStr] = state.feedView.messages.getLength() - 1
+  mm[m.id] = state.feedView.messages.getLength() - 1
   state.feedView.messageMap.set(mm)
 
   // add to profile's feed
@@ -47,72 +43,68 @@ exports.processFeedMsg = function(state, msg) {
 
 function indexFollow(state, msg, link) {
   try {
-    var authorIdStr = util.toHexString(msg.author)
-    var targetIdStr = util.toHexString(link.$feed)
-    if (authorIdStr == state.user.idStr()) {
+    if (msg.author == state.user.id()) {
       // add to list
-      state.followedUsers.push(targetIdStr)
+      state.followedUsers.push(link.$feed)
 
       // update profile if present
-      var targetProf = profiles.getProfile(state, targetIdStr)
+      var targetProf = profiles.getProfile(state, link.$feed)
       if (targetProf)
         targetProf.isFollowing.set(true)
     }
-    if (targetIdStr == state.user.idStr()) {
+    if (link.$feed == state.user.id()) {
       // add to list
-      state.followerUsers.push(authorIdStr)
+      state.followerUsers.push(msg.author)
     }
   } catch(e) { console.warn('failed to index follow', e) }
 }
 
 function indexUnfollow(state, msg, link) {
   try {
-    var authorIdStr = util.toHexString(msg.author)
-    var targetIdStr = util.toHexString(link.$feed)
-    if (authorIdStr == state.user.idStr()) {
+    if (msg.author == state.user.id()) {
       // remove from list
-      state.followedUsers.splice(state.followedUsers.indexOf(targetIdStr), 1)
+      state.followedUsers.splice(state.followedUsers.indexOf(link.$feed), 1)
 
       // update profile if present
-      var targetProf = profiles.getProfile(state, targetIdStr)
+      var targetProf = profiles.getProfile(state, link.$feed)
       if (targetProf)
         targetProf.isFollowing.set(false)
     }
-    if (targetIdStr == state.user.idStr()) {
+    if (link.$feed == state.user.id()) {
       // remove from list
-      state.followerUsers.splice(state.followerUsers.indexOf(authorIdStr), 1)
+      state.followerUsers.splice(state.followerUsers.indexOf(msg.author), 1)
     }
   } catch(e) { console.warn('failed to index follow', e) }
 }
 
 function indexReply(state, msg, link) {
   try {
-    var id = util.toHexString(link.$msg)
-    if (id) {
-      // index the reply
-      var fr = state.feedView.replies()
-      if (!fr[id]) fr[id] = []
-      fr[id].push({ idStr: msg.idStr, type: msg.content.type })
-      state.feedView.replies.set(fr)
+    if (!link.$msg)
+      return false
 
-      // put this link in a consistent place on the msssage
-      msg.repliesToLink.set(link)
+    // index the reply
+    var fr = state.feedView.replies()
+    if (!fr[link.$msg]) fr[link.$msg] = []
+    fr[link.$msg].push({ id: msg.id, type: msg.content.type })
+    state.feedView.replies.set(fr)
 
-      // add a notification if it's a reply to the user's message
-      var mm = state.feedView.messageMap()
-      var targetMsg = state.feedView.messages.get(state.feedView.messages.getLength() - mm[id] - 1)
-      if (targetMsg && targetMsg.authorStr == state.user.idStr()) {
-        var type = 'reply'
-        if (msg.content.postType == 'action') type = 'reaction'
-        state.notifications.push(models.notification({
-          type:           type,
-          msgIdStr:       msg.idStr,
-          authorNickname: msg.authorNickname,
-          msgText:        msg.content.text.split('\n')[0],
-          timestamp:      msg.timestamp
-        }))
-        return true
-      }
+    // put this link in a consistent place on the msssage
+    msg.repliesToLink.set(link)
+
+    // add a notification if it's a reply to the user's message
+    var mm = state.feedView.messageMap()
+    var targetMsg = state.feedView.messages.get(state.feedView.messages.getLength() - mm[link.$msg] - 1)
+    if (targetMsg && targetMsg.author == state.user.id()) {
+      var type = 'reply'
+      if (msg.content.postType == 'action') type = 'reaction'
+      state.notifications.push(models.notification({
+        type:           type,
+        msgId:          msg.id,
+        authorNickname: msg.authorNickname,
+        msgText:        msg.content.text.split('\n')[0],
+        timestamp:      msg.timestamp
+      }))
+      return true
     }
   } catch(e) { console.warn('failed to index reply', e) }
   return false
@@ -120,23 +112,23 @@ function indexReply(state, msg, link) {
 
 function indexRebroadcast(state, msg, link, msgMap) {
   try {
-    var id = util.toHexString(link.$msg)
-    if (id) {
-      var fr = state.feedView.rebroadcasts()
-      if (!fr[id]) fr[id] = []
-      fr[id].push({ idStr: msg.idStr })
-      state.feedView.rebroadcasts.set(fr)
+    if (!link.$msg)
+      return
 
-      // put this link in a consistent place on the msssage
-      msg.rebroadcastsLink.set(link)
+    var fr = state.feedView.rebroadcasts()
+    if (!fr[link.$msg]) fr[link.$msg] = []
+    fr[link.$msg].push({ id: msg.id })
+    state.feedView.rebroadcasts.set(fr)
 
-      // hide the rebroadcast if the original is already in the feed
-      if (msgMap[id]) {
-        msg.hidden.set(true)
-      } else {
-        // use this one to represent the original
-        msgMap[id] = state.feedView.messages.getLength() - 1
-      }
+    // put this link in a consistent place on the msssage
+    msg.rebroadcastsLink.set(link)
+
+    // hide the rebroadcast if the original is already in the feed
+    if (msgMap[link.$msg]) {
+      msg.hidden.set(true)
+    } else {
+      // use this one to represent the original
+      msgMap[link.$msg] = state.feedView.messages.getLength() - 1
     }
   } catch(e) { console.warn('failed to index rebroadcast', e) }
 }
@@ -145,11 +137,11 @@ function indexMentions(state, msg, link) {
   // look for mentions of the current user and create notifications for them
   var fr = state.feedView.rebroadcasts()
   try {
-    if (util.toHexString(link.$feed) != state.user.idStr()) return // not for current user
-    if (msg.rebroadcastsLink && fr[util.toHexString(msg.rebroadcastsLink.$msg)]) return // already handled
+    if (link.$feed != state.user.id()) return // not for current user
+    if (msg.rebroadcastsLink && fr[msg.rebroadcastsLink.$msg]) return // already handled
     state.notifications.push(models.notification({
       type:          'mention',
-      msgIdStr:       msg.idStr,
+      msgId:          msg.id,
       authorNickname: msg.authorNickname,
       msgText:        msg.content.text.split('\n')[0],
       timestamp:      msg.timestamp

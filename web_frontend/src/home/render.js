@@ -1,6 +1,5 @@
 var mercury     = require('mercury')
 var h           = require('mercury').h
-var JSONH       = require('json-human-buffer')
 var util        = require('../lib/util')
 var valueEvents = require('../lib/value-events')
 var comren      = require('../lib/common-render')
@@ -37,7 +36,7 @@ function render(state) {
   return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
     mercury.partial(com.suggestBox, state.suggestBox),
-    mercury.partial(header, state.events, state.user.idStr, state.isSyncing),
+    mercury.partial(header, state.events, state.user.id, state.isSyncing),
     mercury.partial(comren.connStatus, state.events, state.conn),
     mercury.partial(comren.actionFeedback, state.events, state.bubble),
     h('.container', page)
@@ -145,11 +144,11 @@ function feedFilters(events, filters) {
 
 function inboxPage(state) {
   var msgs = state.notifications.map(function(note) {
-    var msgi  = state.feedView.messageMap[note.msgIdStr]
+    var msgi  = state.feedView.messageMap[note.msgId]
     return (typeof msgi != 'undefined') ? state.feedView.messages[state.feedView.messages.length - msgi - 1] : null
   })
   var events = state.feedView.messages.filter(function(msg) {
-    if (msg.content.type == 'follow' && util.toHexString(msg.content.$feed) === state.user.idStr) return true
+    if (msg.content.type == 'follow' && msg.content.$feed === state.user.id) return true
     return false
   })
 
@@ -171,7 +170,7 @@ function profilePage(state, profid) {
       h('.col-xs-7', [comren.notfound('that user')])
     ])
   }
-  var isYou = (state.user.idStr == profid)
+  var isYou = (state.user.id == profid)
   var followsYou = (state.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
     nav: nav(state),
@@ -186,8 +185,8 @@ function profilePage(state, profid) {
 
 function profileControls(events, profile, isYou, followsYou) {
   var followBtn = (profile.isFollowing) ?
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Unfollow') :
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Follow')
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.id })}, 'Unfollow') :
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.id })}, 'Follow')
   return h('.profile-ctrls', [
     h('.panel.panel-default',
       h('.panel-body', [
@@ -206,7 +205,7 @@ function profileControls(events, profile, isYou, followsYou) {
       if (Date.now() > status.endsAt)
         return
       return h('div', [
-        h('a', { style: { color: util.escapePlain(status.textColor||'#000')}, href: '#/msg/'+util.toHexString(status.msg) }, status.text),
+        h('a', { style: { color: util.escapePlain(status.textColor||'#000')}, href: '#/msg/'+status.msg }, status.text),
       ])
     })
   ])
@@ -243,7 +242,7 @@ function messageInfo(msg) {
     timestamp: msg.timestamp
   }
   return h('div.message-info.text-muted', [
-    h('pre', msg.idStr),
+    h('pre', msg.id),
     h('pre', JSONH.stringify(info, null, 2))
   ])
 }
@@ -252,8 +251,8 @@ function messageInfo(msg) {
 // ============
 
 function networkPage(state) {
-  function getProfile(idStr) {
-    return state.profiles[state.profileMap[idStr]] || { id: util.toBuffer(idStr), idStr: idStr }
+  function getProfile(id) {
+    return state.profiles[state.profileMap[id]] || { id: id }
   }
   var followedProfiles = state.followedUsers.map(getProfile)
   var followerProfiles = state.followerUsers.map(getProfile)
@@ -301,9 +300,9 @@ function profileLinks(events, profiles, canRemove) {
 
 function profileLink(events, canRemove, profile) {
   return h('h3', [
-    a('/#/profile/'+profile.idStr, profile.nickname || comren.shortHex(profile.idStr)),
+    a('/#/profile/'+profile.id, profile.nickname || profile.id),
     (canRemove)
-      ? h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.idStr })}, 'remove')
+      ? h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
       : ''
   ])
 }

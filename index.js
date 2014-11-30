@@ -6,15 +6,13 @@ var less       = require('less')
 var browserify = require('browserify')
 var request    = require('request')
 
-var seal = require('../scuttlebot/lib/seal')(require('ssb-keys')) // :TODO: this needs to be a module or something
-
 // stupid-simple etag solution: cache everything!
 var eTag       = (Math.random() * 100000)|0
 
 module.exports = function (server) {
   // generate an access token for the frontend
   var accessSecret = server.createAccessKey({allow: null}) // allow all
-  var accessToken = seal.signHmac(accessSecret, {
+  var accessToken = server.options.signObjHmac(accessSecret, {
     role: 'client',
     ts: Date.now(),
     keyId: server.options.hash(accessSecret)
