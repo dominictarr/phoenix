@@ -4,12 +4,23 @@ var path       = require('path')
 var multicb    = require('multicb')
 var less       = require('less')
 var browserify = require('browserify')
-var request    = require('request');
+var request    = require('request')
+
+var seal = require('../scuttlebot/lib/seal')(require('ssb-keys')) // :TODO: this needs to be a module or something
 
 // stupid-simple etag solution: cache everything!
 var eTag       = (Math.random() * 100000)|0
 
 module.exports = function (server) {
+  // generate an access token for the frontend
+  var accessSecret = server.createAccessKey({allow: null}) // allow all
+  var accessToken = seal.signHmac(accessSecret, {
+    role: 'client',
+    ts: Date.now(),
+    keyId: server.options.hash(accessSecret)
+  })
+
+  // HTTP request handler
   server.on('request', function(req, res) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
     function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
@@ -36,6 +47,13 @@ module.exports = function (server) {
       b.ignore('level-sublevel/bytewise')
       b.ignore('pull-level')
       b.bundle(once(cb))
+    }
+
+    // Local-host only
+    if (req.socket.remoteAddress != '127.0.0.1') {
+      console.log('Remote access attempted by', req.socket.remoteAddress)
+      res.writeHead(403)
+      return res.end('Remote access forbidden')
     }
 
     // Caching
@@ -124,6 +142,10 @@ module.exports = function (server) {
           res.end(err.toString())
           console.error(err.toString())
         } else {
+          // inject the access token for the home page
+          if (req.url == '/js/home.js')
+            jsStr = 'window.RPC_ACCESS_TOKEN = '+JSON.stringify(accessToken)+';\n' + jsStr
+
           type('application/javascript')
           res.writeHead(200)
           res.end(jsStr)

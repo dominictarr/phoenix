@@ -1,7 +1,7 @@
-var pull  = require('pull-stream')
-var merge = require('pull-merge')
-var util  = require('../util')
-var ws    = require('../ws-rpc')
+var pull    = require('pull-stream')
+var merge   = require('pull-merge')
+var util    = require('../util')
+var ws      = require('../ws-rpc')
 
 function include(m) {
   for (var k in m)
@@ -15,22 +15,29 @@ include(require('./network'))
 // pulls down remote data for the session
 exports.setupHomeApp = function(state) {
   ws.connect(state)
-  // session
-  ws.api.whoami(function(err, data) {
-    if (err) throw err
-    state.user.id.set(util.toBuffer(data.id))
-    state.user.idStr.set(util.toHexString(data.id))
-    state.user.pubkey.set(util.toBuffer(data.public))
-    state.user.pubkeyStr.set(util.toHexString(data.public))
-  })
-  
-  // :TODO: add when getUserPages is reimplmeneted
-  /*ws.api.getUserPages(function(err, pages) {
-    state.userPages.set(pages)
-  })*/
 
-  // construct local state
-  exports.syncView(state)
+  // authorize using access-token injected by the server
+  ws.api.auth(window.RPC_ACCESS_TOKEN, function(err) {
+    if (err)
+      return console.error('Failed to authenticate with backend', err)
+
+    // session
+    ws.api.whoami(function(err, data) {
+      if (err) throw err
+      state.user.id.set(util.toBuffer(data.id))
+      state.user.idStr.set(util.toHexString(data.id))
+      state.user.pubkey.set(util.toBuffer(data.public))
+      state.user.pubkeyStr.set(util.toHexString(data.public))
+    })
+    
+    // :TODO: add when getUserPages is reimplmeneted
+    /*ws.api.getUserPages(function(err, pages) {
+      state.userPages.set(pages)
+    })*/
+
+    // construct local state
+    exports.syncView(state)
+  })
 }
 
 // pulls down remote data for the session
