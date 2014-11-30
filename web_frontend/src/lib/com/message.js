@@ -3,7 +3,7 @@ var h           = require('mercury').h
 var valueEvents = require('../value-events')
 var widgets     = require('../widgets')
 var comren      = require('../common-render')
-var util        = require('../../../../lib/util')
+var util        = require('../util')
 var publishForm = require('./publish-form').publishForm
 
 // helpers to lookup messages

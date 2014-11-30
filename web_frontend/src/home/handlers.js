@@ -1,5 +1,5 @@
 var pull = require('pull-stream')
-var util = require('../../../lib/util')
+var util = require('../lib/util')
 var constants = require('./const')
 var models = require('../lib/models')
 var bus = require('../lib/business')

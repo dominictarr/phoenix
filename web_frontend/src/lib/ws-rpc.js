@@ -1,8 +1,54 @@
+var muxrpc      = require('muxrpc')
+var Serializer  = require('pull-serializer')
 var pull        = require('pull-stream')
 var toPull      = require('stream-to-pull-stream')
 var WSStream    = require('websocket-stream')
 var through     = require('through')
-var rpcapi      = require('../../../lib/rpcapi')
+
+// :TODO:
+// it would be much better to get the RPC API from scuttlebot
+// but scuttlebot imports this module, so we cant import scuttlebot w/o a circular dependency
+// until this is solved, the scuttlebot manifest and serializer are copied here:
+
+function serialize (stream) {
+  return Serializer(stream, JSON, {split: '\n\n'})
+}
+
+var manifest = {
+  async: [
+    'add',
+    'get',
+    'getPublicKey',
+    'getLatest',
+    'whoami',
+    'auth',
+
+    // admin api
+    'follow',
+    'unfollow',
+    'isFollowing',
+    'setProfile',
+
+    //local nodes
+    'getLocal',
+  ],
+
+  source: [
+    'createFeedStream',
+    'createHistoryStream',
+    'createLogStream',
+    'messagesByType',
+    'messagesLinkedToMessage',
+    'messagesLinkedToFeed',
+    'messagesLinkedFromFeed',
+    'feedsLinkedToFeed',
+    'feedsLinkedFromFeed',
+
+    // admin api
+    'followedUsers'
+  ]
+}
+
 
 var api = exports.api = null
 
@@ -14,7 +60,7 @@ var connect = exports.connect = function(state) {
   conn.on('error', handleClientError.bind(null, state))
   conn.on('close', handleClientClose.bind(null, state))
 
-  api = exports.api = rpcapi.client()
+  api = exports.api = muxrpc(manifest, null, serialize) ({})
   var clientStream = api.createStream()
   pull(clientStream, toPull.duplex(conn), clientStream)
 

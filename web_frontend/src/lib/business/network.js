@@ -1,4 +1,4 @@
-var util = require('../../../../lib/util')
+var util = require('../util')
 var ws   = require('../ws-rpc')
 
 // loads the network nodes

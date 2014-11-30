@@ -1,6 +1,6 @@
 var pull    = require('pull-stream')
 var multicb = require('multicb')
-var util    = require('../../../../lib/util')
+var util    = require('../util')
 var models  = require('../models')
 
 

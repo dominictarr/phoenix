@@ -1,6 +1,6 @@
 var pull  = require('pull-stream')
 var merge = require('pull-merge')
-var util  = require('../../../../lib/util')
+var util  = require('../util')
 var ws    = require('../ws-rpc')
 
 function include(m) {
@@ -23,9 +23,11 @@ exports.setupHomeApp = function(state) {
     state.user.pubkey.set(util.toBuffer(data.public))
     state.user.pubkeyStr.set(util.toHexString(data.public))
   })
-  ws.api.getUserPages(function(err, pages) {
+  
+  // :TODO: add when getUserPages is reimplmeneted
+  /*ws.api.getUserPages(function(err, pages) {
     state.userPages.set(pages)
-  })
+  })*/
 
   // construct local state
   exports.syncView(state)

@@ -1,4 +1,4 @@
-var util  = require('../../../../lib/util')
+var util  = require('../util')
 var emojiNamedCharacters = require('emoji-named-characters')
 var marked = require('marked');
 

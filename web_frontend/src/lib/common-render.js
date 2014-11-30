@@ -4,7 +4,7 @@ var baseEmoji   = require('base-emoji')
 var valueEvents = require('./value-events')
 var widgets     = require('./widgets')
 var com         = require('./com')
-var util        = require('../../../lib/util')
+var util        = require('./util')
 
 
 // puts the given vdom parts in columns given a `layout` config
