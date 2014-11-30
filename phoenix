@@ -16,11 +16,6 @@ nomnom.command('setup')
 nomnom.command('serve')
   .help('Starts the phoenix server.')
   .options({
-    daemon: {
-      flag: true,
-      abbr: 'd',
-      help: 'Run the server in the background as a daemon.'
-    },
     port: {
       help: 'Sets the port for the server.',
       default: 65000
