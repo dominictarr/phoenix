@@ -195,7 +195,7 @@ var img = exports.img = function (src) {
   return h('img', { src: src })
 }
 
-var shortHex = exports.shortHex = function (str) {
+var shortString = exports.shortString = function (str) {
   return str.slice(0, 6) + '...' + str.slice(-2)
 }
 
@@ -207,6 +207,8 @@ var numberToHex = exports.numberToHex = function (v) {
 }
 
 var toEmoji = exports.toEmoji = function (buf, size) {
+  // :TODO:
+  return buf
   size = size || 20
   if (!buf)
     return ''

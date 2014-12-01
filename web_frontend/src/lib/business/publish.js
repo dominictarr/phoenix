@@ -79,3 +79,9 @@ exports.publishRebroadcast = function(state, msg, cb) {
   }
   ws.api.add(msg.content, cb)
 }
+
+// updates the user's profile
+var publishText =
+exports.publishProfile = function(state, nickname, cb) {
+  ws.api.add({type: 'profile', nickname: nickname}, cb)
+}

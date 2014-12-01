@@ -3,7 +3,6 @@ var multicb = require('multicb')
 var util    = require('../util')
 var models  = require('../models')
 
-
 // consumes a new profile message into the materialized view
 exports.processProfileMsg = function(state, msg) {
   console.log('PROFILE consumed', msg)
@@ -11,26 +10,9 @@ exports.processProfileMsg = function(state, msg) {
   var pid = msg.value.author
   
   // lookup/create the profile
-  var profile
-  var pm = state.profileMap()
-  if (pid in pm) {
-    profile = state.profiles.get(pm[pid])
-  } else {
-    // new profile
-    var i = state.profiles().length
-    profile = { 
-      id: pid,
-      nickname: pid
-    }
-
-    // add to profiles    
-    profile = models.profile(profile)
-    state.profiles.push(profile)
-    
-    // add to id->profile map
-    pm[pid] = i
-    state.profileMap.set(pm)
-  }
+  var profile = getProfile(state, pid)
+  if (!profile)
+    profile = addProfile(state, pid)
 
   try {
     // update values with message content
@@ -56,4 +38,25 @@ exports.getProfile = function(state, pid) {
   if (pid in pm)
     return state.profiles.get(pm[pid])
   return null
+}
+
+// adds a profile for the given id
+var addProfile =
+exports.addProfile = function(state, pid) {
+  var i = state.profiles().length
+  profile = { 
+    id: pid,
+    nickname: util.shortString(pid)
+  }
+
+  // add to profiles    
+  profile = models.profile(profile)
+  state.profiles.push(profile)
+  
+  // add to id->profile map
+  var pm = state.profileMap()
+  pm[pid] = i
+  state.profileMap.set(pm)
+
+  return profile
 }

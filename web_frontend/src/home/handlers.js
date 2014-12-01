@@ -204,7 +204,7 @@ exports.mentionBoxInput = function(state, e) {
     state.suggestBox.options.splice(0, state.suggestBox.options.getLength())
     if (mentionType == 'profile') {
       state.profiles.forEach(function(profile) {
-        state.suggestBox.options.push({ title: profile.nickname(), subtitle: shortHex(profile.idStr), value: profile.idStr })
+        state.suggestBox.options.push({ title: profile.nickname(), subtitle: util.shortString(profile.idStr), value: profile.idStr })
       })
     } else {
       for (var emoji in emojiNamedCharacters) {
@@ -350,13 +350,25 @@ exports.showId = function(state, data) {
   prompt('User Contact ID', data.id)
 }
 
+exports.setUserNickname = function(state) {
+  var nickname = prompt('Enter your nickname')
+  if (!nickname)
+    return
+  if (!confirm('Set your nickname to '+nickname+'?'))
+    return
+  bus.publishProfile(state, nickname, function(err) {
+    if (err) alert(err.toString())
+    else bus.syncView(state)
+  })
+}
+
 exports.follow = function(state, data) {
   bus.followUser(state, data.id, function(err) {
     if (err) alert(err.toString())
     else {
       var pm = state.profileMap()
       var profile = state.profiles.get(pm[data.id])
-      var nickname = (profile) ? profile().nickname : shortHex(data.id)
+      var nickname = (profile) ? profile().nickname : util.shortString(data.id)
 
       bubbleNotification(state, 'info',  nickname + ' followed')
     }
@@ -369,7 +381,7 @@ exports.unfollow = function(state, data) {
     else {
       var pm = state.profileMap()
       var profile = state.profiles.get(pm[data.id])
-      var nickname = (profile) ? profile().nickname : shortHex(data.id)
+      var nickname = (profile) ? profile().nickname : util.shortString(data.id)
 
       bubbleNotification(state, 'warning', nickname + ' unfollowed')
     }
@@ -471,11 +483,6 @@ exports.onGuipostReply = function(state, data) {
     if (!err) bus.syncView(state) // pull down the update
     data.cb(err, result)
   }
-}
-
-function shortHex(str) {
-  if (typeof str != 'string') str = util.toHexString(str)
-  return str.slice(0, 6) + '..' + str.slice(-2)
 }
 
 function bubbleNotification(state, className, msg, t) {

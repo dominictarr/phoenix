@@ -26,6 +26,8 @@ function render(state) {
   } else if (state.route.indexOf('user-page/') === 0) {
     var pageAddress = state.route.slice(10)
     page = userPage(state, pageAddress)
+  } else if (state.route.indexOf('setup') === 0) {
+    page = setupPage(state)
   } else if (state.route.indexOf('help') === 0) {
     var section = state.route.slice(5) || 'intro'
     page = helpPage(state, section)
@@ -184,9 +186,14 @@ function profilePage(state, profid) {
 }
 
 function profileControls(events, profile, isYou, followsYou) {
-  var followBtn = (profile.isFollowing) ?
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.id })}, 'Unfollow') :
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.id })}, 'Follow')
+  var setNicknameBtn = (isYou) ?
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.setUserNickname)}, 'Change Nickname') :
+    undefined
+  var followBtn = (!isYou) ?
+    ((profile.isFollowing) ?
+      h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'Unfollow') :
+      h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow, { id: profile.id })}, 'Follow')) :
+    undefined
   return h('.profile-ctrls', [
     h('.panel.panel-default',
       h('.panel-body', [
@@ -194,7 +201,7 @@ function profileControls(events, profile, isYou, followsYou) {
         (followsYou) ? [h('span.label.label-primary', 'Follows You'), ' '] : ''
       ])
     ),
-    (!isYou) ? h('p', followBtn) : '',
+    h('p', [setNicknameBtn, followBtn]),
     h('div.text-muted', [
       h('small', h('strong', 'Contact ID:')),
       h('br'),
@@ -307,8 +314,8 @@ function profileLink(events, canRemove, profile) {
   ])
 }
 
-// App Page
-// ========
+// User Page
+// =========
 
 function userPage(state, address) {
   var id = (Math.random()*10000)|0
@@ -318,6 +325,19 @@ function userPage(state, address) {
       h('iframe#user-page-'+id, { src: '/user/'+address, sandbox: 'allow-scripts' })
     ],
   }, [['nav', 1], ['main', 11]]))
+}
+
+// Setup Page
+// ==========
+
+function setupPage(state) {
+  return h('.setup-page.row', [
+    h('.col-xs-12', [
+      h('h1', 'Welcome to Phoenix'),
+      h('h2.alert.alert-danger', 'AHHH You need to set your nickname!'),
+      h('.btn.btn-primary', {'ev-click': valueEvents.click(state.events.setUserNickname)}, 'PRESS THIS')
+    ])
+  ])
 }
 
 // Help Page

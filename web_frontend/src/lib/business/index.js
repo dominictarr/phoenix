@@ -18,14 +18,20 @@ exports.setupHomeApp = function(state) {
 
   // authorize using access-token injected by the server
   ws.api.auth(window.RPC_ACCESS_TOKEN, function(err) {
-    if (err)
-      return console.error('Failed to authenticate with backend', err)
+    if (err) {
+      state.conn.hasError.set(true)
+      state.conn.explanation.set('Failed to authenticate with the local server: ' + err.message)
+      console.error('Failed to authenticate with backend', err)
+      return
+    }
 
     // session
     ws.api.whoami(function(err, data) {
       if (err) throw err
       state.user.id.set(data.id)
       state.user.pubkey.set(data.public)
+      if (!exports.getProfile(state, data.id))
+        exports.addProfile(state, data.id)
     })
     
     // :TODO: add when getUserPages is reimplmeneted
@@ -69,6 +75,8 @@ exports.syncView = function(state, cb) {
         ], msgstreamCmp),
         pull.drain(exports.processFeedMsg.bind(null, state), function(err) {
           if (err) return cb(err)
+
+          // count unread notes
           var count = 0
           var accessed = state.accessTime()
           state.notifications.forEach(function (note) {
@@ -76,6 +84,14 @@ exports.syncView = function(state, cb) {
               count ++
           })
           state.unreadMessages.set(count)
+
+          // route to setup page if the user has no profile
+          var prof = exports.getProfile(state, state.user.id())
+          if (!prof.joinDate())
+            window.location.hash = '#/setup'
+          else if (window.location.hash == '#/setup')
+            window.location.hash = '#'
+
           lastFetchTS = newTS
           cb()
         })

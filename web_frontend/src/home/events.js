@@ -27,6 +27,7 @@ function createEvents() {
     'loadMore',
     'addFeed',
     'showId',
+    'setUserNickname',
     'follow',
     'unfollow',
     'sync',
