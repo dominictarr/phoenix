@@ -199,20 +199,13 @@ var shortString = exports.shortString = function (str) {
   return str.slice(0, 6) + '...' + str.slice(-2)
 }
 
-var numberToHex = exports.numberToHex = function (v) {
-  var x = (+v).toString(16)
-  if (x.length === 1)
-    return '0'+x
-  return x
-}
-
 var toEmoji = exports.toEmoji = function (buf, size) {
-  // :TODO:
-  return buf
   size = size || 20
   if (!buf)
     return ''
+  if (typeof buf == 'string')
+    buf = new Buffer(buf.slice(0, buf.indexOf('.')), 'base64')
   return baseEmoji.toCustom(buf, function(v, emoji) {
-    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt="'+numberToHex(v)+'" title="'+((+v).toString(16))+'">'
+    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt=":'+emoji.name+':" title="'+((+v).toString(16))+'">'
   })
 }
