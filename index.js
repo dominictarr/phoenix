@@ -12,6 +12,9 @@ exports.version = '1.0.0'
 exports.manifest = {
   'getUserPages': 'async'
 }
+exports.permissions = {
+  anonymous: {deny: ['getUserPages']}
+}
 
 exports.init = function (server) {
   server.on('request', onRequest(server))
