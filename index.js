@@ -10,14 +10,6 @@ var request    = require('request')
 var eTag       = (Math.random() * 100000)|0
 
 module.exports = function (server) {
-  // generate an access token for the frontend
-  var accessSecret = server.createAccessKey({allow: null}) // allow all
-  var accessToken = server.options.signObjHmac(accessSecret, {
-    role: 'client',
-    ts: Date.now(),
-    keyId: server.options.hash(accessSecret)
-  })
-
   // HTTP request handler
   server.on('request', function(req, res) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
@@ -27,6 +19,14 @@ module.exports = function (server) {
     function read(file) { return fs.createReadStream(resolve(file)); }
     function serve(file) { return read(file).on('error', serve404).pipe(res) }
     function serve404() {  res.writeHead(404); res.end('Not found'); }
+    function genAccessToken() {
+      var accessSecret = server.createAccessKey({allow: null}) // allow all
+      return server.options.signObjHmac(accessSecret, {
+        role: 'client',
+        ts: Date.now(),
+        keyId: server.options.hash(accessSecret)
+      })
+    }
     function renderCss(name, cb) {
       var filepath = resolve('less/'+name)
       fs.readFile(filepath, { encoding: 'utf-8' }, function(err, lessStr) {
@@ -142,7 +142,7 @@ module.exports = function (server) {
         } else {
           // inject the access token for the home page
           if (req.url == '/js/home.js')
-            jsStr = 'window.RPC_ACCESS_TOKEN = '+JSON.stringify(accessToken)+';\n' + jsStr
+            jsStr = 'window.RPC_ACCESS_TOKEN = '+JSON.stringify(genAccessToken())+';\n' + jsStr
 
           type('application/javascript')
           res.writeHead(200)
