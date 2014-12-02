@@ -4,6 +4,7 @@ var pull        = require('pull-stream')
 var toPull      = require('stream-to-pull-stream')
 var WSStream    = require('websocket-stream')
 var through     = require('through')
+var util        = require('./util')
 
 // :TODO:
 // it would be much better to get the RPC API from scuttlebot
@@ -53,7 +54,7 @@ var manifest = {
 var api = exports.api = null
 
 // establishes the server api connection
-var connect = exports.connect = function(state) {
+var connect = exports.connect = function(state, cb) {
   if (api) return
 
   var conn = WSStream('ws://' + window.location.host + '/ws')
@@ -68,17 +69,22 @@ var connect = exports.connect = function(state) {
   window.Buffer = Buffer
   window.rpcapi = api
 
-  // :DOUBLE-DEBUG:
-  window.sync = function(host, port) {
-    pull(
-      api.sync(host, port),
-      pull.drain(console.log.bind(console), console.log.bind(console))
-    )
-  }
-
   conn.on('connect', function () {
     state.conn.hasError.set(false)
     state.conn.explanation.set('')
+
+    // authenticate
+    util.getJson('/access.json', function(err, token) {
+      api.auth(token, function(err) {
+        if (cb) cb(err)
+        if (err) {
+          state.conn.hasError.set(true)
+          state.conn.explanation.set('Failed to authenticate with the local server: ' + err.message)
+          console.error('Failed to authenticate with backend', err)
+          return
+        }
+      })
+    })
   })
 }
 

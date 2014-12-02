@@ -1,6 +1,5 @@
 var pull    = require('pull-stream')
 var merge   = require('pull-merge')
-var util    = require('../util')
 var ws      = require('../ws-rpc')
 
 function include(m) {
@@ -14,16 +13,8 @@ include(require('./network'))
 
 // pulls down remote data for the session
 exports.setupHomeApp = function(state) {
-  ws.connect(state)
-
-  // authorize using access-token injected by the server
-  ws.api.auth(window.RPC_ACCESS_TOKEN, function(err) {
-    if (err) {
-      state.conn.hasError.set(true)
-      state.conn.explanation.set('Failed to authenticate with the local server: ' + err.message)
-      console.error('Failed to authenticate with backend', err)
-      return
-    }
+  ws.connect(state, function(err) {
+    if (err) return
 
     // session
     ws.api.whoami(function(err, data) {

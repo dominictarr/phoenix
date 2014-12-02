@@ -51,6 +51,18 @@ exports.toBuffer = function(v) {
   return new Buffer(v)
 }
 
+exports.getJson = function(path, cb) {
+  var xhr = new XMLHttpRequest()
+  xhr.open('GET', '/access.json', true)
+  xhr.responseType = 'json'
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) {
+      cb(null, xhr.response)
+    }
+  }
+  xhr.send()
+}
+
 // concurrency queue: groups simultaneous async calls to avoid redundant round-trips
 // - produces a queue function with signature: function(key:String, callback:Function, behavior:Function(drain:function))
 // - first time queue function is called for a given key, runs `behavior` immediately, giving it the `drain` cb

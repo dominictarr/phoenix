@@ -19,14 +19,6 @@ module.exports = function (server) {
     function read(file) { return fs.createReadStream(resolve(file)); }
     function serve(file) { return read(file).on('error', serve404).pipe(res) }
     function serve404() {  res.writeHead(404); res.end('Not found'); }
-    function genAccessToken() {
-      var accessSecret = server.createAccessKey({allow: null}) // allow all
-      return server.options.signObjHmac(accessSecret, {
-        role: 'client',
-        ts: Date.now(),
-        keyId: server.options.hash(accessSecret)
-      })
-    }
     function renderCss(name, cb) {
       var filepath = resolve('less/'+name)
       fs.readFile(filepath, { encoding: 'utf-8' }, function(err, lessStr) {
@@ -54,6 +46,23 @@ module.exports = function (server) {
       return res.end('Remote access forbidden')
     }
 
+    // CORS
+    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + server.config.port)
+
+    // Access token
+    // :NOTE: not cached
+    if (req.url == '/access.json') {
+      type('application/json')
+      res.writeHead(200)
+      var accessSecret = server.createAccessKey({allow: null}) // allow all
+      var accessToken = server.options.signObjHmac(accessSecret, {
+        role: 'client',
+        ts: Date.now(),
+        keyId: server.options.hash(accessSecret)
+      })
+      return res.end(JSON.stringify(accessToken))
+    }
+
     // Caching
     if (req.headers['if-none-match'] == eTag) {
       res.writeHead(304)
@@ -61,9 +70,6 @@ module.exports = function (server) {
     }
     res.setHeader('ETag', eTag)
 
-    // CORS
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + server.config.port)
-    
     // Homepage
     if (req.url == '/' || req.url == '/index.html') {
       type('text/html')
@@ -140,10 +146,6 @@ module.exports = function (server) {
           res.end(err.toString())
           console.error(err.toString())
         } else {
-          // inject the access token for the home page
-          if (req.url == '/js/home.js')
-            jsStr = 'window.RPC_ACCESS_TOKEN = '+JSON.stringify(genAccessToken())+';\n' + jsStr
-
           type('application/javascript')
           res.writeHead(200)
           res.end(jsStr)
