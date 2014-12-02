@@ -389,17 +389,7 @@ exports.unfollow = function(state, data) {
 }
 
 exports.sync = function(state) {
-  // :DEBUG: this is a temporary sync function
-  var ws = require('../lib/ws-rpc')
-  state.isSyncing.set(true)
-  pull(
-    ws.api.sync('grimwire.com', 2000),
-    pull.drain(console.log.bind(console), function() {
-      console.log(arguments)
-      state.isSyncing.set(false)
-      bus.syncView(state)
-    })
-  )
+  bus.syncView(state)
 }
 
 exports.toggleFilter = function(state, data) {
