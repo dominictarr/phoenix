@@ -250,7 +250,7 @@ function messageInfo(msg) {
   }
   return h('div.message-info.text-muted', [
     h('pre', msg.id),
-    h('pre', JSONH.stringify(info, null, 2))
+    h('pre', JSON.stringify(info, null, 2))
   ])
 }
 

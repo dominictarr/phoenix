@@ -204,7 +204,7 @@ exports.mentionBoxInput = function(state, e) {
     state.suggestBox.options.splice(0, state.suggestBox.options.getLength())
     if (mentionType == 'profile') {
       state.profiles.forEach(function(profile) {
-        state.suggestBox.options.push({ title: profile.nickname(), subtitle: util.shortString(profile.idStr), value: profile.idStr })
+        state.suggestBox.options.push({ title: profile.nickname(), subtitle: util.shortString(profile.id), value: profile.id })
       })
     } else {
       for (var emoji in emojiNamedCharacters) {
@@ -331,7 +331,7 @@ function fireEvent(element,event){
 }
 
 exports.openMsg = function(state, data) {
-  window.location.hash = '#/msg/' + data.idStr
+  window.location.hash = '#/msg/' + data.id
 }
 
 exports.loadMore = function(state) {
@@ -431,19 +431,17 @@ exports.removeServer = function(state, data) {
 }
 
 exports.replyToMsg = function(state, data) {
-  var id = data.msg.idStr
-  var form = addPublishForm(state, id, data.msg.id)
+  var form = addPublishForm(state, data.msg.id, data.msg.id)
   form.type.set('text')
 }
 
 exports.reactToMsg = function(state, data) {
-  var id = data.msg.idStr
-  var form = addPublishForm(state, id, data.msg.id)
+  var form = addPublishForm(state, data.msg.id, data.msg.id)
   form.type.set('action')
 }
 
 exports.shareMsg = function(state, data) {
-  var id = data.msg.idStr
+  var id = data.msg.id
   var text = data.msg.content.text
   if (text.length > 100)
     text = text.slice(0, 100) + '...'
