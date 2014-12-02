@@ -16,40 +16,25 @@ function serialize (stream) {
 }
 
 var manifest = {
-  async: [
-    'add',
-    'get',
-    'getPublicKey',
-    'getLatest',
-    'whoami',
-    'auth',
-
-    // admin api
-    'follow',
-    'unfollow',
-    'isFollowing',
-    'setProfile',
-
-    //local nodes
-    'getLocal',
-  ],
-
-  source: [
-    'createFeedStream',
-    'createHistoryStream',
-    'createLogStream',
-    'messagesByType',
-    'messagesLinkedToMessage',
-    'messagesLinkedToFeed',
-    'messagesLinkedFromFeed',
-    'feedsLinkedToFeed',
-    'feedsLinkedFromFeed',
-
-    // admin api
-    'followedUsers'
-  ]
+  add: 'async',
+  get: 'async',
+  getPublicKey: 'async',
+  getLatest: 'async',
+  whoami: 'async',
+  auth: 'async',
+  getLocal: 'async',
+  createFeedStream: 'source',
+  createHistoryStream: 'source',
+  createLogStream: 'source',
+  messagesByType: 'source',
+  messagesLinkedToMessage: 'source',
+  messagesLinkedToFeed: 'source',
+  messagesLinkedFromFeed: 'source',
+  feedsLinkedToFeed: 'source',
+  feedsLinkedFromFeed: 'source',
+  followedUsers: 'source',
+  phoenix: { getUserPages: 'async' }
 }
-
 
 var api = exports.api = null
 

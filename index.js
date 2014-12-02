@@ -6,12 +6,38 @@ var less       = require('less')
 var browserify = require('browserify')
 var request    = require('request')
 
-// stupid-simple etag solution: cache everything!
-var eTag       = (Math.random() * 100000)|0
+exports.name = 'phoenix'
+exports.version = '1.0.0'
 
-module.exports = function (server) {
-  // HTTP request handler
-  server.on('request', function(req, res) {
+exports.manifest = {
+  'getUserPages': 'async'
+}
+
+exports.init = function (server) {
+  server.on('request', onRequest(server))
+  return {
+    getUserPages: function(cb) {
+      var userspath = path.join(__dirname, 'user')
+      fs.readdir(userspath, function(err, files) {
+        cb(null, (files||[])
+          .filter(function(file) {
+            return file.slice(-3) == '.js'
+          })
+          .map(function(file) {
+            return { name: file, url: file }
+          })
+        )
+      })
+    }
+  }
+}
+
+// stupid-simple etag solution: cache everything!
+var eTag = (Math.random() * 100000)|0
+
+// HTTP request handler
+function onRequest(server) {
+  return function(req, res) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
     function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
     function type (t) { res.setHeader('Content-Type', t) }
@@ -164,5 +190,5 @@ module.exports = function (server) {
     if (pathStarts('/img/') || pathStarts('/fonts/'))
       return serve(req.url)
     serve404()
-  })
+  }
 }

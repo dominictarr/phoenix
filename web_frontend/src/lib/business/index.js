@@ -25,10 +25,9 @@ exports.setupHomeApp = function(state) {
         exports.addProfile(state, data.id)
     })
     
-    // :TODO: add when getUserPages is reimplmeneted
-    /*ws.api.getUserPages(function(err, pages) {
+    ws.api.phoenix.getUserPages(function(err, pages) {
       state.userPages.set(pages)
-    })*/
+    })
 
     // construct local state
     exports.syncView(state)
