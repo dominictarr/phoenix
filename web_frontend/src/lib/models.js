@@ -1,7 +1,6 @@
 // var cuid = require('cuid')
 var extend = require('xtend')
 var mercury = require('mercury')
-var msgpack = require('msgpack-js')
 
 module.exports = {
   homeApp: createHomeApp,
