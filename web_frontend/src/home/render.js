@@ -333,9 +333,10 @@ function userPage(state, address) {
 function setupPage(state) {
   return h('.setup-page.row', [
     h('.col-xs-12', [
-      h('h1', 'Welcome to Phoenix'),
-      h('h2.alert.alert-danger', 'AHHH You need to set your nickname!'),
-      h('.btn.btn-primary', {'ev-click': valueEvents.click(state.events.setUserNickname)}, 'PRESS THIS')
+      h('.jumbotron', [
+        h('h1', 'Welcome to Phoenix'),
+        h('p', [h('.btn.btn-primary', {'ev-click': valueEvents.click(state.events.setUserNickname)}, 'Click Here'), ' to set your nickname.'])
+      ])
     ])
   ])
 }
