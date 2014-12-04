@@ -332,7 +332,7 @@ function profileLinks(events, profiles, canRemove) {
 
 function profileLink(events, canRemove, profile) {
   return h('h3', [
-    a('/#/profile/'+profile.id, profile.nickname || profile.id),
+    a('/#/profile/'+profile.id, profile.nickname || comren.shortString(profile.id)),
     (canRemove)
       ? h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
       : ''
