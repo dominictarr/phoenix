@@ -30,22 +30,22 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
   // main content
   var main
   switch (msg.content.type) {
-    case 'init': return messageEvent(msg, 'account-created', 'Account created', nicknameMap)
-    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.content.nickname, nicknameMap)
+    case 'init': return messageEvent(msg, 'account-created', 'Account created', nicknameMap, user, events)
+    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.content.nickname, nicknameMap, user, events)
     case 'follow':
       if (msg.content.$rel == 'follows')
-        return messageFollow(msg, nicknameMap)
+        return messageFollow(msg, nicknameMap, user, events)
       return ''
     case 'post':
       var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { id: msg.repliesToLink.$msg }) : null
       if (msg.content.postType == 'action')
-        return messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap)
+        return messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap, user, events)
       else if (msg.content.postType == 'gui') {
         // :TODO: gui posts are disabled for now
-        // main = messageGui(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
+        // main = messageGui(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
         return ''
       } else
-        main = messageText(msg, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
+        main = messageText(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
       break
     default:
       return ''
@@ -61,13 +61,13 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
 }
 
 // message text-content renderer
-var messageText = exports.messageText = function(msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
+var messageText = exports.messageText = function(msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
   var content = new widgets.Markdown(msg.content.text, { nicknames: nicknameMap })
-  return renderMsgShell(content, msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
+  return renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
 }
 
 // message gui-content renderer
-var messageGui = exports.messageGui = function(msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
+var messageGui = exports.messageGui = function(msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
   var content
   if (msg.isRunning) {
     content = h('.gui-post-wrapper.gui-running', [
@@ -81,17 +81,17 @@ var messageGui = exports.messageGui = function(msg, events, parentMsg, messages,
   }
 
   // body
-  return renderMsgShell(content, msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
+  return renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
 }
 
 // renders message with the header and footer
-function renderMsgShell(content, msg, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
+function renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
   replies = lookupAll(messages, messageMap, replies)
   rebroadcasts = lookupAll(messages, messageMap, rebroadcasts)
 
   var replyStr = renderMsgReplies(msg, replies)
-  var reactionsStr = renderMsgReactions(replies, nicknameMap)
-  var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts)
+  var reactionsStr = renderMsgReactions(replies, nicknameMap, user, events)
+  var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts, user, events)
 
   var parentHeader
   if (parentMsg) {
@@ -103,7 +103,7 @@ function renderMsgShell(content, msg, events, parentMsg, messages, messageMap, r
   return h('.panel.panel-default', [
     parentHeader,
     h('.panel-body', [
-      renderMsgHeader(msg, events, nicknameMap),
+      renderMsgHeader(msg, user, events, nicknameMap),
       content,
       (events.replyToMsg && events.reactToMsg && events.shareMsg)
           ? (h('p', [
@@ -125,7 +125,7 @@ function renderMsgShell(content, msg, events, parentMsg, messages, messageMap, r
 }
 
 // message header
-function renderMsgHeader(msg, events, nicknameMap) {
+function renderMsgHeader(msg, user, events, nicknameMap) {
   var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.id, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
 
   if (msg.rebroadcastsLink) {
@@ -133,19 +133,19 @@ function renderMsgHeader(msg, events, nicknameMap) {
     var author = msg.rebroadcastsLink.$feed
     var authorNick = nicknameMap[author] || author
     return h('p', [
-      comren.userlink(author, authorNick),
+      comren.userlink(author, authorNick, user, events),
       h('small.message-ctrls', [
         ' - ',
         util.prettydate(new Date(msg.rebroadcastsLink.timestamp||0), true)
       ]),
-      h('span.repliesto', [' shared by ', comren.userlink(msg.author, msg.authorNickname)]),
+      h('span.repliesto', [' shared by ', comren.userlink(msg.author, msg.authorNickname, user, events)]),
       stopBtnStr
     ])
   }
 
   // normal message
   return h('p', [
-    comren.userlink(msg.author, msg.authorNickname),
+    comren.userlink(msg.author, msg.authorNickname, user, events),
     ' ', h('span', { innerHTML: comren.toEmoji(msg.author.slice(0,16), 12) }),
     h('small.message-ctrls', [
       ' - ',
@@ -162,7 +162,7 @@ function renderMsgReplies(msg, replies) {
 }
 
 // list of reactions in the footer of messages
-function renderMsgReactions(replies, nicknameMap) {
+function renderMsgReactions(replies, nicknameMap, user, events) {
   reactionsStr = []
   var reactMap = {}
   // create a map of reaction-text -> author-nicknames
@@ -187,7 +187,7 @@ function renderMsgReactions(replies, nicknameMap) {
 
     // generate the "bob and N others ___ this" phrase
     var reactors = reactMap[react]
-    var str = [comren.userlink(reactors[0].id, reactors[0].nick)]
+    var str = [comren.userlink(reactors[0].id, reactors[0].nick, user, events)]
     if (reactors.length > 1) {
       var theOthers = reactors.slice(1).map(function(r) { return r.nick })
       str.push(h('a', { href: 'javascript:void()', title: theOthers.join(', ') }, ' and ' + theOthers.length + ' others'))
@@ -201,11 +201,11 @@ function renderMsgReactions(replies, nicknameMap) {
 }
 
 // list of rebroadcasts in the footer of messages
-function renderMsgRebroadcasts(rebroadcasts) {
+function renderMsgRebroadcasts(rebroadcasts, user, events) {
   var rebroadcastsStr = []
   if (rebroadcasts.length) {
     rebroadcasts = onePerAuthor(rebroadcasts)
-    rebroadcastsStr.push(comren.userlink(rebroadcasts[0].author, rebroadcasts[0].authorNickname))
+    rebroadcastsStr.push(comren.userlink(rebroadcasts[0].author, rebroadcasts[0].authorNickname, user, events))
     if (rebroadcasts.length > 1) {
       var theOthers = rebroadcasts.slice(1).map(function(r) { return r.authorNickname })
       rebroadcastsStr.push(h('a', { href: 'javascript:void()', title: theOthers.join(', ') }, ' and ' + theOthers.length + ' others'))
@@ -227,7 +227,7 @@ function renderMsgRebroadcasts(rebroadcasts) {
 }
 
 // message event-content renderer
-var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap) {
+var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap, user, events) {
   var parentLink = ''
   if (msg.repliesToLink) {
     var id = msg.repliesToLink.$msg
@@ -236,7 +236,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
 
   return h('.phoenix-event', [
     h('p.event-body', [
-      comren.userlink(msg.author, msg.authorNickname),
+      comren.userlink(msg.author, msg.authorNickname, user, events),
       new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap }),
       ' ',
       parentLink
@@ -244,15 +244,15 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
   ])
 }
 
-var messageFollow = exports.messageFollow = function(msg, nicknameMap) {
+var messageFollow = exports.messageFollow = function(msg, nicknameMap, user, events) {
   var target = msg.content.$feed
-  var targetNickname = nicknameMap[target] || target
+  var targetNickname = nicknameMap[target] || comren.shortString(target)
 
   return h('.phoenix-event', [
     h('p.event-body', [
-      comren.userlink(msg.author, msg.authorNickname),
+      comren.userlink(msg.author, msg.authorNickname, user, events),
       ' followed ',
-      comren.userlink(target, targetNickname)
+      comren.userlink(target, targetNickname, user, events)
     ])
   ])
 }

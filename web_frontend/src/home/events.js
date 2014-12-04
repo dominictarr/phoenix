@@ -34,6 +34,7 @@ function createEvents() {
 
     // feed buttons
     'toggleFilter',
+    'toggleUseLocalNetwork',
 
     // msg buttons
     'replyToMsg',

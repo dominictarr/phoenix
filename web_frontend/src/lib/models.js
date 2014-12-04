@@ -7,6 +7,7 @@ module.exports = {
   message: createMessage,
   profile: createProfile,
   server: createServer,
+  localPeer: createLocalPeer,
   publishForm: createPublishForm,
   notification: createNotification
 }
@@ -69,14 +70,17 @@ var defaults = {
     profiles: [],
     profileMap: {},
     nicknameMap: {},
-    followedUsers: [],
-    followerUsers: [],
     servers: [],
     user: {
       id: null,
       pubkey: null,
-      nickname: ''
+      nickname: '',
+      followedUsers: [],
+      followerUsers: []
     },
+
+    localPeers: [],
+    useLocalNetwork: false,
 
     userPages: [],
 
@@ -113,6 +117,13 @@ var defaults = {
     hostname: '',
     port: '',
     url: ''
+  },
+
+  localPeer: {
+    id: '',
+    host: '',
+    port: null,
+    nickname: ''
   },
 
   publishForm: {
@@ -189,14 +200,17 @@ function createHomeApp(events, initialState) {
     profiles:         mercury.array(state.profiles.map(createProfile)),
     profileMap:       mercury.value(state.profileMap),
     nicknameMap:      mercury.value(state.nicknameMap),
-    followedUsers:    mercury.array(state.followedUsers),
-    followerUsers:    mercury.array(state.followerUsers),
     servers:          mercury.array(state.servers.map(createServer)),
     user:             mercury.struct({
       id:               mercury.value(state.user.id),
       pubkey:           mercury.value(state.user.pubkey),
-      nickname:         mercury.value(state.user.nickname)
+      nickname:         mercury.value(state.user.nickname),
+      followedUsers:    mercury.array(state.user.followedUsers),
+      followerUsers:    mercury.array(state.user.followerUsers)
     }),
+
+    localPeers:       mercury.array(state.localPeers.map(createLocalPeer)),
+    useLocalNetwork:  mercury.value(state.useLocalNetwork),
 
     userPages:        mercury.value(state.userPages),
 
@@ -229,6 +243,12 @@ function createServer(initialState) {
   var hostname = state.hostname.indexOf(':') != -1 ?
     '[' + state.hostname + ']' : state.hostname
   state.url = 'http://' + hostname + ':' + state.port
+  return mercury.struct(state)
+}
+
+function createLocalPeer(initialState) {
+  var state = extend(defaults.localPeer, initialState)
+  state.nickname = mercury.value(state.nickname)
   return mercury.struct(state)
 }
 

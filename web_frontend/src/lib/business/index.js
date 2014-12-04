@@ -25,21 +25,17 @@ exports.setupHomeApp = function(state) {
         exports.addProfile(state, data.id)
     })
     
+    // user pages
     ws.api.phoenix.getUserPages(function(err, pages) {
       state.userPages.set(pages)
     })
 
+    // lan peer refreshes (once every 30s)
+    setInterval(exports.fetchLocalPeers.bind(null, state), 30*1000)
+
     // construct local state
     exports.syncView(state)
   })
-}
-
-// pulls down remote data for the session
-exports.setupPubApp = function(state) {
-  ws.connect(state)
-
-  // construct local state
-  exports.syncView(state)
 }
 
 // pulls down any new messages and constructs our materialized views
@@ -74,6 +70,9 @@ exports.syncView = function(state, cb) {
               count ++
           })
           state.unreadMessages.set(count)
+
+          // update lan peers
+          exports.fetchLocalPeers(state)
 
           // route to setup page if the user has no profile
           var prof = exports.getProfile(state, state.user.id())

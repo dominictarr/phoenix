@@ -130,20 +130,18 @@ var syncButton = exports.syncButton = function(events, isSyncing) {
   return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync')
 }
 
-var userlink = exports.userlink = function(id, text, opts) {
+var userlink = exports.userlink = function(id, text, user, events, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
   var profileLink = a('#/profile/'+id, text, opts)
-  var followLink = followlink(id, state.events)
+  var followLink = followlink(id, user, events)
 
-  return h('span', [profileLink, [' '], followLink])
+  return h('span', [profileLink, ' ', followLink])
 }
 
-var followlink = exports.followlink = function(id, events) {
-  // :TODO: this is wrong - state should not be referenced as a global
-  // replace an state references with proper arguments to this function
-  var notMe = state.user().id !== id
-  var notFollowed = state.followedUsers().indexOf(id) < 0
+var followlink = exports.followlink = function(id, user, events) {
+  var notMe = user.id !== id
+  var notFollowed = user.followedUsers.indexOf(id) < 0
 
   return notMe && notFollowed ?
     a('javascript:;', '', { className: 'glyphicon glyphicon-plus', 'ev-click': valueEvents.click(events.follow, { id: id }) }) :
