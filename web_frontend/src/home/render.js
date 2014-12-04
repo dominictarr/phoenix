@@ -310,7 +310,7 @@ function networkPage(state) {
         'Known Servers',
         // h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addServer}, 'add')
       ])),
-      h('.panel-body', serverLinks(state.events, state.servers))
+      h('.panel-body', serverLinks(state.events, state.servers.concat(state.localPeers)))
     ]),
   }, [['col1', 3], ['col2', 3], ['col3', 3], ['col4', 3]]))
 }
