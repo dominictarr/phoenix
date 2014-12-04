@@ -22,11 +22,11 @@ exports.processFeedMsg = function(state, msg) {
   state.feedView.messageMap.set(mm)
 
   // add to profile's feed
-  if (authorProf) {
-    authorProf.feed.push(m)
-    if (m.content.type == 'init')
-      authorProf.joinDate.set(util.prettydate(new Date(m.timestamp), true))
-  }
+  if (!authorProf)
+    authorProf = profiles.addProfile(state, m.author)
+  authorProf.feed.push(m)
+  if (m.content.type == 'init')
+    authorProf.joinDate.set(util.prettydate(new Date(m.timestamp), true))
 
   // add pub messages
   if (m.content.type == 'pub') {
