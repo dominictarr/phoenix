@@ -6,7 +6,6 @@ module.exports = {
   homeApp: createHomeApp,
   message: createMessage,
   profile: createProfile,
-  server: createServer,
   localPeer: createLocalPeer,
   publishForm: createPublishForm,
   notification: createNotification
@@ -113,12 +112,6 @@ var defaults = {
     isFollowing: false
   },
 
-  server: {
-    hostname: '',
-    port: '',
-    url: ''
-  },
-
   localPeer: {
     id: '',
     host: '',
@@ -200,7 +193,7 @@ function createHomeApp(events, initialState) {
     profiles:         mercury.array(state.profiles.map(createProfile)),
     profileMap:       mercury.value(state.profileMap),
     nicknameMap:      mercury.value(state.nicknameMap),
-    servers:          mercury.array(state.servers.map(createServer)),
+    servers:          mercury.array(state.servers),
     user:             mercury.struct({
       id:               mercury.value(state.user.id),
       pubkey:           mercury.value(state.user.pubkey),
@@ -235,14 +228,6 @@ function createProfile(initialState) {
   state.joinDate = mercury.value(state.joinDate)
   state.statuses = mercury.array(state.statuses)
   state.isFollowing = mercury.value(state.isFollowing)
-  return mercury.struct(state)
-}
-
-function createServer(initialState) {
-  var state = extend(defaults.server, initialState)
-  var hostname = state.hostname.indexOf(':') != -1 ?
-    '[' + state.hostname + ']' : state.hostname
-  state.url = 'http://' + hostname + ':' + state.port
   return mercury.struct(state)
 }
 

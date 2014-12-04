@@ -99,7 +99,7 @@ function feedPage(state) {
   }, [['nav', 1], ['main', 7], ['side', 4]]))
 }
 
-var msgtypes = ['post', 'follow', 'profile']
+var msgtypes = ['post', 'follow', 'profile', 'pub']
 function mainFeed(feedView, events, user, nicknameMap) {
   var msgs = feedView.messages.filter(function(msg) {
     if (msg.hidden) return false
@@ -308,7 +308,7 @@ function networkPage(state) {
     col4: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', [
         'Known Servers',
-        h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addServer}, 'add')
+        // h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addServer}, 'add')
       ])),
       h('.panel-body', serverLinks(state.events, state.servers))
     ]),
@@ -320,10 +320,11 @@ function serverLinks(events, servers) {
 }
 
 function serverLink(events, server) {
-  return h('h3', [
-    a(server.url, server.hostname),
-    h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'remove')
-  ])
+  return h('h3', server.host)
+  // return h('h3', [
+  //   a(server.url, server.hostname),
+  //   h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'remove')
+  // ])
 }
 
 function profileLinks(events, profiles, canRemove) {

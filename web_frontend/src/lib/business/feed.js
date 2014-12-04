@@ -27,6 +27,13 @@ exports.processFeedMsg = function(state, msg) {
     if (m.content.type == 'init')
       authorProf.joinDate.set(util.prettydate(new Date(m.timestamp), true))
   }
+
+  // add pub messages
+  if (m.content.type == 'pub') {
+    try {
+      state.servers.push({ host: m.content.address.host, port: m.content.address.port || 2000 })
+    } catch (e) { console.warn('failed to index pub message', m, e) }
+  }
   
   // additional indexing
   var notified = false

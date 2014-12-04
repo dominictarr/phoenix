@@ -47,6 +47,8 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
       } else
         main = messageText(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
       break
+    case 'pub':
+      return messageEvent(msg, 'pub', 'Announced a public server at '+msg.content.address.host, nicknameMap, user, events)
     default:
       return ''
   }
