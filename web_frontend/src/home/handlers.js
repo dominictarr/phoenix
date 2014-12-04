@@ -405,6 +405,10 @@ exports.toggleFilter = function(state, data) {
   }))
 }
 
+exports.toggleUseLocalNetwork = function(state, data) {
+  state.useLocalNetwork.set(data.set)
+}
+
 exports.addServer = function(state) {
   var address = prompt('Address of the server (address[:port]).')
   if (!address) return

@@ -7,6 +7,7 @@ module.exports = {
   message: createMessage,
   profile: createProfile,
   server: createServer,
+  localPeer: createLocalPeer,
   publishForm: createPublishForm,
   notification: createNotification
 }
@@ -78,6 +79,9 @@ var defaults = {
       nickname: ''
     },
 
+    localPeers: [],
+    useLocalNetwork: false,
+
     userPages: [],
 
     lastSync: '',
@@ -113,6 +117,13 @@ var defaults = {
     hostname: '',
     port: '',
     url: ''
+  },
+
+  localPeer: {
+    id: '',
+    host: '',
+    port: null,
+    nickname: ''
   },
 
   publishForm: {
@@ -198,6 +209,9 @@ function createHomeApp(events, initialState) {
       nickname:         mercury.value(state.user.nickname)
     }),
 
+    localPeers:       mercury.array(state.localPeers.map(createLocalPeer)),
+    useLocalNetwork:  mercury.value(state.useLocalNetwork),
+
     userPages:        mercury.value(state.userPages),
 
     lastSync:         mercury.value(state.lastSync),
@@ -229,6 +243,12 @@ function createServer(initialState) {
   var hostname = state.hostname.indexOf(':') != -1 ?
     '[' + state.hostname + ']' : state.hostname
   state.url = 'http://' + hostname + ':' + state.port
+  return mercury.struct(state)
+}
+
+function createLocalPeer(initialState) {
+  var state = extend(defaults.localPeer, initialState)
+  state.nickname = mercury.value(state.nickname)
   return mercury.struct(state)
 }
 

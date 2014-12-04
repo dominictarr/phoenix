@@ -93,7 +93,8 @@ function feedPage(state) {
     ],
     nav: nav(state),
     side: [
-      mercury.partial(feedFilters, state.events, state.feedView.filters),
+      // DISABLED mercury.partial(feedFilters, state.events, state.feedView.filters),
+      mercury.partial(localSyncControls, state.events, state.useLocalNetwork, state.localPeers)
     ]
   }, [['nav', 1], ['main', 7], ['side', 4]]))
 }
@@ -137,6 +138,38 @@ function feedFilters(events, filters) {
     feedFilter('guiPosts', 'gui posts'),
     ' ',
     feedFilter('follows', 'follows')
+  ])
+}
+
+function localSyncControls(events, useLocalNetwork, localPeers) {
+  function checkbox(isChecked, event) {
+    return h('input', {
+      type: 'checkbox',
+      checked: (isChecked) ? 'checked' : '',
+      'ev-event': mercury.changeEvent(event, { set: !isChecked })
+    })
+  }
+  function peer(p) {
+    return h('li', [
+      comren.a('#/profile/'+p.id, p.nickname || p.id), 
+      ' ',
+      comren.followlink(p.id, events)
+    ])
+  }
+
+  var peerCtrls
+  if (useLocalNetwork) {
+    peerCtrls = h('ul.list-unstyled', [
+      peer({ id: 'al3keljdfajsjlkjasjf3hlasdfkjsj', host: '192.168.0.4', port: 2000 }),
+      peer({ id: 'qewioprpqwuieropuqwrkjwqerpqouwier', host: '192.168.0.5', port: 2000, nickname: 'Alice' }),
+      peer({ id: 'xmznxmcnvbxmnbvcxmncxmnbvcxmnxcmn', host: '192.168.0.8', port: 2000, nickname: 'Bob' }),
+    ])
+  }
+
+  return h('.local-peers', [
+    h('span.text-muted', [h('label', [h('span', 'Local Network: '), checkbox(useLocalNetwork, events.toggleUseLocalNetwork)])]),
+    h('br'),
+    peerCtrls
   ])
 }
 
