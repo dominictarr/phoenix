@@ -96,3 +96,16 @@ exports.removeServer = function(state, addr, cb) {
     cb()
   })
 }
+
+// gets the latest local peer data
+exports.fetchLocalPeers = function(state) {
+  ws.api.getLocal(function(err, peers) {
+    state.localPeers.splice(0, state.localPeers.getLength())
+    ;(peers||[]).forEach(function (peer) {
+      var profile = require('./index').getProfile(state, peer.id)
+      if (profile)
+        peer.nickname = profile.nickname()
+      state.localPeers.push(peer)
+    })
+  })
+}

@@ -30,29 +30,12 @@ exports.setupHomeApp = function(state) {
       state.userPages.set(pages)
     })
 
-    // lan peer refreshes
-    fetchLocalPeers()
-    setInterval(fetchLocalPeers, 30*1000)
-    function fetchLocalPeers() {
-      ws.api.getLocal(function(err, peers) {
-        state.localPeers.splice(0, state.localPeers.getLength())
-        ;(peers||[]).forEach(function (peer) {
-          state.localPeers.push(peer)
-        })
-      })
-    }
+    // lan peer refreshes (once every 30s)
+    setInterval(exports.fetchLocalPeers.bind(null, state), 30*1000)
 
     // construct local state
     exports.syncView(state)
   })
-}
-
-// pulls down remote data for the session
-exports.setupPubApp = function(state) {
-  ws.connect(state)
-
-  // construct local state
-  exports.syncView(state)
 }
 
 // pulls down any new messages and constructs our materialized views
@@ -87,6 +70,9 @@ exports.syncView = function(state, cb) {
               count ++
           })
           state.unreadMessages.set(count)
+
+          // update lan peers
+          exports.fetchLocalPeers(state)
 
           // route to setup page if the user has no profile
           var prof = exports.getProfile(state, state.user.id())

@@ -136,7 +136,7 @@ var userlink = exports.userlink = function(id, text, user, events, opts) {
   var profileLink = a('#/profile/'+id, text, opts)
   var followLink = followlink(id, user, events)
 
-  return h('span', [profileLink, [' '], followLink])
+  return h('span', [profileLink, ' ', followLink])
 }
 
 var followlink = exports.followlink = function(id, user, events) {
