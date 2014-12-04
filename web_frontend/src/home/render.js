@@ -38,14 +38,14 @@ function render(state) {
   return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
     mercury.partial(com.suggestBox, state.suggestBox),
-    mercury.partial(header, state.events, state.user.id, state.isSyncing),
+    mercury.partial(header, state.events, state.user.id, state.syncMsgsWaiting, state.isSyncing),
     mercury.partial(comren.connStatus, state.events, state.conn),
     mercury.partial(comren.actionFeedback, state.events, state.bubble),
     h('.container', page)
   ])
 }
 
-function header(events, uId, isSyncing) {
+function header(events, uId, syncMsgsWaiting, isSyncing) {
   return h('.nav.navbar.navbar-default', [
     h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
@@ -57,7 +57,7 @@ function header(events, uId, isSyncing) {
         h('li', a('#', 'your contact id', { 'ev-click': valueEvents.click(events.showId, { id: uId }, { preventDefault: true }) })),
         h('li', a('#/profile/' + uId, 'profile')),
         h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add contact')),
-        h('li', comren.syncButton(events, isSyncing))
+        h('li', comren.syncButton(events, syncMsgsWaiting, isSyncing))
       ])
     ])
   ])
