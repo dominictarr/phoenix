@@ -12,7 +12,7 @@ exports.processFeedMsg = function(state, msg) {
   var m = msg.value
   m.id             = msg.key
   var authorProf   = profiles.getProfile(state, m.author)
-  m.authorNickname = (authorProf) ? authorProf.nickname() : m.author
+  m.authorNickname = (authorProf) ? authorProf.nickname() : require('../common-render').shortString(m.author)
   m = models.message(m)
 
   // add to feed
