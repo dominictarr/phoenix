@@ -123,11 +123,14 @@ var firstWords = exports.firstWords = function(str, n) {
   return words.slice(0, n).join(' ') + '...'
 }
 
-var syncButton = exports.syncButton = function(events, isSyncing) {
+var syncButton = exports.syncButton = function(events, syncMsgsWaiting, isSyncing) {
   if (isSyncing) {
     return h('button.btn.btn-default', { disabled: true }, 'Syncing...')
   }
-  return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync')
+  var num = ''
+  if (syncMsgsWaiting > 0)
+    num = ' ('+syncMsgsWaiting+')'
+  return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync' + num)
 }
 
 var userlink = exports.userlink = function(id, text, user, events, opts) {

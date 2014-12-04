@@ -33,6 +33,11 @@ exports.setupHomeApp = function(state) {
     // lan peer refreshes (once every 30s)
     setInterval(exports.fetchLocalPeers.bind(null, state), 30*1000)
 
+    // new message watcher
+    pull(ws.api.createLogStream({ live: true, gt: Date.now() }), pull.drain(function() {
+      state.syncMsgsWaiting.set(state.syncMsgsWaiting() + 1)
+    }))
+
     // construct local state
     exports.syncView(state)
   })
@@ -43,6 +48,10 @@ var lastFetchTS = 0
 exports.syncView = function(state, cb) {
   cb = cb || function(err) { if (err) { throw err }}
   var newTS = Date.now()
+
+  // reset pending sync messages
+  state.syncMsgsWaiting.set(0)
+
   // process profiles first
   pull(
     ws.api.messagesByType({ type: 'profile', keys: true, gt: lastFetchTS }),

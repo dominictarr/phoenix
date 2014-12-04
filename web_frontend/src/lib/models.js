@@ -84,6 +84,7 @@ var defaults = {
     userPages: [],
 
     lastSync: '',
+    syncMsgsWaiting: 0,
     isSyncing: false
   },
 
@@ -208,6 +209,7 @@ function createHomeApp(events, initialState) {
     userPages:        mercury.value(state.userPages),
 
     lastSync:         mercury.value(state.lastSync),
+    syncMsgsWaiting:  mercury.value(state.syncMsgsWaiting),
     isSyncing:        mercury.value(state.isSyncing)
   })
 }
