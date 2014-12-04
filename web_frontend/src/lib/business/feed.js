@@ -45,7 +45,7 @@ function indexFollow(state, msg, link) {
   try {
     if (msg.author == state.user.id()) {
       // add to list
-      state.followedUsers.push(link.$feed)
+      state.user.followedUsers.push(link.$feed)
 
       // update profile if present
       var targetProf = profiles.getProfile(state, link.$feed)
@@ -54,7 +54,7 @@ function indexFollow(state, msg, link) {
     }
     if (link.$feed == state.user.id()) {
       // add to list
-      state.followerUsers.push(msg.author)
+      state.user.followerUsers.push(msg.author)
     }
   } catch(e) { console.warn('failed to index follow', e) }
 }
@@ -63,7 +63,7 @@ function indexUnfollow(state, msg, link) {
   try {
     if (msg.author == state.user.id()) {
       // remove from list
-      state.followedUsers.splice(state.followedUsers.indexOf(link.$feed), 1)
+      state.user.followedUsers.splice(state.user.followedUsers.indexOf(link.$feed), 1)
 
       // update profile if present
       var targetProf = profiles.getProfile(state, link.$feed)
@@ -72,7 +72,7 @@ function indexUnfollow(state, msg, link) {
     }
     if (link.$feed == state.user.id()) {
       // remove from list
-      state.followerUsers.splice(state.followerUsers.indexOf(msg.author), 1)
+      state.user.followerUsers.splice(state.followerUsers.indexOf(msg.author), 1)
     }
   } catch(e) { console.warn('failed to index follow', e) }
 }

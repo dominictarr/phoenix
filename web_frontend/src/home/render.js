@@ -94,7 +94,7 @@ function feedPage(state) {
     nav: nav(state),
     side: [
       // DISABLED mercury.partial(feedFilters, state.events, state.feedView.filters),
-      mercury.partial(localSyncControls, state.events, state.useLocalNetwork, state.localPeers)
+      mercury.partial(localSyncControls, state.events, state.user, state.useLocalNetwork, state.localPeers)
     ]
   }, [['nav', 1], ['main', 7], ['side', 4]]))
 }
@@ -141,7 +141,7 @@ function feedFilters(events, filters) {
   ])
 }
 
-function localSyncControls(events, useLocalNetwork, localPeers) {
+function localSyncControls(events, user, useLocalNetwork, localPeers) {
   function checkbox(isChecked, event) {
     return h('input', {
       type: 'checkbox',
@@ -153,7 +153,7 @@ function localSyncControls(events, useLocalNetwork, localPeers) {
     return h('li', [
       comren.a('#/profile/'+p.id, p.nickname || comren.shortString(p.id)), 
       ' ',
-      comren.followlink(p.id, events)
+      comren.followlink(p.id, user, events)
     ])
   }
 
@@ -198,7 +198,7 @@ function profilePage(state, profid) {
     ])
   }
   var isYou = (state.user.id == profid)
-  var followsYou = (state.followerUsers.indexOf(profid) !== -1)
+  var followsYou = (state.user.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
     nav: nav(state),
     main: [
@@ -286,8 +286,8 @@ function networkPage(state) {
   function getProfile(id) {
     return state.profiles[state.profileMap[id]] || { id: id }
   }
-  var followedProfiles = state.followedUsers.map(getProfile)
-  var followerProfiles = state.followerUsers.map(getProfile)
+  var followedProfiles = state.user.followedUsers.map(getProfile)
+  var followerProfiles = state.user.followerUsers.map(getProfile)
 
   return h('.network-page.row', comren.columns({
     col1: h('.panel.panel-default', [

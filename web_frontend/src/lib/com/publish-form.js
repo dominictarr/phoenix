@@ -68,7 +68,7 @@ function publishFormAction(form, events, user, nicknameMap) {
   return h('.publish-wrapper', [
     formError(form, events),
     h('.phoenix-event', { style: { display: previewDisplay } }, [
-      h('p.event-body', [comren.userlink(user.id, user.nickname), ' ', new widgets.Markdown(textValue, { inline: true, nicknames: nicknameMap })])
+      h('p.event-body', [comren.userlink(user.id, user.nickname, user, events), ' ', new widgets.Markdown(textValue, { inline: true, nicknames: nicknameMap })])
     ]),      
     h('div.publish-form', { 'ev-event': valueEvents.submit(events.submitPublishForm, { id: form.id }) }, [
       suggestions,
