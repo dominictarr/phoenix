@@ -246,7 +246,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap)
 
 var messageFollow = exports.messageFollow = function(msg, nicknameMap) {
   var target = msg.content.$feed
-  var targetNickname = nicknameMap[target] || target
+  var targetNickname = nicknameMap[target] || comren.shortString(target)
 
   return h('.phoenix-event', [
     h('p.event-body', [

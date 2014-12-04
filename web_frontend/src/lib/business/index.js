@@ -25,9 +25,22 @@ exports.setupHomeApp = function(state) {
         exports.addProfile(state, data.id)
     })
     
+    // user pages
     ws.api.phoenix.getUserPages(function(err, pages) {
       state.userPages.set(pages)
     })
+
+    // lan peer refreshes
+    fetchLocalPeers()
+    setInterval(fetchLocalPeers, 30*1000)
+    function fetchLocalPeers() {
+      ws.api.getLocal(function(err, peers) {
+        state.localPeers.splice(0, state.localPeers.getLength())
+        ;(peers||[]).forEach(function (peer) {
+          state.localPeers.push(peer)
+        })
+      })
+    }
 
     // construct local state
     exports.syncView(state)
