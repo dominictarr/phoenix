@@ -191,18 +191,25 @@ function inboxPage(state) {
 
 function profilePage(state, profid) {
   var profi = state.profileMap[profid]
-  var profile = (typeof profi != 'undefined') ? state.profiles[profi] : undefined
-  if (!profile) {
-    return h('.profile-page.row', [
-      h('.col-xs-7', [comren.notfound('that user')])
-    ])
+  var profile = (typeof profi != 'undefined') ? state.profiles[profi] : { 
+    feed: [], 
+    id: profid, 
+    nickname: comren.shortString(profid),
+    isFollowing: (state.user.followedUsers.indexOf(profid) !== -1)
   }
   var isYou = (state.user.id == profid)
   var followsYou = (state.user.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
     nav: nav(state),
     main: [
-      comren.feed(profile.feed, state.feedView, state.events, state.user, state.nicknameMap, true)
+      (profile.feed.length) ?
+        comren.feed(profile.feed, state.feedView, state.events, state.user, state.nicknameMap, true) :
+        h('.panel.panel-default', h('.panel-body', [
+          h('p', 'No messages found yet.'),
+          ((!profile.isFollowing) ? 
+            h('p.text-muted', 'Follow this user to begin searching the network for their data.') :
+            h('p.text-muted', 'Phoenix is searching the network for this user.'))
+        ]))
     ],
     side: [
       mercury.partial(profileControls, state.events, profile, isYou, followsYou)
@@ -222,7 +229,7 @@ function profileControls(events, profile, isYou, followsYou) {
   return h('.profile-ctrls', [
     h('.panel.panel-default',
       h('.panel-body', [
-        h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]),
+        h('h2', [profile.nickname, ' ', ((profile.joinDate) ? h('small', 'joined '+profile.joinDate) : '')]),
         (followsYou) ? [h('span.label.label-primary', 'Follows You'), ' '] : ''
       ])
     ),
