@@ -8,7 +8,7 @@ var preprocessPost =
 exports.preprocessPost = function(msg) {
   // extract any @-mentions
   var match
-  var mentionRegex = /(\s|^)@([A-z0-9]+)/g;
+  var mentionRegex = /(\s|^)@([A-z0-9\/=\.\+]+)/g;
   while ((match = mentionRegex.exec(msg.text))) {
     var mention = match[2]
     if (!msg.mentions)
