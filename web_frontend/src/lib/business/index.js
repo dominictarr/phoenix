@@ -34,7 +34,9 @@ exports.setupHomeApp = function(state) {
     setInterval(exports.fetchLocalPeers.bind(null, state), 30*1000)
 
     // new message watcher
-    pull(ws.api.createLogStream({ live: true, gt: Date.now() }), pull.drain(function() {
+    pull(ws.api.createLogStream({ live: true, gt: Date.now() }), pull.drain(function(msg) {
+      if (msg.value.author == state.user.id())
+        return
       state.syncMsgsWaiting.set(state.syncMsgsWaiting() + 1)
     }))
 
