@@ -33,11 +33,11 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
     case 'init': return messageEvent(msg, 'account-created', 'Account created', nicknameMap, user, events)
     case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.content.nickname, nicknameMap, user, events)
     case 'follow':
-      if (msg.content.$rel == 'follows')
+      if (msg.content.rel == 'follows')
         return messageFollow(msg, nicknameMap, user, events)
       return ''
     case 'post':
-      var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { id: msg.repliesToLink.$msg }) : null
+      var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { id: msg.repliesToLink.msg }) : null
       if (msg.content.postType == 'action')
         return messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap, user, events)
       else if (msg.content.postType == 'gui') {
@@ -132,7 +132,7 @@ function renderMsgHeader(msg, user, events, nicknameMap) {
 
   if (msg.rebroadcastsLink) {
     // duplicated message
-    var author = msg.rebroadcastsLink.$feed
+    var author = msg.rebroadcastsLink.feed
     var authorNick = nicknameMap[author] || author
     return h('p', [
       comren.userlink(author, authorNick, user, events),
@@ -232,7 +232,7 @@ function renderMsgRebroadcasts(rebroadcasts, user, events) {
 var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap, user, events) {
   var parentLink = ''
   if (msg.repliesToLink) {
-    var id = msg.repliesToLink.$msg
+    var id = msg.repliesToLink.msg
     parentLink = comren.a('#/msg/'+id, id)
   }
 
@@ -247,7 +247,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap,
 }
 
 var messageFollow = exports.messageFollow = function(msg, nicknameMap, user, events) {
-  var target = msg.content.$feed
+  var target = msg.content.feed
   var targetNickname = nicknameMap[target] || comren.shortString(target)
 
   return h('.phoenix-event', [

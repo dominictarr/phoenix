@@ -175,7 +175,7 @@ function inboxPage(state) {
     return (typeof msgi != 'undefined') ? state.feedView.messages[state.feedView.messages.length - msgi - 1] : null
   })
   var events = state.feedView.messages.filter(function(msg) {
-    if (msg.content.type == 'follow' && msg.content.$feed === state.user.id) return true
+    if (msg.content.type == 'follow' && msg.content.feed === state.user.id) return true
     return false
   })
 
