@@ -3,6 +3,7 @@ var util = require('../lib/util')
 var constants = require('./const')
 var models = require('../lib/models')
 var bus = require('../lib/business')
+var ws = require('../lib/ws-rpc')
 var sandbox = require('../lib/sandbox')
 var textareaCaretPosition = require('../lib/textarea-caret-position')
 var emojiNamedCharacters = require('emoji-named-characters')
@@ -339,11 +340,42 @@ exports.loadMore = function(state) {
 }
 
 exports.addFeed = function(state) {
-  var token = prompt('User ID of your contact:')
+  var token = prompt('User ID or Invite Code of your contact:')
   if (!token) return
-  bus.followUser(state, token, function(err) {
-    if (err) alert(err.toString())
-  })
+  try {
+    // try to parse as an invite structure
+    var invite = JSON.parse(token)
+    if (!invite.id || invite.id.slice(-8) !== '.blake2s')
+      return alert('Invalid ID or invite code')
+
+    if (state.user.followedUsers.indexOf(invite.id) === -1) {
+      bus.followUser(state, invite.id, function(err) {
+        if (err) alert(err.toString())
+        useInvite()
+      })
+    } else 
+      useInvite()
+
+    function useInvite() {
+      if (!invite.address || !invite.secret)
+        return // no addr or secret? dont bother
+
+      ws.api.phoenix.useInvite(invite, function(err) {
+        if (err) alert(err.message)
+        bus.syncView(state)
+      })
+    }
+  } catch (e) {
+    // is it an id?
+    if (token.slice(-8) !== '.blake2s')
+      return alert('Invalid ID or invite code')
+
+    if (state.user.followedUsers.indexOf(invite.id) === -1) {
+      bus.followUser(state, token, function(err) {
+        if (err) alert(err.toString())
+      })
+    }
+  }
 }
 
 exports.showId = function(state, data) {

@@ -10,15 +10,17 @@ exports.name = 'phoenix'
 exports.version = '1.0.0'
 
 exports.manifest = {
-  'getUserPages': 'async'
+  getUserPages: 'async',
+  useInvite: 'async'
 }
 exports.permissions = {
-  anonymous: {deny: ['getUserPages']}
+  anonymous: {deny: ['getUserPages', 'useInvite']}
 }
 
 exports.init = function (server) {
   server.on('request', onRequest(server))
   return {
+    // enumerate js files in ./user
     getUserPages: function(cb) {
       var userspath = path.join(__dirname, 'user')
       fs.readdir(userspath, function(err, files) {
@@ -30,6 +32,36 @@ exports.init = function (server) {
             return { name: file, url: file }
           })
         )
+      })
+    }, 
+    // connect to the peer and use the invite code
+    useInvite: function(invite, cb) {
+      if (!invite.addr || !invite.sec)
+        cb(new Error('Invalid invite'))
+
+      var addr = invite.address.split(':')
+      if (addr.length === 2)
+        addr = { host: addr[0], port: addr[1] }
+      else
+        addr = { host: addr[0], port: 2000 }
+
+      // connect to and auth with the given server
+      var rpc = server.connect(addr)
+
+      // use the invite
+      var hmacd = server.options.signObjHmac(invite.secret, {
+        keyId: server.options.hash(invite.secret, 'base64'),
+        feed: server.feed.id,
+        ts: Date.now()
+      })
+      rpc.invite.use(hmacd, function (err, msg) {
+        if (err) return cb(err)
+
+        // publish pub message
+        server.feed.add('pub', {address: addr}, function(err) {
+          if (err) return cb(err)
+          cb()
+        })
       })
     }
   }
