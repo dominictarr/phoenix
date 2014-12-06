@@ -30,7 +30,7 @@ exports.followUser = function(state, id, cb) {
   if (!id) return cb(new Error('Invalid ID'))
 
   // publish follows link
-  ws.api.add({ type: 'follow', $feed: id, $rel: 'follows' }, function(err) {
+  ws.api.add({ type: 'follow', feed: id, rel: 'follows' }, function(err) {
     if (err) return cb(err)
 
     // :TODO: replace
@@ -50,7 +50,7 @@ exports.unfollowUser = function(state, id, cb) {
   if (!id) return cb(new Error('Invalid ID'))
 
   // publish unfollows link
-  ws.api.add({ type: 'follow', $feed: id, $rel: 'unfollows' }, function(err) {
+  ws.api.add({ type: 'follow', feed: id, rel: 'unfollows' }, function(err) {
     if (err) return cb(err)
     
     // sync

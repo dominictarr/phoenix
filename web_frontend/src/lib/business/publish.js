@@ -14,7 +14,7 @@ exports.preprocessPost = function(msg) {
     if (!msg.mentions)
       msg.mentions = []
     try {
-      msg.mentions.push({ $feed: mention, $rel: 'mentions' })
+      msg.mentions.push({ feed: mention, rel: 'mentions' })
     } catch (e) { /* :TODO: bad hash, tell user? */ console.warn('Invalid hash used in @-mention', mention) }
   }
   return msg
@@ -32,7 +32,7 @@ var publishReply =
 exports.publishReply = function(state, text, parent, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  ws.api.add(preprocessPost({type: 'post', postType: 'text', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  ws.api.add(preprocessPost({type: 'post', postType: 'text', text: text, timezone: localTZ, repliesTo: {msg: parent, rel: 'replies-to'}}), cb)
 }
 
 // posts to the feed
@@ -47,7 +47,7 @@ var publishReaction =
 exports.publishReaction = function(state, text, parent, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  ws.api.add(preprocessPost({type: 'post', postType: 'action', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  ws.api.add(preprocessPost({type: 'post', postType: 'action', text: text, timezone: localTZ, repliesTo: {msg: parent, rel: 'replies-to'}}), cb)
 }
 
 // posts to the feed
@@ -62,7 +62,7 @@ var publishGuiply =
 exports.publishGuiply = function(state, text, parent, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  ws.api.add({type: 'post', postType: 'gui', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}, cb)
+  ws.api.add({type: 'post', postType: 'gui', text: text, timezone: localTZ, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
 }
 
 // posts a copy of the given message to the feed
@@ -70,9 +70,9 @@ var publishRebroadcast =
 exports.publishRebroadcast = function(state, msg, cb) {
   if (!msg.content.rebroadcasts) {
     msg.content.rebroadcasts = {
-      $rel: 'rebroadcasts',
-      $msg: msg.id,
-      $feed: msg.author,
+      rel: 'rebroadcasts',
+      msg: msg.id,
+      feed: msg.author,
       timestamp: msg.timestamp,
       timezone: msg.content.timezone || 0
     }
