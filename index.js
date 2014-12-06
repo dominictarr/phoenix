@@ -39,7 +39,7 @@ exports.init = function (server) {
       if (!invite.addr || !invite.sec)
         cb(new Error('Invalid invite'))
 
-      var addr = invite.addr.split(':')
+      var addr = invite.address.split(':')
       if (addr.length === 2)
         addr = { host: addr[0], port: addr[1] }
       else
@@ -49,8 +49,8 @@ exports.init = function (server) {
       var rpc = server.connect(addr)
 
       // use the invite
-      var hmacd = server.options.signObjHmac(invite.sec, {
-        keyId: server.options.hash(invite.sec, 'base64'),
+      var hmacd = server.options.signObjHmac(invite.secret, {
+        keyId: server.options.hash(invite.secret, 'base64'),
         feed: server.feed.id,
         ts: Date.now()
       })

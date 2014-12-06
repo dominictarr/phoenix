@@ -357,7 +357,7 @@ exports.addFeed = function(state) {
       useInvite()
 
     function useInvite() {
-      if (!invite.addr || !invite.sec)
+      if (!invite.address || !invite.secret)
         return // no addr or secret? dont bother
 
       ws.api.phoenix.useInvite(invite, function(err) {
