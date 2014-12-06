@@ -1,13 +1,12 @@
 // var cuid = require('cuid')
 var extend = require('xtend')
 var mercury = require('mercury')
-var msgpack = require('msgpack-js')
 
 module.exports = {
   homeApp: createHomeApp,
   message: createMessage,
   profile: createProfile,
-  server: createServer,
+  localPeer: createLocalPeer,
   publishForm: createPublishForm,
   notification: createNotification
 }
@@ -70,20 +69,22 @@ var defaults = {
     profiles: [],
     profileMap: {},
     nicknameMap: {},
-    followedUsers: [],
-    followerUsers: [],
     servers: [],
     user: {
       id: null,
-      idStr: '',
       pubkey: null,
-      pubkeyStr: '',
-      nickname: ''
+      nickname: '',
+      followedUsers: [],
+      followerUsers: []
     },
+
+    localPeers: [],
+    useLocalNetwork: false,
 
     userPages: [],
 
     lastSync: '',
+    syncMsgsWaiting: 0,
     isSyncing: false
   },
 
@@ -91,7 +92,6 @@ var defaults = {
     id: null,
     type: null,
     author: null,
-    authorStr: '',
     content: null,
     previous: null,
     sequence: 0,
@@ -106,7 +106,6 @@ var defaults = {
 
   profile: {
     id: null,
-    idStr: '',
     feed: [],
     nickname: '',
     joinDate: '',
@@ -114,10 +113,11 @@ var defaults = {
     isFollowing: false
   },
 
-  server: {
-    hostname: '',
-    port: '',
-    url: ''
+  localPeer: {
+    id: '',
+    host: '',
+    port: null,
+    nickname: ''
   },
 
   publishForm: {
@@ -132,7 +132,6 @@ var defaults = {
 
   notification: {
     type: '',
-    msgIdStr: '',
     authorNickname: '',
     msgText: ''
   }
@@ -195,27 +194,28 @@ function createHomeApp(events, initialState) {
     profiles:         mercury.array(state.profiles.map(createProfile)),
     profileMap:       mercury.value(state.profileMap),
     nicknameMap:      mercury.value(state.nicknameMap),
-    followedUsers:    mercury.array(state.followedUsers),
-    followerUsers:    mercury.array(state.followerUsers),
-    servers:          mercury.array(state.servers.map(createServer)),
+    servers:          mercury.array(state.servers),
     user:             mercury.struct({
       id:               mercury.value(state.user.id),
-      idStr:            mercury.value(state.user.idStr),
       pubkey:           mercury.value(state.user.pubkey),
-      pubkeyStr:        mercury.value(state.user.pubkeyStr),
-      nickname:         mercury.value(state.user.nickname)
+      nickname:         mercury.value(state.user.nickname),
+      followedUsers:    mercury.array(state.user.followedUsers),
+      followerUsers:    mercury.array(state.user.followerUsers)
     }),
+
+    localPeers:       mercury.array(state.localPeers.map(createLocalPeer)),
+    useLocalNetwork:  mercury.value(state.useLocalNetwork),
 
     userPages:        mercury.value(state.userPages),
 
     lastSync:         mercury.value(state.lastSync),
+    syncMsgsWaiting:  mercury.value(state.syncMsgsWaiting),
     isSyncing:        mercury.value(state.isSyncing)
   })
 }
 
 function createMessage(initialState) {
   var state = extend(defaults.message, initialState)
-  state.authorStr        = state.author.toString('hex')
   state.isRunning        = mercury.value(state.isRunning)
   state.hidden           = mercury.value(state.hidden)
   state.rebroadcastsLink = mercury.value(state.rebroadcastsLink)
@@ -233,11 +233,9 @@ function createProfile(initialState) {
   return mercury.struct(state)
 }
 
-function createServer(initialState) {
-  var state = extend(defaults.server, initialState)
-  var hostname = state.hostname.indexOf(':') != -1 ?
-    '[' + state.hostname + ']' : state.hostname
-  state.url = 'http://' + hostname + ':' + state.port
+function createLocalPeer(initialState) {
+  var state = extend(defaults.localPeer, initialState)
+  state.nickname = mercury.value(state.nickname)
   return mercury.struct(state)
 }
 

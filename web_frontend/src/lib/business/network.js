@@ -1,4 +1,4 @@
-var util = require('../../../../lib/util')
+var util = require('../util')
 var ws   = require('../ws-rpc')
 
 // loads the network nodes
@@ -27,11 +27,10 @@ exports.fetchServers = function(state, cb) {
 // begins following a feed
 var followUser =
 exports.followUser = function(state, id, cb) {
-  var id = util.toBuffer(id)
   if (!id) return cb(new Error('Invalid ID'))
 
   // publish follows link
-  ws.api.add({ type: 'follow', $feed: id, $rel: 'follows' }, function(err) {
+  ws.api.add({ type: 'follow', feed: id, rel: 'follows' }, function(err) {
     if (err) return cb(err)
 
     // :TODO: replace
@@ -48,11 +47,10 @@ exports.followUser = function(state, id, cb) {
 // stops following a feed
 var unfollowUser =
 exports.unfollowUser = function(state, id, cb) {
-  var id = util.toBuffer(id)
   if (!id) return cb(new Error('Invalid ID'))
 
   // publish unfollows link
-  ws.api.add({ type: 'follow', $feed: id, $rel: 'unfollows' }, function(err) {
+  ws.api.add({ type: 'follow', feed: id, rel: 'unfollows' }, function(err) {
     if (err) return cb(err)
     
     // sync
@@ -96,5 +94,18 @@ exports.removeServer = function(state, addr, cb) {
       }
     }
     cb()
+  })
+}
+
+// gets the latest local peer data
+exports.fetchLocalPeers = function(state) {
+  ws.api.getLocal(function(err, peers) {
+    state.localPeers.splice(0, state.localPeers.getLength())
+    ;(peers||[]).forEach(function (peer) {
+      var profile = require('./index').getProfile(state, peer.id)
+      if (profile)
+        peer.nickname = profile.nickname()
+      state.localPeers.push(peer)
+    })
   })
 }

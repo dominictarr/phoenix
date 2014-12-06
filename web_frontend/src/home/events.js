@@ -27,12 +27,14 @@ function createEvents() {
     'loadMore',
     'addFeed',
     'showId',
+    'setUserNickname',
     'follow',
     'unfollow',
     'sync',
 
     // feed buttons
     'toggleFilter',
+    'toggleUseLocalNetwork',
 
     // msg buttons
     'replyToMsg',

@@ -29,24 +29,6 @@
   }
 })()
 
-exports.profileFetcher = function(backend) {
-  var profiles = {};
-  return function fetchProfile(msg, cb) {
-    var author = msg.key ? msg.key : msg.author;
-    var id = author.toString('hex');
-    if (profiles[id]) {
-      msg.nickname = (profiles[id] !== -1) ? profiles[id].nickname : '???';
-      return cb(null, msg);
-    }
-    backend.profile_getProfile(author, function(err, profile) {
-      if (err && !err.notFound) return console.error(err), cb(err);
-      msg.nickname = (profile) ? profile.nickname : '???';
-      profiles[id] = profile || -1;
-      cb(null, msg);
-    });
-  }
-}
-
 var escapePlain =
 exports.escapePlain = function(str) {
   return (str||'')
@@ -55,14 +37,8 @@ exports.escapePlain = function(str) {
     .replace(/>/g, '&gt;')
 }
 
-exports.renderCtx = function(html, ctx) {
-  for (var k in ctx)
-    html = html.replace(RegExp('{'+k+'}', 'gi'), ctx[k])
-  return html
-}
-
-exports.renderErr = function(err) {
-  return '<p class="danger alert">' + err + '</p>'
+exports.shortString = function(str) {
+  return str.slice(0, 6) + '...'
 }
 
 exports.toHexString = function(buff) {
@@ -73,6 +49,18 @@ exports.toHexString = function(buff) {
 exports.toBuffer = function(v) {
   if (typeof v == 'string') return new Buffer(v, 'hex')
   return new Buffer(v)
+}
+
+exports.getJson = function(path, cb) {
+  var xhr = new XMLHttpRequest()
+  xhr.open('GET', '/access.json', true)
+  xhr.responseType = 'json'
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) {
+      cb(null, xhr.response)
+    }
+  }
+  xhr.send()
 }
 
 // concurrency queue: groups simultaneous async calls to avoid redundant round-trips

@@ -1,5 +1,4 @@
 var pull = require('pull-stream')
-var JSONH = require('json-human-buffer')
 
 document.body.innerHTML = [
   '<form role="form" onsubmit="javascript:runQuery(event)">',
@@ -32,7 +31,7 @@ function renderMessages(msgs) {
   msgs.forEach(function(msg) {
     // add to doc
     var pre = document.createElement('pre')
-    pre.textContent = JSONH.stringify(msg, null, 2).replace(/</g, '&lt;').replace(/>/, '&gt;')
+    pre.textContent = JSON.stringify(msg, null, 2).replace(/</g, '&lt;').replace(/>/, '&gt;')
     msgsDiv.insertBefore(pre, msgsDiv.firstChild)
   })
 

@@ -4,7 +4,7 @@ var baseEmoji   = require('base-emoji')
 var valueEvents = require('./value-events')
 var widgets     = require('./widgets')
 var com         = require('./com')
-var util        = require('../../../lib/util')
+var util        = require('./util')
 
 
 // puts the given vdom parts in columns given a `layout` config
@@ -94,9 +94,9 @@ var msgThread = exports.msgThread = function(msg, feedView, events, user, nickna
 function msgThreadTree(msg, feedView, events, user, nicknameMap) {
   // collect replies
   var replies = []
-  ;(feedView.replies[msg.idStr] || []).forEach(function(replyData) {
+  ;(feedView.replies[msg.id] || []).forEach(function(replyData) {
     // fetch and render message
-    var msgi  = feedView.messageMap[replyData.idStr] // look up index
+    var msgi  = feedView.messageMap[replyData.id] // look up index
     var reply = (typeof msgi != 'undefined') ? feedView.messages[feedView.messages.length - msgi - 1] : null
     if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && !reply.hidden) {
       replies.push(com.message(reply, feedView, events, user, nicknameMap, false))
@@ -123,29 +123,31 @@ var firstWords = exports.firstWords = function(str, n) {
   return words.slice(0, n).join(' ') + '...'
 }
 
-var syncButton = exports.syncButton = function(events, isSyncing) {
+var syncButton = exports.syncButton = function(events, syncMsgsWaiting, isSyncing) {
   if (isSyncing) {
     return h('button.btn.btn-default', { disabled: true }, 'Syncing...')
   }
-  return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync')
+  var num = ''
+  if (syncMsgsWaiting > 0)
+    num = ' ('+syncMsgsWaiting+')'
+  return h('button.btn.btn-default', { 'ev-click': events.sync }, 'Sync' + num)
 }
 
-var userlink = exports.userlink = function(id, text, opts) {
+var userlink = exports.userlink = function(id, text, user, events, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
-  var idStr = util.toHexString(id)
-  var profileLink = a('#/profile/'+idStr, text, opts)
-  var followLink = followlink(idStr, state.events)
+  var profileLink = a('#/profile/'+id, text, opts)
+  var followLink = followlink(id, user, events)
 
-  return h('span', [profileLink, [' '], followLink])
+  return h('span', [profileLink, ' ', followLink])
 }
 
-var followlink = exports.followlink = function(idStr, events) {
-  var notMe = state.user().idStr !== idStr
-  var notFollowed = state.followedUsers().indexOf(idStr) < 0
+var followlink = exports.followlink = function(id, user, events) {
+  var notMe = user.id !== id
+  var notFollowed = user.followedUsers.indexOf(id) < 0
 
   return notMe && notFollowed ?
-    a('javascript:;', '', { className: 'glyphicon glyphicon-plus', 'ev-click': valueEvents.click(events.follow, { id: idStr }) }) :
+    a('javascript:;', '', { className: 'glyphicon glyphicon-plus', 'ev-click': valueEvents.click(events.follow, { id: id }) }) :
     ''
 }
 
@@ -194,22 +196,17 @@ var img = exports.img = function (src) {
   return h('img', { src: src })
 }
 
-var shortHex = exports.shortHex = function (str) {
+var shortString = exports.shortString = function (str) {
   return str.slice(0, 6) + '...' + str.slice(-2)
-}
-
-var numberToHex = exports.numberToHex = function (v) {
-  var x = (+v).toString(16)
-  if (x.length === 1)
-    return '0'+x
-  return x
 }
 
 var toEmoji = exports.toEmoji = function (buf, size) {
   size = size || 20
   if (!buf)
     return ''
+  if (typeof buf == 'string')
+    buf = new Buffer(buf.slice(0, buf.indexOf('.')), 'base64')
   return baseEmoji.toCustom(buf, function(v, emoji) {
-    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt="'+numberToHex(v)+'" title="'+((+v).toString(16))+'">'
+    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt=":'+emoji.name+':" title="'+((+v).toString(16))+'">'
   })
 }

@@ -1,20 +1,52 @@
+var muxrpc      = require('muxrpc')
+var Serializer  = require('pull-serializer')
 var pull        = require('pull-stream')
 var toPull      = require('stream-to-pull-stream')
 var WSStream    = require('websocket-stream')
 var through     = require('through')
-var rpcapi      = require('../../../lib/rpcapi')
+var util        = require('./util')
+
+// :TODO:
+// it would be much better to get the RPC API from scuttlebot
+// but scuttlebot imports this module, so we cant import scuttlebot w/o a circular dependency
+// until this is solved, the scuttlebot manifest and serializer are copied here:
+
+function serialize (stream) {
+  return Serializer(stream, JSON, {split: '\n\n'})
+}
+
+var manifest = {
+  add: 'async',
+  get: 'async',
+  getPublicKey: 'async',
+  getLatest: 'async',
+  whoami: 'async',
+  auth: 'async',
+  getLocal: 'async',
+  createFeedStream: 'source',
+  createHistoryStream: 'source',
+  createLogStream: 'source',
+  messagesByType: 'source',
+  messagesLinkedToMessage: 'source',
+  messagesLinkedToFeed: 'source',
+  messagesLinkedFromFeed: 'source',
+  feedsLinkedToFeed: 'source',
+  feedsLinkedFromFeed: 'source',
+  followedUsers: 'source',
+  phoenix: { getUserPages: 'async', useInvite: 'async' }
+}
 
 var api = exports.api = null
 
 // establishes the server api connection
-var connect = exports.connect = function(state) {
+var connect = exports.connect = function(state, cb) {
   if (api) return
 
   var conn = WSStream('ws://' + window.location.host + '/ws')
   conn.on('error', handleClientError.bind(null, state))
   conn.on('close', handleClientClose.bind(null, state))
 
-  api = exports.api = rpcapi.client()
+  api = exports.api = muxrpc(manifest, null, serialize) ({})
   var clientStream = api.createStream()
   pull(clientStream, toPull.duplex(conn), clientStream)
 
@@ -22,17 +54,22 @@ var connect = exports.connect = function(state) {
   window.Buffer = Buffer
   window.rpcapi = api
 
-  // :DOUBLE-DEBUG:
-  window.sync = function(host, port) {
-    pull(
-      api.sync(host, port),
-      pull.drain(console.log.bind(console), console.log.bind(console))
-    )
-  }
-
   conn.on('connect', function () {
     state.conn.hasError.set(false)
     state.conn.explanation.set('')
+
+    // authenticate
+    util.getJson('/access.json', function(err, token) {
+      api.auth(token, function(err) {
+        if (cb) cb(err)
+        if (err) {
+          state.conn.hasError.set(true)
+          state.conn.explanation.set('Failed to authenticate with the local server: ' + err.message)
+          console.error('Failed to authenticate with backend', err)
+          return
+        }
+      })
+    })
   })
 }
 

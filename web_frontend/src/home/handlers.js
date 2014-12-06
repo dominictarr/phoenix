@@ -1,8 +1,9 @@
 var pull = require('pull-stream')
-var util = require('../../../lib/util')
+var util = require('../lib/util')
 var constants = require('./const')
 var models = require('../lib/models')
 var bus = require('../lib/business')
+var ws = require('../lib/ws-rpc')
 var sandbox = require('../lib/sandbox')
 var textareaCaretPosition = require('../lib/textarea-caret-position')
 var emojiNamedCharacters = require('emoji-named-characters')
@@ -204,7 +205,7 @@ exports.mentionBoxInput = function(state, e) {
     state.suggestBox.options.splice(0, state.suggestBox.options.getLength())
     if (mentionType == 'profile') {
       state.profiles.forEach(function(profile) {
-        state.suggestBox.options.push({ title: profile.nickname(), subtitle: shortHex(profile.idStr), value: profile.idStr })
+        state.suggestBox.options.push({ title: profile.nickname(), subtitle: util.shortString(profile.id), value: profile.id })
       })
     } else {
       for (var emoji in emojiNamedCharacters) {
@@ -331,7 +332,7 @@ function fireEvent(element,event){
 }
 
 exports.openMsg = function(state, data) {
-  window.location.hash = '#/msg/' + data.idStr
+  window.location.hash = '#/msg/' + data.id
 }
 
 exports.loadMore = function(state) {
@@ -339,15 +340,58 @@ exports.loadMore = function(state) {
 }
 
 exports.addFeed = function(state) {
-  var token = prompt('User ID of your contact:')
+  var token = prompt('User ID or Invite Code of your contact:')
   if (!token) return
-  bus.followUser(state, token, function(err) {
-    if (err) alert(err.toString())
-  })
+  try {
+    // try to parse as an invite structure
+    var invite = JSON.parse(token)
+    if (!invite.id || invite.id.slice(-8) !== '.blake2s')
+      return alert('Invalid ID or invite code')
+
+    if (state.user.followedUsers.indexOf(invite.id) === -1) {
+      bus.followUser(state, invite.id, function(err) {
+        if (err) alert(err.toString())
+        useInvite()
+      })
+    } else 
+      useInvite()
+
+    function useInvite() {
+      if (!invite.address || !invite.secret)
+        return // no addr or secret? dont bother
+
+      ws.api.phoenix.useInvite(invite, function(err) {
+        if (err) alert(err.message)
+        bus.syncView(state)
+      })
+    }
+  } catch (e) {
+    // is it an id?
+    if (token.slice(-8) !== '.blake2s')
+      return alert('Invalid ID or invite code')
+
+    if (state.user.followedUsers.indexOf(invite.id) === -1) {
+      bus.followUser(state, token, function(err) {
+        if (err) alert(err.toString())
+      })
+    }
+  }
 }
 
 exports.showId = function(state, data) {
   prompt('User Contact ID', data.id)
+}
+
+exports.setUserNickname = function(state) {
+  var nickname = prompt('Enter your nickname')
+  if (!nickname)
+    return
+  if (!confirm('Set your nickname to '+nickname+'?'))
+    return
+  bus.publishProfile(state, nickname, function(err) {
+    if (err) alert(err.toString())
+    else bus.syncView(state)
+  })
 }
 
 exports.follow = function(state, data) {
@@ -356,7 +400,7 @@ exports.follow = function(state, data) {
     else {
       var pm = state.profileMap()
       var profile = state.profiles.get(pm[data.id])
-      var nickname = (profile) ? profile().nickname : shortHex(data.id)
+      var nickname = (profile) ? profile().nickname : util.shortString(data.id)
 
       bubbleNotification(state, 'info',  nickname + ' followed')
     }
@@ -369,7 +413,7 @@ exports.unfollow = function(state, data) {
     else {
       var pm = state.profileMap()
       var profile = state.profiles.get(pm[data.id])
-      var nickname = (profile) ? profile().nickname : shortHex(data.id)
+      var nickname = (profile) ? profile().nickname : util.shortString(data.id)
 
       bubbleNotification(state, 'warning', nickname + ' unfollowed')
     }
@@ -377,17 +421,7 @@ exports.unfollow = function(state, data) {
 }
 
 exports.sync = function(state) {
-  // :DEBUG: this is a temporary sync function
-  var ws = require('../lib/ws-rpc')
-  state.isSyncing.set(true)
-  pull(
-    ws.api.sync('grimwire.com', 2000),
-    pull.drain(console.log.bind(console), function() {
-      console.log(arguments)
-      state.isSyncing.set(false)
-      bus.syncView(state)
-    })
-  )
+  bus.syncView(state)
 }
 
 exports.toggleFilter = function(state, data) {
@@ -401,6 +435,10 @@ exports.toggleFilter = function(state, data) {
     guiPosts:    state.feedView.filters.guiPosts(),
     follows:     state.feedView.filters.follows()
   }))
+}
+
+exports.toggleUseLocalNetwork = function(state, data) {
+  state.useLocalNetwork.set(data.set)
 }
 
 exports.addServer = function(state) {
@@ -419,19 +457,17 @@ exports.removeServer = function(state, data) {
 }
 
 exports.replyToMsg = function(state, data) {
-  var id = data.msg.idStr
-  var form = addPublishForm(state, id, data.msg.id)
+  var form = addPublishForm(state, data.msg.id, data.msg.id)
   form.type.set('text')
 }
 
 exports.reactToMsg = function(state, data) {
-  var id = data.msg.idStr
-  var form = addPublishForm(state, id, data.msg.id)
+  var form = addPublishForm(state, data.msg.id, data.msg.id)
   form.type.set('action')
 }
 
 exports.shareMsg = function(state, data) {
-  var id = data.msg.idStr
+  var id = data.msg.id
   var text = data.msg.content.text
   if (text.length > 100)
     text = text.slice(0, 100) + '...'
@@ -471,11 +507,6 @@ exports.onGuipostReply = function(state, data) {
     if (!err) bus.syncView(state) // pull down the update
     data.cb(err, result)
   }
-}
-
-function shortHex(str) {
-  if (typeof str != 'string') str = util.toHexString(str)
-  return str.slice(0, 6) + '..' + str.slice(-2)
 }
 
 function bubbleNotification(state, className, msg, t) {

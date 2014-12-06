@@ -4,10 +4,9 @@ var pull = require('pull-stream')
 var pushable = require('pull-pushable')
 
 var Serializer = require('pull-serializer')
-var JSONH = require('json-human-buffer')
 
 function serialize (stream) {
-  return Serializer(stream, JSONH, {split: '\n\n'})
+  return Serializer(stream, JSON, {split: '\n\n'})
 }
 
 

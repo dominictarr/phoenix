@@ -1,7 +1,6 @@
 var mercury     = require('mercury')
 var h           = require('mercury').h
-var JSONH       = require('json-human-buffer')
-var util        = require('../../../lib/util')
+var util        = require('../lib/util')
 var valueEvents = require('../lib/value-events')
 var comren      = require('../lib/common-render')
 var com         = require('../lib/com')
@@ -27,6 +26,8 @@ function render(state) {
   } else if (state.route.indexOf('user-page/') === 0) {
     var pageAddress = state.route.slice(10)
     page = userPage(state, pageAddress)
+  } else if (state.route.indexOf('setup') === 0) {
+    page = setupPage(state)
   } else if (state.route.indexOf('help') === 0) {
     var section = state.route.slice(5) || 'intro'
     page = helpPage(state, section)
@@ -37,14 +38,14 @@ function render(state) {
   return h('.homeapp', { 'style': { 'visibility': 'hidden' } }, [
     stylesheet('/css/home.css'),
     mercury.partial(com.suggestBox, state.suggestBox),
-    mercury.partial(header, state.events, state.user.idStr, state.isSyncing),
+    mercury.partial(header, state.events, state.user.id, state.syncMsgsWaiting, state.isSyncing),
     mercury.partial(comren.connStatus, state.events, state.conn),
     mercury.partial(comren.actionFeedback, state.events, state.bubble),
     h('.container', page)
   ])
 }
 
-function header(events, uId, isSyncing) {
+function header(events, uId, syncMsgsWaiting, isSyncing) {
   return h('.nav.navbar.navbar-default', [
     h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
@@ -56,7 +57,7 @@ function header(events, uId, isSyncing) {
         h('li', a('#', 'your contact id', { 'ev-click': valueEvents.click(events.showId, { id: uId }, { preventDefault: true }) })),
         h('li', a('#/profile/' + uId, 'profile')),
         h('li', h('button.btn.btn-default', {'ev-click': events.addFeed}, 'Add contact')),
-        h('li', comren.syncButton(events, isSyncing))
+        h('li', comren.syncButton(events, syncMsgsWaiting, isSyncing))
       ])
     ])
   ])
@@ -92,12 +93,13 @@ function feedPage(state) {
     ],
     nav: nav(state),
     side: [
-      mercury.partial(feedFilters, state.events, state.feedView.filters),
+      // DISABLED mercury.partial(feedFilters, state.events, state.feedView.filters),
+      mercury.partial(localSyncControls, state.events, state.user, state.useLocalNetwork, state.localPeers)
     ]
   }, [['nav', 1], ['main', 7], ['side', 4]]))
 }
 
-var msgtypes = ['post', 'follow', 'profile']
+var msgtypes = ['post', 'follow', 'profile', 'pub']
 function mainFeed(feedView, events, user, nicknameMap) {
   var msgs = feedView.messages.filter(function(msg) {
     if (msg.hidden) return false
@@ -139,17 +141,41 @@ function feedFilters(events, filters) {
   ])
 }
 
+function localSyncControls(events, user, useLocalNetwork, localPeers) {
+  function checkbox(isChecked, event) {
+    return h('input', {
+      type: 'checkbox',
+      checked: (isChecked) ? 'checked' : '',
+      'ev-event': mercury.changeEvent(event, { set: !isChecked })
+    })
+  }
+  function peer(p) {
+    return h('li', [
+      comren.a('#/profile/'+p.id, p.nickname || comren.shortString(p.id)), 
+      ' ',
+      comren.followlink(p.id, user, events)
+    ])
+  }
+
+  return h('.local-peers', [
+    h('span', 'Local Network '),
+    h('small.text-muted', [h('label', [h('span', 'Invisible: '), checkbox(useLocalNetwork, events.toggleUseLocalNetwork)])]),
+    h('br'),
+    peerCtrls = h('ul.list-unstyled', localPeers.map(peer)) 
+  ])
+}
+
 
 // Inbox Page
 // ==========
 
 function inboxPage(state) {
   var msgs = state.notifications.map(function(note) {
-    var msgi  = state.feedView.messageMap[note.msgIdStr]
+    var msgi  = state.feedView.messageMap[note.msgId]
     return (typeof msgi != 'undefined') ? state.feedView.messages[state.feedView.messages.length - msgi - 1] : null
   })
   var events = state.feedView.messages.filter(function(msg) {
-    if (msg.content.type == 'follow' && util.toHexString(msg.content.$feed) === state.user.idStr) return true
+    if (msg.content.type == 'follow' && msg.content.feed === state.user.id) return true
     return false
   })
 
@@ -165,18 +191,25 @@ function inboxPage(state) {
 
 function profilePage(state, profid) {
   var profi = state.profileMap[profid]
-  var profile = (typeof profi != 'undefined') ? state.profiles[profi] : undefined
-  if (!profile) {
-    return h('.profile-page.row', [
-      h('.col-xs-7', [comren.notfound('that user')])
-    ])
+  var profile = (typeof profi != 'undefined') ? state.profiles[profi] : { 
+    feed: [], 
+    id: profid, 
+    nickname: comren.shortString(profid),
+    isFollowing: (state.user.followedUsers.indexOf(profid) !== -1)
   }
-  var isYou = (state.user.idStr == profid)
-  var followsYou = (state.followerUsers.indexOf(profid) !== -1)
+  var isYou = (state.user.id == profid)
+  var followsYou = (state.user.followerUsers.indexOf(profid) !== -1)
   return h('.profile-page.row', comren.columns({
     nav: nav(state),
     main: [
-      comren.feed(profile.feed, state.feedView, state.events, state.user, state.nicknameMap, true)
+      (profile.feed.length) ?
+        comren.feed(profile.feed, state.feedView, state.events, state.user, state.nicknameMap, true) :
+        h('.panel.panel-default', h('.panel-body', [
+          h('p', 'No messages found yet.'),
+          ((!profile.isFollowing) ? 
+            h('p.text-muted', 'Follow this user to begin searching the network for their data.') :
+            h('p.text-muted', 'Phoenix is searching the network for this user.'))
+        ]))
     ],
     side: [
       mercury.partial(profileControls, state.events, profile, isYou, followsYou)
@@ -185,17 +218,22 @@ function profilePage(state, profid) {
 }
 
 function profileControls(events, profile, isYou, followsYou) {
-  var followBtn = (profile.isFollowing) ?
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow,  { id: profile.idStr })}, 'Unfollow') :
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow,  { id: profile.idStr })}, 'Follow')
+  var setNicknameBtn = (isYou) ?
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.setUserNickname)}, 'Change Nickname') :
+    undefined
+  var followBtn = (!isYou) ?
+    ((profile.isFollowing) ?
+      h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'Unfollow') :
+      h('button.btn.btn-default', {'ev-click': valueEvents.click(events.follow, { id: profile.id })}, 'Follow')) :
+    undefined
   return h('.profile-ctrls', [
     h('.panel.panel-default',
       h('.panel-body', [
-        h('h2', [profile.nickname, ' ', h('small', 'joined '+profile.joinDate)]),
+        h('h2', [profile.nickname, ' ', ((profile.joinDate) ? h('small', 'joined '+profile.joinDate) : '')]),
         (followsYou) ? [h('span.label.label-primary', 'Follows You'), ' '] : ''
       ])
     ),
-    (!isYou) ? h('p', followBtn) : '',
+    h('p', [setNicknameBtn, followBtn]),
     h('div.text-muted', [
       h('small', h('strong', 'Contact ID:')),
       h('br'),
@@ -206,7 +244,7 @@ function profileControls(events, profile, isYou, followsYou) {
       if (Date.now() > status.endsAt)
         return
       return h('div', [
-        h('a', { style: { color: util.escapePlain(status.textColor||'#000')}, href: '#/msg/'+util.toHexString(status.msg) }, status.text),
+        h('a', { style: { color: util.escapePlain(status.textColor||'#000')}, href: '#/msg/'+status.msg }, status.text),
       ])
     })
   ])
@@ -243,8 +281,8 @@ function messageInfo(msg) {
     timestamp: msg.timestamp
   }
   return h('div.message-info.text-muted', [
-    h('pre', msg.idStr),
-    h('pre', JSONH.stringify(info, null, 2))
+    h('pre', msg.id),
+    h('pre', JSON.stringify(info, null, 2))
   ])
 }
 
@@ -252,11 +290,11 @@ function messageInfo(msg) {
 // ============
 
 function networkPage(state) {
-  function getProfile(idStr) {
-    return state.profiles[state.profileMap[idStr]] || { id: util.toBuffer(idStr), idStr: idStr }
+  function getProfile(id) {
+    return state.profiles[state.profileMap[id]] || { id: id }
   }
-  var followedProfiles = state.followedUsers.map(getProfile)
-  var followerProfiles = state.followerUsers.map(getProfile)
+  var followedProfiles = state.user.followedUsers.map(getProfile)
+  var followerProfiles = state.user.followerUsers.map(getProfile)
 
   return h('.network-page.row', comren.columns({
     col1: h('.panel.panel-default', [
@@ -277,9 +315,9 @@ function networkPage(state) {
     col4: h('.panel.panel-default', [
       h('.panel-heading', h('h3.panel-title', [
         'Known Servers',
-        h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addServer}, 'add')
+        // h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': state.events.addServer}, 'add')
       ])),
-      h('.panel-body', serverLinks(state.events, state.servers))
+      h('.panel-body', serverLinks(state.events, state.servers.concat(state.localPeers)))
     ]),
   }, [['col1', 3], ['col2', 3], ['col3', 3], ['col4', 3]]))
 }
@@ -289,10 +327,11 @@ function serverLinks(events, servers) {
 }
 
 function serverLink(events, server) {
-  return h('h3', [
-    a(server.url, server.hostname),
-    h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'remove')
-  ])
+  return h('h3', server.host)
+  // return h('h3', [
+  //   a(server.url, server.hostname),
+  //   h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.removeServer, { hostname: server.hostname, port: server.port })}, 'remove')
+  // ])
 }
 
 function profileLinks(events, profiles, canRemove) {
@@ -301,15 +340,15 @@ function profileLinks(events, profiles, canRemove) {
 
 function profileLink(events, canRemove, profile) {
   return h('h3', [
-    a('/#/profile/'+profile.idStr, profile.nickname || comren.shortHex(profile.idStr)),
+    a('/#/profile/'+profile.id, profile.nickname || comren.shortString(profile.id)),
     (canRemove)
-      ? h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.idStr })}, 'remove')
+      ? h('button.btn.btn-default.btn-xs.pull-right', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'remove')
       : ''
   ])
 }
 
-// App Page
-// ========
+// User Page
+// =========
 
 function userPage(state, address) {
   var id = (Math.random()*10000)|0
@@ -319,6 +358,20 @@ function userPage(state, address) {
       h('iframe#user-page-'+id, { src: '/user/'+address, sandbox: 'allow-scripts' })
     ],
   }, [['nav', 1], ['main', 11]]))
+}
+
+// Setup Page
+// ==========
+
+function setupPage(state) {
+  return h('.setup-page.row', [
+    h('.col-xs-12', [
+      h('.jumbotron', [
+        h('h1', 'Welcome to Phoenix'),
+        h('p', [h('.btn.btn-primary', {'ev-click': valueEvents.click(state.events.setUserNickname)}, 'Click Here'), ' to set your nickname.'])
+      ])
+    ])
+  ])
 }
 
 // Help Page

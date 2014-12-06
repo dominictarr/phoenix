@@ -1,4 +1,4 @@
-var util = require('../../../../lib/util')
+var util = require('../util')
 var ws   = require('../ws-rpc')
 
 var localTZ = new Date().getTimezoneOffset();
@@ -8,13 +8,13 @@ var preprocessPost =
 exports.preprocessPost = function(msg) {
   // extract any @-mentions
   var match
-  var mentionRegex = /(\s|^)@([A-z0-9]+)/g;
+  var mentionRegex = /(\s|^)@([A-z0-9\/=\.\+]+)/g;
   while ((match = mentionRegex.exec(msg.text))) {
     var mention = match[2]
     if (!msg.mentions)
       msg.mentions = []
     try {
-      msg.mentions.push({ $feed: util.toBuffer(mention), $rel: 'mentions' })
+      msg.mentions.push({ feed: mention, rel: 'mentions' })
     } catch (e) { /* :TODO: bad hash, tell user? */ console.warn('Invalid hash used in @-mention', mention) }
   }
   return msg
@@ -30,10 +30,9 @@ exports.publishText = function(state, text, cb) {
 // posts to the feed
 var publishReply =
 exports.publishReply = function(state, text, parent, cb) {
-  parent = util.toBuffer(parent)
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  ws.api.add(preprocessPost({type: 'post', postType: 'text', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  ws.api.add(preprocessPost({type: 'post', postType: 'text', text: text, timezone: localTZ, repliesTo: {msg: parent, rel: 'replies-to'}}), cb)
 }
 
 // posts to the feed
@@ -46,10 +45,9 @@ exports.publishAction = function(state, text, cb) {
 // posts to the feed
 var publishReaction =
 exports.publishReaction = function(state, text, parent, cb) {
-  parent = util.toBuffer(parent)
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  ws.api.add(preprocessPost({type: 'post', postType: 'action', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}), cb)
+  ws.api.add(preprocessPost({type: 'post', postType: 'action', text: text, timezone: localTZ, repliesTo: {msg: parent, rel: 'replies-to'}}), cb)
 }
 
 // posts to the feed
@@ -64,7 +62,7 @@ var publishGuiply =
 exports.publishGuiply = function(state, text, parent, cb) {
   if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
   if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  ws.api.add({type: 'post', postType: 'gui', text: text, timezone: localTZ, repliesTo: {$msg: parent, $rel: 'replies-to'}}, cb)
+  ws.api.add({type: 'post', postType: 'gui', text: text, timezone: localTZ, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
 }
 
 // posts a copy of the given message to the feed
@@ -72,12 +70,18 @@ var publishRebroadcast =
 exports.publishRebroadcast = function(state, msg, cb) {
   if (!msg.content.rebroadcasts) {
     msg.content.rebroadcasts = {
-      $rel: 'rebroadcasts',
-      $msg: util.toBuffer(msg.id),
-      $feed: util.toBuffer(msg.author),
+      rel: 'rebroadcasts',
+      msg: msg.id,
+      feed: msg.author,
       timestamp: msg.timestamp,
       timezone: msg.content.timezone || 0
     }
   }
   ws.api.add(msg.content, cb)
+}
+
+// updates the user's profile
+var publishText =
+exports.publishProfile = function(state, nickname, cb) {
+  ws.api.add({type: 'profile', nickname: nickname}, cb)
 }

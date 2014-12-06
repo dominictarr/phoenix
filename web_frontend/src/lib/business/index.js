@@ -1,7 +1,6 @@
-var pull  = require('pull-stream')
-var merge = require('pull-merge')
-var util  = require('../../../../lib/util')
-var ws    = require('../ws-rpc')
+var pull    = require('pull-stream')
+var merge   = require('pull-merge')
+var ws      = require('../ws-rpc')
 
 function include(m) {
   for (var k in m)
@@ -14,29 +13,36 @@ include(require('./network'))
 
 // pulls down remote data for the session
 exports.setupHomeApp = function(state) {
-  ws.connect(state)
-  // session
-  ws.api.whoami(function(err, data) {
-    if (err) throw err
-    state.user.id.set(util.toBuffer(data.id))
-    state.user.idStr.set(util.toHexString(data.id))
-    state.user.pubkey.set(util.toBuffer(data.public))
-    state.user.pubkeyStr.set(util.toHexString(data.public))
+  ws.connect(state, function(err) {
+    if (err) return
+
+    // session
+    ws.api.whoami(function(err, data) {
+      if (err) throw err
+      state.user.id.set(data.id)
+      state.user.pubkey.set(data.public)
+      if (!exports.getProfile(state, data.id))
+        exports.addProfile(state, data.id)
+    })
+    
+    // user pages
+    ws.api.phoenix.getUserPages(function(err, pages) {
+      state.userPages.set(pages)
+    })
+
+    // lan peer refreshes (once every 30s)
+    setInterval(exports.fetchLocalPeers.bind(null, state), 30*1000)
+
+    // new message watcher
+    pull(ws.api.createLogStream({ live: true, gt: Date.now() }), pull.drain(function(msg) {
+      if (msg.value.author == state.user.id())
+        return
+      state.syncMsgsWaiting.set(state.syncMsgsWaiting() + 1)
+    }))
+
+    // construct local state
+    exports.syncView(state)
   })
-  ws.api.getUserPages(function(err, pages) {
-    state.userPages.set(pages)
-  })
-
-  // construct local state
-  exports.syncView(state)
-}
-
-// pulls down remote data for the session
-exports.setupPubApp = function(state) {
-  ws.connect(state)
-
-  // construct local state
-  exports.syncView(state)
 }
 
 // pulls down any new messages and constructs our materialized views
@@ -44,6 +50,10 @@ var lastFetchTS = 0
 exports.syncView = function(state, cb) {
   cb = cb || function(err) { if (err) { throw err }}
   var newTS = Date.now()
+
+  // reset pending sync messages
+  state.syncMsgsWaiting.set(0)
+
   // process profiles first
   pull(
     ws.api.messagesByType({ type: 'profile', keys: true, gt: lastFetchTS }),
@@ -62,6 +72,8 @@ exports.syncView = function(state, cb) {
         ], msgstreamCmp),
         pull.drain(exports.processFeedMsg.bind(null, state), function(err) {
           if (err) return cb(err)
+
+          // count unread notes
           var count = 0
           var accessed = state.accessTime()
           state.notifications.forEach(function (note) {
@@ -69,6 +81,17 @@ exports.syncView = function(state, cb) {
               count ++
           })
           state.unreadMessages.set(count)
+
+          // update lan peers
+          exports.fetchLocalPeers(state)
+
+          // route to setup page if the user has no profile
+          var prof = exports.getProfile(state, state.user.id())
+          if (!prof.joinDate())
+            window.location.hash = '#/setup'
+          else if (window.location.hash == '#/setup')
+            window.location.hash = '#'
+
           lastFetchTS = newTS
           cb()
         })
