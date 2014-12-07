@@ -36,8 +36,8 @@ exports.init = function (server) {
     }, 
     // connect to the peer and use the invite code
     useInvite: function(invite, cb) {
-      if (!invite.addr || !invite.sec)
-        cb(new Error('Invalid invite'))
+      if (!invite.address || !invite.secret)
+        return cb(new Error('Invalid invite'))
 
       var addr = invite.address.split(':')
       if (addr.length === 2)
