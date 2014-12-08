@@ -48,7 +48,7 @@ function render(state) {
 function header(events, uId, syncMsgsWaiting, isSyncing) {
   return h('.nav.navbar.navbar-default', [
     h('.container', [
-      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'phoenix')),
+      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'ssbui')),
       h('ul.nav.navbar-nav', [
         h('li', a('#/network', 'network')),
         h('li', a('#/help', 'help'))
