@@ -1,7 +1,7 @@
 {
   "name": "ssbplug-phoenix",
   "description": "a web-interface plugin for scuttlebot",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "homepage": "https://github.com/pfraze/phoenix",
   "repository": {
     "type": "git",
