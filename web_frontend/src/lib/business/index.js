@@ -1,5 +1,6 @@
 var pull    = require('pull-stream')
 var merge   = require('pull-merge')
+var util    = require('../util')
 var ws      = require('../ws-rpc')
 
 function include(m) {
@@ -87,7 +88,7 @@ exports.syncView = function(state, cb) {
 
           // route to setup page if the user has no profile
           var prof = exports.getProfile(state, state.user.id())
-          if (!prof.joinDate())
+          if (!prof.joinDate() || prof.nickname() == util.shortString(state.user.id()))
             window.location.hash = '#/setup'
           else if (window.location.hash == '#/setup')
             window.location.hash = '#'
