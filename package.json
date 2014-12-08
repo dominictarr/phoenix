@@ -1,5 +1,12 @@
 {
-  "name": "phoenix",
+  "name": "ssbplug-phoenix",
+  "description": "a web-interface plugin for scuttlebot",
+  "version": "1.0.0",
+  "homepage": "https://github.com/pfraze/phoenix",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/pfraze/phoenix.git"
+  },
   "dependencies": {
     "base-emoji": "~0.3.0",
     "blake2s": "~1.0.0",
@@ -35,5 +42,7 @@
     "value-event": "~3.2.0",
     "websocket-stream": "~1.1.0",
     "xtend": "~3.0.0"
-  }
+  },
+  "author": "Paul Frazee <pfrazee@gmail.com>",
+  "license": "MIT"
 }
