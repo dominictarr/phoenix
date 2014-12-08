@@ -30,8 +30,8 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
   // main content
   var main
   switch (msg.content.type) {
-    case 'init': return messageEvent(msg, 'account-created', 'Account created', nicknameMap, user, events)
-    case 'profile': return messageEvent(msg, 'account-change', 'Is now known as ' + msg.content.nickname, nicknameMap, user, events)
+    case 'init': return messageEvent(msg, 'account-created', 'account created', nicknameMap, user, events)
+    case 'profile': return messageEvent(msg, 'account-change', 'is now known as ' + msg.content.nickname, nicknameMap, user, events)
     case 'follow':
       if (msg.content.rel == 'follows')
         return messageFollow(msg, nicknameMap, user, events)
@@ -48,7 +48,7 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
         main = messageText(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
       break
     case 'pub':
-      return messageEvent(msg, 'pub', 'Announced a public server at '+msg.content.address.host, nicknameMap, user, events)
+      return messageEvent(msg, 'pub', 'announced a public server at '+msg.content.address.host, nicknameMap, user, events)
     default:
       return ''
   }
