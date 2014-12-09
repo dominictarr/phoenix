@@ -50,7 +50,9 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
     case 'pub':
       return messageEvent(msg, 'pub', 'announced a public server at '+msg.content.address.host, nicknameMap, user, events)
     default:
-      return ''
+      // unknown type
+      var content = h('pre', JSON.stringify(msg.content, null, 2))
+      main = renderMsgShell(content, msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
   }
 
   // reply/react form
@@ -97,8 +99,13 @@ function renderMsgShell(content, msg, user, events, parentMsg, messages, message
 
   var parentHeader
   if (parentMsg) {
+    var parentMsgLabel
+    if (parentMsg.content.text)
+      parentMsgLabel = new widgets.Markdown(comren.firstWords(parentMsg.content.text, 5), { nicknames: nicknameMap, inline: true })
+    else
+      parentMsgLabel = (parentMsg.id)
     parentHeader = h('.panel-heading', [
-      're: ', comren.a('#/msg/'+parentMsg.id, new widgets.Markdown(comren.firstWords(parentMsg.content.text, 5), { nicknames: nicknameMap, inline: true }))
+      're: ', comren.a('#/msg/'+parentMsg.id, parentMsgLabel)
     ])
   }
 

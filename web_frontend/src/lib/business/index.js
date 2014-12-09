@@ -64,13 +64,7 @@ exports.syncView = function(state, cb) {
 
       // now process the feed
       pull(
-        merge([
-          pull.values(profileMsgs),
-          ws.api.messagesByType({ type: 'init',   keys: true, gt: lastFetchTS }),
-          ws.api.messagesByType({ type: 'post',   keys: true, gt: lastFetchTS }),
-          ws.api.messagesByType({ type: 'follow', keys: true, gt: lastFetchTS }),
-          ws.api.messagesByType({ type: 'pub',    keys: true, gt: lastFetchTS })
-        ], msgstreamCmp),
+        ws.api.createLogStream({ keys: true, gt: lastFetchTS }),
         pull.drain(exports.processFeedMsg.bind(null, state), function(err) {
           if (err) return cb(err)
 
@@ -99,10 +93,4 @@ exports.syncView = function(state, cb) {
       )
     })
   )
-}
-
-function msgstreamCmp(a, b) {
-  if (a.value.timestamp < b.value.timestamp) return -1
-  if (a.value.timestamp === b.value.timestamp) return 0
-  return 1
 }

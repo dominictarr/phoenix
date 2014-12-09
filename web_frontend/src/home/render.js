@@ -104,7 +104,8 @@ function mainFeed(feedView, events, user, nicknameMap) {
   var msgs = feedView.messages.filter(function(msg) {
     if (msg.hidden) return false
     if (msg.repliesToLink) return false
-    if (msgtypes.indexOf(msg.content.type) === -1) return false
+    return true
+    // if (msgtypes.indexOf(msg.content.type) === -1) return false
     if (!feedView.filters.shares      && msg.rebroadcastsLink) return false
     if (!feedView.filters.textPosts   && msg.content.postType == 'text') return false
     if (!feedView.filters.actionPosts && msg.content.postType == 'action' && !msg.repliesToLink) return false
