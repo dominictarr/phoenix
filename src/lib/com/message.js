@@ -51,7 +51,7 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
       return messageEvent(msg, 'pub', 'announced a public server at '+msg.content.address.host, nicknameMap, user, events)
     default:
       // unknown type
-      var content = h('pre', JSON.stringify(msg.content, null, 2))
+      var content = h('.phoenix-raw', JSON.stringify(msg.content, null, 2))
       main = renderMsgShell(content, msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
   }
 
