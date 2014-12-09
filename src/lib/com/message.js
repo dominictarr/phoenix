@@ -29,7 +29,7 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
 
   // main content
   var main
-  switch (msg.content.type) {
+  switch (msg.isViewRaw ? 'raw' : msg.content.type) {
     case 'init': main = messageEvent(msg, 'account-created', 'account created', nicknameMap, user, events); break
     case 'profile': main = messageEvent(msg, 'account-change', 'is now known as ' + msg.content.nickname, nicknameMap, user, events); break
     case 'follow': main = messageFollow(msg, nicknameMap, user, events); break
@@ -52,7 +52,14 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
     main = h('div', [main, h('.message-reply', publishForm(publishForms[i], events, user, nicknameMap))])
   }
 
-  return main
+  // known type? render with view raw toggle
+  var isKnown = ~['init','profile','follow','post','pub'].indexOf(msg.content.type)
+  return h('.message-wrapper', [
+    (isKnown) ?
+      h('a.glyphicon.glyphicon-cog.text-muted', {href:'javascript:undefined', title: 'View Raw', 'ev-click': valueEvents.click(events.toggleViewRaw, { id: msg.id })}) :
+      '',
+    main
+  ])
 }
 
 // message text-content renderer

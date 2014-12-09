@@ -99,6 +99,7 @@ var defaults = {
     timestamp: 0,
     authorNickname: '',
     isRunning: false,
+    isViewRaw: false,
     hidden: false,
     rebroadcastsLink: null,
     repliesToLink: null
@@ -217,6 +218,7 @@ function createHomeApp(events, initialState) {
 function createMessage(initialState) {
   var state = extend(defaults.message, initialState)
   state.isRunning        = mercury.value(state.isRunning)
+  state.isViewRaw        = mercury.value(state.isViewRaw)
   state.hidden           = mercury.value(state.hidden)
   state.rebroadcastsLink = mercury.value(state.rebroadcastsLink)
   state.repliesToLink    = mercury.value(state.repliesToLink)

@@ -274,12 +274,13 @@ function messagePage(state, msgid) {
 
 function messageInfo(msg) {
   var info = {
-    content: msg.content,
-    sequence: msg.sequence,
     previous: msg.previous,
     author: msg.author,
+    sequence: msg.sequence,
+    timestamp: msg.timestamp,
+    hash: msg.hash,
+    content: msg.content,
     signature: msg.signature,
-    timestamp: msg.timestamp
   }
   return h('div.message-info.text-muted', [
     h('pre', msg.id),

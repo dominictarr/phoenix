@@ -64,6 +64,19 @@
     }
   }
 
+  .message-wrapper {
+    position: relative;
+    > a {
+      position: absolute;
+      right: 0;
+      display: none;
+      margin: 1em;
+    }
+    &:hover > a {
+      display: inline;
+    }
+  }
+
   .message-reply {
     margin-left: 40px;
     margin-top: -12px;
