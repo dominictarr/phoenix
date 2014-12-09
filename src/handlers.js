@@ -1,11 +1,11 @@
 var pull = require('pull-stream')
-var util = require('../lib/util')
+var util = require('./lib/util')
 var constants = require('./const')
-var models = require('../lib/models')
-var bus = require('../lib/business')
-var ws = require('../lib/ws-rpc')
-var sandbox = require('../lib/sandbox')
-var textareaCaretPosition = require('../lib/textarea-caret-position')
+var models = require('./lib/models')
+var bus = require('./lib/business')
+var ws = require('./lib/ws-rpc')
+var sandbox = require('./lib/sandbox')
+var textareaCaretPosition = require('./lib/textarea-caret-position')
 var emojiNamedCharacters = require('emoji-named-characters')
 
 exports.setRoute = function(state, route) {
