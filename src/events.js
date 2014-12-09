@@ -41,6 +41,7 @@ function createEvents() {
     'reactToMsg',
     'shareMsg',
     'runMsgGui',
+    'toggleViewRaw',
 
     // guipost behaviors
     'refreshIframe',

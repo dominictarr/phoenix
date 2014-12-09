@@ -479,14 +479,23 @@ exports.shareMsg = function(state, data) {
   })
 }
 
-exports.runMsgGui = function(state, data) {
+function getMsg(state, id) {
   var mm = state.feedView.messageMap()
-  var i = mm[data.id]
+  var i = mm[id]
   if (i == void 0) return
-  var msg = state.feedView.messages.get(state.feedView.messages.getLength() - i - 1)
-  if (!msg) return
+  return state.feedView.messages.get(state.feedView.messages.getLength() - i - 1)
+}
 
+exports.runMsgGui = function(state, data) {
+  var msg = getMsg(state, data.id)
+  if (!msg) return
   msg.isRunning.set(data.run)
+}
+
+exports.toggleViewRaw = function(state, data) {
+  var msg = getMsg(state, data.id)
+  if (!msg) return
+  msg.isViewRaw.set(!msg.isViewRaw())
 }
 
 exports.refreshIframe = function() {

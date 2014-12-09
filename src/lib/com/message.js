@@ -29,30 +29,21 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
 
   // main content
   var main
-  switch (msg.content.type) {
-    case 'init': return messageEvent(msg, 'account-created', 'account created', nicknameMap, user, events)
-    case 'profile': return messageEvent(msg, 'account-change', 'is now known as ' + msg.content.nickname, nicknameMap, user, events)
-    case 'follow':
-      if (msg.content.rel == 'follows')
-        return messageFollow(msg, nicknameMap, user, events)
-      return ''
+  switch (msg.isViewRaw ? 'raw' : msg.content.type) {
+    case 'init': main = messageEvent(msg, 'account-created', 'account created', nicknameMap, user, events); break
+    case 'profile': main = messageEvent(msg, 'account-change', 'is now known as ' + msg.content.nickname, nicknameMap, user, events); break
+    case 'follow': main = messageFollow(msg, nicknameMap, user, events); break
     case 'post':
       var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { id: msg.repliesToLink.msg }) : null
       if (msg.content.postType == 'action')
-        return messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap, user, events)
-      else if (msg.content.postType == 'gui') {
-        // :TODO: gui posts are disabled for now
-        // main = messageGui(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
-        return ''
-      } else
+        main = messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap, user, events)
+      else
         main = messageText(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
       break
-    case 'pub':
-      return messageEvent(msg, 'pub', 'announced a public server at '+msg.content.address.host, nicknameMap, user, events)
+    case 'pub': main = messageEvent(msg, 'pub', 'announced a public server at '+msg.content.address.host, nicknameMap, user, events); break
     default:
       // unknown type
-      var content = h('pre', JSON.stringify(msg.content, null, 2))
-      main = renderMsgShell(content, msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
+      main = messageRaw(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
   }
 
   // reply/react form
@@ -61,7 +52,14 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
     main = h('div', [main, h('.message-reply', publishForm(publishForms[i], events, user, nicknameMap))])
   }
 
-  return main
+  // known type? render with view raw toggle
+  var isKnown = ~['init','profile','follow','post','pub'].indexOf(msg.content.type)
+  return h('.message-wrapper', [
+    (isKnown) ?
+      h('a.glyphicon.glyphicon-cog.text-muted', {href:'javascript:undefined', title: 'View Raw', 'ev-click': valueEvents.click(events.toggleViewRaw, { id: msg.id })}) :
+      '',
+    main
+  ])
 }
 
 // message text-content renderer
@@ -85,6 +83,24 @@ var messageGui = exports.messageGui = function(msg, user, events, parentMsg, mes
   }
 
   // body
+  return renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
+}
+
+var messageRaw = exports.messageRaw = function(msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
+  var json = util.escapePlain(JSON.stringify(msg.content, null, 2))
+
+  // turn feed references into links
+  json = json.replace(/\"feed\": \"([^\"]+)\"/g, function($0, $1) {
+    var nick = nicknameMap[$1] || $1
+    return '"feed": "<a class="user-link" href="/#/profile/'+$1+'">'+nick+'</a>"'
+  })
+
+  // turn message references into links
+  json = json.replace(/\"msg\": \"([^\"]+)\"/g, function($0, $1) {
+    return '"msg": "<a href="/#/msg/'+$1+'">'+$1+'</a>"'
+  })
+
+  var content = h('.phoenix-raw', { innerHTML: json })
   return renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
 }
 
@@ -256,11 +272,12 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap,
 var messageFollow = exports.messageFollow = function(msg, nicknameMap, user, events) {
   var target = msg.content.feed
   var targetNickname = nicknameMap[target] || comren.shortString(target)
+  var action = (msg.content.rel == 'unfollows') ? ' unfollowed ' : ' followed '
 
   return h('.phoenix-event', [
     h('p.event-body', [
       comren.userlink(msg.author, msg.authorNickname, user, events),
-      ' followed ',
+      action,
       comren.userlink(target, targetNickname, user, events)
     ])
   ])
