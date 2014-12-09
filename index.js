@@ -76,7 +76,7 @@ function onRequest(server) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
     function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
     function type (t) { res.setHeader('Content-Type', t) }
-    function resolve(file) { return path.join(__dirname, './web_frontend/' + file) }
+    function resolve(file) { return path.join(__dirname, file) }
     function read(file) { return fs.createReadStream(resolve(file)); }
     function serve(file) { return read(file).on('error', serve404).pipe(res) }
     function serve404() {  res.writeHead(404); res.end('Not found'); }
@@ -164,7 +164,7 @@ function onRequest(server) {
       var dir = path.join(__dirname, path.dirname(req.url))
       renderCss('gui-sandbox.less', loaded())
       browserify({ basedir: dir })
-        .add(path.join(__dirname, './web_frontend/src/user-page.js')) // :TODO: publish user-page.js as an npm module and remove this add() call
+        .add(path.join(__dirname, './src/user-page.js')) // :TODO: publish user-page.js as an npm module and remove this add() call
         .add(path.join(dir, path.basename(req.url)))
         .bundle(once(loaded()))
       return loaded(function (err, results) {

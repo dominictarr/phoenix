@@ -5,9 +5,9 @@ var mercury = require('mercury')
 var models = require('./lib/models')
 var bus = require('./lib/business')
 var sandbox = require('./lib/sandbox') 
-var createEvents = require('./home/events')
-var render = require('./home/render')
-var handlers = require('./home/handlers')
+var createEvents = require('./events')
+var render = require('./render')
+var handlers = require('./handlers')
 
 // init app
 var state = createApp()
