@@ -30,25 +30,17 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
   // main content
   var main
   switch (msg.content.type) {
-    case 'init': return messageEvent(msg, 'account-created', 'account created', nicknameMap, user, events)
-    case 'profile': return messageEvent(msg, 'account-change', 'is now known as ' + msg.content.nickname, nicknameMap, user, events)
-    case 'follow':
-      if (msg.content.rel == 'follows')
-        return messageFollow(msg, nicknameMap, user, events)
-      return ''
+    case 'init': main = messageEvent(msg, 'account-created', 'account created', nicknameMap, user, events); break
+    case 'profile': main = messageEvent(msg, 'account-change', 'is now known as ' + msg.content.nickname, nicknameMap, user, events); break
+    case 'follow': main = messageFollow(msg, nicknameMap, user, events); break
     case 'post':
       var parentMsg = (isTopRender && msg.repliesToLink) ? lookup(feedView.messages, feedView.messageMap, { id: msg.repliesToLink.msg }) : null
       if (msg.content.postType == 'action')
-        return messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap, user, events)
-      else if (msg.content.postType == 'gui') {
-        // :TODO: gui posts are disabled for now
-        // main = messageGui(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
-        return ''
-      } else
+        main = messageEvent(msg, (msg.repliesToLink) ? 'reaction' : 'action', msg.content.text, nicknameMap, user, events)
+      else
         main = messageText(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
       break
-    case 'pub':
-      return messageEvent(msg, 'pub', 'announced a public server at '+msg.content.address.host, nicknameMap, user, events)
+    case 'pub': main = messageEvent(msg, 'pub', 'announced a public server at '+msg.content.address.host, nicknameMap, user, events); break
     default:
       // unknown type
       main = messageRaw(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
@@ -273,11 +265,12 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap,
 var messageFollow = exports.messageFollow = function(msg, nicknameMap, user, events) {
   var target = msg.content.feed
   var targetNickname = nicknameMap[target] || comren.shortString(target)
+  var action = (msg.content.rel == 'unfollows') ? ' unfollowed ' : ' followed '
 
   return h('.phoenix-event', [
     h('p.event-body', [
       comren.userlink(msg.author, msg.authorNickname, user, events),
-      ' followed ',
+      action,
       comren.userlink(target, targetNickname, user, events)
     ])
   ])
