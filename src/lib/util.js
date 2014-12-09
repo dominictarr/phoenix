@@ -53,7 +53,7 @@ exports.toBuffer = function(v) {
 
 exports.getJson = function(path, cb) {
   var xhr = new XMLHttpRequest()
-  xhr.open('GET', '/access.json', true)
+  xhr.open('GET', path, true)
   xhr.responseType = 'json'
   xhr.onreadystatechange = function() {
     if (xhr.readyState == 4) {
