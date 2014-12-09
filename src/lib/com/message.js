@@ -51,8 +51,7 @@ var message = exports.message = function(msg, feedView, events, user, nicknameMa
       return messageEvent(msg, 'pub', 'announced a public server at '+msg.content.address.host, nicknameMap, user, events)
     default:
       // unknown type
-      var content = h('.phoenix-raw', JSON.stringify(msg.content, null, 2))
-      main = renderMsgShell(content, msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
+      main = messageRaw(msg, user, events, parentMsg, feedView.messages, feedView.messageMap, feedView.replies[msg.id], feedView.rebroadcasts[msg.id], nicknameMap)
   }
 
   // reply/react form
@@ -85,6 +84,24 @@ var messageGui = exports.messageGui = function(msg, user, events, parentMsg, mes
   }
 
   // body
+  return renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
+}
+
+var messageRaw = exports.messageRaw = function(msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
+  var json = util.escapePlain(JSON.stringify(msg.content, null, 2))
+
+  // turn feed references into links
+  json = json.replace(/\"feed\": \"([^\"]+)\"/g, function($0, $1) {
+    var nick = nicknameMap[$1] || $1
+    return '"feed": "<a class="user-link" href="/#/profile/'+$1+'">'+nick+'</a>"'
+  })
+
+  // turn message references into links
+  json = json.replace(/\"msg\": \"([^\"]+)\"/g, function($0, $1) {
+    return '"msg": "<a href="/#/msg/'+$1+'">'+$1+'</a>"'
+  })
+
+  var content = h('.phoenix-raw', { innerHTML: json })
   return renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
 }
 
