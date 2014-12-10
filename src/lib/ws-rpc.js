@@ -33,7 +33,7 @@ var manifest = {
   feedsLinkedToFeed: 'source',
   feedsLinkedFromFeed: 'source',
   followedUsers: 'source',
-  phoenix: { getUserPages: 'async', useInvite: 'async' }
+  phoenix: { useInvite: 'async' }
 }
 
 var api = exports.api = null

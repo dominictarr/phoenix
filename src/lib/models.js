@@ -48,7 +48,6 @@ var defaults = {
         shares: true,
         textPosts: true,
         actionPosts: true,
-        guiPosts: true,
         follows: true
       },
       replies: {},
@@ -80,8 +79,6 @@ var defaults = {
 
     localPeers: [],
     useLocalNetwork: false,
-
-    userPages: [],
 
     lastSync: '',
     syncMsgsWaiting: 0,
@@ -172,7 +169,6 @@ function createHomeApp(events, initialState) {
         shares:           mercury.value(state.feedView.filters.shares),
         textPosts:        mercury.value(state.feedView.filters.textPosts),
         actionPosts:      mercury.value(state.feedView.filters.actionPosts),
-        guiPosts:         mercury.value(state.feedView.filters.guiPosts),
         follows:          mercury.value(state.feedView.filters.follows)
       }),
       replies:          mercury.value(state.feedView.replies),
@@ -206,8 +202,6 @@ function createHomeApp(events, initialState) {
 
     localPeers:       mercury.array(state.localPeers.map(createLocalPeer)),
     useLocalNetwork:  mercury.value(state.useLocalNetwork),
-
-    userPages:        mercury.value(state.userPages),
 
     lastSync:         mercury.value(state.lastSync),
     syncMsgsWaiting:  mercury.value(state.syncMsgsWaiting),

@@ -11,7 +11,6 @@ function createEvents() {
     'submitPublishForm',
     'dismissPublishFormError',
     'cancelPublishForm',
-    'testPublishFormCode',
 
     // mention box behaviors
     'mentionBoxInput',
@@ -40,12 +39,7 @@ function createEvents() {
     'replyToMsg',
     'reactToMsg',
     'shareMsg',
-    'runMsgGui',
     'toggleViewRaw',
-
-    // guipost behaviors
-    'refreshIframe',
-    'onGuipostReply'
   ])
   events.setRoute = EventRouter()
   return events

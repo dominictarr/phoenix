@@ -50,21 +50,6 @@ exports.publishReaction = function(state, text, parent, cb) {
   ws.api.add(preprocessPost({type: 'post', postType: 'action', text: text, timezone: localTZ, repliesTo: {msg: parent, rel: 'replies-to'}}), cb)
 }
 
-// posts to the feed
-var publishGui =
-exports.publishGui = function(state, text, cb) {
-  if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  ws.api.add({type: 'post', postType: 'gui', text: text, timezone: localTZ}, cb)
-}
-
-// posts to the feed
-var publishGuiply =
-exports.publishGuiply = function(state, text, parent, cb) {
-  if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-  if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-  ws.api.add({type: 'post', postType: 'gui', text: text, timezone: localTZ, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
-}
-
 // posts a copy of the given message to the feed
 var publishRebroadcast =
 exports.publishRebroadcast = function(state, msg, cb) {
