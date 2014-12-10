@@ -13,14 +13,7 @@ Join us in #scuttlebutt on freenode.
 
 **To start on your localhost**
 
-```
-git clone https://github.com/pfraze/phoenix.git
-cd phoenix
-npm install
-./phoenix setup
-./phoenix serve
-```
-
+Follow the instructions for using [ssbui](https://github.com/pfraze/ssbui#readme).
 
 ## Contributing
 
@@ -30,7 +23,6 @@ Make sure your submissions are licensed for free use. All code in Phoenix (inclu
 
 You can get help in #scuttlebutt on freenode.
 
-
 ## Project Repos
 
 The phoenix project is broken into four main repositories:
@@ -38,8 +30,8 @@ The phoenix project is broken into four main repositories:
  - [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt): a library on top of leveldb that adds the data structures, crypto, and indexing of the ssb protocol.
  - [scuttlebot](https://github.com/pfraze/scuttlebot): a network server & server-library which wraps ssb
  - [muxrpc](https://github.com/dominictarr/muxrpc): the RPC protocol used by scuttlebot and phoenix
- - [phoenix](https://github.com/pfraze/phoenix): a social-feeds application
-
+ - [phoenix](https://github.com/pfraze/phoenix): a social-feeds plugin to scuttlebot
+ - [ssbui](https://github.com/pfraze/ssbui): an installable package for using phoenix with scuttlebot
 
 ## License
 
