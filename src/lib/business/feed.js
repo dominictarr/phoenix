@@ -165,7 +165,7 @@ function indexGivesNick(state, msg, link) {
     var nicks = targetProf.nicknames()
     if (!nicks[link.nickname])
       nicks[link.nickname] = []
-    if (~nicks[link.nickname].indexOf(msg.author))
+    if (!~nicks[link.nickname].indexOf(msg.author))
       nicks[link.nickname].push(msg.author)
     targetProf.nicknames.set(nicks)
 
