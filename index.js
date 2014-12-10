@@ -72,32 +72,47 @@ var eTag = (Math.random() * 100000)|0
 
 // HTTP request handler
 function onRequest(server) {
+  function resolve(file) { return path.join(__dirname, file) }
+
+  // check for the built assets
+  var buildJs = false, buildCss = false
+  try { fs.statSync(resolve('js')) }
+  catch (e) { buildJs = true, console.log('Built JS assets do not exist, building in-memory on each request') }
+  try { fs.statSync(resolve('css')) }
+  catch (e) { buildCss = true, console.log('Built CSS assets do not exist, building in-memory on each request') }
+
   return function(req, res) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
     function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
     function type (t) { res.setHeader('Content-Type', t) }
-    function resolve(file) { return path.join(__dirname, file) }
     function read(file) { return fs.createReadStream(resolve(file)); }
     function serve(file) { return read(file).on('error', serve404).pipe(res) }
-    function serve404() {  res.writeHead(404); res.end('Not found'); }
+    function serve404() { res.writeHead(404); res.end('Not found'); }
     function renderCss(name, cb) {
-      var filepath = resolve('less/'+name)
-      fs.readFile(filepath, { encoding: 'utf-8' }, function(err, lessStr) {
-        if (err) return cb(err)
-        less.render(lessStr, { paths: [resolve('less')], filename: name + '.less' }, cb)
-      })
+      if (buildCss) {
+        name = path.basename(name, '.css')+'.less'
+        var filepath = resolve('less/'+name)
+        fs.readFile(filepath, { encoding: 'utf-8' }, function(err, lessStr) {
+          if (err) return cb(err)
+          less.render(lessStr, { paths: [resolve('less')], filename: name }, cb)
+        })
+      } else
+        fs.readFile(resolve('css/'+name), { encoding: 'utf-8' }, cb)
     }
     function renderJs(name, cb) {
-      var b = browserify({ basedir: resolve('src') })
-      b.add(resolve('src/'+name))
-      // :TODO: remove these ignores? these are from the old phoenix-rpc days
-      b.ignore('proquint-')
-      b.ignore('http')
-      b.ignore('level')
-      b.ignore('level/sublevel')
-      b.ignore('level-sublevel/bytewise')
-      b.ignore('pull-level')
-      b.bundle(once(cb))
+      if (buildJs) {
+        var b = browserify({ basedir: resolve('src') })
+        b.add(resolve('src/'+name))
+        // :TODO: remove these ignores? these are from the old phoenix-rpc days
+        b.ignore('proquint-')
+        b.ignore('http')
+        b.ignore('level')
+        b.ignore('level/sublevel')
+        b.ignore('level-sublevel/bytewise')
+        b.ignore('pull-level')
+        b.bundle(once(cb))
+      } else
+        fs.readFile(resolve('js/'+name), { encoding: 'utf-8' }, cb)
     }
 
     // Local-host only
@@ -142,7 +157,7 @@ function onRequest(server) {
       var loaded = multicb()
       fs.readFile(resolve('html/gui-sandbox.html'), { encoding: 'utf-8' }, loaded())
       renderJs('gui-sandbox.js', loaded())
-      renderCss('gui-sandbox.less', loaded())
+      renderCss('gui-sandbox.css', loaded())
       return loaded(function(err, results) {
         if (err) return console.error(err), serve404()
         var html = results[0][1]
@@ -162,7 +177,7 @@ function onRequest(server) {
     if (pathStarts('/user/') && pathEnds('.js')) {
       var loaded = multicb()
       var dir = path.join(__dirname, path.dirname(req.url))
-      renderCss('gui-sandbox.less', loaded())
+      renderCss('gui-sandbox.css', loaded())
       browserify({ basedir: dir })
         .add(path.join(__dirname, './src/user-page.js')) // :TODO: publish user-page.js as an npm module and remove this add() call
         .add(path.join(dir, path.basename(req.url)))
@@ -186,7 +201,7 @@ function onRequest(server) {
 
     // CSS
     if (pathStarts('/css/') && pathEnds('.css')) {
-      return renderCss(path.basename(req.url, '.css')+'.less', function(err, cssStr) {
+      return renderCss(path.basename(req.url), function(err, cssStr) {
         if (err) {
           res.writeHead(500)
           res.end(err.toString())
