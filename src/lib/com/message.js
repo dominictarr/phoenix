@@ -111,7 +111,7 @@ function renderMsgShell(content, msg, user, events, parentMsg, messages, message
 
   var replyStr = renderMsgReplies(msg, replies)
   var reactionsStr = renderMsgReactions(replies, nicknameMap, user, events)
-  var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts, user, events)
+  var rebroadcastsStr = renderMsgRebroadcasts(rebroadcasts, nicknameMap, user, events)
 
   var parentHeader
   if (parentMsg) {
@@ -155,22 +155,20 @@ function renderMsgHeader(msg, user, events, nicknameMap) {
 
   if (msg.rebroadcastsLink) {
     // duplicated message
-    var author = msg.rebroadcastsLink.feed
-    var authorNick = nicknameMap[author] || author
     return h('p', [
-      comren.userlink(author, authorNick, user, events),
+      comren.userlink(author, nicknameMap[msg.rebroadcastsLink.feed], user, events),
       h('small.message-ctrls', [
         ' - ',
         util.prettydate(new Date(msg.rebroadcastsLink.timestamp||0), true)
       ]),
-      h('span.repliesto', [' shared by ', comren.userlink(msg.author, msg.authorNickname, user, events)]),
+      h('span.repliesto', [' shared by ', comren.userlink(msg.author, nicknameMap[msg.author], user, events)]),
       stopBtnStr
     ])
   }
 
   // normal message
   return h('p', [
-    comren.userlink(msg.author, msg.authorNickname, user, events),
+    comren.userlink(msg.author, nicknameMap[msg.author], user, events),
     ' ', h('span', { innerHTML: comren.toEmoji(msg.author.slice(0,16), 12) }),
     h('small.message-ctrls', [
       ' - ',
@@ -197,11 +195,11 @@ function renderMsgReactions(replies, nicknameMap, user, events) {
       if (!reactMap[react])
         reactMap[react] = []
       if (notYetAdded(reactMap[react], reply))
-        reactMap[react].push({ id: reply.author, nick: reply.authorNickname })
+        reactMap[react].push({ id: reply.author, nick: nicknameMap[reply.author] })
     }
   })
   function notYetAdded(list, reply) { // helper to remove duplicate reactions by a user
-    var nick = reply.authorNickname
+    var nick = nicknameMap[reply.author]
     return list.filter(function(r) { return r.nick == nick }).length === 0
   }
   // render the list of reactions
@@ -226,13 +224,13 @@ function renderMsgReactions(replies, nicknameMap, user, events) {
 }
 
 // list of rebroadcasts in the footer of messages
-function renderMsgRebroadcasts(rebroadcasts, user, events) {
+function renderMsgRebroadcasts(rebroadcasts, nicknameMap, user, events) {
   var rebroadcastsStr = []
   if (rebroadcasts.length) {
     rebroadcasts = onePerAuthor(rebroadcasts)
-    rebroadcastsStr.push(comren.userlink(rebroadcasts[0].author, rebroadcasts[0].authorNickname, user, events))
+    rebroadcastsStr.push(comren.userlink(rebroadcasts[0].author, nicknameMap[rebroadcasts[0].author], user, events))
     if (rebroadcasts.length > 1) {
-      var theOthers = rebroadcasts.slice(1).map(function(r) { return r.authorNickname })
+      var theOthers = rebroadcasts.slice(1).map(function(r) { return nicknameMap[r.author] })
       rebroadcastsStr.push(h('a', { href: 'javascript:void()', title: theOthers.join(', ') }, ' and ' + theOthers.length + ' others'))
     }
     rebroadcastsStr.push(' shared this.')
@@ -261,7 +259,7 @@ var messageEvent = exports.messageEvent = function(msg, type, text, nicknameMap,
 
   return h('.phoenix-event', [
     h('p.event-body', [
-      comren.userlink(msg.author, msg.authorNickname, user, events),
+      comren.userlink(msg.author, nicknameMap[msg.author], user, events),
       new widgets.Markdown(' ' + text, { inline: true, nicknames: nicknameMap }),
       ' ',
       parentLink
@@ -276,7 +274,7 @@ var messageFollow = exports.messageFollow = function(msg, nicknameMap, user, eve
 
   return h('.phoenix-event', [
     h('p.event-body', [
-      comren.userlink(msg.author, msg.authorNickname, user, events),
+      comren.userlink(msg.author, nicknameMap[msg.author], user, events),
       action,
       comren.userlink(target, targetNickname, user, events)
     ])

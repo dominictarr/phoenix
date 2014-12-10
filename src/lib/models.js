@@ -97,7 +97,6 @@ var defaults = {
     sequence: 0,
     signature: null,
     timestamp: 0,
-    authorNickname: '',
     isRunning: false,
     isViewRaw: false,
     hidden: false,
@@ -109,6 +108,8 @@ var defaults = {
     id: null,
     feed: [],
     nickname: '',
+    nicknames: null,
+    wasGivenName: false,
     joinDate: '',
     statuses: [],
     isFollowing: false
@@ -133,7 +134,6 @@ var defaults = {
 
   notification: {
     type: '',
-    authorNickname: '',
     msgText: ''
   }
 }
@@ -229,6 +229,8 @@ function createProfile(initialState) {
   var state = extend(defaults.profile, initialState)
   state.feed = mercury.array(state.feed.map(createMessage))
   state.nickname = mercury.value(state.nickname)
+  state.nicknames = mercury.value({})
+  state.wasGivenName = mercury.value(state.wasGivenName)
   state.joinDate = mercury.value(state.joinDate)
   state.statuses = mercury.array(state.statuses)
   state.isFollowing = mercury.value(state.isFollowing)
