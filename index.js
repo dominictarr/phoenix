@@ -10,30 +10,15 @@ exports.name = 'phoenix'
 exports.version = '1.0.0'
 
 exports.manifest = {
-  getUserPages: 'async',
   useInvite: 'async'
 }
 exports.permissions = {
-  anonymous: {deny: ['getUserPages', 'useInvite']}
+  anonymous: {deny: ['useInvite']}
 }
 
 exports.init = function (server) {
   server.on('request', onRequest(server))
   return {
-    // enumerate js files in ./user
-    getUserPages: function(cb) {
-      var userspath = path.join(__dirname, 'user')
-      fs.readdir(userspath, function(err, files) {
-        cb(null, (files||[])
-          .filter(function(file) {
-            return file.slice(-3) == '.js'
-          })
-          .map(function(file) {
-            return { name: file, url: file }
-          })
-        )
-      })
-    }, 
     // connect to the peer and use the invite code
     useInvite: function(invite, cb) {
       if (!invite.address || !invite.secret)
@@ -150,53 +135,6 @@ function onRequest(server) {
     if (req.url == '/' || req.url == '/index.html') {
       type('text/html')
       return serve('html/home.html')
-    }
-
-    // Gui sandbox
-    if (pathStarts('/gui-sandbox')) {
-      var loaded = multicb()
-      fs.readFile(resolve('html/gui-sandbox.html'), { encoding: 'utf-8' }, loaded())
-      renderJs('gui-sandbox.js', loaded())
-      renderCss('gui-sandbox.css', loaded())
-      return loaded(function(err, results) {
-        if (err) return console.error(err), serve404()
-        var html = results[0][1]
-        var script = results[1][1]
-        var style = results[2][1]
-        html = html.replace('$SCRIPT', script)
-        html = html.replace('$STYLE', style)
-
-        res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\'')
-        type('text/html')
-        res.writeHead(200)
-        res.end(html)
-      })
-    }
-
-    // User page sandbox
-    if (pathStarts('/user/') && pathEnds('.js')) {
-      var loaded = multicb()
-      var dir = path.join(__dirname, path.dirname(req.url))
-      renderCss('gui-sandbox.css', loaded())
-      browserify({ basedir: dir })
-        .add(path.join(__dirname, './src/user-page.js')) // :TODO: publish user-page.js as an npm module and remove this add() call
-        .add(path.join(dir, path.basename(req.url)))
-        .bundle(once(loaded()))
-      return loaded(function (err, results) {
-        if (err) {
-          res.writeHead(500)
-          res.end(err.toString())
-          return console.error(err.toString())
-        }
-
-        var css = results[0][1]
-        var js  = results[1][1]
-
-        res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\' \'unsafe-eval\'')
-        type('text/html')
-        res.writeHead(200)
-        res.end('<html><head><style>'+css+'</style></head><body></body><script>'+js+'</script></html>')
-      })
     }
 
     // CSS

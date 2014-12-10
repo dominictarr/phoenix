@@ -4,7 +4,6 @@ var constants = require('./const')
 var models = require('./lib/models')
 var bus = require('./lib/business')
 var ws = require('./lib/ws-rpc')
-var sandbox = require('./lib/sandbox')
 var textareaCaretPosition = require('./lib/textarea-caret-position')
 var emojiNamedCharacters = require('emoji-named-characters')
 
@@ -74,9 +73,6 @@ exports.submitPublishForm = function(state, data) {
   var str = (form.textValue()).trim()
   if (!str) return
 
-  if (form.type() == 'gui' && !confirm('Post the GUI? (Make sure you test it!)'))
-    return
-
   // wait a tick so that the form.textValue can be process by mercury
   // if we dont, and submitPublishForm was triggered by ctrl+enter...
   // ...then mercury will not realize that form.textValue changed, and wont clear the input
@@ -85,11 +81,9 @@ exports.submitPublishForm = function(state, data) {
     if (!form.parent) {
       if (form.type() == 'text')        bus.publishText(state, str, after)
       else if (form.type() == 'action') bus.publishAction(state, str, after)
-      else if (form.type() == 'gui')    bus.publishGui(state, str, after)
     } else {
       if (form.type() == 'text')        bus.publishReply(state, str, form.parent, after)
       else if (form.type() == 'action') bus.publishReaction(state, str, form.parent, after)
-      else if (form.type() == 'gui')    bus.publishGuiply(state, str, form.parent, after)
     }
     function after(err) {
       if (err) {
@@ -140,24 +134,6 @@ function resetForm(state, form) {
     m[form.id] = undefined
     state.feedView.publishFormMap.set(m)
   }
-}
-
-exports.testPublishFormCode = function(state, data) {
-  var m = state.feedView.publishFormMap()
-  var form = state.feedView.publishForms.get(m[data.id])
-  if (!form)
-    return
-
-  if (data.restart) {
-    form.isRunning.set(false)
-    // this setTimout is hacky, but it works
-    // it gives mercury time to destroy the iframe (responding to isRunning == false)
-    // and gives the textarea blur event time to update the form.textValue
-    setTimeout(function() {
-      form.isRunning.set(true)
-    }, 50)
-  } else
-    form.isRunning.set(data.run)
 }
 
 // :TODO: refactor into a value-event
@@ -450,7 +426,6 @@ exports.toggleFilter = function(state, data) {
     shares:      state.feedView.filters.shares(),
     textPosts:   state.feedView.filters.textPosts(),
     actionPosts: state.feedView.filters.actionPosts(),
-    guiPosts:    state.feedView.filters.guiPosts(),
     follows:     state.feedView.filters.follows()
   }))
 }
@@ -504,36 +479,10 @@ function getMsg(state, id) {
   return state.feedView.messages.get(state.feedView.messages.getLength() - i - 1)
 }
 
-exports.runMsgGui = function(state, data) {
-  var msg = getMsg(state, data.id)
-  if (!msg) return
-  msg.isRunning.set(data.run)
-}
-
 exports.toggleViewRaw = function(state, data) {
   var msg = getMsg(state, data.id)
   if (!msg) return
   msg.isViewRaw.set(!msg.isViewRaw())
-}
-
-exports.refreshIframe = function() {
-  var iframes = document.querySelectorAll('iframe')
-  for (var i=0; i < iframes.length; i++) {
-    iframes[i].setAttribute('src', iframes[i].src)
-    iframes[i].rpc = null
-  }
-}
-
-exports.onGuipostReply = function(state, data) {
-  if (!confirm('This GUI would like to post to your feed. Allow it?'))
-    return data.cb(new Error('Access denied'))
-  if (data.postType == 'text')        bus.publishReply(state, data.text, data.mid, after)
-  else if (data.postType == 'action') bus.publishReaction(state, data.text, data.mid, after)
-  else if (data.postType == 'gui')    bus.publishGuiply(state, data.text, data.mid, after)
-  function after(err, result) {
-    if (!err) bus.syncView(state) // pull down the update
-    data.cb(err, result)
-  }
 }
 
 function bubbleNotification(state, className, msg, t) {

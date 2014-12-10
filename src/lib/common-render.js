@@ -98,7 +98,7 @@ function msgThreadTree(msg, feedView, events, user, nicknameMap) {
     // fetch and render message
     var msgi  = feedView.messageMap[replyData.id] // look up index
     var reply = (typeof msgi != 'undefined') ? feedView.messages[feedView.messages.length - msgi - 1] : null
-    if (reply && (reply.content.type == 'post' && (reply.content.postType == 'text' || reply.content.postType == 'gui')) && !reply.hidden) {
+    if (reply && (reply.content.type == 'post' && reply.content.postType == 'text') && !reply.hidden) {
       replies.push(com.message(reply, feedView, events, user, nicknameMap, false))
 
       // build and render subtree

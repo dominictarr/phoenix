@@ -26,11 +26,6 @@ exports.setupHomeApp = function(state) {
       if (!exports.getProfile(state, data.id))
         exports.addProfile(state, data.id)
     })
-    
-    // user pages
-    ws.api.phoenix.getUserPages(function(err, pages) {
-      state.userPages.set(pages)
-    })
 
     // lan peer refreshes (once every 30s)
     if (!fetchLocalPeersInterval)

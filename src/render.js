@@ -23,9 +23,6 @@ function render(state) {
   } else if (state.route.indexOf('msg/') === 0) {
     var msgid = state.route.slice(4)
     page = messagePage(state, msgid)
-  } else if (state.route.indexOf('user-page/') === 0) {
-    var pageAddress = state.route.slice(10)
-    page = userPage(state, pageAddress)
   } else if (state.route.indexOf('setup') === 0) {
     page = setupPage(state)
   } else if (state.route.indexOf('help') === 0) {
@@ -67,9 +64,7 @@ function nav(state) {
   var pages = [
     ['', 'feed'],
     ['inbox', 'inbox ('+state.unreadMessages+')'],
-  ].concat(state.userPages.map(function(page) {
-    return ['user-page/'+page.url, page.name]
-  }))
+  ]
 
   var route = state.route
   if (route == 'feed') route = ''
@@ -109,7 +104,6 @@ function mainFeed(feedView, events, user, nicknameMap) {
     if (!feedView.filters.shares      && msg.rebroadcastsLink) return false
     if (!feedView.filters.textPosts   && msg.content.postType == 'text') return false
     if (!feedView.filters.actionPosts && msg.content.postType == 'action' && !msg.repliesToLink) return false
-    if (!feedView.filters.guiPosts    && msg.content.postType == 'gui') return false
     if (!feedView.filters.follows     && msg.content.type == 'follow') return false
     return true
   })
@@ -135,8 +129,6 @@ function feedFilters(events, filters) {
     feedFilter('textPosts', 'text posts'),
     ' ',
     feedFilter('actionPosts', 'action posts'),
-    ' ',
-    feedFilter('guiPosts', 'gui posts'),
     ' ',
     feedFilter('follows', 'follows')
   ])
@@ -355,19 +347,6 @@ function profileLink(events, canRemove, profile) {
   ])
 }
 
-// User Page
-// =========
-
-function userPage(state, address) {
-  var id = (Math.random()*10000)|0
-  return h('.user-page.row', comren.columns({
-    nav: nav(state),
-    main: [
-      h('iframe#user-page-'+id, { src: '/user/'+address, sandbox: 'allow-scripts' })
-    ],
-  }, [['nav', 1], ['main', 11]]))
-}
-
 // Setup Page
 // ==========
 
@@ -401,7 +380,7 @@ function helpPage(state, section) {
   } else {
     content = [
       panel('Basics', 'Phoenix v1 is a social feed application. You can broadcast to everyone following you, much like on Twitter. However, unlike Twitter, only people you are following can contact you. This means no unsolicited spam!'),
-      panel('Replies', 'You can reply to other users with text posts, reactions, and guis. When you open a message\'s page, you\'ll see all of the replies in a threaded view, like a message-board. Click the age of a post (eg "5m", "yesterday") to get to its page.'),
+      panel('Replies', 'You can reply to other users with text posts and reactions. When you open a message\'s page, you\'ll see all of the replies in a threaded view, like a message-board. Click the age of a post (eg "5m", "yesterday") to get to its page.'),
       panel('Sharing', 'If you want to spread somebody\'s message, you can "share" it to your followers. This is just like retweeting, except, in the case of Phoenix, it\'s the ONLY way to spread a message. If somebody replies to you, your non-mutual followers will only see that reply if you share it.'),
       panel('Mentions', ['Like in most social networks, you can "@-mention" other users. If they follow you, or if somebody shares the message to them, they\'ll be notified of the mention. Check your ', comren.a('#/inbox', 'Inbox'), ' to find your notifications.']),
       panel('Emojis', ['You can put emojis in your posts using colons. For instance, \':smile:\' will result in ', h('img.emoji', { src: '/img/emoji/smile.png', height: 20, width: 20}), '. Check the ', comren.a('http://www.emoji-cheat-sheet.com/', 'Emoji Cheat Sheet'), ' to see what\'s available'])

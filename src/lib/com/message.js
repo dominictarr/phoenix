@@ -68,24 +68,6 @@ var messageText = exports.messageText = function(msg, user, events, parentMsg, m
   return renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
 }
 
-// message gui-content renderer
-var messageGui = exports.messageGui = function(msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
-  var content
-  if (msg.isRunning) {
-    content = h('.gui-post-wrapper.gui-running', [
-      new widgets.IframeSandbox(msg.content.text, msg.id, replies, events.onGuipostReply)
-    ])
-  } else {
-    content = h('.gui-post-wrapper', [
-      h('.gui-post-runbtn', {'ev-click': valueEvents.click(events.runMsgGui, { id: msg.id, run: true })}),
-      h('pre.gui-post', h('code',msg.content.text))
-    ])
-  }
-
-  // body
-  return renderMsgShell(content, msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap)
-}
-
 var messageRaw = exports.messageRaw = function(msg, user, events, parentMsg, messages, messageMap, replies, rebroadcasts, nicknameMap) {
   var json = util.escapePlain(JSON.stringify(msg.content, null, 2))
 
@@ -151,8 +133,6 @@ function renderMsgShell(content, msg, user, events, parentMsg, messages, message
 
 // message header
 function renderMsgHeader(msg, user, events, nicknameMap) {
-  var stopBtnStr = (msg.isRunning) ? comren.jsa(comren.icon('remove'), events.runMsgGui, { id: msg.id, run: false }, { className: 'text-danger pull-right', title: 'Close GUI' }) : ''
-
   if (msg.rebroadcastsLink) {
     // duplicated message
     return h('p', [
@@ -173,14 +153,13 @@ function renderMsgHeader(msg, user, events, nicknameMap) {
     h('small.message-ctrls', [
       ' - ',
       comren.a('#/msg/'+msg.id, util.prettydate(new Date(msg.timestamp), true), { title: 'View message thread' })
-    ]),
-    stopBtnStr
+    ])
   ])
 }
 
 // summary of reactions in the bottom of messages
 function renderMsgReplies(msg, replies) {
-  var nReplies = (replies) ? replies.filter(function(r) { return r.content.type == 'post' && (r.content.postType == 'text' || r.content.postType == 'gui') }).length : 0
+  var nReplies = (replies) ? replies.filter(function(r) { return r.content.type == 'post' && r.content.postType == 'text' }).length : 0
   return (nReplies) ? comren.a('#/msg/'+msg.id, nReplies + ' replies') : ''
 }
 
