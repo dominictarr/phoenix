@@ -57,14 +57,15 @@ function indexFollow(state, msg, link) {
   try {
     if (msg.author == state.user.id()) {
       // add to list
-      state.user.followedUsers.push(link.feed)
+      if (!~state.user.followedUsers.indexOf(link.feed))
+        state.user.followedUsers.push(link.feed)
 
       // update profile if present
       var targetProf = profiles.getProfile(state, link.feed) || profiles.addProfile(state, link.feed)
       if (targetProf)
         targetProf.isFollowing.set(true)
     }
-    if (link.feed == state.user.id()) {
+    if (link.feed == state.user.id() && !~state.user.followerUsers.indexOf(msg.author)) {
       // add to list
       state.user.followerUsers.push(msg.author)
     }
