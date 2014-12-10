@@ -37,10 +37,13 @@ var manifest = {
 }
 
 var api = exports.api = null
+var onConnected
 
 // establishes the server api connection
-var connect = exports.connect = function(state, cb) {
+var connect = exports.connect = function(state, _onConnected) {
   if (api) return
+  if (_onConnected)
+    onConnected = _onConnected
 
   var conn = WSStream('ws://' + window.location.host + '/ws')
   conn.on('error', handleClientError.bind(null, state))
@@ -61,7 +64,7 @@ var connect = exports.connect = function(state, cb) {
     // authenticate
     util.getJson('/access.json', function(err, token) {
       api.auth(token, function(err) {
-        if (cb) cb(err)
+        if (onConnected) onConnected(err)
         if (err) {
           state.conn.hasError.set(true)
           state.conn.explanation.set('Failed to authenticate with the local server: ' + err.message)
