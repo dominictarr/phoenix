@@ -40,7 +40,7 @@ exports.addProfile = function(state, pid) {
   var i = state.profiles().length
   profile = { 
     id: pid,
-    nickname: false
+    nickname: ''
   }
 
   // add to profiles    
@@ -51,6 +51,9 @@ exports.addProfile = function(state, pid) {
   var pm = state.profileMap()
   pm[pid] = i
   state.profileMap.set(pm)
+
+  // set nickname
+  setNickname(state, pid, util.shortString(pid))
 
   return profile
 }

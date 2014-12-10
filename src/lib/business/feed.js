@@ -21,11 +21,8 @@ exports.processFeedMsg = function(state, msg) {
 
   // add to profile's feed
   var authorProf = profiles.getProfile(state, m.author)
-  if (!authorProf) {
+  if (!authorProf)
     authorProf = profiles.addProfile(state, m.author)
-    if (!authorProf.nickname())
-      profiles.setNickname(state, m.author, util.shortString(m.author))
-  }
   authorProf.feed.push(m)
   if (m.content.type == 'init')
     authorProf.joinDate.set(util.prettydate(new Date(m.timestamp), true))
@@ -58,7 +55,7 @@ function indexFollow(state, msg, link) {
       state.user.followedUsers.push(link.feed)
 
       // update profile if present
-      var targetProf = profiles.getProfile(state, link.feed)
+      var targetProf = profiles.getProfile(state, link.feed) || profiles.addProfile(state, link.feed)
       if (targetProf)
         targetProf.isFollowing.set(true)
     }
