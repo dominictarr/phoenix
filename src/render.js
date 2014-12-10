@@ -219,8 +219,8 @@ function profilePage(state, profid) {
 }
 
 function profileControls(events, profile, isYou, followsYou) {
-  var setNicknameBtn = (isYou) ?
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.setUserNickname)}, 'Change Nickname') :
+  var setNicknameBtn = (isYou || profile.isFollowing) ?
+    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.setUserNickname, { id: profile.id })}, 'Change Nickname') :
     undefined
   var followBtn = (!isYou) ?
     ((profile.isFollowing) ?
@@ -234,7 +234,7 @@ function profileControls(events, profile, isYou, followsYou) {
         (followsYou) ? [h('span.label.label-primary', 'Follows You'), ' '] : ''
       ])
     ),
-    h('p', [setNicknameBtn, followBtn]),
+    h('p', [setNicknameBtn, ' ', followBtn]),
     h('div.text-muted', [
       h('small', h('strong', 'Contact ID:')),
       h('br'),

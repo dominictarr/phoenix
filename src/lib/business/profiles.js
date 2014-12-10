@@ -16,14 +16,8 @@ exports.processProfileMsg = function(state, msg) {
 
   try {
     // update values with message content
-    if (msg.value.content.nickname) {
-      profile.nickname.set(msg.value.content.nickname)
-
-      // update the nickname->profile map
-      var nm = state.nicknameMap()
-      nm[pid] = profile.nickname()
-      state.nicknameMap.set(nm)
-    }
+    if (msg.value.content.nickname)
+      setNickname(state, pid, msg.value.content.nickname)
   } catch(e) {}
 
   // pull into current user data
@@ -59,4 +53,17 @@ exports.addProfile = function(state, pid) {
   state.profileMap.set(pm)
 
   return profile
+}
+
+var setNickname =
+exports.setNickname = function(state, pid, nick) {
+  var profile = getProfile(state, pid)
+  if (!profile)
+    return
+  profile.nickname.set(nick)
+
+  // update the nickname->profile map
+  var nm = state.nicknameMap()
+  nm[pid] = nick
+  state.nicknameMap.set(nm)
 }

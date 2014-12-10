@@ -44,6 +44,7 @@ exports.processFeedMsg = function(state, msg) {
     if (link.rel == 'replies-to')   notified = indexReply(state, m, link)
     if (!notified &&
         link.rel == 'mentions')     indexMentions(state, m, link)
+    if (link.rel == 'gives-nick')   indexGivesNick(state, m, link)
     if (link.rel == 'adds-status')  indexAddStatus(state, m, link)
   })
 }
@@ -63,7 +64,7 @@ function indexFollow(state, msg, link) {
       // add to list
       state.user.followerUsers.push(msg.author)
     }
-  } catch(e) { console.warn('failed to index follow', e) }
+  } catch(e) { console.warn('failed to index follow', msg, e) }
 }
 
 function indexUnfollow(state, msg, link) {
@@ -81,7 +82,7 @@ function indexUnfollow(state, msg, link) {
       // remove from list
       state.user.followerUsers.splice(state.followerUsers.indexOf(msg.author), 1)
     }
-  } catch(e) { console.warn('failed to index follow', e) }
+  } catch(e) { console.warn('failed to index follow', msg, e) }
 }
 
 function indexReply(state, msg, link) {
@@ -113,7 +114,7 @@ function indexReply(state, msg, link) {
       }))
       return true
     }
-  } catch(e) { console.warn('failed to index reply', e) }
+  } catch(e) { console.warn('failed to index reply', msg, e) }
   return false
 }
 
@@ -137,7 +138,7 @@ function indexRebroadcast(state, msg, link, msgMap) {
       // use this one to represent the original
       msgMap[link.msg] = state.feedView.messages.getLength() - 1
     }
-  } catch(e) { console.warn('failed to index rebroadcast', e) }
+  } catch(e) { console.warn('failed to index rebroadcast', msg, e) }
 }
 
 function indexMentions(state, msg, link) {
@@ -154,7 +155,17 @@ function indexMentions(state, msg, link) {
       msgText:        msg.content.text.split('\n')[0],
       timestamp:      msg.timestamp
     }))
-  } catch(e) { console.warn('failed to index mention', e) }
+  } catch(e) { console.warn('failed to index mention', msg, e) }
+}
+
+function indexGivesNick(state, msg, link) {
+  try {
+    var targetProf = profiles.getProfile(state, link.feed)
+    if (!targetProf || !link.nickname)
+      return
+    if (msg.author == state.user.id())
+      profiles.setNickname(state, link.feed, link.nickname)
+  } catch (e) { console.warn('failed to index gives-nick', msg, e)}
 }
 
 function indexAddStatus(state, msg, link) {

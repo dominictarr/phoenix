@@ -85,3 +85,9 @@ var publishText =
 exports.publishProfile = function(state, nickname, cb) {
   ws.api.add({type: 'profile', nickname: nickname}, cb)
 }
+
+// suggests a nickname for the user
+var publishGivesNick =
+exports.publishGivesNick = function(state, userid, nickname, cb) {
+  ws.api.add({type: 'gives-nick', rel: 'gives-nick', feed: userid, nickname: nickname}, cb)
+}

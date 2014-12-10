@@ -382,16 +382,24 @@ exports.showId = function(state, data) {
   prompt('User Contact ID', data.id)
 }
 
-exports.setUserNickname = function(state) {
-  var nickname = prompt('Enter your nickname')
+exports.setUserNickname = function(state, data) {
+  var isSelf = state.user.id() == data.id
+  var nickname = prompt((isSelf) ? 'What do you call yourself?' : 'What do you call them?')
   if (!nickname)
     return
-  if (!confirm('Set your nickname to '+nickname+'?'))
+  if (!confirm('Use '+nickname+'?'))
     return
-  bus.publishProfile(state, nickname, function(err) {
-    if (err) alert(err.toString())
-    else bus.syncView(state)
-  })
+  if (isSelf) {
+    bus.publishProfile(state, nickname, function(err) {
+      if (err) alert(err.toString())
+      else bus.syncView(state)
+    })
+  } else {
+    bus.publishGivesNick(state, data.id, nickname, function(err) {
+      if (err) alert(err.toString())
+      else bus.syncView(state)
+    })    
+  }
 }
 
 exports.follow = function(state, data) {
