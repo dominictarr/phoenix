@@ -213,12 +213,12 @@ function profilePage(state, profid) {
         ]))
     ],
     side: [
-      mercury.partial(profileControls, state.events, profile, isYou, followsYou)
+      mercury.partial(profileControls, state.events, profile, state.user, state.nicknameMap, isYou, followsYou)
     ]
   }, [['nav', 1], ['main', 7], ['side', 4]]))
 }
 
-function profileControls(events, profile, isYou, followsYou) {
+function profileControls(events, profile, user, nicknameMap, isYou, followsYou) {
   var setNicknameBtn = h('button.btn.btn-default', {'ev-click': valueEvents.click(events.setUserNickname, { id: profile.id })}, 'Change Nickname')
   var followBtn = (!isYou) ?
     ((profile.isFollowing) ?
@@ -237,7 +237,15 @@ function profileControls(events, profile, isYou, followsYou) {
       h('small', h('strong', 'Contact ID:')),
       h('br'),
       h('div', { style: { width: '160px' }, innerHTML: comren.toEmoji(profile.id) }),
-      h('br')
+      h('br'),
+      h('small', h('strong', 'Given Nicknames:')),
+      h('br'),
+      Object.keys(profile.nicknames||{}).map(function(nick) {
+        function ulink(id) {
+          return comren.userlink(id, nicknameMap[id], user, events)
+        }
+        return [h('span', nick), ' by ', profile.nicknames[nick].map(ulink), h('br')]
+      })
     ]),
     (profile.statuses||[]).map(function(status) {
       if (Date.now() > status.endsAt)

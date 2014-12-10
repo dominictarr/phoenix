@@ -160,6 +160,16 @@ function indexGivesNick(state, msg, link) {
     var targetProf = profiles.getProfile(state, link.feed)
     if (!targetProf || !link.nickname)
       return
+
+    // track the msg
+    var nicks = targetProf.nicknames()
+    if (!nicks[link.nickname])
+      nicks[link.nickname] = []
+    if (~nicks[link.nickname].indexOf(msg.author))
+      nicks[link.nickname].push(msg.author)
+    targetProf.nicknames.set(nicks)
+
+    // use nickname if assigned by current user
     if (msg.author == state.user.id()) {
       profiles.setNickname(state, link.feed, link.nickname)
       targetProf.wasGivenName.set(true)
