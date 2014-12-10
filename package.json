@@ -7,6 +7,9 @@
     "type": "git",
     "url": "git://github.com/pfraze/phoenix.git"
   },
+  "scripts": {
+    "build": "mkdir -p js; browserify -o js/home.js src/home.js; mkdir -p css; lessc less/home.less css/home.css"
+  },
   "dependencies": {
     "base-emoji": "~0.3.0",
     "blake2s": "~1.0.0",
