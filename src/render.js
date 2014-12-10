@@ -219,9 +219,7 @@ function profilePage(state, profid) {
 }
 
 function profileControls(events, profile, isYou, followsYou) {
-  var setNicknameBtn = (isYou || profile.isFollowing) ?
-    h('button.btn.btn-default', {'ev-click': valueEvents.click(events.setUserNickname, { id: profile.id })}, 'Change Nickname') :
-    undefined
+  var setNicknameBtn = h('button.btn.btn-default', {'ev-click': valueEvents.click(events.setUserNickname, { id: profile.id })}, 'Change Nickname')
   var followBtn = (!isYou) ?
     ((profile.isFollowing) ?
       h('button.btn.btn-default', {'ev-click': valueEvents.click(events.unfollow, { id: profile.id })}, 'Unfollow') :

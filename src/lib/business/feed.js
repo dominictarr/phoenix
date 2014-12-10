@@ -160,8 +160,10 @@ function indexGivesNick(state, msg, link) {
     var targetProf = profiles.getProfile(state, link.feed)
     if (!targetProf || !link.nickname)
       return
-    if (msg.author == state.user.id())
+    if (msg.author == state.user.id()) {
       profiles.setNickname(state, link.feed, link.nickname)
+      targetProf.wasGivenName.set(true)
+    }
   } catch (e) { console.warn('failed to index gives-nick', msg, e)}
 }
 

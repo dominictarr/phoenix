@@ -387,7 +387,7 @@ exports.setUserNickname = function(state, data) {
   var nickname = prompt((isSelf) ? 'What do you call yourself?' : 'What do you call them?')
   if (!nickname)
     return
-  if (!confirm('Use '+nickname+'?'))
+  if (!confirm('Use "'+nickname+'"?'))
     return
   if (isSelf) {
     bus.publishProfile(state, nickname, function(err) {
@@ -403,14 +403,24 @@ exports.setUserNickname = function(state, data) {
 }
 
 exports.follow = function(state, data) {
+  var prof = bus.getProfile(state, data.id) || bus.addProfile(state, data.id)
+  var nickname = prof.nickname()
+  if (!prof.wasGivenName()) {
+    nickname = prompt('What would you like to call them?')
+    if (!nickname)
+      return
+    if (!confirm('Use "'+nickname+'"?'))
+      return
+  }
+
   bus.followUser(state, data.id, function(err) {
     if (err) alert(err.toString())
     else {
-      var pm = state.profileMap()
-      var profile = state.profiles.get(pm[data.id])
-      var nickname = (profile) ? profile().nickname : util.shortString(data.id)
-
-      bubbleNotification(state, 'info',  nickname + ' followed')
+      bus.publishGivesNick(state, data.id, nickname, function(err) {
+        if (err) alert(err.toString())
+        bubbleNotification(state, 'info',  nickname + ' followed')
+        bus.syncView(state)
+      })
     }
   })
 }
