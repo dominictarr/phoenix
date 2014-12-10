@@ -50,9 +50,6 @@ exports.init = function (server) {
   }
 }
 
-// stupid-simple etag solution: cache everything!
-var eTag = (Math.random() * 100000)|0
-
 // HTTP request handler
 function onRequest(server) {
   function resolve(file) { return path.join(__dirname, file) }
@@ -104,7 +101,6 @@ function onRequest(server) {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + server.config.port)
 
     // Access token
-    // :NOTE: not cached
     if (req.url == '/access.json') {
       type('application/json')
       res.writeHead(200)
@@ -116,13 +112,6 @@ function onRequest(server) {
       })
       return res.end(JSON.stringify(accessToken))
     }
-
-    // Caching
-    if (req.headers['if-none-match'] == eTag) {
-      res.writeHead(304)
-      return res.end()
-    }
-    res.setHeader('ETag', eTag)
 
     // Homepage
     if (req.url == '/' || req.url == '/index.html') {
