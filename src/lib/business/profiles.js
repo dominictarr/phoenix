@@ -5,8 +5,6 @@ var models  = require('../models')
 
 // consumes a new profile message into the materialized view
 exports.processProfileMsg = function(state, msg) {
-  console.log('PROFILE consumed', msg)
-
   var pid = msg.value.author
   
   // lookup/create the profile

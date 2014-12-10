@@ -6,8 +6,6 @@ var models      = require('../models')
 var profiles    = require('./profiles')
 
 exports.processFeedMsg = function(state, msg) {
-  console.log('FEED consumed', msg)
-  
   // prep message  
   var m = msg.value
   m.id = msg.key
@@ -30,7 +28,14 @@ exports.processFeedMsg = function(state, msg) {
   // add pub messages
   if (m.content.type == 'pub') {
     try {
-      state.servers.push({ host: m.content.address.host, port: m.content.address.port || 2000 })
+      var addr = m.content.address
+      if (typeof addr == 'string') {
+        addr = addr.split(':')
+        addr = { host: addr[0], port: addr[1]||2000 }
+      }
+      var exists = state.servers.filter(function(addr2) { return addr2.host == addr.host && (addr2.port||2000) == addr.port }).getLength()
+      if (!exists)
+        state.servers.push({ host: m.content.address.host, port: m.content.address.port || 2000 })
     } catch (e) { console.warn('failed to index pub message', m, e) }
   }
   
