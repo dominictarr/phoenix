@@ -101,7 +101,7 @@ function indexReply(state, msg, link) {
     // add a notification if it's a reply to the user's message
     var mm = state.feedView.messageMap()
     var targetMsg = state.feedView.messages.get(state.feedView.messages.getLength() - mm[link.msg] - 1)
-    if (targetMsg && targetMsg.author == state.user.id()) {
+    if (targetMsg && targetMsg.author == state.user.id() && msg.author != state.user.id()) {
       var type = 'reply'
       if (msg.content.postType == 'action') type = 'reaction'
       state.notifications.push(models.notification({
@@ -146,6 +146,7 @@ function indexMentions(state, msg, link) {
   try {
     if (link.feed != state.user.id()) return // not for current user
     if (msg.rebroadcastsLink && fr[msg.rebroadcastsLink.msg]) return // already handled
+    if (msg.author == state.user.id()) return // for some reason the user mentioned themself
     state.notifications.push(models.notification({
       type:          'mention',
       msgId:          msg.id,
