@@ -21,6 +21,8 @@ exports.setRoute = function(state, route) {
   state.feedView.pagination.start.set(0)
   state.feedView.pagination.end.set(constants.PAGE_SIZE)
 
+  if (state.route() && state.route() !== route)
+    bus.syncView(state) // update view
   state.route.set(route)
 }
 
