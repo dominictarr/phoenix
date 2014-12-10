@@ -88,13 +88,6 @@ function onRequest(server) {
       if (buildJs) {
         var b = browserify({ basedir: resolve('src') })
         b.add(resolve('src/'+name))
-        // :TODO: remove these ignores? these are from the old phoenix-rpc days
-        b.ignore('proquint-')
-        b.ignore('http')
-        b.ignore('level')
-        b.ignore('level/sublevel')
-        b.ignore('level-sublevel/bytewise')
-        b.ignore('pull-level')
         b.bundle(once(cb))
       } else
         fs.readFile(resolve('js/'+name), { encoding: 'utf-8' }, cb)
