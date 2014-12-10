@@ -1,6 +1,3 @@
-phoenix.lnk
-.sass-cache
 node_modules
-phoenix-relay.pid
-phoenix-relay.log
-.relay-members
+js
+css
