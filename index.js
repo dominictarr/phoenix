@@ -2,8 +2,6 @@ var once       = require('once')
 var fs         = require('fs')
 var path       = require('path')
 var multicb    = require('multicb')
-var less       = require('less')
-var browserify = require('browserify')
 var request    = require('request')
 
 exports.name = 'phoenix'
@@ -75,6 +73,7 @@ function onRequest(server) {
     function serve404() { res.writeHead(404); res.end('Not found'); }
     function renderCss(name, cb) {
       if (buildCss) {
+        var less = require('less')
         name = path.basename(name, '.css')+'.less'
         var filepath = resolve('less/'+name)
         fs.readFile(filepath, { encoding: 'utf-8' }, function(err, lessStr) {
@@ -86,6 +85,7 @@ function onRequest(server) {
     }
     function renderJs(name, cb) {
       if (buildJs) {
+        var browserify = require('browserify')
         var b = browserify({ basedir: resolve('src') })
         b.add(resolve('src/'+name))
         b.bundle(once(cb))

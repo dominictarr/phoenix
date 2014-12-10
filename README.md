@@ -3,7 +3,7 @@ Phoenix v1
 
 ![phoenix](phoenix.png) **It's distributed!**
 
-Web applications without servers, social networks without advertisers, messaging without surveillance, and gardens without walls.
+Web applications without servers, social networks without advertisers, messaging without surveillance, gardens without walls.
 
 Phoenix is a peer-to-peer network. It uses crytographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Public bot users aggregate and redistribute the feeds, but phoenix has no "servers." Every node is equal, and the network is fully open!
 
@@ -14,6 +14,12 @@ Join us in #scuttlebutt on freenode.
 **To start on your localhost**
 
 Follow the instructions for using [ssbui](https://github.com/pfraze/ssbui#readme).
+
+## Building
+
+On load, phoenix checks for the `./js` and `./css` directories. If they're present, it will serve from those directories. You can build the assets for them by installing `browserify` and `lessc` and running `npm run build`.
+
+If you are doing a lot of development on phoenix, you can remove the `./js` and `./css` directories, then do an `npm install -d`. Phoenix will live-build the assets on page refresh.
 
 ## Contributing
 

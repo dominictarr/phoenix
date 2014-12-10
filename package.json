@@ -13,7 +13,6 @@
   "dependencies": {
     "base-emoji": "~0.3.0",
     "blake2s": "~1.0.0",
-    "browserify": "~6.2.0",
     "dom-walk": "~0.1.0",
     "eccjs": "git://github.com/dominictarr/eccjs.git#586f6d47507184a2efe84684ed0a30605cbc43a5",
     "emoji-named-characters": "^1.0.1",
@@ -21,7 +20,6 @@
     "geval": "~2.1.1",
     "global": "~4.2.1",
     "hash-router": "~0.4.0",
-    "less": "~1.7.5",
     "marked": "git://github.com/clehner/marked#8af8ae018ba452b5c7f936a474dbce265f2ae732",
     "mercury": "~11.0.0",
     "multicb": "~1.0.0",
@@ -41,6 +39,10 @@
     "value-event": "~3.2.0",
     "websocket-stream": "~1.1.0",
     "xtend": "~3.0.0"
+  },
+  "devDependencies": {
+    "browserify": "~6.2.0",
+    "less": "~1.7.5"
   },
   "author": "Paul Frazee <pfrazee@gmail.com>",
   "license": "MIT"
