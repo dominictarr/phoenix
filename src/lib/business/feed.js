@@ -10,9 +10,7 @@ exports.processFeedMsg = function(state, msg) {
   
   // prep message  
   var m = msg.value
-  m.id             = msg.key
-  var authorProf   = profiles.getProfile(state, m.author)
-  m.authorNickname = (authorProf) ? authorProf.nickname() : require('../common-render').shortString(m.author)
+  m.id = msg.key
   m = models.message(m)
 
   // add to feed
@@ -22,8 +20,12 @@ exports.processFeedMsg = function(state, msg) {
   state.feedView.messageMap.set(mm)
 
   // add to profile's feed
-  if (!authorProf)
+  var authorProf = profiles.getProfile(state, m.author)
+  if (!authorProf) {
     authorProf = profiles.addProfile(state, m.author)
+    if (!authorProf.nickname())
+      profiles.setNickname(state, m.author, util.shortString(m.author))
+  }
   authorProf.feed.push(m)
   if (m.content.type == 'init')
     authorProf.joinDate.set(util.prettydate(new Date(m.timestamp), true))
@@ -108,7 +110,6 @@ function indexReply(state, msg, link) {
       state.notifications.push(models.notification({
         type:           type,
         msgId:          msg.id,
-        authorNickname: msg.authorNickname,
         msgText:        msg.content.text.split('\n')[0],
         timestamp:      msg.timestamp
       }))
@@ -151,7 +152,6 @@ function indexMentions(state, msg, link) {
     state.notifications.push(models.notification({
       type:          'mention',
       msgId:          msg.id,
-      authorNickname: msg.authorNickname,
       msgText:        msg.content.text.split('\n')[0],
       timestamp:      msg.timestamp
     }))

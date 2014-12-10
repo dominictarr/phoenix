@@ -97,7 +97,6 @@ var defaults = {
     sequence: 0,
     signature: null,
     timestamp: 0,
-    authorNickname: '',
     isRunning: false,
     isViewRaw: false,
     hidden: false,
@@ -134,7 +133,6 @@ var defaults = {
 
   notification: {
     type: '',
-    authorNickname: '',
     msgText: ''
   }
 }
