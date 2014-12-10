@@ -36,6 +36,7 @@ exports.setupHomeApp = function(state) {
       if (msg.value.author == state.user.id())
         return
       state.syncMsgsWaiting.set(state.syncMsgsWaiting() + 1)
+      document.title = '('+state.syncMsgsWaiting()+') ssbui'
     }))
 
     // construct local state
@@ -51,6 +52,7 @@ exports.syncView = function(state, cb) {
 
   // reset pending sync messages
   state.syncMsgsWaiting.set(0)
+  document.title = 'ssbui'
 
   // process profiles first
   pull(
