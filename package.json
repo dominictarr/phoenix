@@ -2,10 +2,10 @@
   "name": "ssbplug-phoenix",
   "description": "a web-interface plugin for scuttlebot",
   "version": "1.1.2",
-  "homepage": "https://github.com/pfraze/phoenix",
+  "homepage": "https://github.com/ssbc/phoenix",
   "repository": {
     "type": "git",
-    "url": "git://github.com/pfraze/phoenix.git"
+    "url": "git://github.com/ssbc/phoenix.git"
   },
   "scripts": {
     "build": "mkdir -p js; browserify -o js/home.js src/home.js; mkdir -p css; lessc less/home.less css/home.css"
