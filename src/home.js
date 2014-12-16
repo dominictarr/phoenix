@@ -1,11 +1,13 @@
 var pull = require('pull-streams')
 var remoteRequire = require('remote-require')
-remoteRequire.alias('self', require('./apis'))
-remoteRequire.using(require('./mans'))
 
-var ssb =      remoteRequire('localhost/ssb'),
-var feed =     remoteRequire('self/phoenix-feed'),
-var profiles = remoteRequire('self/phoenix-profiles')
+remoteRequire.using(require('./mans'))
+remoteRequire.import('localhost', 'ssb')
+remoteRequire.import(require('./apis'), ['phoenix-feed', 'phoenix-profiles'])
+
+var ssb =      remoteRequire('ssb'),
+var feed =     remoteRequire('phoenix-feed'),
+var profiles = remoteRequire('phoenix-profiles')
 
 // :TODO: reduce to only one log stream
 pull(ssb.createLogStream(), feed.in())

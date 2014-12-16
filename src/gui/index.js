@@ -1,6 +1,11 @@
 var h = require('hyperscript')
 
 module.exports = function(ssb, feed, profiles) {
+  [ssb, feed, profiles].forEach(function(api) {
+    api.on('disconnect', onDisconnect)
+    api.on('reconnect', onReconnect)    
+  })
+
   var html = h('div#page',
     h('div#header',
       h('h1.classy', 'h', { style: {'background-color': '#22f'} })),
@@ -17,4 +22,11 @@ module.exports = function(ssb, feed, profiles) {
         "the intension is for this to be used to create\n",
         "reusable, interactive html widgets. "))
   document.body.appendChild(html)
+}
+
+function onDisconnect(e) {
+  // :TODO:
+}
+function onReconnect(e) {
+  // :TODO:
 }
