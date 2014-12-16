@@ -1,7 +1,7 @@
 var h = require('hyperscript')
 
-module.exports = function(ssb, feed, profiles) {
-  [ssb, feed, profiles].forEach(function(api) {
+module.exports = function(ssb, feed, profiles, network) {
+  [ssb, feed, profiles, network].forEach(function(api) {
     api.on('disconnect', onDisconnect)
     api.on('reconnect', onReconnect)    
   })

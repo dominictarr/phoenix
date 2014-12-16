@@ -1,5 +1,6 @@
 module.exports = {
-  ssb: require('./ssb.json'),
-  'phoenix-feed': require('./phoenix-feed.json'),
-  'phoenix-profiles': require('./phoenix-profiles.json')
+  ssb: require('./ssb'),
+  'phoenix-feed': require('./phoenix-feed'),
+  'phoenix-profiles': require('./phoenix-profiles'),
+  'phoenix-network': require('./phoenix-network')
 }
