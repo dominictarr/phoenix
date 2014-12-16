@@ -1,4 +1,5 @@
 var pull = require('pull-stream')
+var ssbmsgs = require('ssb-msgs')
 var remoteRequire = require('remote-require')
 var ssb = remoteRequire('localhost/ssb')
 
@@ -30,7 +31,7 @@ exports.init = function() {
           profile.nickname = content.nickname
       }
     }
-    mlib.indexLinks(content, function(link) {
+    ssbmsgs.indexLinks(content, function(link) {
       if (link.rel == 'gives-nick') indexGivesNick(msg, link)
     })
   }

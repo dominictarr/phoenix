@@ -1,4 +1,5 @@
 var pull = require('pull-stream')
+var ssbmsgs = require('ssb-msgs')
 var remoteRequire = require('remote-require')
 var ssb = remoteRequire('localhost/ssb')
 
@@ -38,7 +39,7 @@ exports.init = function() {
     msgs[msg.key] = msg
     allFeed.push(msg)
     (userFeeds[msg.value.author] = (userFeeds[msg.value.author]||[])).push(msg)
-    mlib.indexLinks(msg.value.content, function(link) {
+    ssbmsgs.indexLinks(msg.value.content, function(link) {
       if (link.rel == 'rebroadcasts') indexRebroadcast(msg, link)
       if (link.rel == 'replies-to')   indexReply(msg, link)
       if (link.rel == 'mentions')     indexMentions(msg, link)
