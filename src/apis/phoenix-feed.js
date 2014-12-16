@@ -17,18 +17,21 @@ exports.init = function() {
   var inboxFeed = []
   var userFeeds = {}
 
-  var userId = null // :TODO:
+  var userId = null
+
+  // setup
+  ssb.whoami(function(err, user) {
+    if (user)
+      userId = user.id
+  })
 
   // handle received messages
-  function process(msgEnvelope) {
-    var msg = msgEnvelope.value
-    msg.id = msgEnvelope.key
-
+  function process(msg) {
     // index
-    msgs[msg.id] = msg
+    msgs[msg.key] = msg
     allFeed.push(msg)
-    (userFeeds[m.author] = (userFeeds[m.author]||[])).push(m)
-    mlib.indexLinks(m.content, function(link) {
+    (userFeeds[msg.value.author] = (userFeeds[msg.value.author]||[])).push(msg)
+    mlib.indexLinks(msg.value.content, function(link) {
       if (link.rel == 'rebroadcasts') indexRebroadcast(msg, link)
       if (link.rel == 'replies-to')   indexReply(msg, link)
       if (link.rel == 'mentions')     indexMentions(msg, link)
@@ -52,7 +55,7 @@ exports.init = function() {
 
       // add to inbox if it's a reply to the user's message
       var target = msgs[link.msg]
-      if (target && target.author == userId && msg.author != userId) {
+      if (target && target.value.author == userId && msg.value.author != userId) {
         inboxFeed.push(msg)
         msg.isInboxed = true
       }
@@ -132,15 +135,16 @@ exports.init = function() {
 
     // posts a copy of the given message to the feed
     rebroadcast: function(msg, cb) {
-      if (!msg.content.rebroadcasts) {
-        msg.content.rebroadcasts = {
+      var content = JSON.parse(JSON.stringify(msg.value.content))
+      if (!content.rebroadcasts) {
+        content.rebroadcasts = {
           rel: 'rebroadcasts',
-          msg: msg.id,
-          feed: msg.author,
-          timestamp: msg.timestamp
+          msg: msg.key,
+          feed: msg.value.author,
+          timestamp: msg.value.timestamp
         }
       }
-      ssb.add(msg.content, cb)
+      ssb.add(content, cb)
     }
   }
 }
