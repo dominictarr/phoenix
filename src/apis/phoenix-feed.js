@@ -1,6 +1,6 @@
 var pull = require('pull-stream')
 var remoteRequire = require('remote-require')
-var ssb = remoteRequire('ssb')
+var ssb = remoteRequire('localhost/ssb')
 
 module.exports = {
   name: 'phoenix-feed',
@@ -17,6 +17,10 @@ exports.init = function() {
   var inboxFeed = []
   var userFeeds = {}
 
+  // :TODO: it would be best if there was no `userId`
+  // `userId` is used to contruct the inbox. It would be wasteful to do it for every user
+  // but it's a pain to have just one `userId`, because there may be multiple users that we need the inbox for
+  // it would be better to just construct (and continue tracking) the inbox for a user when it's requested
   var userId = null
 
   // setup
@@ -27,6 +31,9 @@ exports.init = function() {
 
   // handle received messages
   function process(msg) {
+    if (msg.key in msgs)
+      return // already indexed
+
     // index
     msgs[msg.key] = msg
     allFeed.push(msg)
@@ -93,7 +100,7 @@ exports.init = function() {
     in: function() { return pull.drain(process) },
 
     // output streams
-    all: function() { return pull.values(allFeed) }
+    all: function() { return pull.values(allFeed) },
     inbox: function() { return pull.values(inboxFeed) },
     user: function(id) { return pull.values(userFeeds[id]) },
 
@@ -147,5 +154,4 @@ exports.init = function() {
       ssb.add(content, cb)
     }
   }
-}
 }
