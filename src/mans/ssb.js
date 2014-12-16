@@ -1,30 +1,26 @@
 {
-  name: "ssb",
-  version: "0.0.0",
-  methods: {
-    // protocol
-    auth: 'async',
+  // protocol
+  auth: 'async',
 
-    // output streams
-    createFeedStream: 'source',
-    createHistoryStream: 'source',
-    createLogStream: 'source',
-    messagesByType: 'source',
-    messagesLinkedToMessage: 'source',
-    messagesLinkedToFeed: 'source',
-    messagesLinkedFromFeed: 'source',
-    feedsLinkedToFeed: 'source',
-    feedsLinkedFromFeed: 'source',
-    followedUsers: 'source',
+  // output streams
+  createFeedStream: 'source',
+  createHistoryStream: 'source',
+  createLogStream: 'source',
+  messagesByType: 'source',
+  messagesLinkedToMessage: 'source',
+  messagesLinkedToFeed: 'source',
+  messagesLinkedFromFeed: 'source',
+  feedsLinkedToFeed: 'source',
+  feedsLinkedFromFeed: 'source',
+  followedUsers: 'source',
 
-    // getters
-    get: 'async',
-    getPublicKey: 'async',
-    getLatest: 'async',
-    whoami: 'async',
-    getLocal: 'async',
+  // getters
+  get: 'async',
+  getPublicKey: 'async',
+  getLatest: 'async',
+  whoami: 'async',
+  getLocal: 'async',
 
-    // publishers
-    add: 'async'
-  }
+  // publishers
+  add: 'async'
 }

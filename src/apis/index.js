@@ -1,5 +1,7 @@
-module.exports = {
-  'phoenix-feed': require('./phoenix-feed'),
-  'phoenix-profiles': require('./phoenix-profiles'),
-  'phoenix-network': require('./phoenix-network')
+module.exoprts = function(ssb) {
+  return {
+    feed: require('./phoenix-feed').init(ssb),
+    profiles: require('./phoenix-profiles').init(ssb),
+    network: require('./phoenix-network').init(ssb)
+  }
 }

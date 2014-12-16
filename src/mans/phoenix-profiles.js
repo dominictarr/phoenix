@@ -1,18 +1,14 @@
 {
-  name: "phoenix-profiles",
-  version: "0.0.0",
-  methods: {
-    // input streams
-    in: 'sink',
+  // input streams
+  in: 'sink',
 
-    // output streams
-    all: 'source',
+  // output streams
+  all: 'source',
 
-    // getters
-    get: 'async',
+  // getters
+  get: 'async',
 
-    // publishers
-    updateSelf: 'async',
-    giveNick: 'async'
-  }
+  // publishers
+  updateSelf: 'async',
+  giveNick: 'async'
 }

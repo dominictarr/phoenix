@@ -1,7 +1,5 @@
 var pull = require('pull-stream')
 var ssbmsgs = require('ssb-msgs')
-var remoteRequire = require('remote-require')
-var ssb = remoteRequire('localhost/ssb')
 
 module.exports = {
   name: 'phoenix-feed',
@@ -11,7 +9,7 @@ module.exports = {
   }
 }
 
-exports.init = function() {
+exports.init = function(ssb) {
   var msgs = {}
   var replies = {}
   var allFeed = []

@@ -1,18 +1,21 @@
-var pull = require('pull-streams')
-var remoteRequire = require('remote-require')
-
-remoteRequire.using(require('./mans'))
-remoteRequire.connect('localhost')
-remoteRequire.connect(require('./apis'), {as:'self'})
-
-var ssb =      remoteRequire('localhost/ssb'),
-var feed =     remoteRequire('self/phoenix-feed'),
-var profiles = remoteRequire('self/phoenix-profiles')
-var network  = remoteRequire('self/phoenix-network')
+var pull      = require('pull-streams')
+var apis      = require('./apis')
+var localhost = require('./util/localhost')
+var self      = apis(localhost.ssb)
 
 // :TODO: reduce to only one log stream
-pull(ssb.createLogStream(), feed.in())
-pull(ssb.createLogStream(), profiles.in())
-pull(ssb.createLogStream(), network.in())
+pull(localhost.ssb.createLogStream(), self.feed.in())
+pull(localhost.ssb.createLogStream(), self.profiles.in())
+pull(localhost.ssb.createLogStream(), self.network.in())
 
-require('./gui')(ssb, feed, profiles, network)
+var gui = require('./gui')(localhost.ssb, self.feed, self.profiles, self.network)
+
+localhost.on('socket:connect', function() {
+  gui.setConnectionStatus(true)
+})
+localhost.on('socket:error', function(err) {
+  gui.setConnectionStatus(false, 'Lost connection to server.')
+})
+localhost.on('socket:reconnecting', function(err) {
+  gui.setConnectionStatus(false, 'Lost connection to server. Reconnecting...')
+})
