@@ -21,6 +21,9 @@ module.exports.init = function(ssb) {
     if (msg.key in msgs)
       return // already indexed
 
+    // render to markdown
+    msg.markdown = toMarkdown(msg)
+
     // index
     msg.inboxes = {}
     msgs[msg.key] = msg
@@ -116,33 +119,25 @@ module.exports.init = function(ssb) {
       cb(new Error('Not Found'))
     },
 
-    // posts to the feed
+    // publishers
     postText: function(text, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       post({type: 'post', postType: 'text', text: text}, cb)
     },
-
-    // posts to the feed
     postReply: function(text, parent, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       if (!parent) return cb(new Error('Must provide a parent message to the reply'))
       post({type: 'post', postType: 'text', text: text, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
     },
-
-    // posts to the feed
     postAction: function(text, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       post({type: 'post', postType: 'action', text: text}, cb)
     },
-
-    // posts to the feed
     postReaction: function(text, parent, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       if (!parent) return cb(new Error('Must provide a parent message to the reply'))
       post({type: 'post', postType: 'action', text: text, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
     },
-
-    // posts a copy of the given message to the feedn
     rebroadcast: function(msg, cb) {
       var content = JSON.parse(JSON.stringify(msg.value.content))
       if (!content.rebroadcasts) {
@@ -156,4 +151,57 @@ module.exports.init = function(ssb) {
       ssb.add(content, cb)
     }
   }
+}
+
+function toMarkdown(msg) {
+  try {
+    var author = msg.value.author
+    var content = msg.value.content
+    switch (content.type) {
+      case 'init':
+        return '@'+author+' account created'
+      
+      case 'post':
+        if (content.postType == 'text')
+          return content.text
+        if (content.postType == 'action')
+          return '@'+author+' '+content.text
+        break
+      
+      case 'follow':
+        var links = ssbmsgs.getLinks(content, 'follows')
+        if (links.length > 0) {
+          var users = links.map(function(link) { return '@'+link.msg }).join(', ')
+          return '@'+author+' followed '+users
+        }
+        var links = ssbmsgs.getLinks(content, 'unfollows')
+        if (links.length > 0) {
+          var users = links.map(function(link) { return '@'+link.msg }).join(', ')
+          return '@'+author+' unfollowed '+users
+        }
+        break
+
+      case 'pub':
+        var addr = content.address
+        if (typeof addr == 'object') {
+          addr = addr.host
+          if (addr.port && addr.port != 2000)
+            addr += ':'+addr.port
+        }
+        return '@'+author+' announced a public peer at '+addr
+      
+      case 'profile':
+        if (content.nickname)
+          return '@'+author+' set their nickname to '+content.nickname
+
+      case 'gives-nick':
+        var links = ssbmsgs.getLinks(content, 'gives-nick')
+        if (links.length > 0) {
+          var users = links.map(function(link) { return '@'+link.msg+' '+link.nickname }).join(', ')
+          return '@'+author+' named '+users
+        }
+        break
+    }
+  } catch (e) {}
+  return null
 }

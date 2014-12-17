@@ -1,9 +1,15 @@
 var h = require('hyperscript')
 var com = require('./index')
 var util = require('../../lib/util')
+var markdown = require('../../lib/markdown')
 
 module.exports = function(state, msg) {
-  return messageRaw(state, msg)
+  var content
+  if (msg.markdown)
+    content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.nicknames) })
+  else
+    content = messageRaw(state, msg)
+  return renderMsgShell(state, msg, content)
 }
 
 function messageRaw(state, msg) {
@@ -20,8 +26,7 @@ function messageRaw(state, msg) {
     return '"msg": "<a href="/#/msg/'+$1+'">'+$1+'</a>"'
   })
 
-  var content = h('.message-raw', { innerHTML: json })
-  return renderMsgShell(state, msg, content)
+  return h('.message-raw', { innerHTML: json })
 }
 
 // renders message with the header and footer
