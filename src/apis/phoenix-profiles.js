@@ -9,7 +9,7 @@ module.exports = {
   }
 }
 
-exports.init = function(ssb) {
+module.exports.init = function(ssb) {
   var profiles = {}
 
   // handle received messages
@@ -59,7 +59,7 @@ exports.init = function(ssb) {
 
   return {
     // new messages sink-stream
-    in: function() { return pull.drain(process) },
+    in: function(done) { return pull.drain(process, done) },
 
     // output streams
     all: function() { return pull.values(allFeed) },

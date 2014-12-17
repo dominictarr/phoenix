@@ -1,14 +1,16 @@
-var pull      = require('pull-streams')
+var pull      = require('pull-stream')
 var apis      = require('./apis')
-var localhost = require('./util/localhost')
-var self      = apis(localhost.ssb)
+var localhost = require('./lib/localhost-ws')
+var ssb       = localhost // :TODO: ssb should be a sub api
+var self      = apis(ssb)
 
 // :TODO: reduce to only one log stream
-pull(localhost.ssb.createLogStream(), self.feed.in())
-pull(localhost.ssb.createLogStream(), self.profiles.in())
-pull(localhost.ssb.createLogStream(), self.network.in())
+var logerror = console.error.bind(console)
+pull(ssb.createLogStream(), self.feed.in(logerror))
+pull(ssb.createLogStream(), self.profiles.in(logerror))
+pull(ssb.createLogStream(), self.network.in(logerror))
 
-var gui = require('./gui')(localhost.ssb, self.feed, self.profiles, self.network)
+var gui = require('./gui')(ssb, self.feed, self.profiles, self.network)
 
 localhost.on('socket:connect', function() {
   gui.setConnectionStatus(true)

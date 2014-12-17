@@ -9,7 +9,7 @@ module.exports = {
   }
 }
 
-exports.init = function(ssb) {
+module.exports.init = function(ssb) {
   var followers = {}
   var following = {}
   var pubPeers = []
@@ -62,7 +62,7 @@ exports.init = function(ssb) {
 
   return {
     // new messages sink-stream
-    in: function() { return pull.drain(process) },
+    in: function(done) { return pull.drain(process, done) },
 
     // output streams
     followers: function(id) { return pull.values(followers[id]||[]) },

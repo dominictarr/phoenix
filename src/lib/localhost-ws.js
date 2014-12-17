@@ -1,11 +1,12 @@
 var muxrpc     = require('muxrpc')
+var pull       = require('pull-stream')
 var ws         = require('pull-ws-server')
 var Serializer = require('pull-serializer')
 var util       = require('./util')
 
 var reconnectTimeout
 var wsStream
-var rpcapi = muxrpc({ auth: 'async', ssb: require('../mans/ssb') }, null, serialize)()
+var rpcapi = muxrpc(require('../mans/ssb'), null, serialize)()
 connect()
 
 function connect() {
@@ -17,7 +18,7 @@ function connect() {
   wsStream = ws.connect({ host: 'localhost', port: 2000 })
   pull(wsStream, rpcapi.createStream(), wsStream)
 
-  wsStream.socket.on('connect', function() {
+  wsStream.socket.onopen = function() {
     util.getJson('/access.json', function(err, token) {
       rpcapi.auth(token, function(err) {
         if (err) {
@@ -28,14 +29,14 @@ function connect() {
         }
       })
     })
-  })
+  }
 
-  wsStream.socket.on('close', function() {
+  wsStream.socket.onclose = function() {
     rpcapi._emit('socket:error', new Error('Close'))
     console.error('Backend connection lost')
     if (!reconnectTimeout)
       reconnectTimeout = setTimeout(connect, 10*1000)
-  })
+  }
 }
 
 function serialize (stream) {

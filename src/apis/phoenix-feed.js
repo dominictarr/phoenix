@@ -9,7 +9,7 @@ module.exports = {
   }
 }
 
-exports.init = function(ssb) {
+module.exports.init = function(ssb) {
   var msgs = {}
   var replies = {}
   var allFeed = []
@@ -56,7 +56,7 @@ exports.init = function(ssb) {
     try {
       if (!link.msg) return
       if (msg.isInboxed) return
-      (replies[link.msg] = (replies[link.msg]||[]).push(msg)
+      (replies[link.msg] = (replies[link.msg]||[])).push(msg)
       msg.repliesToLink = link
 
       // add to inbox if it's a reply to the user's message
@@ -96,7 +96,7 @@ exports.init = function(ssb) {
 
   return {
     // new messages sink-stream
-    in: function() { return pull.drain(process) },
+    in: function(done) { return pull.drain(process, done) },
 
     // output streams
     all: function() { return pull.values(allFeed) },
@@ -117,29 +117,29 @@ exports.init = function(ssb) {
     postText: function(text, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       post({type: 'post', postType: 'text', text: text}, cb)
-    }
+    },
 
     // posts to the feed
     postReply: function(text, parent, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       if (!parent) return cb(new Error('Must provide a parent message to the reply'))
       post({type: 'post', postType: 'text', text: text, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
-    }
+    },
 
     // posts to the feed
     postAction: function(text, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       post({type: 'post', postType: 'action', text: text}, cb)
-    }
+    },
 
     // posts to the feed
     postReaction: function(text, parent, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       if (!parent) return cb(new Error('Must provide a parent message to the reply'))
       post({type: 'post', postType: 'action', text: text, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
-    }
+    },
 
-    // posts a copy of the given message to the feed
+    // posts a copy of the given message to the feedn
     rebroadcast: function(msg, cb) {
       var content = JSON.parse(JSON.stringify(msg.value.content))
       if (!content.rebroadcasts) {

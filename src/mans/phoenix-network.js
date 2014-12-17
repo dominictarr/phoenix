@@ -1,4 +1,4 @@
-{
+module.exports = {
   // input streams
   in: 'sink',
 
