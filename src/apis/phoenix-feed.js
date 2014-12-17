@@ -64,7 +64,7 @@ module.exports.init = function(ssb) {
     return false
   }
 
-  function indexMentions(state, msg, link) {
+  function indexMentions(msg, link) {
     try {
       if (msg.inboxes[link.feed]) return // already handled
       if (link.feed in inboxFeeds) {

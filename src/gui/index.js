@@ -26,22 +26,25 @@ var state = {
 
 // wire up toplevel event handlers
 // - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
-function runHandler(e) {
-  var el = e.target
-  while (el) {
-    for (var k in handlers) {
-      if (el.classList && el.classList.contains('ev-'+k)) {
-        e.preventDefault()
-        e.stopPropagation()
-        return handlers[k](state, el, e)
+function runHandler(name) {
+  return function(e) {
+    var el = e.target
+    while (el) {
+      for (var k in handlers) {
+        if (k.indexOf(name) === -1) continue // filter by evt type
+        if (el.classList && el.classList.contains(k)) {
+          e.preventDefault()
+          e.stopPropagation()
+          return handlers[k](state, el, e)
+        }
       }
+      // bubble up and keep looking
+      el = el.parentNode
     }
-    // bubble up and keep looking
-    el = el.parentNode
   }
 }
-document.body.addEventListener('click', runHandler)
-document.body.addEventListener('submit', runHandler)
+document.body.addEventListener('click', runHandler('click'))
+document.body.addEventListener('submit', runHandler('submit'))
 
 module.exports = function(ssb, feed, profiles, network) {
   state.apis.ssb = ssb
