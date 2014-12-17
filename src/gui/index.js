@@ -7,6 +7,8 @@ var handlers = require('./handlers')
 var util = require('../lib/util')
 
 var state = {
+  apis: {},
+
   unreadMessages: 0,
   
   msgs: [],
@@ -17,7 +19,7 @@ var state = {
     id: null
   },
   page: {
-    id: null,
+    id: 'feed',
     param: null
   }
 }
@@ -26,8 +28,11 @@ var state = {
 // - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
 function runHandler(el, e) {
   for (var k in handlers) {
-    if (el.classList && el.classList.contains('ev-'+k))
+    if (el.classList && el.classList.contains('ev-'+k)) {
+      e.preventDefault()
+      e.stopPropagation()
       return handlers[k](state, el, e)
+    }
   }
 }
 document.body.addEventListener('click', function(e) {
@@ -42,10 +47,14 @@ document.body.addEventListener('submit', function(e) {
   runHandler(e.target, e)
 })
 
-// init function
 module.exports = function(ssb, feed, profiles, network) {
+  state.apis.ssb = ssb
+  state.apis.feed = feed
+  state.apis.profiles = profiles
+  state.apis.network = network
+
   var lastSync
-  function syncState(cb) {
+  state.sync = function(cb) {
     // sync the apis with ssb
     // :TODO: only one log feed
     var ts = Date.now()
@@ -66,27 +75,19 @@ module.exports = function(ssb, feed, profiles, network) {
         if (err)
           console.error(err)
         else {
+          // update state
           state.msgs = r[0][1]
           state.profiles = r[1][1]
           for (var k in state.profiles)
             state.nicknames[k] = state.profiles[k].nickname || util.shortString(k)
         }
-        cb(err)
+        
+        // re-render the page
+        var page = pages[state.page.id]
+        if (!page)
+          page = pages.notfound
+        page(state)
       })
-    })
-  }
-
-  function renderPage(id, param) {
-    state.page.id = id
-    state.page.param = param
-
-    var page = pages[id]
-    if (!page)
-      page = pages.notfound
-
-    syncState(function(err) {
-      // :TODO: err handling
-      page(state)
     })
   }
 
@@ -95,7 +96,6 @@ module.exports = function(ssb, feed, profiles, network) {
     setUserId: function(id) { state.user.id = id },
     setConnectionStatus: function (isConnected, message) {
       // :TODO:
-    },
-    renderPage: renderPage
+    }
   }
 }
