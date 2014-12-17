@@ -13,19 +13,8 @@ module.exports.init = function(ssb) {
   var msgs = {}
   var replies = {}
   var allFeed = []
-  var inboxFeed = []
+  var inboxFeeds = {}
   var userFeeds = {}
-
-  // :TODO: it would be best if there was no `userId`
-  // `userId` is used to contruct the inbox. It would be wasteful to do it for every user
-  // but it's a pain to have just one `userId`, because there may be multiple users that we need the inbox for
-  // it would be better to just construct (and continue tracking) the inbox for a user when it's requested
-  var userId = null
-  // ssb.whoami(function(err, user) {
-  //   console.log('whoami', err, user)
-  //   if (user)
-  //     userId = user.id
-  // })
 
   // handle received messages
   function process(msg) {
@@ -33,6 +22,7 @@ module.exports.init = function(ssb) {
       return // already indexed
 
     // index
+    msg.inboxes = {}
     msgs[msg.key] = msg
     allFeed.push(msg)
     if (!userFeeds[msg.value.author])
@@ -48,7 +38,6 @@ module.exports.init = function(ssb) {
   function indexRebroadcast(msg, link) {
     try {
       if (!link.msg) return
-      if (msg.isInboxed) return
       msg.isRebroadcast = true
     } catch(e) { console.warn('failed to index rebroadcast', msg, e) }
   }
@@ -56,17 +45,17 @@ module.exports.init = function(ssb) {
   function indexReply(msg, link) {
     try {
       if (!link.msg) return
-      if (msg.isInboxed) return
       if (!replies[link.msg])
         replies[link.msg] = []
       replies[link.msg].push(msg)
       msg.repliesToLink = link
 
-      // add to inbox if it's a reply to the user's message
+      // add to inbox if it's a reply to an inbox user's message
       var target = msgs[link.msg]
-      if (target && target.value.author == userId && msg.value.author != userId) {
-        inboxFeed.push(msg)
-        msg.isInboxed = true
+      var recp = target.value.author
+      if (target && recp in inboxFeeds && msg.value.author != recp && !msg.inboxes[recp]) {
+        inboxFeeds[recp].push(msg)        
+        msg.inboxes[recp] = true
       }
     } catch(e) { console.warn('failed to index reply', msg, e) }
     return false
@@ -74,10 +63,11 @@ module.exports.init = function(ssb) {
 
   function indexMentions(state, msg, link) {
     try {
-      if (msg.isInboxed) return // already handled
-      if (link.feed != userId) return // not for current user
-      inboxFeed.push(msg)
-      msg.isInboxed = true
+      if (msg.inboxes[link.feed]) return // already handled
+      if (link.feed in inboxFeeds) {
+        inboxFeeds[link.feed].push(msg)
+        msg.inboxes[link.feed] = true
+      }
     } catch(e) { console.warn('failed to index mention', msg, e) }
   }
 
@@ -98,13 +88,23 @@ module.exports.init = function(ssb) {
   }
 
   return {
+    addInboxIndex: function(id, cb) {
+      if (!inboxFeeds[id])
+        inboxFeeds[id] = []
+      cb&&cb()
+    },
+    delInboxIndex: function(id, cb) {
+      delete inboxFeeds[id]
+      cb&&cb()
+    },
+
     // new messages sink-stream
     in: function(done) { return pull.drain(process, done) },
 
     // output streams
     all: function() { return pull.values(allFeed) },
-    inbox: function() { return pull.values(inboxFeed) },
-    user: function(id) { return pull.values(userFeeds[id]) },
+    inbox: function(id) { return pull.values(inboxFeeds[id]||[]) },
+    user: function(id) { return pull.values(userFeeds[id]||[]) },
 
     // getters
     get: function(id, cb) {

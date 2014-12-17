@@ -5,11 +5,17 @@ var ssb       = localhost // :TODO: ssb should be a sub api
 var self      = apis(ssb)
 
 function connectStreams() {
-  // :TODO: reduce to only one log stream
-  var logerror = console.error.bind(console)
-  pull(ssb.createLogStream({ live: true }), self.feed.in(logerror))
-  pull(ssb.createLogStream({ live: true }), self.profiles.in(logerror))
-  pull(ssb.createLogStream({ live: true }), self.network.in(logerror))
+  ssb.whoami(function(err, user) {
+    console.log('whoami', err, user)
+    if (user)
+      self.feed.addInboxIndex(user.id)
+
+    // :TODO: reduce to only one log stream
+    var logerror = console.error.bind(console)
+    pull(ssb.createLogStream({ live: true }), self.feed.in(logerror))
+    pull(ssb.createLogStream({ live: true }), self.profiles.in(logerror))
+    pull(ssb.createLogStream({ live: true }), self.network.in(logerror))
+  })
 }
 
 var gui = require('./gui')(ssb, self.feed, self.profiles, self.network)

@@ -1,4 +1,8 @@
 module.exports = {
+  // config
+  addInboxIndex: 'async',
+  delInboxIndex: 'async',
+
   // input streams
   in: 'sink',
 
