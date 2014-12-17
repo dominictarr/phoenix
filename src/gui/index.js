@@ -3,6 +3,7 @@ var pull = require('pull-stream')
 var multicb = require('multicb')
 var com = require('./com')
 var pages = require('./pages')
+var handlers = require('./handlers')
 var util = require('../lib/util')
 
 var state = {
@@ -21,6 +22,27 @@ var state = {
   }
 }
 
+// wire up toplevel event handlers
+// - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
+function runHandler(el, e) {
+  for (var k in handlers) {
+    if (el.classList && el.classList.contains('ev-'+k))
+      return handlers[k](state, el, e)
+  }
+}
+document.body.addEventListener('click', function(e) {
+  // find the link el
+  var el = e.target
+  while (el && el.tagName != 'A' && el.tagName != 'BUTTON')
+    el = el.parentNode
+  if (el)
+    runHandler(el, e)
+})
+document.body.addEventListener('submit', function(e) {
+  runHandler(e.target, e)
+})
+
+// init function
 module.exports = function(ssb, feed, profiles, network) {
   var lastSync
   function syncState(cb) {

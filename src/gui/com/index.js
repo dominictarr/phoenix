@@ -54,9 +54,9 @@ exports.header = function(uId, syncMsgsWaiting) {
         h('li', a('#/help', 'help'))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
-        h('li', h('a.beh-show-yourid', {href: '#'}, 'your contact id')),
+        h('li', h('a.ev-view-userid', {href: '#'}, 'your contact id')),
         h('li', a('#/profile/' + uId, 'profile')),
-        h('li', h('button.btn.btn-default.beh-add-contact', 'Add contact')),
+        h('li', h('button.btn.btn-default.ev-add-contact', 'Add contact')),
         h('li', syncButton(syncMsgsWaiting))
       ])
     ])
