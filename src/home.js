@@ -6,7 +6,6 @@ var ssb       = localhost // :TODO: ssb should be a sub api
 var self      = apis(ssb)
 
 var gui = require('./gui')(ssb, self.feed, self.profiles, self.network)
-gui.renderPage('loading')
 
 localhost.on('socket:connect', function() {
   gui.setConnectionStatus(true)

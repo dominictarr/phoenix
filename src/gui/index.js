@@ -22,16 +22,19 @@ var state = {
 }
 
 module.exports = function(ssb, feed, profiles, network) {
+  var lastSync
   function syncState(cb) {
     // sync the apis with ssb
     // :TODO: only one log feed
+    var ts = Date.now()
     var done = multicb()
-    pull(ssb.createLogStream(), feed.in(done()))
-    pull(ssb.createLogStream(), profiles.in(done()))
-    pull(ssb.createLogStream(), network.in(done()))
+    pull(ssb.createLogStream({ gt: lastSync }), feed.in(done()))
+    pull(ssb.createLogStream({ gt: lastSync }), profiles.in(done()))
+    pull(ssb.createLogStream({ gt: lastSync }), network.in(done()))
     done(function(err) {
       if (err)
         console.error(err)
+      lastSync = ts
         
       // pull data from the apis
       var done = multicb()
