@@ -21,12 +21,11 @@ module.exports.init = function(ssb) {
   // but it's a pain to have just one `userId`, because there may be multiple users that we need the inbox for
   // it would be better to just construct (and continue tracking) the inbox for a user when it's requested
   var userId = null
-
-  // setup
-  ssb.whoami(function(err, user) {
-    if (user)
-      userId = user.id
-  })
+  // ssb.whoami(function(err, user) {
+  //   console.log('whoami', err, user)
+  //   if (user)
+  //     userId = user.id
+  // })
 
   // handle received messages
   function process(msg) {
@@ -36,7 +35,9 @@ module.exports.init = function(ssb) {
     // index
     msgs[msg.key] = msg
     allFeed.push(msg)
-    (userFeeds[msg.value.author] = (userFeeds[msg.value.author]||[])).push(msg)
+    if (!userFeeds[msg.value.author])
+      userFeeds[msg.value.author] = []
+    userFeeds[msg.value.author].push(msg)
     ssbmsgs.indexLinks(msg.value.content, function(link) {
       if (link.rel == 'rebroadcasts') indexRebroadcast(msg, link)
       if (link.rel == 'replies-to')   indexReply(msg, link)
@@ -56,7 +57,9 @@ module.exports.init = function(ssb) {
     try {
       if (!link.msg) return
       if (msg.isInboxed) return
-      (replies[link.msg] = (replies[link.msg]||[])).push(msg)
+      if (!replies[link.msg])
+        replies[link.msg] = []
+      replies[link.msg].push(msg)
       msg.repliesToLink = link
 
       // add to inbox if it's a reply to the user's message

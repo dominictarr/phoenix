@@ -4,15 +4,18 @@ var localhost = require('./lib/localhost-ws')
 var ssb       = localhost // :TODO: ssb should be a sub api
 var self      = apis(ssb)
 
-// :TODO: reduce to only one log stream
-var logerror = console.error.bind(console)
-pull(ssb.createLogStream(), self.feed.in(logerror))
-pull(ssb.createLogStream(), self.profiles.in(logerror))
-pull(ssb.createLogStream(), self.network.in(logerror))
+function connectStreams() {
+  // :TODO: reduce to only one log stream
+  var logerror = console.error.bind(console)
+  pull(ssb.createLogStream({ live: true }), self.feed.in(logerror))
+  pull(ssb.createLogStream({ live: true }), self.profiles.in(logerror))
+  pull(ssb.createLogStream({ live: true }), self.network.in(logerror))
+}
 
 var gui = require('./gui')(ssb, self.feed, self.profiles, self.network)
 
 localhost.on('socket:connect', function() {
+  connectStreams()
   gui.setConnectionStatus(true)
 })
 localhost.on('socket:error', function(err) {
@@ -21,3 +24,10 @@ localhost.on('socket:error', function(err) {
 localhost.on('socket:reconnecting', function(err) {
   gui.setConnectionStatus(false, 'Lost connection to server. Reconnecting...')
 })
+
+// DEBUG
+window.PULL = pull
+window.SSB = ssb
+window.FEED = self.feed
+window.PROFILES = self.profiles
+window.NETWORK = self.network

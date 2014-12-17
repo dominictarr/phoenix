@@ -6,7 +6,7 @@ var util       = require('./util')
 
 var reconnectTimeout
 var wsStream
-var rpcapi = muxrpc(require('../mans/ssb'), null, serialize)()
+var rpcapi = muxrpc(require('../mans/ssb'), {auth: 'async'}, serialize)({auth: auth})
 connect()
 
 function connect() {
@@ -19,13 +19,15 @@ function connect() {
   pull(wsStream, rpcapi.createStream(), wsStream)
 
   wsStream.socket.onopen = function() {
+    console.log('localhost socket opened')
     util.getJson('/access.json', function(err, token) {
       rpcapi.auth(token, function(err) {
         if (err) {
           rpcapi._emit('socket:error', new Error('AuthFail'))
-          console.error('Failed to authenticate with backend', err)
+          console.error('local host socket failed auth', err)
         } else {
           rpcapi._emit('socket:connect')
+          console.log('localhost socket authenticated')
         }
       })
     })
@@ -33,10 +35,14 @@ function connect() {
 
   wsStream.socket.onclose = function() {
     rpcapi._emit('socket:error', new Error('Close'))
-    console.error('Backend connection lost')
+    console.error('localhost socket lost')
     if (!reconnectTimeout)
       reconnectTimeout = setTimeout(connect, 10*1000)
   }
+}
+
+function auth(req, cb) {
+  cb(null, true)
 }
 
 function serialize (stream) {
