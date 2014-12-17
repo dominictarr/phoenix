@@ -46,3 +46,4 @@ window.SSB = ssb
 window.FEED = self.feed
 window.PROFILES = self.profiles
 window.NETWORK = self.network
+window.GUI = gui

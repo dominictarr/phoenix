@@ -2,11 +2,9 @@ module.exports = {
   // input streams
   in: 'sink',
 
-  // output streams
-  all: 'source',
-
   // getters
   get: 'async',
+  getAll: 'async',
 
   // publishers
   updateSelf: 'async',

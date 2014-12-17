@@ -61,13 +61,13 @@ module.exports.init = function(ssb) {
     // new messages sink-stream
     in: function(done) { return pull.drain(process, done) },
 
-    // output streams
-    all: function() { return pull.values(allFeed) },
-
     // getters
     get: function(id, cb) {
       if (id in profiles) return cb(null, profiles[id])
       cb(new Error('Not Found'))
+    },
+    getAll: function(cb) {
+      cb(null, profiles)
     },
 
     // publishers
