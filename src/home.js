@@ -8,30 +8,19 @@ var self      = apis(ssb)
 var gui = require('./gui')(ssb, self.feed, self.profiles, self.network)
 gui.renderPage('loading')
 
-function connectStreams() {
+localhost.on('socket:connect', function() {
+  gui.setConnectionStatus(true)
+
+  // load session info
   ssb.whoami(function(err, user) {
     console.log('whoami', err, user)
     if (user) {
       self.feed.addInboxIndex(user.id)
       gui.setUserId(user.id)
     }
-
-    // :TODO: only one log feed
-    var done = multicb()
-    pull(ssb.createLogStream(), self.feed.in(done()))
-    pull(ssb.createLogStream(), self.profiles.in(done()))
-    pull(ssb.createLogStream(), self.network.in(done()))
-    done(function(err) {
-      if (err)
-        console.error(err)
-      gui.renderPage('feed')
-    })
+    // render the page
+    gui.renderPage('feed')
   })
-}
-
-localhost.on('socket:connect', function() {
-  connectStreams()
-  gui.setConnectionStatus(true)
 })
 localhost.on('socket:error', function(err) {
   gui.setConnectionStatus(false, 'Lost connection to server.')

@@ -23,19 +23,31 @@ var state = {
 
 module.exports = function(ssb, feed, profiles, network) {
   function syncState(cb) {
+    // sync the apis with ssb
+    // :TODO: only one log feed
     var done = multicb()
-    pull(feed.all(), pull.collect(done()))
-    profiles.getAll(done())
-    done(function(err, r) {
+    pull(ssb.createLogStream(), feed.in(done()))
+    pull(ssb.createLogStream(), profiles.in(done()))
+    pull(ssb.createLogStream(), network.in(done()))
+    done(function(err) {
       if (err)
         console.error(err)
-      else {
-        state.msgs = r[0][1]
-        state.profiles = r[1][1]
-        for (var k in state.profiles)
-          state.nicknames[k] = state.profiles[k].nickname || util.shortString(k)
-      }
-      cb(err)
+        
+      // pull data from the apis
+      var done = multicb()
+      pull(feed.all(), pull.collect(done()))
+      profiles.getAll(done())
+      done(function(err, r) {
+        if (err)
+          console.error(err)
+        else {
+          state.msgs = r[0][1]
+          state.profiles = r[1][1]
+          for (var k in state.profiles)
+            state.nicknames[k] = state.profiles[k].nickname || util.shortString(k)
+        }
+        cb(err)
+      })
     })
   }
 
