@@ -87,3 +87,4 @@ exports.page = function(state, id, content) {
 }
 
 exports.message = require('./message')
+exports.postForm = require('./post-form')
