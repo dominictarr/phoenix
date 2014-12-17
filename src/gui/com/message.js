@@ -29,24 +29,32 @@ function messageRaw(state, msg) {
   return h('.message-raw', { innerHTML: json })
 }
 
-// renders message with the header and footer
 function renderMsgShell(state, msg, content) {
-  return h('.panel.panel-default', [
-    h('.panel-body', [
-      renderMsgHeader(state, msg),
-      content,
-    ]),
+  return h('.panel.panel-default.message', [
+    renderMsgHeader(state, msg),
+    h('.panel-body', content),
+    renderMsgFooter(state, msg)
   ])
 }
 
-// message header
 function renderMsgHeader(state, msg) {
-  return h('p', [
+  var nReplies = 1 // :TODO:
+  var repliesStr = ''
+  if (nReplies == 1) repliesStr = ' (1 reply)'
+  if (nReplies > 1) repliesStr = ' ('+nReplies+' replies)'
+
+  return h('.panel-heading', [
     com.userlink(msg.value.author, state.nicknames[msg.value.author]),
-    ' ', h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,16), 16) }),
-    h('small.message-ctrls', [
-      ' - ',
-      com.a('#/msg/'+msg.id, util.prettydate(new Date(msg.value.timestamp), true), { title: 'View message thread' })
-    ])
+    ' ', h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,16), 12) }),
+    ' ', com.a('#/msg/'+msg.key, 'posted '+util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' })
   ])
+}
+
+function renderMsgFooter(state, msg) {
+  return h('.panel-footer',
+    h('a', { title: 'Reply', href: '#' }, com.icon('comment')),
+    ' ',
+    h('a', { title: 'React', href: '#' }, com.icon('hand-up')),
+    ' bob liked this, erin agreed with this'
+  )
 }

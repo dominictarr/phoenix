@@ -51,41 +51,15 @@
 // @import "bootstrap/responsive-utilities.less";
 
 // Phoenix styles
-@import "notifications.less";
-@import "feed.less";
-@import "local-peers.less";
-@import "message.less";
-@import "profile.less";
-@import "network.less";
-@import "com/suggest-box.less";
-@import "com/publish-form.less";
-@import "com/helptip.less";
+@import "com/message.less";
 
 // Home styles
 html {
   overflow-y: scroll; // always show scrollbar
 }
-.homeapp {
-  visibility: visible !important;
-}
-.feed-page > .col-xs-5 {
-  padding-top: 14px; // adjust for the filters in the left column
-}
-
-#conn-status, #action-feedback {
-  position: fixed;
-  top: 30px;
-  z-index: 1000;
-  width: auto;
-  .alert {
-    box-shadow: 1px 3px 3px rgba(0,0,0,0.25);
-  }
-}
-
 .side-nav {
   white-space: nowrap;
 }
-
 .navbar-nav {
   li {
     button {
@@ -93,12 +67,10 @@ html {
     }
   }
 }
-
 .user-link {
   font-weight: bold;
   color: #555;
 }
-
 iframe {
   background-color: transparent;
   border: 0px none transparent;

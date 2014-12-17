@@ -8,6 +8,11 @@ exports.a = function(href, text, opts) {
   return h('a', opts, text)
 }
 
+var icon =
+exports.icon = function (i) {
+  return h('span.glyphicon.glyphicon-'+i)
+}
+
 var syncButton =
 exports.syncButton = function(syncMsgsWaiting) {
   var num = ''
