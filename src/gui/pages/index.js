@@ -22,12 +22,7 @@ module.exports = {
     ))
   }),
   feed: require('./feed'),
-  inbox: simple(function(state) {
-    return com.page(state, 'inbox', h('.row',
-      h('.col-xs-1', com.sidenav(state)),
-      h('.col-xs-11', h('p', h('strong', 'Inbox')))
-    ))
-  }),
+  inbox: require('./inbox'),
   message: require('./message'),
   profile: simple(function(state) {
     return com.page(state, 'profile', h('.row',

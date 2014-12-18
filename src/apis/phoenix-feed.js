@@ -57,7 +57,7 @@ module.exports.init = function(ssb) {
       var target = msgs[link.msg]
       var recp = target.value.author
       if (target && recp in inboxFeeds && msg.value.author != recp && !msg.inboxes[recp]) {
-        inboxFeeds[recp].push(msg)        
+        inboxFeeds[recp].push(msg.key)        
         msg.inboxes[recp] = true
       }
     } catch(e) { console.warn('failed to index reply', msg, e) }
@@ -68,7 +68,7 @@ module.exports.init = function(ssb) {
     try {
       if (msg.inboxes[link.feed]) return // already handled
       if (link.feed in inboxFeeds) {
-        inboxFeeds[link.feed].push(msg)
+        inboxFeeds[link.feed].push(msg.key)
         msg.inboxes[link.feed] = true
       }
     } catch(e) { console.warn('failed to index mention', msg, e) }

@@ -15,6 +15,7 @@ var state = {
   
   msgs: [],
   msgsById: {},
+  inbox: [],
   profiles: {},
   nicknames: {},
 
@@ -69,6 +70,7 @@ state.sync = function(cb) {
     // pull data from the apis
     var done = multicb()
     pull(feed.all(), pull.collect(done()))
+    pull(feed.inbox(state.user.id), pull.collect(done()))
     profiles.getAll(done())
     done(function(err, r) {
       if (err)
@@ -79,7 +81,8 @@ state.sync = function(cb) {
         state.msgs.forEach(function(msg) {
           state.msgsById[msg.key] = msg
         })
-        state.profiles = r[1][1]
+        state.inbox = r[1][1]
+        state.profiles = r[2][1]
         for (var k in state.profiles)
           state.nicknames[k] = state.profiles[k].nickname || util.shortString(k)
       }
