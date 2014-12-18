@@ -13,7 +13,6 @@ module.exports.init = function(ssb) {
   var msgs = {}
   var allFeed = []
   var inboxFeeds = {}
-  var userFeeds = {}
 
   // handle received messages
   function process(msg) {
@@ -27,9 +26,6 @@ module.exports.init = function(ssb) {
     // index
     msgs[msg.key] = msg
     allFeed.push(msg)
-    if (!userFeeds[msg.value.author])
-      userFeeds[msg.value.author] = []
-    userFeeds[msg.value.author].push(msg)
     ssbmsgs.indexLinks(msg.value.content, function(link) {
       if (link.rel == 'rebroadcasts') indexRebroadcast(msg, link)
       if (link.rel == 'replies-to')   indexReply(msg, link)
@@ -109,7 +105,6 @@ module.exports.init = function(ssb) {
     // output streams
     all: function() { return pull.values(allFeed) },
     inbox: function(id) { return pull.values(inboxFeeds[id]||[]) },
-    user: function(id) { return pull.values(userFeeds[id]||[]) },
 
     // getters
     get: function(id, cb) {

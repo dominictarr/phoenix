@@ -24,12 +24,7 @@ module.exports = {
   feed: require('./feed'),
   inbox: require('./inbox'),
   message: require('./message'),
-  profile: simple(function(state) {
-    return com.page(state, 'profile', h('.row',
-      h('.col-xs-1', com.sidenav(state)),
-      h('.col-xs-11', h('p', h('strong', 'profile')))
-    ))
-  }),
+  profile: require('./profile'),
   network: simple(function(state) {
     return com.page(state, 'network', h('.row',
       h('.col-xs-1', com.sidenav(state)),

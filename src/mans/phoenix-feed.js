@@ -9,7 +9,6 @@ module.exports = {
   // output streams
   all: 'source',
   inbox: 'source',
-  user: 'source',
 
   // getters
   get: 'async',
