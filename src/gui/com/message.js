@@ -53,8 +53,8 @@ function renderMsgHeader(state, msg) {
 function renderMsgFooter(state, msg) {
   return h('.panel-footer',
     h('span.pull-right',
-      h('a.ev-reply', { title: 'Reply', href: '#' }, com.icon('comment')),
-      h('a.ev-react', { title: 'React', href: '#' }, com.icon('hand-up'))
+      h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, com.icon('comment')),
+      h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, com.icon('hand-up'))
     ),
     'bob liked this, erin agreed with this'
   )

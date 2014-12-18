@@ -27,7 +27,14 @@ module.exports = {
     alert('todo')
   },
   'click-react': function(state, el, e) {
-    alert('todo')
+    var text = prompt('What is your reaction? eg "likes", "agrees with"')
+    if (!text)
+      return
+
+    state.apis.feed.postReaction(text, el.dataset.msgid, function(err) {
+      if (err) alert(err.message)
+      else state.sync()
+    })
   },
   'click-view-userid': function(state, el, e) {
     alert('todo')
