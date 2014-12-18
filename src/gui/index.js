@@ -25,7 +25,8 @@ var state = {
   page: {
     id: 'feed',
     param: null,
-    renderMode: 'markdown'
+    renderMode: 'markdown',
+    feedMode: 'threaded'
   }
 }
 

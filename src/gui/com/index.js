@@ -64,7 +64,11 @@ exports.header = function(state) {
             h('li.dropdown-header', 'Render Mode'),
             headerMenuRendermode(state, 'markdown', 'Markdown'),
             headerMenuRendermode(state, 'rawcontent', 'Raw Content'),
-            headerMenuRendermode(state, 'rawfull', 'Raw Full')
+            headerMenuRendermode(state, 'rawfull', 'Raw Full'),
+            h('li.divider'),
+            h('li.dropdown-header', 'Feed Mode'),
+            headerMenuFeedmode(state, 'threaded', 'Threaded'),
+            headerMenuFeedmode(state, 'flat', 'Flat')
           )
         )
       ])
@@ -75,6 +79,11 @@ function headerMenuRendermode(state, id, label) {
   if (state.page.renderMode == id)
     label = [icon('ok'), ' ', label]
   return h('li', h('a.click-set-render-mode', { href: '#', 'data-mode': id }, label))
+}
+function headerMenuFeedmode(state, id, label) {
+  if (state.page.feedMode == id)
+    label = [icon('ok'), ' ', label]
+  return h('li', h('a.click-set-feed-mode', { href: '#', 'data-mode': id }, label))
 }
 
 var sidenav =
