@@ -24,7 +24,8 @@ var state = {
   },
   page: {
     id: 'feed',
-    param: null
+    param: null,
+    renderMode: 'markdown'
   }
 }
 

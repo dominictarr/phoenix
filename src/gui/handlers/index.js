@@ -14,6 +14,7 @@ module.exports = {
     })
   },
   'click-header-menu': require('./header-menu').toggle,
+  'click-set-render-mode': require('./header-menu').setRenderMode,
   'click-view-userid': function(state, el, e) {
     alert('todo')
   },

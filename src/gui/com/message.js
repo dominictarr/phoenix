@@ -5,7 +5,7 @@ var markdown = require('../../lib/markdown')
 
 module.exports = function(state, msg) {
   var content
-  if (msg.markdown)
+  if (state.page.renderMode == 'markdown' && msg.markdown)
     content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.nicknames) })
   else
     content = messageRaw(state, msg)
@@ -13,11 +13,12 @@ module.exports = function(state, msg) {
 }
 
 function messageRaw(state, msg) {
-  var json = util.escapePlain(JSON.stringify(msg.value.content, null, 2))
+  var obj = (state.page.renderMode == 'rawfull') ? msg.value : msg.value.content
+  var json = util.escapePlain(JSON.stringify(obj, null, 2))
 
   // turn feed references into links
   json = json.replace(/\"feed\": \"([^\"]+)\"/g, function($0, $1) {
-    var nick = nicknameMap[$1] || $1
+    var nick = state.nicknames[$1] || $1
     return '"feed": "<a class="user-link" href="/#/profile/'+$1+'">'+nick+'</a>"'
   })
 
