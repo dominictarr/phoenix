@@ -104,6 +104,13 @@ state.setConnectionStatus = function (isConnected, message) {
 // - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
 function runHandler(eventType) {
   return function(e) {
+    // close any dropdowns
+    if (eventType == 'click') {
+      Array.prototype.forEach.call(document.querySelectorAll('.dropdown'), function(el) {
+        el.classList.remove('open')
+      })
+    }
+
     var el = e.target
     while (el) {
       // check if this is a page navigation

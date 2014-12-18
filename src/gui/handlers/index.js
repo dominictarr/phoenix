@@ -13,6 +13,7 @@ module.exports = {
       else state.sync()
     })
   },
+  'click-header-menu': require('./header-menu').toggle,
   'click-view-userid': function(state, el, e) {
     alert('todo')
   },
