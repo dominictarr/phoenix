@@ -30,7 +30,7 @@ module.exports = {
   },
   'click-reply': function(state, el, e) {
     var messageEl = el.parentNode.parentNode.parentNode
-    if (!messageEl.nextSibling || !messageEl.nextSibling.classList.contains('reply-form')) {
+    if (!messageEl.nextSibling || !messageEl.nextSibling.classList || !messageEl.nextSibling.classList.contains('reply-form')) {
       var formEl = com.postForm(state, el.dataset.msgid)
       if (messageEl.nextSibling)
         messageEl.parentNode.insertBefore(formEl, messageEl.nextSibling)
