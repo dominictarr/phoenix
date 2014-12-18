@@ -1,6 +1,7 @@
 .panel.message {
   .panel-heading,
   .panel-footer {
+    position: relative;
     font-size: 11px;
     background: white;
     border: 0;
@@ -9,8 +10,14 @@
       color: gray;
     }
   }
-  .panel-footer a {
-    padding-left: 1em;
+  .panel-footer .pull-right {
+    // use position: absolute because positioning varies if theres other content with float: right
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    a {
+      padding-left: 1em;
+    }
   }
   .panel-body {
     padding: 0 15px;

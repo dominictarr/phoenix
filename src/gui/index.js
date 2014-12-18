@@ -12,6 +12,7 @@ var state = {
   unreadMessages: 0,
   
   msgs: [],
+  msgsById: {},
   profiles: {},
   nicknames: {},
 
@@ -76,6 +77,9 @@ module.exports = function(ssb, feed, profiles, network) {
         else {
           // update state
           state.msgs = r[0][1]
+          state.msgs.forEach(function(msg) {
+            state.msgsById[msg.key] = msg
+          })
           state.profiles = r[1][1]
           for (var k in state.profiles)
             state.nicknames[k] = state.profiles[k].nickname || util.shortString(k)

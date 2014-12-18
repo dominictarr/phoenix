@@ -11,7 +11,6 @@ module.exports = {
 
 module.exports.init = function(ssb) {
   var msgs = {}
-  var replies = {}
   var allFeed = []
   var inboxFeeds = {}
   var userFeeds = {}
@@ -21,11 +20,12 @@ module.exports.init = function(ssb) {
     if (msg.key in msgs)
       return // already indexed
 
-    // render to markdown
+    // prep message
     msg.markdown = toMarkdown(msg)
+    msg.inboxes = {}
+    msg.replies = []
 
     // index
-    msg.inboxes = {}
     msgs[msg.key] = msg
     allFeed.push(msg)
     if (!userFeeds[msg.value.author])
@@ -48,9 +48,9 @@ module.exports.init = function(ssb) {
   function indexReply(msg, link) {
     try {
       if (!link.msg) return
-      if (!replies[link.msg])
-        replies[link.msg] = []
-      replies[link.msg].push(msg)
+      var parent = msgs[link.msg]
+      if (!parent) return
+      parent.replies.push(msg.key)
       msg.repliesToLink = link
 
       // add to inbox if it's a reply to an inbox user's message
@@ -115,7 +115,11 @@ module.exports.init = function(ssb) {
       cb(new Error('Not Found'))
     },
     getReplies: function(id, cb) {
-      if (id in msgs) return cb(null, replies[id]||[])
+      if (id in msgs) {
+        msg = msgs[id]
+        var replies = msg.replies.map(function(id) { return msgs[id] })
+        return cb(null, replies)
+      }
       cb(new Error('Not Found'))
     },
 

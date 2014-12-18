@@ -38,10 +38,10 @@ function renderMsgShell(state, msg, content) {
 }
 
 function renderMsgHeader(state, msg) {
-  var nReplies = 1 // :TODO:
+  var nTextReplies = getReplies(state, msg, 'text').length
   var repliesStr = ''
-  if (nReplies == 1) repliesStr = ' (1 reply)'
-  if (nReplies > 1) repliesStr = ' ('+nReplies+' replies)'
+  if (nTextReplies == 1) repliesStr = ' (1 reply)'
+  if (nTextReplies > 1) repliesStr = ' ('+nTextReplies+' replies)'
 
   return h('.panel-heading', [
     com.userlink(msg.value.author, state.nicknames[msg.value.author]),
@@ -51,11 +51,26 @@ function renderMsgHeader(state, msg) {
 }
 
 function renderMsgFooter(state, msg) {
+  var reactions = getReplies(state, msg, 'action').map(function(reaction) {
+    return [com.userlink(reaction.value.author, state.nicknames[reaction.value.author]), ' ', reaction.value.content.text, ' this. ']
+  })
+
   return h('.panel-footer',
     h('span.pull-right',
       h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, com.icon('comment')),
       h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, com.icon('hand-up'))
     ),
-    'bob liked this, erin agreed with this'
+    reactions
   )
+}
+
+function getReplies(state, msg, typeFilter) {
+  return (msg.replies || [])
+    .map(function(id) { return state.msgsById[id] })
+    .filter(function(reply) {
+      if (!reply) return false
+      console.log(reply.value.content.postType, typeFilter)
+      if (typeFilter && reply.value.content.postType != typeFilter) return false
+      return true
+    })
 }
