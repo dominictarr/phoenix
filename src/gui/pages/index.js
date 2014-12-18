@@ -36,10 +36,5 @@ module.exports = {
       h('.col-xs-11', h('p', h('strong', 'network')))
     ))
   }),
-  help: simple(function(state) {
-    return com.page(state, 'help', h('.row',
-      h('.col-xs-1', com.sidenav(state)),
-      h('.col-xs-11', h('p', h('strong', 'help')))
-    ))
-  })
+  help: require('./help')
 }
