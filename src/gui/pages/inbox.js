@@ -10,10 +10,7 @@ module.exports = function(state) {
 
   var content = com.page(state, 'feed', h('.row',
     h('.col-xs-1', com.sidenav(state)),
-    h('.col-xs-7', 
-      com.postForm(state),
-      h('.message-feed', msgs)
-    )
+    h('.col-xs-7', h('.message-feed', msgs))
   ))
 
   document.body.innerHTML = ''
