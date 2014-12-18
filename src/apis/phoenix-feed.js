@@ -21,7 +21,6 @@ module.exports.init = function(ssb) {
       return // already indexed
 
     // prep message
-    msg.markdown = toMarkdown(msg)
     msg.inboxes = {}
     msg.replies = []
 
@@ -36,6 +35,9 @@ module.exports.init = function(ssb) {
       if (link.rel == 'replies-to')   indexReply(msg, link)
       if (link.rel == 'mentions')     indexMentions(msg, link)
     })
+
+    // render message
+    msg.markdown = toMarkdown(msg)
   }
 
   function indexRebroadcast(msg, link) {
@@ -168,8 +170,11 @@ function toMarkdown(msg) {
       case 'post':
         if (content.postType == 'text')
           return content.text
-        if (content.postType == 'action')
+        if (content.postType == 'action') {
+          if (msg.repliesToLink)
+            return '@'+author+' '+content.text+' [this](#/msg/'+msg.repliesToLink.msg+')'
           return '@'+author+' '+content.text
+        }
         break
       
       case 'follow':
