@@ -28,6 +28,12 @@ module.exports = {
       h('.col-xs-11', h('p', h('strong', 'Inbox')))
     ))
   }),
+  message: simple(function(state) {
+    return com.page(state, 'message', h('.row',
+      h('.col-xs-1', com.sidenav(state)),
+      h('.col-xs-11', h('p', h('strong', 'message')))
+    ))
+  }),
   profile: simple(function(state) {
     return com.page(state, 'profile', h('.row',
       h('.col-xs-1', com.sidenav(state)),

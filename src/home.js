@@ -18,7 +18,7 @@ localhost.on('socket:connect', function() {
       gui.setUserId(user.id)
     }
     // render the page
-    gui.state.sync()
+    gui.sync()
   })
 })
 localhost.on('socket:error', function(err) {
