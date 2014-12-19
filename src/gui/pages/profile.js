@@ -27,14 +27,17 @@ module.exports = function(state) {
   }
 
   // render controls
-  var followBtn = ''
+  var followBtn = '', setNickBtn = ''
   var isFollowing = (state.user.following.indexOf(pid) != -1)
-  if (pid != state.user.id) {
+  if (pid == state.user.id) {
+    setNickBtn = h('button.btn.btn-default.click-set-nickname', 'Set Nickname')
+  } else {
+    setNickBtn = h('button.btn.btn-default.click-set-nickname', {'data-user-id': pid}, 'Give Nickname')
     if (isFollowing)
       followBtn = h('button.btn.btn-default.click-unfollow', {'data-user-id': pid}, 'Unfollow')
     else
       followBtn = h('button.btn.btn-default.click-follow', {'data-user-id': pid}, 'Follow')
-  }
+  } 
 
   // render page
   var nickname = state.nicknames[pid]
@@ -44,7 +47,7 @@ module.exports = function(state) {
     h('.col-xs-7', h('.message-feed', msgs)),
     h('.col-xs-4',
       h('h2', nickname, ' ', h('small', 'joined '+util.prettydate(joinDate, true))),
-      h('p', followBtn),
+      h('p', followBtn, ' ', setNickBtn),
       h('small', 'EmojID:'), h('br'),
       h('div', { style: { width: '160px' }, innerHTML: com.toEmoji(pid) })
     )

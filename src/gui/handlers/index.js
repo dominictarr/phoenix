@@ -18,6 +18,7 @@ module.exports = {
   'click-set-feed-mode': require('./header-menu').setFeedMode,
   'click-follow': require('./profiles').follow,
   'click-unfollow': require('./profiles').unfollow,
+  'click-set-nickname': require('./profiles').setNickname,
   'click-view-userid': function(state, el, e) {
     prompt('Here is your contact id', state.user.id)
   },
