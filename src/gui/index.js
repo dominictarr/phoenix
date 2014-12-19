@@ -21,7 +21,8 @@ var state = {
   peers: [],
 
   user: {
-    id: null
+    id: null,
+    following: []
   },
   page: {
     id: 'feed',
@@ -77,6 +78,7 @@ state.sync = function(cb) {
     pull(feed.inbox(state.user.id), pull.collect(done()))
     profiles.getAll(done())
     pull(network.pubPeers(), pull.collect(done()))
+    pull(network.following(state.user.id), pull.collect(done()))
     done(function(err, r) {
       if (err)
         console.error(err)
@@ -91,6 +93,7 @@ state.sync = function(cb) {
         for (var k in state.profiles)
           state.nicknames[k] = getNickname(state.profiles[k])
         state.peers = r[3][1]
+        state.user.following = r[4][1]
       }
       
       // re-render the page

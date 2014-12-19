@@ -8,7 +8,7 @@ module.exports = function(state) {
   var profile = state.profiles[pid]
 
   if (!profile) {
-    // :TODO:
+    // :TODO: profile not found
     var page = com.page(state, 'profile', h('.row',
       h('.col-xs-1', com.sidenav(state)),
       h('.col-xs-7', 'Not found (todo)')
@@ -26,14 +26,25 @@ module.exports = function(state) {
       msgs.push(com.message(state, state.msgs[i]))
   }
 
-  console.log(profile)
-  var nickname = profile.nickname || util.shortString(pid)
+  // render controls
+  var followBtn = ''
+  var isFollowing = (state.user.following.indexOf(pid) != -1)
+  if (pid != state.user.id) {
+    if (isFollowing)
+      followBtn = h('button.btn.btn-default.click-unfollow', {'data-user-id': pid}, 'Unfollow')
+    else
+      followBtn = h('button.btn.btn-default.click-follow', {'data-user-id': pid}, 'Follow')
+  }
+
+  // render page
+  var nickname = state.nicknames[pid]
   var joinDate = new Date(profile.createdAt)
   var page = com.page(state, 'profile', h('.row',
     h('.col-xs-1', com.sidenav(state)),
     h('.col-xs-7', h('.message-feed', msgs)),
     h('.col-xs-4',
       h('h2', nickname, ' ', h('small', 'joined '+util.prettydate(joinDate, true))),
+      h('p', followBtn),
       h('small', 'EmojID:'), h('br'),
       h('div', { style: { width: '160px' }, innerHTML: com.toEmoji(pid) })
     )
