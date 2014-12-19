@@ -17,7 +17,7 @@ module.exports = {
   'click-set-render-mode': require('./header-menu').setRenderMode,
   'click-set-feed-mode': require('./header-menu').setFeedMode,
   'click-view-userid': function(state, el, e) {
-    alert('todo')
+    prompt('Here is your contact id', state.user.id)
   },
   'click-add-contact': function(state, el, e) {
     alert('todo')
