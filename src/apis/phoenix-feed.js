@@ -175,12 +175,12 @@ function toMarkdown(msg) {
       case 'follow':
         var links = ssbmsgs.getLinks(content, 'follows')
         if (links.length > 0) {
-          var users = links.map(function(link) { return '@'+link.msg }).join(', ')
+          var users = links.map(function(link) { return '@'+link.feed }).join(', ')
           return '@'+author+' followed '+users
         }
         var links = ssbmsgs.getLinks(content, 'unfollows')
         if (links.length > 0) {
-          var users = links.map(function(link) { return '@'+link.msg }).join(', ')
+          var users = links.map(function(link) { return '@'+link.feed }).join(', ')
           return '@'+author+' unfollowed '+users
         }
         break
@@ -201,7 +201,7 @@ function toMarkdown(msg) {
       case 'gives-nick':
         var links = ssbmsgs.getLinks(content, 'gives-nick')
         if (links.length > 0) {
-          var users = links.map(function(link) { return '@'+link.msg+' '+link.nickname }).join(', ')
+          var users = links.map(function(link) { return '@'+link.feed+' '+link.nickname }).join(', ')
           return '@'+author+' named '+users
         }
         break

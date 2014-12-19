@@ -23,8 +23,8 @@ module.exports.init = function(ssb) {
       profile.createdAt = msg.value.timestamp
     if (content.type == 'profile') {
       // only handle more recent than current
-      if (profile.msgSeq < msg.value.seq) {
-        profile.msgSeq = msg.value.seq
+      if (profile.msgSeq < msg.value.sequence) {
+        profile.msgSeq = msg.value.sequence
         if (content.nickname)
           profile.nickname = content.nickname
       }
@@ -39,7 +39,7 @@ module.exports.init = function(ssb) {
     if (!profile) {
       profiles[pid] = profile = {
         id: pid,
-        msgSeq: null,
+        msgSeq: 0,
         nickname: null,
         given: [],
         createdAt: null

@@ -42,8 +42,8 @@ module.exports.init = function(ssb) {
     try {
       var src = msg.value.author
       var dst = link.feed
-      (followers[dst] = (followers[dst]||[])).push(src)
-      (following[src] = (following[src]||[])).push(dst)
+      ;(followers[dst] = (followers[dst]||[])).push(src)
+      ;(following[src] = (following[src]||[])).push(dst)
     } catch(e) { console.warn('failed to index follow', msg, e) }
   }
 

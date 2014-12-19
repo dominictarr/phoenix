@@ -86,7 +86,7 @@ state.sync = function(cb) {
         state.inbox = r[1][1]
         state.profiles = r[2][1]
         for (var k in state.profiles)
-          state.nicknames[k] = state.profiles[k].nickname || util.shortString(k)
+          state.nicknames[k] = getNickname(state.profiles[k])
       }
       
       // re-render the page
@@ -101,6 +101,15 @@ state.sync = function(cb) {
 state.setUserId = function(id) { state.user.id = id }
 state.setConnectionStatus = function (isConnected, message) {
   // :TODO:
+}
+
+function getNickname(profile) {
+  for (var i=profile.given.length-1; i >= 0; i--) {
+    var given = profile.given[i]
+    if (given.author == state.user.id && given.nickname)
+      return given.nickname
+  }
+  return profile.nickname || util.shortString(profile.id)
 }
 
 // - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
