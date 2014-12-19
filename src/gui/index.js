@@ -18,6 +18,7 @@ var state = {
   inbox: [],
   profiles: {},
   nicknames: {},
+  peers: [],
 
   user: {
     id: null
@@ -59,6 +60,7 @@ state.sync = function(cb) {
 
   // sync the apis with ssb
   // :TODO: only one log feed
+  // :TODO: setup once as a live stream
   var ts = Date.now()
   var done = multicb()
   pull(ssb.createLogStream({ gt: lastSync }), feed.in(done()))
@@ -74,6 +76,7 @@ state.sync = function(cb) {
     pull(feed.all(), pull.collect(done()))
     pull(feed.inbox(state.user.id), pull.collect(done()))
     profiles.getAll(done())
+    pull(network.pubPeers(), pull.collect(done()))
     done(function(err, r) {
       if (err)
         console.error(err)
@@ -87,6 +90,7 @@ state.sync = function(cb) {
         state.profiles = r[2][1]
         for (var k in state.profiles)
           state.nicknames[k] = getNickname(state.profiles[k])
+        state.peers = r[3][1]
       }
       
       // re-render the page

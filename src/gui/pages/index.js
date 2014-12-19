@@ -25,11 +25,6 @@ module.exports = {
   inbox: require('./inbox'),
   message: require('./message'),
   profile: require('./profile'),
-  network: simple(function(state) {
-    return com.page(state, 'network', h('.row',
-      h('.col-xs-1', com.sidenav(state)),
-      h('.col-xs-11', h('p', h('strong', 'network')))
-    ))
-  }),
+  network: require('./network'),
   help: require('./help')
 }
