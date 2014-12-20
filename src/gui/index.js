@@ -31,6 +31,7 @@ var state = {
     renderMode: 'markdown',
     feedMode: 'threaded'
   },
+  pendingMessages: 0,
   unreadMessages: 0,
   suggestOptions: {}
 }
@@ -72,9 +73,11 @@ state.sync = function(cb) {
   var profiles = this.apis.profiles
   var network = this.apis.network
 
+  // clear pending messages
+  this.setPendingMessages(0)
+
   // sync the apis with ssb
   // :TODO: only one log feed
-  // :TODO: setup once as a live stream
   var ts = Date.now()
   var done = multicb()
   pull(ssb.createLogStream({ gt: lastSync }), feed.in(done()))
@@ -127,6 +130,18 @@ state.sync = function(cb) {
 state.setUserId = function(id) { state.user.id = id }
 state.setConnectionStatus = function (isConnected, message) {
   // :TODO:
+}
+
+state.setPendingMessages = function(n) {
+  this.pendingMessages = n
+  var syncbtn = document.querySelector('.sync-btn')
+  if (n) {
+    document.title = '('+n+') ssbui'
+    if (syncbtn) syncbtn.textContent = 'Sync ('+n+')'
+  } else {
+    document.title = 'ssbui'
+    if (syncbtn) syncbtn.textContent = 'Sync'
+  }
 }
 
 function getNickname(profile) {

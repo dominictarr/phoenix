@@ -1,4 +1,5 @@
 module.exports = {
+  'click-sync': function(state) { state.sync() },
   'submit-publish-text-post': require('./textpost').submit,
   'click-preview-text-post': require('./textpost').preview,
   'click-reply': require('./textpost').reply,

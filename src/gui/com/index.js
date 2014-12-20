@@ -18,7 +18,7 @@ exports.syncButton = function(syncMsgsWaiting) {
   var num = ''
   if (syncMsgsWaiting > 0)
     num = ' ('+syncMsgsWaiting+')'
-  return h('button.btn.btn-default.beh-sync', 'Sync' + num)
+  return h('button.btn.btn-default.sync-btn.click-sync', 'Sync' + num)
 }
 
 var userlink =
@@ -57,7 +57,7 @@ exports.header = function(state) {
         h('li', h('a.click-view-userid', {href: '#'}, 'your contact id')),
         h('li', a('#/profile/' + state.user.id, 'profile')),
         h('li', h('button.btn.btn-default.click-add-contact', 'Add contact')),
-        h('li', syncButton(0)),
+        h('li', syncButton(state.pendingMessages)),
         h('li#header-menu.dropdown',
           h('button.btn.btn-default.click-header-menu', h('span.caret')),
           h('ul.dropdown-menu',
