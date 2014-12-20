@@ -2,7 +2,7 @@ module.exports = function(state) {
   var hash = window.location.hash
   
   state.page.param = null
-  if (hash == '#' || hash == '#/')
+  if (!hash || hash == '#' || hash == '#/')
     state.page.id = 'feed'
   else if (hash == '#/network')
     state.page.id = 'network'

@@ -13,7 +13,7 @@ module.exports = function(state) {
       msgs.push(com.message(state, state.msgs[i]))
     }
   }
-
+  
   var content = com.page(state, 'feed', h('.row',
     h('.col-xs-1', com.sidenav(state)),
     h('.col-xs-7', 

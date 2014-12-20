@@ -1,6 +1,7 @@
 var h = require('hyperscript')
 var pull = require('pull-stream')
 var multicb = require('multicb')
+var emojiNamedCharacters = require('emoji-named-characters')
 var com = require('./com')
 var pages = require('./pages')
 var handlers = require('./handlers')
@@ -10,9 +11,8 @@ var util = require('../lib/util')
 // gui master state object
 var state = {
   apis: {},
-
-  unreadMessages: 0,
   
+  // computed state
   msgs: [],
   msgsById: {},
   inbox: [],
@@ -20,6 +20,7 @@ var state = {
   nicknames: {},
   peers: [],
 
+  // ui state
   user: {
     id: null,
     following: []
@@ -29,9 +30,21 @@ var state = {
     param: null,
     renderMode: 'markdown',
     feedMode: 'threaded'
-  }
+  },
+  unreadMessages: 0,
+  suggestOptions: {}
 }
 
+// setup emoji options for the suggest box
+state.suggestOptions[':'] = []
+for (var emoji in emojiNamedCharacters) {
+  state.suggestOptions[':'].push({
+    image: '/img/emoji/' + emoji + '.png',
+    title: emoji,
+    subtitle: emoji,
+    value: emoji + ':'
+  })
+}
 
 // init func
 module.exports = function(ssb, feed, profiles, network) {
@@ -83,17 +96,23 @@ state.sync = function(cb) {
       if (err)
         console.error(err)
       else {
-        // update state
+        // pull state
         state.msgs = r[0][1]
+        state.inbox = r[1][1]
+        state.profiles = r[2][1]
+        state.peers = r[3][1]
+        state.user.following = r[4][1]
+
+        // compute additional structures
         state.msgs.forEach(function(msg) {
           state.msgsById[msg.key] = msg
         })
-        state.inbox = r[1][1]
-        state.profiles = r[2][1]
-        for (var k in state.profiles)
-          state.nicknames[k] = getNickname(state.profiles[k])
-        state.peers = r[3][1]
-        state.user.following = r[4][1]
+        state.suggestOptions['@'] = []
+        for (var k in state.profiles) {
+          var profile = state.profiles[k]
+          state.nicknames[k] = getNickname(profile)
+          state.suggestOptions['@'].push({ title: state.nicknames[profile.id], subtitle: util.shortString(profile.id), value: profile.id })
+        }
       }
       
       // re-render the page
