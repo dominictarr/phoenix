@@ -134,7 +134,10 @@ state.sync = function(cb) {
 
 state.setUserId = function(id) { state.user.id = id }
 state.setConnectionStatus = function (isConnected, message) {
-  // :TODO:
+  var connStatus = document.getElementById('conn-status')
+  connStatus.innerHTML = ''
+  if (!isConnected)
+    connStatus.appendChild(h('.alert.alert-danger', message))
 }
 
 state.setPendingMessages = function(n) {
@@ -147,6 +150,12 @@ state.setPendingMessages = function(n) {
     document.title = 'ssbui'
     if (syncbtn) syncbtn.textContent = 'Sync'
   }
+}
+
+state.setPage = function(page) {
+  var el = document.getElementById('page-container')
+  el.innerHTML = ''
+  el.appendChild(page)
 }
 
 function getNickname(profile) {

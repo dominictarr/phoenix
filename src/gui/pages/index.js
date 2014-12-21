@@ -3,8 +3,7 @@ var com = require('../com')
 
 function simple(cb) {
   return function(state) {
-    document.body.innerHTML = ''
-    document.body.appendChild(cb(state))
+    state.setPage(cb(state))
   }
 }
 

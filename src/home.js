@@ -28,10 +28,10 @@ localhost.on('socket:connect', function() {
   })
 })
 localhost.on('socket:error', function(err) {
-  gui.setConnectionStatus(false, 'Lost connection to server.')
+  gui.setConnectionStatus(false, 'Lost connection to the host program. Please restart the host program.')
 })
 localhost.on('socket:reconnecting', function(err) {
-  gui.setConnectionStatus(false, 'Lost connection to server. Reconnecting...')
+  gui.setConnectionStatus(false, 'Lost connection to the host program. Reconnecting...')
 })
 
 // DEBUG

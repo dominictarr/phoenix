@@ -9,14 +9,10 @@ module.exports = function(state) {
 
   if (!profile) {
     // :TODO: profile not found
-    var page = com.page(state, 'profile', h('.row',
+    return state.setPage(com.page(state, 'profile', h('.row',
       h('.col-xs-1', com.sidenav(state)),
       h('.col-xs-7', 'Not found (todo)')
-    ))
-
-    document.body.innerHTML = ''
-    document.body.appendChild(page)
-    return
+    )))
   }
 
   // render messages
@@ -42,7 +38,7 @@ module.exports = function(state) {
   // render page
   var nickname = state.nicknames[pid]
   var joinDate = new Date(profile.createdAt)
-  var page = com.page(state, 'profile', h('.row',
+  state.setPage(com.page(state, 'profile', h('.row',
     h('.col-xs-1', com.sidenav(state)),
     h('.col-xs-7', h('.message-feed', msgs)),
     h('.col-xs-4',
@@ -51,8 +47,5 @@ module.exports = function(state) {
       h('small', 'EmojID:'), h('br'),
       h('div', { style: { width: '160px' }, innerHTML: com.toEmoji(pid) })
     )
-  ))
-
-  document.body.innerHTML = ''
-  document.body.appendChild(page)
+  )))
 }

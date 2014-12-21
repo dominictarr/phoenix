@@ -3,8 +3,7 @@ var pull = require('pull-stream')
 var com = require('../com')
 
 module.exports = function(state) {
-
-  var page = com.page(state, 'network', h('.row',
+  state.setPage(com.page(state, 'network', h('.row',
     h('.col-xs-1', com.sidenav(state)),
     h('.col-xs-7',
       h('p', h('strong', 'Network Peers')),
@@ -19,8 +18,5 @@ module.exports = function(state) {
         return h('span', com.a('#/profile/'+id, state.nicknames[id]), h('br'))
       }))      
     )
-  ))
-
-  document.body.innerHTML = ''
-  document.body.appendChild(page)
+  )))
 }

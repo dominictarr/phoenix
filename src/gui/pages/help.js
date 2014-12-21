@@ -24,7 +24,7 @@ module.exports = function(state) {
     ]
   }
 
-  var page = com.page(state, 'help', h('.row',
+  state.setPage(com.page(state, 'help', h('.row',
     h('.col-xs-1', com.sidenav(state)),
     h('.col-xs-7', content),
     h('.col-xs-4', h('ul.nav.nav-pills.nav-stacked', helpnav('#/help/'+state.page.param, [
@@ -32,10 +32,7 @@ module.exports = function(state) {
       ['#/help/networking', 'Networking'],
       ['#/help/privacy', 'Privacy']
     ])))
-  ))
-
-  document.body.innerHTML = ''
-  document.body.appendChild(page)
+  )))
 }
 
 function helpnav(current, items) {

@@ -8,11 +8,8 @@ module.exports = function(state) {
     msgs.push(com.message(state, state.msgsById[state.inbox[i]]))
   }
 
-  var content = com.page(state, 'feed', h('.row',
+  state.setPage(com.page(state, 'feed', h('.row',
     h('.col-xs-1', com.sidenav(state)),
     h('.col-xs-7', h('.message-feed', msgs))
-  ))
-
-  document.body.innerHTML = ''
-  document.body.appendChild(content)
+  )))
 }
