@@ -116,6 +116,11 @@ state.sync = function(cb) {
           state.nicknames[k] = getNickname(profile)
           state.suggestOptions['@'].push({ title: state.nicknames[profile.id], subtitle: util.shortString(profile.id), value: profile.id })
         }
+        var readMessages = []
+        try { readMessages = JSON.parse(localStorage.readMessages) } catch(e) {}
+        state.unreadMessages = state.inbox.reduce(function(acc, mid) {
+          return (readMessages.indexOf(mid) === -1) ? (acc + 1) : acc
+        }, 0)
       }
       
       // re-render the page

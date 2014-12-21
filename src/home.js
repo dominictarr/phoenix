@@ -21,7 +21,7 @@ localhost.on('socket:connect', function() {
 
     // new message watcher
     pull(ssb.createLogStream({ live: true, gt: Date.now() }), pull.drain(function(msg) {
-      if (msg.value.author == user.id && false)
+      if (msg.value.author == user.id)
         return
       gui.setPendingMessages(gui.pendingMessages + 1)
     }))

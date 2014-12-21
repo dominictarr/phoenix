@@ -1,6 +1,7 @@
 module.exports = function(state) {
   var hash = window.location.hash
   
+  // set the route
   state.page.param = null
   if (!hash || hash == '#' || hash == '#/')
     state.page.id = 'feed'
@@ -21,4 +22,9 @@ module.exports = function(state) {
     state.page.param = hash.slice(7) || 'intro'
   } else
     state.page.id = 'notfound'
+
+  // route logic
+  if (state.page.id == 'inbox') {
+    localStorage.readMessages = JSON.stringify(state.inbox)
+  }
 }
