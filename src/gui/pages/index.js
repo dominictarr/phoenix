@@ -14,12 +14,7 @@ module.exports = {
       h('.col-xs-11', h('p', h('strong', 'Not Found')))
     ))
   }),
-  loading: simple(function(state) {
-    return com.page(state, 'loading', h('.row',
-      h('.col-xs-1', com.sidenav(state)),
-      h('.col-xs-11', h('p', h('strong', 'loading...')))
-    ))
-  }),
+  setup: require('./setup'),
   feed: require('./feed'),
   inbox: require('./inbox'),
   message: require('./message'),

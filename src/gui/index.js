@@ -123,6 +123,12 @@ state.sync = function(cb) {
         }, 0)
       }
       
+      // setup page reroute
+      if (!state.profiles[state.user.id].nickname)
+        window.location.hash = '#/setup'
+      else if (window.location.hash == '#/setup')
+        window.location.hash = '#/'
+
       // re-render the page
       var page = pages[state.page.id]
       if (!page)
