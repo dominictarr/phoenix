@@ -63,7 +63,10 @@ module.exports = function (addr) {
   // listen for messages from the auto popup
   window.addEventListener('message', function(e) {
     if (e.origin !== domain) return
-    console.debug('received from popup:', e.data)
+    if (e.data == 'granted')
+      rpcapi._emit('perms:granted')
+    if (e.data == 'denied')
+      rpcapi._emit('perms:denied')
   })
 
   return rpcapi
