@@ -11,7 +11,10 @@ ssb.on('socket:reconnecting', function() {
 })
 ssb.on('socket:error', function() {
   console.log('Connection failed')
-  setTimeout(ssb.connect.bind(ssb), 10*1000)
+})
+ssb.on('perms:granted', function() {
+  console.log('Auth granted')
+  ssb.connect()
 })
 ssb.on('perms:authed', function() {
   console.log('Auth suceeded')
@@ -39,4 +42,7 @@ loginBtn.onclick = function(e){
 logoutBtn.onclick = function(e){
   e.preventDefault()
   ssb.deauth()
+  ssb.close()
+  loginBtn.removeAttribute('disabled')
+  logoutBtn.setAttribute('disabled', true)
 }

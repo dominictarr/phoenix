@@ -103,13 +103,13 @@ function onRequest(server) {
 
     // CORS
     var originIsSelf = (!req.headers.origin || req.headers.origin == ('http://localhost:' + server.config.port))
-    if (req.headers.origin in authedApps)
-      res.setHeader('Access-Control-Allow-Origin', req.headers.origin)
-    else
-      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + server.config.port)
+    res.setHeader('Access-Control-Allow-Origin', (req.headers.origin in authedApps) ? req.headers.origin : ('http://localhost:' + server.config.port))
+    res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET, POST, DELETE')
+    if (req.method == 'OPTIONS')
+      return res.writeHead(204), res.end()
 
     // Auth grant
-    if (req.url == '/grant-auth' && req.method == 'POST' && originIsSelf) {
+    if (req.url == '/app-auth' && req.method == 'POST' && originIsSelf) {
       return getJsonBody(req, res, function(err, body) {
         if (!body.domain || typeof body.domain != 'string' || !body.allow || !Array.isArray(body.allow)) {
           res.writeHead(422, 'bad entity - invalid request object')
@@ -124,6 +124,16 @@ function onRequest(server) {
         res.writeHead(204)
         res.end()
       })
+    }
+
+    // Auth ungrant
+    if (req.url == '/app-auth' && req.method == 'DELETE' && !originIsSelf) {
+      // remove entry
+      if (req.headers.origin in authedApps) {
+        delete authedApps[req.headers.origin]
+      }
+      res.writeHead(204)
+      return res.end()
     }
 
     // Access token

@@ -4876,39 +4876,61 @@ module.exports = function (addr) {
   addr = addr || { host: HOST, port: PORT }
   var domain = 'http://'+(addr.host||HOST)+':'+(addr.port||PORT)
   var reconnectTimeout
-  var wsStream
+  var wsStream, rpcStream
   var rpcapi = muxrpc(require('../mans/ssb'), {auth: 'async'}, serialize)({auth: auth})
 
   rpcapi.connect = function (opts) {
     opts = opts || {}
     opts.reconnect = opts.reconnect || 10000
+    if (reconnectTimeout)
+      clearTimeout(reconnectTimeout)
     reconnectTimeout = null
 
     if (wsStream)
       rpcapi._emit('socket:reconnecting')
 
     wsStream = ws.connect(addr)
-    pull(wsStream, rpcapi.createStream(), wsStream)
+    rpcStream = rpcapi.createStream()
+    pull(wsStream, rpcStream, wsStream)
 
     wsStream.socket.onopen = function() {
       rpcapi._emit('socket:connect')
       util.getJson(domain+'/access.json', function(err, token) {
         rpcapi.auth(token, function(err) {
-          if (err) rpcapi._emit('perms:error', err)
+          if (err) {
+            rpcapi._emit('perms:error', err)
+            wsStream.socket.close()
+          }
           else rpcapi._emit('perms:authed')
         })
       })
     }
 
     wsStream.socket.onclose = function() {
+      rpcStream.close(function(){})
       rpcapi._emit('socket:error', new Error('Close'))
       if (!reconnectTimeout && opts.reconnect)
         reconnectTimeout = setTimeout(rpcapi.connect.bind(rpcapi, opts), opts.reconnect)
     }
   }
 
-  rpcapi.deauth = function() {
-    // :TODO:
+  rpcapi.close = function(cb) {
+    rpcStream.close(cb || function(){})
+    wsStream.socket.close()
+  }
+
+  rpcapi.deauth = function(cb) {
+    var xhr = new XMLHttpRequest()
+    xhr.open('DELETE', domain+'/app-auth', true)
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4 && cb) {
+        var err
+        if (xhr.status < 200 || xhr.status >= 400)
+          err = new Error(xhr.status + ' ' + xhr.statusText)
+        cb(err)
+      }
+    }
+    xhr.send()
   }
 
   rpcapi.getAuthUrl = function(opts) {
@@ -4926,7 +4948,10 @@ module.exports = function (addr) {
   // listen for messages from the auto popup
   window.addEventListener('message', function(e) {
     if (e.origin !== domain) return
-    console.debug('received from popup:', e.data)
+    if (e.data == 'granted')
+      rpcapi._emit('perms:granted')
+    if (e.data == 'denied')
+      rpcapi._emit('perms:denied')
   })
 
   return rpcapi
@@ -5054,7 +5079,10 @@ ssb.on('socket:reconnecting', function() {
 })
 ssb.on('socket:error', function() {
   console.log('Connection failed')
-  setTimeout(ssb.connect.bind(ssb), 10*1000)
+})
+ssb.on('perms:granted', function() {
+  console.log('Auth granted')
+  ssb.connect()
 })
 ssb.on('perms:authed', function() {
   console.log('Auth suceeded')
@@ -5082,5 +5110,8 @@ loginBtn.onclick = function(e){
 logoutBtn.onclick = function(e){
   e.preventDefault()
   ssb.deauth()
+  ssb.close()
+  loginBtn.removeAttribute('disabled')
+  logoutBtn.setAttribute('disabled', true)
 }
 },{"../../src/lib/ssb-client":44}]},{},[47]);
