@@ -8,7 +8,8 @@
     "url": "git://github.com/ssbc/phoenix.git"
   },
   "scripts": {
-    "build": "mkdir -p js; browserify -o js/home.js src/home.js; mkdir -p css; lessc less/home.less css/home.css"
+    "build": "mkdir -p js; browserify -o js/home.js src/home.js; mkdir -p css; lessc less/home.less css/home.css",
+    "build-test": "browserify -o test/app-auth.js test/src/app-auth.js"
   },
   "dependencies": {
     "base-emoji": "~0.3.0",
@@ -31,6 +32,7 @@
     "pull-stream": "~2.24.1",
     "pull-stream-to-stream": "~1.3.0",
     "pull-ws-server": "~1.1.1",
+    "raw-body": "~1.3.1",
     "request": "~2.47.0",
     "ssb-keys": "~0.3.0",
     "ssb-msgs": "~1.0.0",

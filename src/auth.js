@@ -1,4 +1,5 @@
 var querystr = require('querystring')
+var util = require('./lib/util')
 
 var permDescs = {
   identRead: { title: 'Verify your Identity', methods: ['whoami'] },
@@ -29,9 +30,30 @@ function setup(opts) {
     return error('No valid perms. Must be one of methods in\n'+JSON.stringify(permDescs, null, 2))
   var descHtml = []
   for (var k in desc) {
-    descHtml.push(desc[k].title + ': <code>' + desc[k].methods.join(', ') + '</code>')
+    descHtml.push(desc[k].title + ': <code>' + desc[k].methods.join('</code> <code>') + '</code>')
   }
   render('.app-perms', '<ul><li>'+descHtml.join('</li><li>')+'</li></ul>')
+
+  // decision btns
+  allowbtn.onclick = function() {
+    render('.alert-danger', false)
+    util.postJson('/grant-auth', { domain: opts.domain, title: opts.title, allow: opts.perms }, function(err) {
+      if (err) render('.alert-danger', err.toString())
+      else close(true)
+    })
+  }
+  denybtn.onclick = function() {
+    close(false)
+  }
+
+  // helpers
+  function close(granted) {
+    if (opts.popup) {
+      window.opener.postMessage(granted ? 'granted' : 'denied', opts.domain)
+      window.close()
+    }
+    else window.location = opts.domain
+  }
 }
 
 function getPermDesc(perms) {
@@ -57,7 +79,7 @@ function getPermDesc(perms) {
 }
 
 function error(explanation) {
-  render('.alert-error', 'Bad auth request. Please contact the developer of the application you\'re attempting to use and let them know this occurred.')
+  render('.alert-danger', 'Bad auth request. Please contact the developer of the application you\'re attempting to use and let them know this occurred.')
   console.error(explanation)
 }
 
@@ -66,8 +88,12 @@ function makesafe(str) {
 }
 function render(sel, html) {
   Array.prototype.forEach.call(document.querySelectorAll(sel), function(el) {
-    if (el.style.display == 'none')
-      el.style.display = 'block'
-    el.innerHTML = html
+    if (html !== false) {
+      if (el.style.display == 'none')
+        el.style.display = 'block'
+      el.innerHTML = html
+    } else {
+      el.style.display = 'none'
+    }
   })
 }

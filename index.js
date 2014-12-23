@@ -3,6 +3,7 @@ var fs         = require('fs')
 var path       = require('path')
 var multicb    = require('multicb')
 var request    = require('request')
+var getRawBody = require('raw-body')
 
 exports.name = 'phoenix'
 exports.version = '1.0.0'
@@ -61,6 +62,9 @@ function onRequest(server) {
   try { fs.statSync(resolve('css')) }
   catch (e) { buildCss = true, console.log('Built CSS assets do not exist, building in-memory on each request') }
 
+  // authorized apps
+  var authedApps = {}
+
   return function(req, res) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
     function pathEnds(v) { return req.url.indexOf(v) === (req.url.length - v.length); }
@@ -98,13 +102,47 @@ function onRequest(server) {
     }
 
     // CORS
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + server.config.port)
+    var originIsSelf = (!req.headers.origin || req.headers.origin == ('http://localhost:' + server.config.port))
+    if (req.headers.origin in authedApps)
+      res.setHeader('Access-Control-Allow-Origin', req.headers.origin)
+    else
+      res.setHeader('Access-Control-Allow-Origin', 'http://localhost:' + server.config.port)
+
+    // Auth grant
+    if (req.url == '/grant-auth' && req.method == 'POST' && originIsSelf) {
+      return getJsonBody(req, res, function(err, body) {
+        if (!body.domain || typeof body.domain != 'string' || !body.allow || !Array.isArray(body.allow)) {
+          res.writeHead(422, 'bad entity - invalid request object')
+          return res.end()
+        }
+        // add entry
+        authedApps[body.domain] = {
+          domain: body.domain,
+          title: body.title || body.domain,
+          allow: body.allow
+        }
+        res.writeHead(204)
+        res.end()
+      })
+    }
 
     // Access token
     if (req.url == '/access.json') {
+      // generate access secret according to host and assigned perms
+      var accessSecret
+      if (!originIsSelf) {
+        if (req.headers.origin in authedApps)
+          accessSecret = server.createAccessKey({ allow: authedApps[req.headers.origin].allow })
+        else {
+          res.writeHead(403)
+          return res.end()
+        }
+      } else
+        accessSecret = server.createAccessKey({ allow: null }) // allow all
+
+      // respond with token
       type('application/json')
       res.writeHead(200)
-      var accessSecret = server.createAccessKey({allow: null}) // allow all
       var accessToken = server.options.signObjHmac(accessSecret, {
         role: 'client',
         ts: Date.now(),
@@ -167,4 +205,19 @@ function onRequest(server) {
       return serve(req.url)
     serve404()
   }
+}
+
+function getJsonBody(req, res, cb) {
+  getRawBody(req, { length: req.headers['content-length'], limit: '1mb', encoding: 'utf-8' }, function(err, body) {
+    if (err) {
+      res.writeHead(500, err.toString())
+      return res.end()
+    }
+    try { body = JSON.parse(body) }
+    catch (e) {
+      res.writeHead(422, 'bad entity - failed to parse json')
+      return res.end()
+    }
+    cb(null, body)
+  })
 }
