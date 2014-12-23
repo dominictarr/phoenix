@@ -119,6 +119,12 @@ function onRequest(server) {
       return serve('html/home.html')
     }
 
+    // Auth page
+    if (req.url.indexOf('/auth.html') === 0) {
+      type('text/html')
+      return serve('html/auth.html')
+    }
+
     // CSS
     if (pathStarts('/css/') && pathEnds('.css')) {
       return renderCss(path.basename(req.url), function(err, cssStr) {
