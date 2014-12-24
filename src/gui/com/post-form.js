@@ -1,5 +1,5 @@
 var h = require('hyperscript')
-var suggestBox = require('../../lib/suggest-box')
+var suggestBox = require('suggest-box')
 
 module.exports = function(state, parent) {
   var textarea = h('textarea.form-control', { name: 'text', rows: 3 })
