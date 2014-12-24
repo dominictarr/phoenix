@@ -37,6 +37,9 @@ loginBtn.onclick = function(e){
   ssb.openAuthPopup({
     title: '3rd-party App Auth Test',
     perms: ['whoami', 'add', 'messagesByType', 'createLogStream']
+  }, function(err, granted) {
+    if (granted)
+      ssb.connect()
   })
 }
 logoutBtn.onclick = function(e){

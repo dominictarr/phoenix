@@ -108,34 +108,6 @@ function onRequest(server) {
     if (req.method == 'OPTIONS')
       return res.writeHead(204), res.end()
 
-    // Auth grant
-    if (req.url == '/app-auth' && req.method == 'POST' && originIsSelf) {
-      return getJsonBody(req, res, function(err, body) {
-        if (!body.domain || typeof body.domain != 'string' || !body.allow || !Array.isArray(body.allow)) {
-          res.writeHead(422, 'bad entity - invalid request object')
-          return res.end()
-        }
-        // add entry
-        authedApps[body.domain] = {
-          domain: body.domain,
-          title: body.title || body.domain,
-          allow: body.allow
-        }
-        res.writeHead(204)
-        res.end()
-      })
-    }
-
-    // Auth ungrant
-    if (req.url == '/app-auth' && req.method == 'DELETE' && !originIsSelf) {
-      // remove entry
-      if (req.headers.origin in authedApps) {
-        delete authedApps[req.headers.origin]
-      }
-      res.writeHead(204)
-      return res.end()
-    }
-
     // Access token
     if (req.url == '/access.json') {
       // generate access secret according to host and assigned perms
@@ -168,9 +140,37 @@ function onRequest(server) {
     }
 
     // Auth page
-    if (req.url.indexOf('/auth.html') === 0) {
+    if (req.url.indexOf('/auth.html') === 0 && req.method == 'GET') {
       type('text/html')
       return serve('html/auth.html')
+    }
+
+    // Auth grant
+    if (req.url.indexOf('/auth.html') === 0 && req.method == 'POST' && originIsSelf) {
+      return getJsonBody(req, res, function(err, body) {
+        if (!body.domain || typeof body.domain != 'string' || !body.allow || !Array.isArray(body.allow)) {
+          res.writeHead(422, 'bad entity - invalid request object')
+          return res.end()
+        }
+        // add entry
+        authedApps[body.domain] = {
+          domain: body.domain,
+          title: body.title || body.domain,
+          allow: body.allow
+        }
+        res.writeHead(204)
+        res.end()
+      })
+    }
+
+    // Auth ungrant
+    if (req.url.indexOf('/auth.html') === 0 && req.method == 'DELETE' && !originIsSelf) {
+      // remove entry
+      if (req.headers.origin in authedApps) {
+        delete authedApps[req.headers.origin]
+      }
+      res.writeHead(204)
+      return res.end()
     }
 
     // CSS

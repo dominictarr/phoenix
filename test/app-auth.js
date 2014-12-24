@@ -4861,12 +4861,78 @@ function ws(uri, protocols, opts) {
 if (WebSocket) ws.prototype = WebSocket.prototype;
 
 },{}],44:[function(require,module,exports){
+var querystr   = require('querystring')
+
+var HOST = 'localhost'
+var PORT = 2000
+var ACCESS_PATH = '/access.json'
+var AUTH_PATH = '/auth.html'
+
+module.exports = function (addr) {
+  addr = addr || { host: HOST, port: PORT }
+  var domain = 'http://'+(addr.host||HOST)+':'+(addr.port||PORT)
+
+  return {
+    getToken: function(cb) {
+      var xhr = new XMLHttpRequest()
+      xhr.open('GET', domain+ACCESS_PATH, true)
+      xhr.responseType = 'json'
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && cb) {
+          var err
+          if (xhr.status < 200 || xhr.status >= 400)
+            err = new Error(xhr.status + ' ' + xhr.statusText)
+          cb(err, xhr.response)
+        }
+      }
+      xhr.send()
+    },
+    getAuthUrl: function(opts) {
+      opts = opts || {}
+      opts.domain = window.location.protocol + '//' + window.location.host
+      return domain+AUTH_PATH+'?'+querystr.stringify(opts)
+    },
+    openAuthPopup: function(opts, cb) {
+      if (typeof opts == 'function') {
+        cb = opts
+        opts = null
+      }
+      cb = cb || function(){}
+      opts = opts || {}
+      opts.popup = 1
+      window.open(this.getAuthUrl(opts), null)
+
+      // listen for messages from the popup
+      window.addEventListener('message', onmsg)
+      function onmsg(e) {
+        if (e.origin !== domain) return
+        if (e.data == 'granted')
+          cb(null, true)
+        if (e.data == 'denied')
+          cb(null, false)
+        window.removeEventListener('message', onmsg)
+      }
+    },
+    deauth: function(cb) {
+      var xhr = new XMLHttpRequest()
+      xhr.open('DELETE', domain+AUTH_PATH, true)
+      xhr.onreadystatechange = function() {
+        if (xhr.readyState == 4 && cb) {
+          var err
+          if (xhr.status < 200 || xhr.status >= 400)
+            err = new Error(xhr.status + ' ' + xhr.statusText)
+          cb(err)
+        }
+      }
+      xhr.send()
+    }
+  }
+}
+},{"querystring":6}],45:[function(require,module,exports){
 var muxrpc     = require('muxrpc')
 var pull       = require('pull-stream')
 var ws         = require('pull-ws-server')
 var Serializer = require('pull-serializer')
-var querystr   = require('querystring')
-var util       = require('./util')
 
 var HOST = 'localhost'
 var PORT = 2000
@@ -4877,6 +4943,7 @@ module.exports = function (addr) {
   var domain = 'http://'+(addr.host||HOST)+':'+(addr.port||PORT)
   var reconnectTimeout
   var wsStream, rpcStream
+  var appAuth = require('./ssb-app-auth')(addr)
   var rpcapi = muxrpc(require('../mans/ssb'), {auth: 'async'}, serialize)({auth: auth})
 
   rpcapi.connect = function (opts) {
@@ -4895,7 +4962,7 @@ module.exports = function (addr) {
 
     wsStream.socket.onopen = function() {
       rpcapi._emit('socket:connect')
-      util.getJson(domain+'/access.json', function(err, token) {
+      appAuth.getToken(function(err, token) {
         rpcapi.auth(token, function(err) {
           if (err) {
             rpcapi._emit('perms:error', err)
@@ -4919,40 +4986,9 @@ module.exports = function (addr) {
     wsStream.socket.close()
   }
 
-  rpcapi.deauth = function(cb) {
-    var xhr = new XMLHttpRequest()
-    xhr.open('DELETE', domain+'/app-auth', true)
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4 && cb) {
-        var err
-        if (xhr.status < 200 || xhr.status >= 400)
-          err = new Error(xhr.status + ' ' + xhr.statusText)
-        cb(err)
-      }
-    }
-    xhr.send()
-  }
-
-  rpcapi.getAuthUrl = function(opts) {
-    opts = opts || {}
-    opts.domain = window.location.protocol + '//' + window.location.host
-    return domain+AUTH_PATH+'?'+querystr.stringify(opts)
-  }
-
-  rpcapi.openAuthPopup = function(opts) {
-    opts = opts || {}
-    opts.popup = 1
-    window.open(this.getAuthUrl(opts), null)
-  }
-
-  // listen for messages from the auto popup
-  window.addEventListener('message', function(e) {
-    if (e.origin !== domain) return
-    if (e.data == 'granted')
-      rpcapi._emit('perms:granted')
-    if (e.data == 'denied')
-      rpcapi._emit('perms:denied')
-  })
+  rpcapi.getAuthUrl = appAuth.getAuthUrl.bind(appAuth)
+  rpcapi.openAuthPopup = appAuth.openAuthPopup.bind(appAuth)
+  rpcapi.deauth = appAuth.deauth.bind(appAuth)
 
   return rpcapi
 }
@@ -4964,81 +5000,7 @@ function auth(req, cb) {
 function serialize (stream) {
   return Serializer(stream, JSON, {split: '\n\n'})
 }
-},{"../mans/ssb":46,"./util":45,"muxrpc":8,"pull-serializer":21,"pull-stream":31,"pull-ws-server":37,"querystring":6}],45:[function(require,module,exports){
-exports.getJson = function(path, cb) {
-  var xhr = new XMLHttpRequest()
-  xhr.open('GET', path, true)
-  xhr.responseType = 'json'
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4) {
-      var err
-      if (xhr.status < 200 || xhr.status >= 400)
-        err = new Error(xhr.status + ' ' + xhr.statusText)
-      cb(err, xhr.response)
-    }
-  }
-  xhr.send()
-}
-
-exports.postJson = function(path, obj, cb) {
-  var xhr = new XMLHttpRequest()
-  xhr.open('POST', path, true)
-  xhr.setRequestHeader('Content-Type', 'application/json')
-  xhr.responseType = 'json'
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4) {
-      var err
-      if (xhr.status < 200 || xhr.status >= 400)
-        err = new Error(xhr.status + ' ' + xhr.statusText)
-      cb(err, xhr.response)
-    }
-  }
-  xhr.send(JSON.stringify(obj))
-}
-
-;(function() {
-  function createHandler(divisor,noun){
-    return function(diff, useAgo){
-      var n = Math.floor(diff/divisor);
-      return "" + n + noun + ((useAgo) ? ' ago' : '');
-    }
-  }
-
-  var formatters = [
-    { threshold: 1,        handler: function(){ return      "just now" } },
-    { threshold: 60,       handler: createHandler(1,        "s") },
-    { threshold: 3600,     handler: createHandler(60,       "m") },
-    { threshold: 86400,    handler: createHandler(3600,     "h") },
-    { threshold: 172800,   handler: function(){ return      "yesterday" } },
-    { threshold: 604800,   handler: createHandler(86400,    "d") },
-    { threshold: 2592000,  handler: createHandler(604800,   "w") },
-    { threshold: 31536000, handler: createHandler(2592000,  "mo") },
-    { threshold: Infinity, handler: createHandler(31536000, "y") }
-  ];
-
-  exports.prettydate = function (date, useAgo) {
-    var diff = (((new Date()).getTime() - date.getTime()) / 1000);
-    for( var i=0; i<formatters.length; i++ ){
-      if( diff < formatters[i].threshold ){
-        return formatters[i].handler(diff, useAgo);
-      }
-    }
-    throw new Error("exhausted all formatter options, none found"); //should never be reached
-  }
-})()
-
-var escapePlain =
-exports.escapePlain = function(str) {
-  return (str||'')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-}
-
-exports.shortString = function(str) {
-  return str.slice(0, 6) + '...'
-}
-},{}],46:[function(require,module,exports){
+},{"../mans/ssb":46,"./ssb-app-auth":44,"muxrpc":8,"pull-serializer":21,"pull-stream":31,"pull-ws-server":37}],46:[function(require,module,exports){
 module.exports = {
   // protocol
   auth: 'async',
@@ -5105,6 +5067,9 @@ loginBtn.onclick = function(e){
   ssb.openAuthPopup({
     title: '3rd-party App Auth Test',
     perms: ['whoami', 'add', 'messagesByType', 'createLogStream']
+  }, function(err, granted) {
+    if (granted)
+      ssb.connect()
   })
 }
 logoutBtn.onclick = function(e){
@@ -5114,4 +5079,4 @@ logoutBtn.onclick = function(e){
   loginBtn.removeAttribute('disabled')
   logoutBtn.setAttribute('disabled', true)
 }
-},{"../../src/lib/ssb-client":44}]},{},[47]);
+},{"../../src/lib/ssb-client":45}]},{},[47]);

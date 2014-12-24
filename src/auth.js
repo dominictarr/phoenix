@@ -37,7 +37,7 @@ function setup(opts) {
   // decision btns
   allowbtn.onclick = function() {
     render('.alert-danger', false)
-    util.postJson('/app-auth', { domain: opts.domain, title: opts.title, allow: opts.perms }, function(err) {
+    util.postJson('/auth.html', { domain: opts.domain, title: opts.title, allow: opts.perms }, function(err) {
       if (err) render('.alert-danger', err.toString())
       else close(true)
     })
