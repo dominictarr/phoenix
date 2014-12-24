@@ -4863,144 +4863,159 @@ if (WebSocket) ws.prototype = WebSocket.prototype;
 },{}],44:[function(require,module,exports){
 var querystr   = require('querystring')
 
-var HOST = 'localhost'
-var PORT = 2000
+var DEFAULT_PROTOCOL = 'http:'
+var DEFAULT_PORT = 2000
 var ACCESS_PATH = '/access.json'
 var AUTH_PATH = '/auth.html'
 
-module.exports = function (addr) {
-  addr = addr || { host: HOST, port: PORT }
-  var domain = 'http://'+(addr.host||HOST)+':'+(addr.port||PORT)
+function address(addr) {
+  addr = addr || {}
+  if (typeof addr == 'string'){
+    var parts = addr.split(':')
+    if (parts.length === 3)
+      addr = { protocol: parts[0]+':', host: parts[1].slice(2), port: parts[2]}
+    else if (parts .length === 2)
+      addr = { host: parts[0], port: parts[1] }
+    else
+      addr = { host: parts[0] }
+  }
+  if (!addr.protocol) addr.protocol = DEFAULT_PROTOCOL
+  if (!addr.host) throw new Error('BadParam - no host:String or {.host:String}')
+  if (!addr.port || +addr.port != addr.port) addr.port = DEFAULT_PORT
+  addr.domain = addr.protocol+'//'+addr.host+':'+addr.port
+  return addr
+}
 
-  return {
-    getToken: function(cb) {
-      var xhr = new XMLHttpRequest()
-      xhr.open('GET', domain+ACCESS_PATH, true)
-      xhr.responseType = 'json'
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && cb) {
-          var err
-          if (xhr.status < 200 || xhr.status >= 400)
-            err = new Error(xhr.status + ' ' + xhr.statusText)
-          cb(err, xhr.response)
-        }
+module.exports = {
+  getToken: function(addr, cb) {
+    addr = address(addr)
+    var xhr = new XMLHttpRequest()
+    xhr.open('GET', addr.domain+ACCESS_PATH, true)
+    xhr.responseType = 'json'
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4 && cb) {
+        var err
+        if (xhr.status < 200 || xhr.status >= 400)
+          err = new Error(xhr.status + ' ' + xhr.statusText)
+        cb(err, xhr.response)
       }
-      xhr.send()
-    },
-    getAuthUrl: function(opts) {
-      opts = opts || {}
-      opts.domain = window.location.protocol + '//' + window.location.host
-      return domain+AUTH_PATH+'?'+querystr.stringify(opts)
-    },
-    openAuthPopup: function(opts, cb) {
-      if (typeof opts == 'function') {
-        cb = opts
-        opts = null
-      }
-      cb = cb || function(){}
-      opts = opts || {}
-      opts.popup = 1
-      window.open(this.getAuthUrl(opts), null)
-
-      // listen for messages from the popup
-      window.addEventListener('message', onmsg)
-      function onmsg(e) {
-        if (e.origin !== domain) return
-        if (e.data == 'granted')
-          cb(null, true)
-        if (e.data == 'denied')
-          cb(null, false)
-        window.removeEventListener('message', onmsg)
-      }
-    },
-    deauth: function(cb) {
-      var xhr = new XMLHttpRequest()
-      xhr.open('DELETE', domain+AUTH_PATH, true)
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState == 4 && cb) {
-          var err
-          if (xhr.status < 200 || xhr.status >= 400)
-            err = new Error(xhr.status + ' ' + xhr.statusText)
-          cb(err)
-        }
-      }
-      xhr.send()
     }
+    xhr.send()
+  },
+  getAuthUrl: function(addr, opts) {
+    addr = address(addr)
+    opts = opts || {}
+    opts.domain = window.location.protocol + '//' + window.location.host
+    return addr.domain+AUTH_PATH+'?'+querystr.stringify(opts)
+  },
+  openAuthPopup: function(addr, opts, cb) {
+    addr = address(addr)
+    if (typeof opts == 'function') {
+      cb = opts
+      opts = null
+    }
+    cb = cb || function(){}
+    opts = opts || {}
+    opts.popup = 1
+    window.open(this.getAuthUrl(addr, opts), null)
+
+    // listen for messages from the popup
+    window.addEventListener('message', onmsg)
+    function onmsg(e) {
+      if (e.origin !== addr.domain) return
+      if (e.data == 'granted')
+        cb(null, true)
+      if (e.data == 'denied')
+        cb(null, false)
+      window.removeEventListener('message', onmsg)
+    }
+  },
+  deauth: function(addr, cb) {
+    addr = address(addr)
+    var xhr = new XMLHttpRequest()
+    xhr.open('DELETE', addr.domain+AUTH_PATH, true)
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState == 4 && cb) {
+        var err
+        if (xhr.status < 200 || xhr.status >= 400)
+          err = new Error(xhr.status + ' ' + xhr.statusText)
+        cb(err)
+      }
+    }
+    xhr.send()
   }
 }
 },{"querystring":6}],45:[function(require,module,exports){
-var muxrpc     = require('muxrpc')
-var pull       = require('pull-stream')
-var ws         = require('pull-ws-server')
-var Serializer = require('pull-serializer')
+var pull = require('pull-stream')
+var ws   = require('pull-ws-server')
+var EventEmitter = require('events').EventEmitter
 
-var HOST = 'localhost'
-var PORT = 2000
-var AUTH_PATH = '/auth.html'
+var DEFAULT_PROTOCOL = 'http:'
+var DEFAULT_PORT = 2000
 
-module.exports = function (addr) {
-  addr = addr || { host: HOST, port: PORT }
-  var domain = 'http://'+(addr.host||HOST)+':'+(addr.port||PORT)
-  var reconnectTimeout
-  var wsStream, rpcStream
-  var appAuth = require('./ssb-app-auth')(addr)
-  var rpcapi = muxrpc(require('../mans/ssb'), {auth: 'async'}, serialize)({auth: auth})
+function address(addr) {
+  addr = addr || {}
+  if (typeof addr == 'string'){
+    var parts = addr.split(':')
+    if (parts.length === 3)
+      addr = { protocol: parts[0]+':', host: parts[1].slice(2), port: parts[2]}
+    else if (parts .length === 2)
+      addr = { host: parts[0], port: parts[1] }
+    else
+      addr = { host: parts[0] }
+  }
+  if (!addr.protocol) addr.protocol = DEFAULT_PROTOCOL
+  if (!addr.host) throw new Error('BadParam - no host:String or {.host:String}')
+  if (!addr.port || +addr.port != addr.port) addr.port = DEFAULT_PORT
+  addr.domain = addr.protocol+'//'+addr.host+':'+addr.port
+  return addr
+}
 
-  rpcapi.connect = function (opts) {
+exports.connect = function (rpcapi, addr, cb) {
+  var chan = new EventEmitter()
+
+  chan.connect = function(addr, cb) {
+    addr = address(addr)
+    if (chan.wsStream)
+      chan.emit('reconnecting')
+
+    chan.addr = addr
+    chan.wsStream = ws.connect(addr)
+    chan.rpcStream = rpcapi.createStream()
+    pull(chan.wsStream, chan.rpcStream, chan.wsStream)
+
+    chan.wsStream.socket.onopen = function() {
+      chan.emit('connect')
+      cb && cb()
+    }
+
+    chan.wsStream.socket.onclose = function() {
+      chan.rpcStream.close(function(){})
+      chan.emit('error', new Error('Close'))
+    }
+  }
+
+  chan.reconnect = function(cb) {
+    this.connect(this.addr, cb)
+  }  
+
+  chan.close = function(cb) {
+    this.rpcStream.close(cb || function(){})
+    this.wsStream.socket.close()
+  }
+
+  chan.reset = function(opts) {
     opts = opts || {}
-    opts.reconnect = opts.reconnect || 10000
-    if (reconnectTimeout)
-      clearTimeout(reconnectTimeout)
-    reconnectTimeout = null
-
-    if (wsStream)
-      rpcapi._emit('socket:reconnecting')
-
-    wsStream = ws.connect(addr)
-    rpcStream = rpcapi.createStream()
-    pull(wsStream, rpcStream, wsStream)
-
-    wsStream.socket.onopen = function() {
-      rpcapi._emit('socket:connect')
-      appAuth.getToken(function(err, token) {
-        rpcapi.auth(token, function(err) {
-          if (err) {
-            rpcapi._emit('perms:error', err)
-            wsStream.socket.close()
-          }
-          else rpcapi._emit('perms:authed')
-        })
-      })
-    }
-
-    wsStream.socket.onclose = function() {
-      rpcStream.close(function(){})
-      rpcapi._emit('socket:error', new Error('Close'))
-      if (!reconnectTimeout && opts.reconnect)
-        reconnectTimeout = setTimeout(rpcapi.connect.bind(rpcapi, opts), opts.reconnect)
-    }
+    opts.wait = (typeof opts.wait == 'undefined') ? 10*1000 : opts.wait
+    chan.close(function() {
+      setTimeout(chan.connect.bind(chan, chan.addr), opts.wait)
+    })
   }
 
-  rpcapi.close = function(cb) {
-    rpcStream.close(cb || function(){})
-    wsStream.socket.close()
-  }
-
-  rpcapi.getAuthUrl = appAuth.getAuthUrl.bind(appAuth)
-  rpcapi.openAuthPopup = appAuth.openAuthPopup.bind(appAuth)
-  rpcapi.deauth = appAuth.deauth.bind(appAuth)
-
-  return rpcapi
+  chan.connect(addr, cb)
+  return chan
 }
-
-function auth(req, cb) {
-  cb(null, false)
-}
-
-function serialize (stream) {
-  return Serializer(stream, JSON, {split: '\n\n'})
-}
-},{"../mans/ssb":46,"./ssb-app-auth":44,"muxrpc":8,"pull-serializer":21,"pull-stream":31,"pull-ws-server":37}],46:[function(require,module,exports){
+},{"events":1,"pull-stream":31,"pull-ws-server":37}],46:[function(require,module,exports){
 module.exports = {
   // protocol
   auth: 'async',
@@ -5028,55 +5043,59 @@ module.exports = {
   add: 'async'
 }
 },{}],47:[function(require,module,exports){
-var ssb = require('../../src/lib/ssb-client')()
+var muxrpc = require('muxrpc')
+var Serializer = require('pull-serializer')
+var auth = require('../../src/lib/ssb-app-auth')
+var chan = require('../../src/lib/ssb-channel')
 var loginBtn = document.getElementById('loginbtn')
 var logoutBtn = document.getElementById('logoutbtn')
 
-ssb.connect()
-ssb.on('socket:connect', function() {
+var ssb = muxrpc(require('../../src/mans/ssb'), false, serialize)()
+var ssbchan = chan.connect(ssb, 'localhost')
+ssbchan.on('connect', function() {
   console.log('Connected')
-})
-ssb.on('socket:reconnecting', function() {
-  console.log('Reconnecting')
-})
-ssb.on('socket:error', function() {
-  console.log('Connection failed')
-})
-ssb.on('perms:granted', function() {
-  console.log('Auth granted')
-  ssb.connect()
-})
-ssb.on('perms:authed', function() {
-  console.log('Auth suceeded')
-  loginBtn.setAttribute('disabled', true)
-  logoutBtn.removeAttribute('disabled')
+  auth.getToken('localhost', function(err, token) {
+    if (err) return ssbchan.close(), console.log('Token fetch failed', err)
+    ssb.auth(token, function(err) {
+      if (err) return ssbchan.close(), console.log('Auth failed')
+      loginBtn.setAttribute('disabled', true)
+      logoutBtn.removeAttribute('disabled')
 
-  // :TODO: this should include a challenge for the server to sign, proving ownership of the keypair
-  ssb.whoami(function(err, id) {
-    console.log('whoami', err, id)
+      // :TODO: this should include a challenge for the server to sign, proving ownership of the keypair
+      ssb.whoami(function(err, id) {
+        console.log('whoami', err, id)
+      })
+    })
   })
 })
-ssb.on('perms:error', function() {
-  console.log('Auth failed')
+ssbchan.on('reconnecting', function() {
+  console.log('Reconnecting')
+})
+ssbchan.on('error', function() {
+  console.log('Connection failed')
   loginBtn.removeAttribute('disabled')
   logoutBtn.setAttribute('disabled', true)
 })
 
 loginBtn.onclick = function(e){
   e.preventDefault()
-  ssb.openAuthPopup({
+  auth.openAuthPopup('localhost', {
     title: '3rd-party App Auth Test',
     perms: ['whoami', 'add', 'messagesByType', 'createLogStream']
   }, function(err, granted) {
     if (granted)
-      ssb.connect()
+      ssbchan.reconnect()
   })
 }
 logoutBtn.onclick = function(e){
   e.preventDefault()
-  ssb.deauth()
-  ssb.close()
+  auth.deauth('localhost')
+  ssbchan.close()
   loginBtn.removeAttribute('disabled')
   logoutBtn.setAttribute('disabled', true)
 }
-},{"../../src/lib/ssb-client":45}]},{},[47]);
+
+function serialize (stream) {
+  return Serializer(stream, JSON, {split: '\n\n'})
+}
+},{"../../src/lib/ssb-app-auth":44,"../../src/lib/ssb-channel":45,"../../src/mans/ssb":46,"muxrpc":8,"pull-serializer":21}]},{},[47]);
