@@ -1,46 +1,43 @@
-var document = require('global/document')
-var window = require('global/window')
-var mercury = require('mercury')
+var pull      = require('pull-stream')
+var multicb   = require('multicb')
+var apis      = require('./apis')
+var localhost = require('./lib/localhost-ws')
+var ssb       = localhost // :TODO: ssb should be a sub api
+var self      = apis(ssb)
 
-var models = require('./lib/models')
-var bus = require('./lib/business')
-var createEvents = require('./events')
-var render = require('./render')
-var handlers = require('./handlers')
+var gui = require('./gui')(ssb, self.feed, self.profiles, self.network)
 
-// init app
-var state = createApp()
-mercury.app(document.body, state, render)
-handlers.setRoute(state, window.location.hash)
+localhost.on('socket:connect', function() {
+  gui.setConnectionStatus(true)
 
-// put some things on the window object for debugging
-window.state = state
-window.models = models
-
-module.exports = createApp
-function createApp() {
-  var feedFilters
-  try { feedFilters = JSON.parse(localStorage.getItem('feed-filters')) }
-  catch (e) {}
-
-  var initState = {
-    feedFilters: feedFilters || {
-      shares: true,
-      textPosts: true,
-      actionPosts: true,
-      follows: true
+  // load session info
+  ssb.whoami(function(err, user) {
+    // render the page
+    if (user) {
+      self.feed.addInboxIndex(user.id)
+      gui.setUserId(user.id)
     }
-  }
+    gui.sync()
 
-  var events = createEvents()
-  var state = models.homeApp(events, initState)
-  bus.setupHomeApp(state)
-  wireUpEvents(state, events)
-  return state
-}
+    // new message watcher
+    pull(ssb.createLogStream({ live: true, gt: Date.now() }), pull.drain(function(msg) {
+      if (msg.value.author == user.id)
+        return
+      gui.setPendingMessages(gui.pendingMessages + 1)
+    }))
+  })
+})
+localhost.on('socket:error', function(err) {
+  gui.setConnectionStatus(false, 'Lost connection to the host program. Please restart the host program.')
+})
+localhost.on('socket:reconnecting', function(err) {
+  gui.setConnectionStatus(false, 'Lost connection to the host program. Reconnecting...')
+})
 
-function wireUpEvents(state, events) {
-  for (var k in handlers) {
-    events[k](handlers[k].bind(null, state))
-  }
-}
+// DEBUG
+window.PULL = pull
+window.SSB = ssb
+window.FEED = self.feed
+window.PROFILES = self.profiles
+window.NETWORK = self.network
+window.GUI = gui

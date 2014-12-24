@@ -1,0 +1,42 @@
+.panel.message {
+  box-shadow: none;
+  margin: 0;
+  border-radius: 0;
+  
+  .panel-heading,
+  .panel-footer {
+    position: relative;
+    font-size: 11px;
+    background: white;
+    border: 0;
+    color: gray;
+    a {
+      color: gray;
+    }
+  }
+  .panel-footer .pull-right {
+    // use position: absolute because positioning varies if theres other content with float: right
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    a {
+      padding-left: 1em;
+    }
+  }
+  .panel-body {
+    padding: 0 15px;
+    .message-raw {
+      white-space: pre;
+      font-family: @font-family-monospace;
+      padding: ((@line-height-computed - 1) / 2);
+      margin: 0 0 (@line-height-computed / 2);
+      font-size: (@font-size-base - 1); // 14px to 13px
+      line-height: @line-height-base;
+      word-break: break-all;
+      word-wrap: break-word;
+      color: @pre-color;
+      background-color: @pre-bg;
+      overflow: auto;
+    }
+  }
+}

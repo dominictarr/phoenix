@@ -1,4 +1,35 @@
-(function() {
+exports.getJson = function(path, cb) {
+  var xhr = new XMLHttpRequest()
+  xhr.open('GET', path, true)
+  xhr.responseType = 'json'
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) {
+      var err
+      if (xhr.status < 200 || xhr.status >= 400)
+        err = new Error(xhr.status + ' ' + xhr.statusText)
+      cb(err, xhr.response)
+    }
+  }
+  xhr.send()
+}
+
+exports.postJson = function(path, obj, cb) {
+  var xhr = new XMLHttpRequest()
+  xhr.open('POST', path, true)
+  xhr.setRequestHeader('Content-Type', 'application/json')
+  xhr.responseType = 'json'
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4) {
+      var err
+      if (xhr.status < 200 || xhr.status >= 400)
+        err = new Error(xhr.status + ' ' + xhr.statusText)
+      cb(err, xhr.response)
+    }
+  }
+  xhr.send(JSON.stringify(obj))
+}
+
+;(function() {
   function createHandler(divisor,noun){
     return function(diff, useAgo){
       var n = Math.floor(diff/divisor);
@@ -39,80 +70,4 @@ exports.escapePlain = function(str) {
 
 exports.shortString = function(str) {
   return str.slice(0, 6) + '...'
-}
-
-exports.toHexString = function(buff) {
-  if (Buffer.isBuffer(buff)) return buff.toString('hex')
-  // may be a typed array (in browsers) try converting:
-  return (new Buffer(buff||'', 'hex')).toString('hex')
-}
-exports.toBuffer = function(v) {
-  if (typeof v == 'string') return new Buffer(v, 'hex')
-  return new Buffer(v)
-}
-
-exports.getJson = function(path, cb) {
-  var xhr = new XMLHttpRequest()
-  xhr.open('GET', path, true)
-  xhr.responseType = 'json'
-  xhr.onreadystatechange = function() {
-    if (xhr.readyState == 4) {
-      cb(null, xhr.response)
-    }
-  }
-  xhr.send()
-}
-
-// concurrency queue: groups simultaneous async calls to avoid redundant round-trips
-// - produces a queue function with signature: function(key:String, callback:Function, behavior:Function(drain:function))
-// - first time queue function is called for a given key, runs `behavior` immediately, giving it the `drain` cb
-// - until `behavior` calls drain, all other calls to the queue of the same `key` will have their cb be added to the queue
-// - when `behavior` does call `drain`, all the queued cbs will be run with the given values, and the queue for the given `key` is reset
-/*
-var n = 0
-var q = util.queue() // create a new queue
-function someAsync(key, cb) {
-  // enter the queue
-  q(key, cb, function(drain) {
-    // do async
-    setTimeout(function() { drain(null, ++n) }, 5000)
-  })
-}
-someAsync('foo', console.log) // emits 1 after 5s
-someAsync('foo', console.log) // emits 1 after 5s
-someAsync('foo', console.log) // emits 1 after 5s
-someAsync('bar', console.log) // emits 2 after 5s
-*/
-exports.queue = function() {
-  var q = {}
-  return function(key, cb, fn) {
-    cb = cb || function(){}
-
-    // try to add to the queue
-    if (q[key])
-      return q[key].push(cb)
-
-    // create the queue instance
-    q[key] = [cb]
-    fn(function() {
-      // clear the queue
-      var qq = q[key]
-      q[key] = null
-
-      // run all fns
-      var args = Array.prototype.slice.call(arguments)
-      for (var i=0; i < qq.length; i++)
-        qq[i].apply(null, args)
-    })
-  }
-}
-
-exports.splitAddr = function(addr) {
-  if (addr[0] == '[') {
-    // ipv6 address
-    var i = addr.indexOf(']')
-    return [addr.substr(1, i-1), addr.substr(i+2)]
-  } else {
-    return addr.split(':')
-  }
 }
