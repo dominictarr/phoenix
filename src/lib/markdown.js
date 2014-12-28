@@ -1,6 +1,8 @@
 var emojiNamedCharacters = require('emoji-named-characters')
 var marked = require('marked');
 
+var mentionRegex = /(\s|>|^)@([A-z0-9\/=\.\+]+)/g;
+
 marked.setOptions({
   gfm: true,
   tables: true,
@@ -19,15 +21,6 @@ marked.setOptions({
   }
 });
 
-exports.block = function(text, nicknames) {
-  return mentionLinks(marked(text||''), nicknames)
-}
-
-exports.inline = function(text, nicknames) {
-  return mentionLinks(marked(text||'', {renderer: inlineRenderer}), nicknames)
-}
-
-var mentionRegex = /(\s|>|^)@([A-z0-9\/=\.\+]+)/g;
 function mentionLinks(str, nicknames) {
   if (!nicknames)
     return str
@@ -37,106 +30,10 @@ function mentionLinks(str, nicknames) {
   })
 }
 
-
-// Inline-only renderer
-function InlineRenderer(options) {
-  this.options = options || {};
+module.exports = function(text, nicknames) {
+  return mentionLinks(marked(text||''), nicknames)
 }
 
-InlineRenderer.prototype.code = function(code, lang, escaped) {
-  return '<code>'
-      + (escaped ? code : escape(code, true))
-      + '</code>';
-};
+module.exports.block = module.exports
 
-InlineRenderer.prototype.blockquote = function(quote) {
-  return quote;
-};
 
-InlineRenderer.prototype.html = function(html) {
-  return html;
-};
-
-InlineRenderer.prototype.heading = function(text, level, raw) {
-  return '<strong>' + text + '</strong> ';
-};
-
-InlineRenderer.prototype.hr = function() {
-  return ' ';
-};
-
-InlineRenderer.prototype.list = function(body, ordered) {
-  var type = ordered ? 'ol' : 'ul';
-  return '<' + type + ' class="list-inline">\n' + body + '</' + type + '>\n';
-};
-
-InlineRenderer.prototype.listitem = function(text) {
-  return '<li>' + text + '</li>\n';
-};
-
-InlineRenderer.prototype.paragraph = function(text) {
-  return text + ' ';
-};
-
-InlineRenderer.prototype.table = function(header, body) {
-  return '';
-};
-
-InlineRenderer.prototype.tablerow = function(content) {
-  return '';
-};
-
-InlineRenderer.prototype.tablecell = function(content, flags) {
-  return ''
-};
-
-// span level renderer
-InlineRenderer.prototype.strong = function(text) {
-  return '<strong>' + text + '</strong>';
-};
-
-InlineRenderer.prototype.em = function(text) {
-  return '<em>' + text + '</em>';
-};
-
-InlineRenderer.prototype.codespan = function(text) {
-  return '<code>' + text + '</code>';
-};
-
-InlineRenderer.prototype.br = function() {
-  return ' '
-};
-
-InlineRenderer.prototype.del = function(text) {
-  return '<del>' + text + '</del>';
-};
-
-InlineRenderer.prototype.link = function(href, title, text) {
-  if (this.options.sanitize) {
-    try {
-      var prot = decodeURIComponent(unescape(href))
-        .replace(/[^\w:]/g, '')
-        .toLowerCase();
-    } catch (e) {
-      return '';
-    }
-    if (prot.indexOf('javascript:') === 0) {
-      return '';
-    }
-  }
-  var out = '<a href="' + href + '"';
-  if (title) {
-    out += ' title="' + title + '"';
-  }
-  out += '>' + text + '</a>';
-  return out;
-};
-
-InlineRenderer.prototype.image = function(href, title, text) {
-  var out = '<img src="' + href + '" alt="' + text + '"';
-  if (title) {
-    out += ' title="' + title + '"';
-  }
-  out += this.options.xhtml ? '/>' : '>';
-  return out;
-};
