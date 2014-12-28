@@ -37,6 +37,7 @@
     "request": "~2.47.0",
     "ssb-keys": "~0.3.0",
     "ssb-msgs": "~1.0.0",
+    "stack": "~0.1.0",
     "stream-to-pull-stream": "~1.6.0",
     "suggest-box": "~1.0.0",
     "through": "~2.3.4",
