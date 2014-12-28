@@ -22,6 +22,7 @@ exports.init = function (server) {
       next()
     },
     require('./domain-auth')(server),
+    require('./static-assets-builder')(server),
     require('./static-assets')(server)
   ))
 
