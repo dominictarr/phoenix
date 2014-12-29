@@ -158,53 +158,14 @@ function toMarkdown(msg) {
   try {
     var author = msg.value.author
     var content = msg.value.content
-    switch (content.type) {
-      case 'init':
-        return '@'+author+' account created'
-      
-      case 'post':
-        if (content.postType == 'text')
-          return content.text
-        if (content.postType == 'action') {
-          if (msg.repliesToLink)
-            return '@'+author+' '+content.text+' [this](#/msg/'+msg.repliesToLink.msg+')'
-          return '@'+author+' '+content.text
-        }
-        break
-      
-      case 'follow':
-        var links = ssbmsgs.getLinks(content, 'follows')
-        if (links.length > 0) {
-          var users = links.map(function(link) { return '@'+link.feed }).join(', ')
-          return '@'+author+' followed '+users
-        }
-        var links = ssbmsgs.getLinks(content, 'unfollows')
-        if (links.length > 0) {
-          var users = links.map(function(link) { return '@'+link.feed }).join(', ')
-          return '@'+author+' unfollowed '+users
-        }
-        break
-
-      case 'pub':
-        var addr = content.address
-        if (typeof addr == 'object') {
-          addr = addr.host
-          if (addr.port && addr.port != 2000)
-            addr += ':'+addr.port
-        }
-        return '@'+author+' announced a public peer at '+addr
-      
-      case 'profile':
-        if (content.nickname)
-          return '@'+author+' set their nickname to '+content.nickname
-
-      case 'gives-nick':
-        var links = ssbmsgs.getLinks(content, 'gives-nick')
-        if (links.length > 0) {
-          var users = links.map(function(link) { return '@'+link.feed+' '+link.nickname }).join(', ')
-          return '@'+author+' named '+users
-        }
-        break
+    if (content.type == 'post') {
+      if (content.postType == 'text')
+        return content.text
+      if (content.postType == 'action') {
+        if (msg.repliesToLink)
+          return '@'+author+' '+content.text+' [this](#/msg/'+msg.repliesToLink.msg+')'
+        return '@'+author+' '+content.text
+      }
     }
   } catch (e) {}
   return null
