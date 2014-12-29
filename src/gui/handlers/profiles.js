@@ -21,6 +21,29 @@ exports.unfollow = function(state, el, e) {
   }
 }
 
+exports.followPrompt = function(state, el, e) {
+  var id = prompt('Enter the user id or invite code for who you want to follow')
+  if (!id)
+    return
+  var parts = id.split(',')
+  var isInvite = (parts.length === 3)
+  if (isInvite) state.apis.ssb.invite.addMe(id, next)
+  else state.apis.network.follow(id, next)
+  function next (err) {
+    if (err) {
+      console.error(err)
+      alert('Error: '+err.message)
+    }
+    else {
+      if (isInvite)
+        alert('Invite code accepted')
+      else
+        alert('Now following '+id)
+      state.sync()
+    }
+  }
+}
+
 exports.setName = function(state, el, e) {
   var userId = el.dataset.userId || state.user.id
   var isSelf = state.user.id == userId

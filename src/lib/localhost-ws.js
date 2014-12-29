@@ -6,7 +6,7 @@ var util       = require('./util')
 
 var reconnectTimeout
 var wsStream
-var rpcapi = muxrpc(require('../mans/ssb'), {auth: 'async'}, serialize)({auth: auth})
+var rpcapi = muxrpc(require('../mans/ssb'), null, serialize)()
 connect()
 
 function connect() {
@@ -39,10 +39,6 @@ function connect() {
     if (!reconnectTimeout)
       reconnectTimeout = setTimeout(connect, 10*1000)
   }
-}
-
-function auth(req, cb) {
-  cb(null, true)
 }
 
 function serialize (stream) {

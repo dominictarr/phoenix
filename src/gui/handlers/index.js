@@ -23,7 +23,5 @@ module.exports = {
   'click-view-userid': function(state, el, e) {
     prompt('Here is your contact id', state.user.id)
   },
-  'click-add-contact': function(state, el, e) {
-    alert('todo')
-  }
+  'click-add-contact': require('./profiles').followPrompt
 }

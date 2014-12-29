@@ -22,5 +22,10 @@ module.exports = {
   getLocal: 'async',
 
   // publishers
-  add: 'async'
+  add: 'async',
+
+  // invites
+  invite: {
+    addMe: 'async'
+  }
 }
