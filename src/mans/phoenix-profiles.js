@@ -7,6 +7,6 @@ module.exports = {
   getAll: 'async',
 
   // publishers
-  updateSelf: 'async',
-  giveNick: 'async'
+  nameSelf: 'async',
+  nameOther: 'async'
 }

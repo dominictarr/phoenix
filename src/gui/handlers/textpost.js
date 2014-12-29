@@ -26,7 +26,7 @@ exports.preview = function(state, el, e) {
 
   var previewEl = form.querySelector('.preview')
   previewEl.style.display = 'block'
-  previewEl.innerHTML = markdown.block(util.escapePlain(text), state.nicknames)
+  previewEl.innerHTML = markdown.block(util.escapePlain(text), state.names)
 }
 
 exports.reply = function(state, el, e) {

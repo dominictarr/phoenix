@@ -26,11 +26,11 @@ module.exports = function(state) {
   }
 
   // render controls
-  var followBtn = '', setNickBtn = ''
+  var followBtn = '', setNameBtn = ''
   if (pid == state.user.id) {
-    setNickBtn = h('button.btn.btn-default.click-set-nickname', 'Set Nickname')
+    setNameBtn = h('button.btn.btn-default.click-set-name', 'Set Nickname')
   } else {
-    setNickBtn = h('button.btn.btn-default.click-set-nickname', {'data-user-id': pid}, 'Give Nickname')
+    setNameBtn = h('button.btn.btn-default.click-set-name', {'data-user-id': pid}, 'Give Nickname')
     if (isFollowing)
       followBtn = h('button.btn.btn-default.click-unfollow', {'data-user-id': pid}, 'Unfollow')
     else
@@ -38,14 +38,14 @@ module.exports = function(state) {
   } 
 
   // render page
-  var nickname = state.nicknames[pid] || util.shortString(pid)
+  var name = state.names[pid] || util.shortString(pid)
   var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
   state.setPage(com.page(state, 'profile', h('.row',
     h('.col-xs-2.col-md-1', com.sidenav(state)),
     h('.col-xs-7.col-md-7', msgfeed),
     h('.col-xs-3.col-md-4',
-      h('h2', nickname, ' ', h('small', 'joined '+joinDate)),
-      h('p', followBtn, ' ', setNickBtn),
+      h('h2', name, ' ', h('small', 'joined '+joinDate)),
+      h('p', followBtn, ' ', setNameBtn),
       h('small', 'EmojID:'), h('br'),
       h('div', { style: { width: '160px' }, innerHTML: com.toEmoji(pid) })
     )
