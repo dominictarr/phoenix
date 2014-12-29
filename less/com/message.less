@@ -2,6 +2,18 @@
   box-shadow: none;
   margin: 0;
   border-radius: 0;
+
+  // visible-on-hover styles
+  border-color: transparent;
+  .panel-heading .extra {
+    visibility: hidden;
+  }
+  &:hover {
+    border-color: @panel-inner-border;
+    .panel-heading .extra {
+      visibility: visible;
+    }
+  }
   
   .panel-heading,
   .panel-footer {
@@ -12,15 +24,6 @@
     color: gray;
     a {
       color: gray;
-    }
-  }
-  .panel-footer .pull-right {
-    // use position: absolute because positioning varies if theres other content with float: right
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    a {
-      padding-left: 1em;
     }
   }
   .panel-body {

@@ -46,8 +46,13 @@ function renderMsgHeader(state, msg) {
 
   return h('.panel-heading', [
     com.userlink(msg.value.author, state.nicknames[msg.value.author]),
-    ' ', h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,16), 12) }),
-    ' ', com.a('#/msg/'+msg.key, 'posted '+util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' })
+    ' ',
+    h('span.extra', 
+      h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,16), 12) }),
+      ' ', com.a('#/msg/'+msg.key, 'posted '+util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
+      ' . ', h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, com.icon('comment'), ' reply'),
+      ' . ', h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, com.icon('hand-up'), ' react')
+    )
   ])
 }
 
@@ -55,14 +60,9 @@ function renderMsgFooter(state, msg) {
   var reactions = getReplies(state, msg, 'action').map(function(reaction) {
     return [com.userlink(reaction.value.author, state.nicknames[reaction.value.author]), ' ', reaction.value.content.text, ' this. ']
   })
-
-  return h('.panel-footer',
-    h('span.pull-right',
-      h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, com.icon('comment')),
-      h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, com.icon('hand-up'))
-    ),
-    reactions
-  )
+  if (reactions.length)
+    return h('.panel-footer', reactions)
+  return ''
 }
 
 function getReplies(state, msg, typeFilter) {
