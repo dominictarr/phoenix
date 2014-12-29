@@ -5,8 +5,10 @@ var markdown = require('../../lib/markdown')
 
 module.exports = function(state, msg) {
   var content
-  if (state.page.renderMode == 'markdown' && msg.markdown)
+  if (state.page.renderMode == 'markdown') {
+    if (!msg.markdown) return ''
     content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.nicknames) })
+  }
   else
     content = messageRaw(state, msg)
   return renderMsgShell(state, msg, content)
