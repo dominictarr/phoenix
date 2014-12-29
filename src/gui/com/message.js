@@ -48,13 +48,10 @@ function renderMsgHeader(state, msg) {
 
   return h('.panel-heading', [
     com.userlink(msg.value.author, state.nicknames[msg.value.author]),
-    ' ',
-    h('span.extra', 
-      h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,16), 12) }),
-      ' ', com.a('#/msg/'+msg.key, 'posted '+util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
-      ' . ', h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, com.icon('comment'), ' reply'),
-      ' . ', h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, com.icon('hand-up'), ' react')
-    )
+    ' ', h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,4), 12) }),
+    ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
+    ' . ', h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, 'reply'),
+    ' . ', h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, 'react')
   ])
 }
 
