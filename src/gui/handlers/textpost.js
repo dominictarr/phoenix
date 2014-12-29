@@ -30,7 +30,7 @@ exports.preview = function(state, el, e) {
 }
 
 exports.reply = function(state, el, e) {
-  var messageEl = el.parentNode.parentNode.parentNode
+  var messageEl = el.parentNode.parentNode
   if (!messageEl.nextSibling || !messageEl.nextSibling.classList || !messageEl.nextSibling.classList.contains('reply-form')) {
     var formEl = com.postForm(state, el.dataset.msgid)
     if (messageEl.nextSibling)

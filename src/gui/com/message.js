@@ -64,7 +64,7 @@ function renderMsgFooter(state, msg) {
     return [com.userlink(reaction.value.author, state.nicknames[reaction.value.author]), ' ', reaction.value.content.text, ' this. ']
   })
   if (reactions.length)
-    return h('.panel-footer', reactions)
+    return h('.panel-footer', h('.well.well-sm', reactions))
   return ''
 }
 
