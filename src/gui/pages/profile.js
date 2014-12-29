@@ -37,6 +37,18 @@ module.exports = function(state) {
       followBtn = h('button.btn.btn-default.click-follow', {'data-user-id': pid}, 'Follow')
   } 
 
+  // given names
+  var givenNames = []
+  if (profile.self.name)
+    givenNames.push(h('li', profile.self.name + ' (self-assigned)'))
+  Object.keys(profile.given).forEach(function(userid) {
+    var given = profile.given[userid]
+    if (given.name)
+      givenNames.push(h('li', given.name + ' by ', com.userlink(userid, state.names[userid])))
+  })
+  if (givenNames.length)
+    givenNames = [h('small', 'Given Names'), h('br'), h('ul.list-unstyled', givenNames)]
+
   // render page
   var name = state.names[pid] || util.shortString(pid)
   var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
@@ -47,7 +59,8 @@ module.exports = function(state) {
       h('h2', name, ' ', h('small', 'joined '+joinDate)),
       h('p', followBtn, ' ', setNameBtn),
       h('small', 'EmojID:'), h('br'),
-      h('div', { style: { width: '160px' }, innerHTML: com.toEmoji(pid) })
+      h('div', { style: { width: '160px', 'margin-bottom': '1em' }, innerHTML: com.toEmoji(pid) }),
+      givenNames
     )
   )))
 }
