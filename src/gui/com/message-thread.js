@@ -2,11 +2,14 @@ var h = require('hyperscript')
 var com = require('./index')
 var message = require('./message')
 
+var messageOpts = { mustRender: false }
 var messageThread =
 module.exports = function(state, msg) {
+  var r = replies(state, msg)
+  messageOpts.mustRender = !!r // always render if there are replies
   return h('.message-thread', [
-    com.message(state, msg),
-    replies(state, msg)
+    com.message(state, msg, messageOpts),
+    r
   ])
 }
 

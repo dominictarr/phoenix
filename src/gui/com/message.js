@@ -3,11 +3,15 @@ var com = require('./index')
 var util = require('../../lib/util')
 var markdown = require('../../lib/markdown')
 
-module.exports = function(state, msg) {
+module.exports = function(state, msg, opts) {
   var content
   if (state.page.renderMode == 'markdown') {
-    if (!msg.markdown) return ''
-    content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.nicknames) })
+    if (!msg.markdown) {
+      if (!opts || !opts.mustRender)
+        return ''
+      content = messageRaw(state, msg)
+    } else
+      content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.nicknames) })
   }
   else
     content = messageRaw(state, msg)
