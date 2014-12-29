@@ -6,7 +6,7 @@ var markdown = require('../../lib/markdown')
 module.exports = function(state, msg) {
   var content
   if (state.page.renderMode == 'markdown' && msg.markdown)
-    content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.nicknames) })
+    content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.names) })
   else
     content = messageRaw(state, msg)
   return renderMsgShell(state, msg, content)
@@ -18,8 +18,8 @@ function messageRaw(state, msg) {
 
   // turn feed references into links
   json = json.replace(/\"feed\": \"([^\"]+)\"/g, function($0, $1) {
-    var nick = state.nicknames[$1] || $1
-    return '"feed": "<a class="user-link" href="/#/profile/'+$1+'">'+nick+'</a>"'
+    var name = state.names[$1] || $1
+    return '"feed": "<a class="user-link" href="/#/profile/'+$1+'">'+name+'</a>"'
   })
 
   // turn message references into links
@@ -45,7 +45,7 @@ function renderMsgHeader(state, msg) {
   if (nTextReplies > 1) repliesStr = ' ('+nTextReplies+' replies)'
 
   return h('.panel-heading', [
-    com.userlink(msg.value.author, state.nicknames[msg.value.author]),
+    com.userlink(msg.value.author, state.names[msg.value.author]),
     ' ', h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,16), 12) }),
     ' ', com.a('#/msg/'+msg.key, 'posted '+util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' })
   ])
@@ -53,7 +53,7 @@ function renderMsgHeader(state, msg) {
 
 function renderMsgFooter(state, msg) {
   var reactions = getReplies(state, msg, 'action').map(function(reaction) {
-    return [com.userlink(reaction.value.author, state.nicknames[reaction.value.author]), ' ', reaction.value.content.text, ' this. ']
+    return [com.userlink(reaction.value.author, state.names[reaction.value.author]), ' ', reaction.value.content.text, ' this. ']
   })
 
   return h('.panel-footer',

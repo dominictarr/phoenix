@@ -16,22 +16,30 @@ module.exports.init = function(ssb) {
   function process(msg) {
     var pid = msg.value.author
     var profile = getOrCreate(pid)
-
-    // index
     var content = msg.value.content
-    if (content.type == 'init')
-      profile.createdAt = msg.value.timestamp
-    if (content.type == 'profile') {
-      // only handle more recent than current
-      if (profile.msgSeq < msg.value.sequence) {
-        profile.msgSeq = msg.value.sequence
-        if (content.nickname)
-          profile.nickname = content.nickname
+
+    try {
+      if (content.type == 'init')
+        profile.createdAt = msg.value.timestamp
+
+      if (content.type == 'name') {
+        if (!content.name || !(''+content.name).trim())
+          return
+
+        var links = ssbmsgs.getLinks(content, 'names').filter(function(link) { return !!link.feed })
+        if (links.length) {
+          links.forEach(function(link) {
+            var targetProf = getOrCreate(link.feed)
+            targetProf.given[pid] = targetProf.given[pid] || {}
+            targetProf.given[pid].name = content.name
+          })
+        } else {
+          profile.self.name = content.name
+        }
       }
+    } catch (e) {
+      console.warn('Failed to index message in phoenix-profiles', e, msg)
     }
-    ssbmsgs.indexLinks(content, function(link) {
-      if (link.rel == 'gives-nick') indexGivesNick(msg, link)
-    })
   }
 
   function getOrCreate(pid) {
@@ -39,22 +47,12 @@ module.exports.init = function(ssb) {
     if (!profile) {
       profiles[pid] = profile = {
         id: pid,
-        msgSeq: 0,
-        nickname: null,
-        given: [],
+        self: { name: null },
+        given: {},
         createdAt: null
       }
     }
     return profile
-  }
-
-  function indexGivesNick(msg, link) {
-    try {
-      var targetProf = profiles[link.feed]
-      if (!targetProf || !link.nickname)
-        return
-      targetProf.given.push({ nickname: link.nickname, author: msg.value.author })
-    } catch (e) { console.warn('failed to index gives-nick', msg, e)}
   }
 
   return {
@@ -71,15 +69,14 @@ module.exports.init = function(ssb) {
     },
 
     // publishers
-    updateSelf: function(profile, cb) {
-      if (!profile || typeof profile != 'object') return cb(new Error('Profile object is required'))
-      if (typeof profile.nickname != 'string' || profile.nickname.trim() == '') return cb(new Error('`profile.nickname` string is required and must be non-empty'))
-      ssb.add({type: 'profile', nickname: profile.nickname}, cb)
+    nameSelf: function(name, cb) {
+      if (typeof name != 'string' || name.trim() == '') return cb(new Error('Arg 1 name string is required and must be non-empty'))
+      ssb.add({type: 'name', name: name}, cb)
     },
-    giveNick: function(id, nickname, cb) {
-      if (!id || typeof id != 'string') return cb(new Error('Target user id is required'))
-      if (typeof nickname != 'string' || nickname.trim() == '') return cb(new Error('Nickname string is required and must be non-empty'))
-      ssb.add({type: 'gives-nick', rel: 'gives-nick', feed: id, nickname: nickname}, cb)
+    nameOther: function(id, name, cb) {
+      if (!id || typeof id != 'string') return cb(new Error('Arg 1 target feed id string is required'))
+      if (typeof name != 'string' || name.trim() == '') return cb(new Error('Arg 2 name string is required and must be non-empty'))
+      ssb.add({type: 'name', rel: 'names', feed: id, name: name}, cb)
     }
   }
 }
