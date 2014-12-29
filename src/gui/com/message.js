@@ -51,11 +51,11 @@ function renderMsgHeader(state, msg) {
   if (nTextReplies > 1) repliesStr = ' ('+nTextReplies+' replies)'
 
   return h('.panel-heading', [
-    com.userlink(msg.value.author, state.nicknames[msg.value.author]),
-    ' ', h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,4), 12) }),
+    h('span', { innerHTML: com.toEmoji(msg.value.author.slice(0,4), 12) }),
+    ' ', com.userlink(msg.value.author, state.nicknames[msg.value.author]),
     ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
-    ' . ', h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, 'reply'),
-    ' . ', h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, 'react')
+    h('span', {innerHTML: ' &middot; '}), h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, 'reply'),
+    h('span', {innerHTML: ' &middot; '}), h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, 'react')
   ])
 }
 
