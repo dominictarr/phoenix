@@ -46,7 +46,7 @@ exports.toEmoji = function (buf, size) {
 
 var header =
 exports.header = function(state) {
-  return h('.nav.navbar.navbar-default', [
+  return h('.nav.navbar.navbar-default.navbar-fixed-top', [
     h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'scuttlebutt')),
       h('ul.nav.navbar-nav', [
