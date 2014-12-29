@@ -171,7 +171,7 @@ function getName(profile) {
     if (id == state.user.id && profile.given[id].name)
       return profile.given[id].name
   }
-  return (profile.self.name) ? profile.self.name : util.shortString(profile.id)
+  return (profile.self.name) ? '"'+profile.self.name+'"' : util.shortString(profile.id)
 }
 
 // - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
