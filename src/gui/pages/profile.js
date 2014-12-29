@@ -58,7 +58,7 @@ module.exports = function(state) {
     h('.col-xs-3.col-md-4',
       h('h2', name, ' ', h('small', 'joined '+joinDate)),
       h('p', followBtn, ' ', setNameBtn),
-      h('small', 'EmojID:'), h('br'),
+      h('small', 'Emoji Fingerprint'), h('br'),
       h('div', { style: { width: '160px', 'margin-bottom': '1em' }, innerHTML: com.toEmoji(pid) }),
       givenNames
     )
