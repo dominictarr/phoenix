@@ -21,20 +21,20 @@ exports.unfollow = function(state, el, e) {
   }
 }
 
-exports.setNickname = function(state, el, e) {
+exports.setName = function(state, el, e) {
   var userId = el.dataset.userId || state.user.id
   var isSelf = state.user.id == userId
-  var nickname = (isSelf) ?
+  var name = (isSelf) ?
     prompt('What would you like your nickname to be?') :
     prompt('What would you like their nickname to be?')
-  if (!nickname)
+  if (!name)
     return
-  if (!confirm('Set nickname to '+nickname+'?'))
+  if (!confirm('Set nickname to '+name+'?'))
     return
   if (isSelf)
-    state.apis.profiles.updateSelf({ nickname: nickname }, done)
+    state.apis.profiles.nameSelf(name, done)
   else
-    state.apis.profiles.giveNick(userId, nickname, done)
+    state.apis.profiles.nameOther(userId, name, done)
   function done(err) {
     if (err) alert(err.message)
     else state.sync()

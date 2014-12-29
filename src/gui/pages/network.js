@@ -15,7 +15,7 @@ module.exports = function(state) {
       })),
       h('p', h('strong', 'Known Users')),
       h('p', Object.keys(state.profiles).map(function(id) { 
-        return h('span', com.a('#/profile/'+id, state.nicknames[id]), h('br'))
+        return h('span', com.a('#/profile/'+id, state.names[id]), h('br'))
       }))      
     )
   )))

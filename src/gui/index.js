@@ -17,7 +17,7 @@ var state = {
   msgsById: {},
   inbox: [],
   profiles: {},
-  nicknames: {},
+  names: {},
   peers: [],
 
   // ui state
@@ -113,8 +113,8 @@ state.sync = function(cb) {
         state.suggestOptions['@'] = []
         for (var k in state.profiles) {
           var profile = state.profiles[k]
-          state.nicknames[k] = getNickname(profile)
-          state.suggestOptions['@'].push({ title: state.nicknames[profile.id], subtitle: util.shortString(profile.id), value: profile.id })
+          state.names[k] = getName(profile)
+          state.suggestOptions['@'].push({ title: state.names[profile.id], subtitle: util.shortString(profile.id), value: profile.id })
         }
         var readMessages = []
         try { readMessages = JSON.parse(localStorage.readMessages) } catch(e) {}
@@ -124,7 +124,7 @@ state.sync = function(cb) {
       }
       
       // setup page reroute
-      if (!state.profiles[state.user.id].nickname)
+      if (!state.profiles[state.user.id].self.name)
         window.location.hash = '#/setup'
       else if (window.location.hash == '#/setup')
         window.location.hash = '#/'
@@ -164,13 +164,14 @@ state.setPage = function(page) {
   el.appendChild(page)
 }
 
-function getNickname(profile) {
-  for (var i=profile.given.length-1; i >= 0; i--) {
-    var given = profile.given[i]
-    if (given.author == state.user.id && given.nickname)
-      return given.nickname
+function getName(profile) {
+  if (profile.id == state.user.id)
+    return profile.self.name || util.shortString(profile.id)
+  for (var id in profile.given) {
+    if (id == state.user.id && profile.given[id].name)
+      return profile.given[id].name
   }
-  return profile.nickname || util.shortString(profile.id)
+  return (profile.self.name) ? '"'+profile.self.name+'"' : util.shortString(profile.id)
 }
 
 // - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'

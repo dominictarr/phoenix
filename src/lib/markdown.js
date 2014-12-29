@@ -19,20 +19,20 @@ marked.setOptions({
   }
 });
 
-exports.block = function(text, nicknames) {
-  return mentionLinks(marked(text||''), nicknames)
+exports.block = function(text, names) {
+  return mentionLinks(marked(text||''), names)
 }
 
-exports.inline = function(text, nicknames) {
-  return mentionLinks(marked(text||'', {renderer: inlineRenderer}), nicknames)
+exports.inline = function(text, names) {
+  return mentionLinks(marked(text||'', {renderer: inlineRenderer}), names)
 }
 
 var mentionRegex = /(\s|>|^)@([A-z0-9\/=\.\+]+)/g;
-function mentionLinks(str, nicknames) {
-  if (!nicknames)
+function mentionLinks(str, names) {
+  if (!names)
     return str
   return str.replace(mentionRegex, function(full, $1, $2) {
-    var nickname = nicknames[$2] || $2;
+    var nickname = names[$2] || $2;
     return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + nickname + '</a>'
   })
 }
