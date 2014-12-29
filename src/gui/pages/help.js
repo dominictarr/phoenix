@@ -25,9 +25,9 @@ module.exports = function(state) {
   }
 
   state.setPage(com.page(state, 'help', h('.row',
-    h('.col-xs-1', com.sidenav(state)),
+    h('.col-xs-2.col-md-1', com.sidenav(state)),
     h('.col-xs-7', content),
-    h('.col-xs-4', h('ul.nav.nav-pills.nav-stacked', helpnav('#/help/'+state.page.param, [
+    h('.col-xs-3.col-md-4', h('ul.nav.nav-pills.nav-stacked', helpnav('#/help/'+state.page.param, [
       ['#/help/intro', 'Getting Started'],
       ['#/help/networking', 'Networking'],
       ['#/help/privacy', 'Privacy']

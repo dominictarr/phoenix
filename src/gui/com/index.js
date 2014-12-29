@@ -50,12 +50,12 @@ exports.header = function(state) {
     h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'scuttlebutt')),
       h('ul.nav.navbar-nav', [
-        h('li', a('#/network', 'network')),
-        h('li', a('#/help', 'help'))
+        h('li.hidden-xs', a('#/network', 'network')),
+        h('li.hidden-xs', a('#/help', 'help'))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li', h('a.click-view-userid', {href: '#'}, 'your contact id')),
-        h('li', a('#/profile/' + state.user.id, 'profile')),
+        h('li.hidden-xs', a('#/profile/' + state.user.id, 'profile')),
         h('li', h('button.btn.btn-default.click-add-contact', 'Add contact')),
         h('li', syncButton(state.pendingMessages)),
         h('li#header-menu.dropdown',
@@ -90,13 +90,24 @@ var sidenav =
 exports.sidenav = function(state) {
   var pages = [
     ['feed', '', 'feed'],
-    ['inbox', 'inbox', 'inbox ('+state.unreadMessages+')'],
+    ['inbox', 'inbox', 'inbox ('+state.unreadMessages+')']
   ]
+  var extraPages = [
+    ['profile', 'profile/'+state.user.id, 'profile'],
+    ['network', 'network', 'network'],
+    ['help', 'help', 'help']
+  ]
+
   return h('.side-nav', [
     pages.map(function(page) {
       if (page[0] == state.page.id)
         return h('p', h('strong', a('#/'+page[1], page[2])))
       return h('p', a('#/'+page[1], page[2]))
+    }),
+    extraPages.map(function(page) {
+      if (page[0] == state.page.id)
+        return h('p.visible-xs', h('strong', a('#/'+page[1], page[2])))
+      return h('p.visible-xs', a('#/'+page[1], page[2]))
     })
   ])
 }

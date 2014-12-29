@@ -6,13 +6,13 @@ module.exports = function(state) {
   var msg = state.msgsById[state.page.param]
   if (msg) {
     state.setPage(com.page(state, 'message', h('.row',
-      h('.col-xs-1', com.sidenav(state)),
-      h('.col-xs-7', com.messageThread(state, msg))
+      h('.col-xs-2.col-md-1', com.sidenav(state)),
+      h('.col-xs-10.col-sm-9.col-md-8.col-lg-7', com.messageThread(state, msg))
     )))
   } else {
     state.setPage(com.page(state, 'message', h('.row',
-      h('.col-xs-1', com.sidenav(state)),
-      h('.col-xs-7', 'Message not found.')
+      h('.col-xs-2.col-md-1', com.sidenav(state)),
+      h('.col-xs-10.col-sm-9.col-md-8.col-lg-7', 'Message not found.')
     )))
   }
 }

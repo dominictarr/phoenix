@@ -9,7 +9,7 @@ module.exports = function(state) {
   }
 
   state.setPage(com.page(state, 'feed', h('.row',
-    h('.col-xs-1', com.sidenav(state)),
-    h('.col-xs-7', h('.message-feed', msgs))
+    h('.col-xs-2.col-md-1', com.sidenav(state)),
+    h('.col-xs-10.col-sm-9.col-md-8.col-lg-7', h('.message-feed', msgs))
   )))
 }

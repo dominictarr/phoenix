@@ -41,9 +41,9 @@ module.exports = function(state) {
   var nickname = state.nicknames[pid] || util.shortString(pid)
   var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
   state.setPage(com.page(state, 'profile', h('.row',
-    h('.col-xs-1', com.sidenav(state)),
-    h('.col-xs-7', msgfeed),
-    h('.col-xs-4',
+    h('.col-xs-2.col-md-1', com.sidenav(state)),
+    h('.col-xs-7.col-md-7', msgfeed),
+    h('.col-xs-3.col-md-4',
       h('h2', nickname, ' ', h('small', 'joined '+joinDate)),
       h('p', followBtn, ' ', setNickBtn),
       h('small', 'EmojID:'), h('br'),
