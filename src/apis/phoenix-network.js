@@ -42,8 +42,12 @@ module.exports.init = function(ssb) {
     try {
       var src = msg.value.author
       var dst = link.feed
-      ;(followers[dst] = (followers[dst]||[])).push(src)
-      ;(following[src] = (following[src]||[])).push(dst)
+      followers[dst] = followers[dst]||[]
+      if (!~followers[dst].indexOf(src))
+        followers[dst].push(src)
+      following[src] = following[src]||[]
+      if (!~following[src].indexOf(dst))
+        following[src].push(dst)
     } catch(e) { console.warn('failed to index follow', msg, e) }
   }
 
@@ -66,7 +70,7 @@ module.exports.init = function(ssb) {
 
     // output streams
     followers: function(id) { return pull.values(followers[id]||[]) },
-    following: function(id) { return pull.values(following[id]||[]) },
+    following: function(id) { console.log(following); return pull.values(following[id]||[]) },
     pubPeers: function() { return pull.values(pubPeers) },
 
     // getters

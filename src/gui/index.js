@@ -23,7 +23,8 @@ var state = {
   // ui state
   user: {
     id: null,
-    following: []
+    following: [],
+    followers: []
   },
   page: {
     id: 'feed',
@@ -95,6 +96,7 @@ state.sync = function(cb) {
     profiles.getAll(done())
     pull(network.pubPeers(), pull.collect(done()))
     pull(network.following(state.user.id), pull.collect(done()))
+    pull(network.followers(state.user.id), pull.collect(done()))
     done(function(err, r) {
       if (err)
         console.error(err)
@@ -105,6 +107,7 @@ state.sync = function(cb) {
         state.profiles = r[2][1]
         state.peers = r[3][1]
         state.user.following = r[4][1]
+        state.user.followers = r[5][1]
 
         // compute additional structures
         state.msgs.forEach(function(msg) {
