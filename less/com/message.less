@@ -23,8 +23,9 @@
   }
   .panel-body {
     padding: 0 15px;
-    max-height: 220px;
-    overflow: scroll;
+    & > div > :first-child {
+      margin-top: 0;
+    }
 
     .message-raw {
       white-space: pre;
@@ -40,7 +41,8 @@
       overflow: auto;
     }
   }
-  &.expanded {
-    max-height: auto;
-  }
+}
+.feed-page .panel.message .panel-body {
+  max-height: 220px;
+  overflow: scroll;
 }
