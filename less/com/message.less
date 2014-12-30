@@ -23,6 +23,9 @@
   }
   .panel-body {
     padding: 0 15px;
+    max-height: 220px;
+    overflow: scroll;
+
     .message-raw {
       white-space: pre;
       font-family: @font-family-monospace;
@@ -36,5 +39,8 @@
       background-color: @pre-bg;
       overflow: auto;
     }
+  }
+  &.expanded {
+    max-height: auto;
   }
 }
