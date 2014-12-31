@@ -70,7 +70,7 @@ module.exports.init = function(ssb) {
 
     // output streams
     followers: function(id) { return pull.values(followers[id]||[]) },
-    following: function(id) { console.log(following); return pull.values(following[id]||[]) },
+    following: function(id) { return pull.values(following[id]||[]) },
     pubPeers: function() { return pull.values(pubPeers) },
 
     // getters
