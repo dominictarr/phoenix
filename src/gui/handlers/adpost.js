@@ -7,7 +7,7 @@ exports.submit = function(state, el, e) {
   var text = form.text.value
 
   state.apis.feed.postAdvert(text, function (err) {
-    if (err) alert(err.message)
+    if (err) swal('Error While Publishing', err.message, 'error')
     else {
       form.text.value = ''
       var previewEl = form.querySelector('.preview')

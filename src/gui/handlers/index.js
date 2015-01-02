@@ -12,7 +12,7 @@ module.exports = {
       return
 
     state.apis.feed.postReaction(text, el.dataset.msgid, function(err) {
-      if (err) alert(err.message)
+      if (err) swal('Error While Publishing', err.message, 'error')
       else state.sync()
     })
   },
@@ -23,7 +23,7 @@ module.exports = {
   'click-unfollow': require('./profiles').unfollow,
   'click-set-name': require('./profiles').setName,
   'click-view-userid': function(state, el, e) {
-    prompt('Here is your contact id', state.user.id)
+    swal('Here is your contact id', state.user.id)
   },
   'click-add-contact': require('./profiles').followPrompt
 }

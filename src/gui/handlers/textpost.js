@@ -10,7 +10,7 @@ exports.submit = function(state, el, e) {
   if (parent) state.apis.feed.postReply(text, parent, done)
   else state.apis.feed.postText(text, done)
   function done(err) {
-    if (err) alert(err.message)
+    if (err) swal('Error While Publishing', err.message, 'error')
     else {
       form.text.value = ''
       var previewEl = form.querySelector('.preview')
