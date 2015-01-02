@@ -32,6 +32,12 @@ module.exports = function(state) {
         return h('span', addr, h('br'))
       }))
     ),
-    h('.col-xs-2.col-md-3', com.adverts(state))
+    h('.col-xs-2.col-md-3',
+      com.adverts(state),
+      h('hr'),
+      com.advertForm(state),
+      h('hr'),
+      com.sidehelp()
+    )
   )))
 }

@@ -22,7 +22,7 @@ exports.unfollow = function(state, el, e) {
 }
 
 exports.followPrompt = function(state, el, e) {
-  var id = prompt('Enter the user id or invite code for who you want to follow')
+  var id = prompt('Enter the contact id or invite code')
   if (!id)
     return
   var parts = id.split(',')

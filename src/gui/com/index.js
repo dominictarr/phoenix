@@ -112,6 +112,16 @@ exports.sidenav = function(state) {
   ])
 }
 
+var sidehelp =
+exports.sidehelp = function() {
+  return h('ul',
+    h('li', h('p', h('button.btn.btn-xs.btn-default.click-view-userid', 'Get your contact id'))),
+    h('li', h('p', h('button.btn.btn-xs.btn-default.click-add-contact', 'Add a contact'))),
+    h('li', h('p', h('button.btn.btn-xs.btn-default.click-add-contact', 'Use an invite'))),
+    h('li', h('p', a('#/help', 'more help')))
+  )
+}
+
 var page =
 exports.page = function(state, id, content) {
   return h('div',

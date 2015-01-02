@@ -9,7 +9,11 @@ module.exports = function(state) {
     var index = state.adverts.length - (Math.random()*Math.min(state.adverts.length, 30))|0
     ads.push(state.msgsById[state.adverts[index]])
   }
-  return h('.adverts-but-its-cool-tho',ads.map(renderAd.bind(null, state)))
+  if (ads.length)
+    ads = ads.map(renderAd.bind(null, state))
+  else
+    ads = h('small', 'this space is reserved for user adverts - try it out!')
+  return h('.adverts-but-its-cool-tho', ads)
 }
 
 function renderAd(state, ad) {
