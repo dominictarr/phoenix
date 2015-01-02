@@ -28,7 +28,7 @@ localhost.on('socket:connect', function() {
   })
 })
 localhost.on('socket:error', function(err) {
-  gui.setConnectionStatus(false, 'Lost connection to the host program. Please restart the host program.')
+  gui.setConnectionStatus(false, 'Lost connection to the host program. Please restart the host program. Trying again in 10 seconds.')
 })
 localhost.on('socket:reconnecting', function(err) {
   gui.setConnectionStatus(false, 'Lost connection to the host program. Reconnecting...')
