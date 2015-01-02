@@ -9,14 +9,20 @@ module.exports = function(state) {
   var isFollowing = (state.user.following.indexOf(pid) != -1)
 
   // render messages
-  var msgfeed, msgs = []
+  var msgfeed, msgs = [], hasMsgs = false
   for (var i=state.msgs.length-1; i>=0; i--) {
-    if (state.msgs[i].value.author == pid)
-      msgs.push(com.message(state, state.msgs[i]))
+    if (state.msgs[i].value.author == pid) {
+      hasMsgs = true
+      var m = com.message(state, state.msgs[i])
+      if (m) msgs.push(m)
+    }
   }
-  if (msgs.length)
-    msgfeed = h('.message-feed', msgs)
-  else {
+  if (hasMsgs) {
+    if (msgs.length)
+      msgfeed = h('.message-feed', msgs)
+    else
+      msgfeed = h('p', h('strong', 'No posts have been published by this user yet.'))
+  } else {
     msgfeed = h('p', 
       'No messages found for this user.',
       ((!isFollowing) ? 
