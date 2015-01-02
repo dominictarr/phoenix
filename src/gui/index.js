@@ -16,6 +16,7 @@ var state = {
   msgs: [],
   msgsById: {},
   inbox: [],
+  adverts: [],
   profiles: {},
   names: {},
   peers: [],
@@ -93,6 +94,7 @@ state.sync = function(cb) {
     var done = multicb()
     pull(feed.all(), pull.collect(done()))
     pull(feed.inbox(state.user.id), pull.collect(done()))
+    pull(feed.adverts(), pull.collect(done()))
     profiles.getAll(done())
     pull(network.pubPeers(), pull.collect(done()))
     pull(network.following(state.user.id), pull.collect(done()))
@@ -104,10 +106,11 @@ state.sync = function(cb) {
         // pull state
         state.msgs = r[0][1]
         state.inbox = r[1][1]
-        state.profiles = r[2][1]
-        state.peers = r[3][1]
-        state.user.following = r[4][1]
-        state.user.followers = r[5][1]
+        state.adverts = r[2][1]
+        state.profiles = r[3][1]
+        state.peers = r[4][1]
+        state.user.following = r[5][1]
+        state.user.followers = r[6][1]
 
         // compute additional structures
         state.msgs.forEach(function(msg) {

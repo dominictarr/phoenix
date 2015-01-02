@@ -13,6 +13,7 @@ module.exports.init = function(ssb) {
   var msgs = {}
   var allFeed = []
   var inboxFeeds = {}
+  var adverts = []
 
   // handle received messages
   function process(msg) {
@@ -26,6 +27,8 @@ module.exports.init = function(ssb) {
     // index
     msgs[msg.key] = msg
     allFeed.push(msg)
+    if (msg.value.content.type == 'post' && msg.value.content.postType == 'advert' && !!msg.value.content.text)
+      adverts.push(msg.key)
     ssbmsgs.indexLinks(msg.value.content, function(link) {
       if (link.rel == 'rebroadcasts') indexRebroadcast(msg, link)
       if (link.rel == 'replies-to')   indexReply(msg, link)
@@ -105,6 +108,7 @@ module.exports.init = function(ssb) {
     // output streams
     all: function() { return pull.values(allFeed) },
     inbox: function(id) { return pull.values(inboxFeeds[id]||[]) },
+    adverts: function() { return pull.values(adverts) },
 
     // getters
     get: function(id, cb) {
@@ -138,6 +142,10 @@ module.exports.init = function(ssb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       if (!parent) return cb(new Error('Must provide a parent message to the reply'))
       post({type: 'post', postType: 'action', text: text, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
+    },
+    postAdvert: function(text, cb) {
+      if (!text.trim()) return cb(new Error('Can not post an empty string to the adverts'))
+      post({type: 'post', postType: 'advert', text: text}, cb)      
     },
     rebroadcast: function(msg, cb) {
       var content = JSON.parse(JSON.stringify(msg.value.content))

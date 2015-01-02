@@ -23,7 +23,7 @@ module.exports = function(state) {
         return h('span', com.a('#/profile/'+id, state.names[id]), h('br'))
       }))
     ),
-    h('.col-xs-4',
+    h('.col-xs-2',
       h('p', h('strong', 'Network Peers')),
       h('p', state.peers.map(function(peer) { 
         var addr = peer.host
@@ -31,6 +31,7 @@ module.exports = function(state) {
           addr += ':'+peer.port
         return h('span', addr, h('br'))
       }))
-    )
+    ),
+    h('.col-xs-2.col-md-3', com.adverts(state))
   )))
 }

@@ -123,3 +123,5 @@ exports.page = function(state, id, content) {
 exports.message = require('./message')
 exports.messageThread = require('./message-thread')
 exports.postForm = require('./post-form')
+exports.adverts = require('./adverts')
+exports.advertForm = require('./advert-form')

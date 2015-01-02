@@ -25,7 +25,6 @@ exports.preview = function(state, el, e) {
   var text = form.text.value
 
   var previewEl = form.querySelector('.preview')
-  previewEl.style.display = 'block'
   previewEl.innerHTML = markdown.block(util.escapePlain(text), state.names)
 }
 
