@@ -153,10 +153,10 @@ state.setPendingMessages = function(n) {
   this.pendingMessages = n
   var syncbtn = document.querySelector('.sync-btn')
   if (n) {
-    document.title = '('+n+') scuttlebutt'
+    document.title = '('+n+') secure scuttlebutt'
     if (syncbtn) syncbtn.textContent = 'Sync ('+n+')'
   } else {
-    document.title = 'scuttlebutt'
+    document.title = 'secure scuttlebutt'
     if (syncbtn) syncbtn.textContent = 'Sync'
   }
 }

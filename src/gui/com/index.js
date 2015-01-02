@@ -48,7 +48,7 @@ var header =
 exports.header = function(state) {
   return h('.nav.navbar.navbar-default.navbar-fixed-top', [
     h('.container', [
-      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'scuttlebutt')),
+      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
         h('li.hidden-xs', a('#/network', 'network')),
         h('li.hidden-xs', a('#/help', 'help'))
