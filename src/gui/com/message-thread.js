@@ -4,11 +4,12 @@ var message = require('./message')
 
 var messageOpts = { mustRender: false }
 var messageThread =
-module.exports = function(state, msg) {
+module.exports = function(state, msg, opts) {
+  opts = opts || messageOpts
   var r = replies(state, msg)
-  messageOpts.mustRender = !!r // always render if there are replies
+  opts.mustRender = !!r // always render if there are replies
   return h('.message-thread', [
-    com.message(state, msg, messageOpts),
+    com.message(state, msg, opts),
     r
   ])
 }

@@ -7,7 +7,7 @@ module.exports = function(state) {
   if (msg) {
     state.setPage(com.page(state, 'message', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(state)),
-      h('.col-xs-10.col-sm-9.col-md-8.col-lg-7', com.messageThread(state, msg))
+      h('.col-xs-10.col-sm-9.col-md-8.col-lg-7', com.messageThread(state, msg, { fullLength: true }))
     )))
   } else {
     state.setPage(com.page(state, 'message', h('.row',

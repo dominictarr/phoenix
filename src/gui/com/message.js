@@ -10,8 +10,13 @@ module.exports = function(state, msg, opts) {
       if (!opts || !opts.mustRender)
         return ''
       content = messageRaw(state, msg)
-    } else
-      content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.names) })
+    } else {
+      md = msg.markdown
+      if ((!opts || !opts.fullLength) && md.length >= 512) {
+        md = md.slice(0, 512) + '... [read more](#/msg/'+msg.key+')'
+      }
+      content = h('div', { innerHTML: markdown.block(util.escapePlain(md), state.names) })
+    }
   }
   else
     content = messageRaw(state, msg)
