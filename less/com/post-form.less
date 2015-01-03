@@ -1,11 +1,28 @@
 .post-form {
+  &:not(.reply-form) {
+    padding: 10px;
+    border: 1px solid #ccc;
+    margin-bottom: 6px;
+  }
   &.reply-form {
     padding: 15px;
+  }
+  .open {
+    display: none;
+  }
+  &.opened {
+    .open {
+      display: block;
+    }
+    .closed {
+      display: none;
+    }
   }
   .preview:empty {
     display: none;
   }
   .post-form-btns {
+    margin: 0;
     button, a {
       margin-right: 5px;
     }

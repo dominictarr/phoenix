@@ -28,6 +28,18 @@ exports.preview = function(state, el, e) {
   previewEl.innerHTML = markdown.block(util.escapePlain(text), state.names)
 }
 
+exports.newpost = function(state, el, e) {
+  var form = el.parentNode.parentNode
+  form.classList.add('opened')
+}
+
+exports.cancelNewpost = function(state, el, e) {
+  var form = el.parentNode.parentNode.parentNode
+  form.reset()
+  form.querySelector('.preview').innerHTML = ''
+  form.classList.remove('opened')
+}
+
 exports.reply = function(state, el, e) {
   var messageEl = el.parentNode.parentNode
   if (!messageEl.nextSibling || !messageEl.nextSibling.classList || !messageEl.nextSibling.classList.contains('reply-form')) {
@@ -40,6 +52,6 @@ exports.reply = function(state, el, e) {
 }
 
 exports.cancelReply = function(state, el, e) {
-  var replyFormEl = el.parentNode.parentNode
-  replyFormEl.parentNode.removeChild(replyFormEl)
+  var form = el.parentNode.parentNode.parentNode
+  form.parentNode.removeChild(form)
 }
