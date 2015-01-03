@@ -18,7 +18,7 @@ exports.syncButton = function(syncMsgsWaiting) {
   var num = ''
   if (syncMsgsWaiting > 0)
     num = ' ('+syncMsgsWaiting+')'
-  return h('button.btn.btn-default.sync-btn.click-sync', 'Sync' + num)
+  return h('button.btn.btn-primary.sync-btn.click-sync', 'Sync' + num)
 }
 
 var userlink =
@@ -46,7 +46,7 @@ exports.toEmoji = function (buf, size) {
 
 var header =
 exports.header = function(state) {
-  return h('.nav.navbar.navbar-default.navbar-fixed-top', [
+  return h('.nav.navbar.navbar-default', [
     h('.container', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
@@ -56,10 +56,10 @@ exports.header = function(state) {
       h('ul.nav.navbar-nav.navbar-right', [
         h('li', h('a.click-view-userid', {href: '#'}, 'your contact id')),
         h('li.hidden-xs', a('#/profile/' + state.user.id, 'profile')),
-        h('li', h('button.btn.btn-default.click-add-contact', 'Add contact')),
+        h('li', h('button.btn.btn-primary.click-add-contact', 'Add contact')),
         h('li', syncButton(state.pendingMessages)),
         h('li#header-menu.dropdown',
-          h('button.btn.btn-default.click-header-menu', h('span.caret')),
+          h('button.btn.btn-primary.click-header-menu', h('span.caret')),
           h('ul.dropdown-menu',
             h('li.dropdown-header', 'Render Mode'),
             headerMenuRendermode(state, 'markdown', 'Markdown'),
@@ -114,11 +114,11 @@ exports.sidenav = function(state) {
 
 var sidehelp =
 exports.sidehelp = function() {
-  return h('ul',
-    h('li', h('p', h('button.btn.btn-xs.btn-default.click-view-userid', 'Get your contact id'))),
-    h('li', h('p', h('button.btn.btn-xs.btn-default.click-add-contact', 'Add a contact'))),
-    h('li', h('p', h('button.btn.btn-xs.btn-default.click-add-contact', 'Use an invite'))),
-    h('li', h('p', a('#/help', 'more help')))
+  return h('ul.list-unstyled',
+    h('li', h('button.btn.btn-primary.click-view-userid', 'Get your contact id')),
+    h('li', h('button.btn.btn-primary.click-add-contact', 'Add a contact')),
+    h('li', h('button.btn.btn-primary.click-add-contact', 'Use an invite')),
+    h('li', h('span', {style:'display: inline-block; padding: 6px 12px'}, a('#/help', 'More help')))
   )
 }
 

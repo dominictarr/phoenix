@@ -9,9 +9,9 @@ module.exports = function(state, parent) {
     h('p.preview'),
     h('p,', textarea),
     h('p.post-form-btns',
-      h('button.btn.btn-default', 'Post'),
+      h('button.btn.btn-primary', 'Post'),
       ' ',
-      h('button.btn.btn-default.click-preview-text-post', 'Preview'),
+      h('button.btn.btn-primary.click-preview-text-post', 'Preview'),
       ' ',
       (!!parent) ? h('a.click-cancel-reply', { href: '#' }, 'Cancel') : ''
     )
