@@ -21,10 +21,10 @@ exports.submit = function(state, el, e) {
   state.apis.feed.postAdvert(text, function (err) {
     if (err) swal('Error While Publishing', err.message, 'error')
     else {
-      form.text.value = ''
-      var previewEl = form.querySelector('.preview')
-      previewEl.innerHTML = ''
-      state.sync()
+      swal('Your Ad Has Been Published', null, 'success')
+      form.reset()
+      form.querySelector('.preview').innerHTML = ''
+      form.classList.remove('opened')
     }
   })
 }
