@@ -8,6 +8,8 @@ module.exports = {
   'click-cancel-newpost': require('./textpost').cancelNewpost,
   'click-reply': require('./textpost').reply,
   'click-cancel-reply': require('./textpost').cancelReply,
+  'click-newadvert': require('./adpost').newad,
+  'click-cancel-advert': require('./adpost').cancelAdvert,
   'click-react': function(state, el, e) {
     var text = prompt('What is your reaction? eg "likes", "agrees with"')
     if (!text)

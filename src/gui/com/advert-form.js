@@ -6,12 +6,17 @@ module.exports = function(state) {
   suggestBox(textarea, state.suggestOptions) // decorate with suggestbox 
 
   return h('form.advert-form.submit-publish-advert-post',
-    h('.preview.well.well-sm'),
-    h('p,', textarea),
-    h('p.post-form-btns',
-      h('button.btn.btn-default', 'Advertise'),
-      ' ',
-      h('button.btn.btn-default.click-preview-advert-post', 'Preview')
-    )
+    h('.open',
+      h('.preview.well.well-sm'),
+      h('p,', textarea),
+      h('p.post-form-btns',
+        h('button.btn.btn-primary', 'Advertise'),
+        ' ',
+        h('button.btn.btn-primary.click-preview-advert-post', 'Preview'),
+        ' ',
+        h('button.btn.btn-primary.click-cancel-advert', { href: '#' }, 'Cancel')
+      )
+    ),
+    h('.closed', h('button.btn.btn-primary.click-newadvert', 'New Advert'))
   )
 }

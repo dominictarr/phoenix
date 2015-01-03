@@ -14,7 +14,9 @@ module.exports = function(state, parent) {
         ' ',
         h('button.btn.btn-primary.click-preview-text-post', 'Preview'),
         ' ',
-        (!!parent) ? h('a.click-cancel-reply', { href: '#' }, 'Cancel') : h('a.click-cancel-newpost', { href: '#' }, 'Cancel')
+        (!!parent) ?
+          h('button.btn.btn-primaryclick-cancel-reply', { href: '#' }, 'Cancel') : 
+          h('button.btn.btn-primaryclick-cancel-newpost', { href: '#' }, 'Cancel')
       )
     ),
     h('.closed', h('button.btn.btn-primary.click-newpost', 'New Post'))

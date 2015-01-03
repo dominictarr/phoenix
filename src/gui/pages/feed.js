@@ -17,8 +17,8 @@ module.exports = function(state) {
   }
 
   var content = [h('.message-feed', msgs)]
-  if (msgs.length === 0 || state.user.following.length === 0) {
-    var why = (msgs.length === 0) ? 'your feed is empty' : 'you have no friends'
+  if (msgs.length === 0 || state.user.followers.length === 0) {
+    var why = (msgs.length === 0) ? 'your feed is empty' : 'you have no followers'
     content = content.concat([
       h('hr'),
       h('p', h('strong', 'You must be new, because '+why+'!')),
@@ -48,7 +48,6 @@ module.exports = function(state) {
     ),
     h('.col-xs-2.col-md-3',
       com.adverts(state),
-      h('hr'),
       com.advertForm(state),
       h('hr'),
       com.sidehelp()
