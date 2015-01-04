@@ -8,7 +8,7 @@ module.exports = function(state) {
     if (state.page.feedMode == 'threaded') {
       if (state.msgs[i].repliesToLink)
         continue
-      var mt = com.messageThread(state, state.msgs[i])
+      var mt = com.messageSummary(state, state.msgs[i])//com.messageThread(state, state.msgs[i])
       if (mt) msgs.push(mt)
     } else {
       var m = com.message(state, state.msgs[i])
@@ -16,7 +16,7 @@ module.exports = function(state) {
     }
   }
 
-  var content = [h('.message-feed', msgs)]
+  var content = [h('table.table.message-feed', msgs)]
   if (msgs.length === 0 || state.user.followers.length === 0) {
     var why = (msgs.length === 0) ? 'your feed is empty' : 'you have no followers'
     content = content.concat([
@@ -43,7 +43,7 @@ module.exports = function(state) {
   state.setPage(com.page(state, 'feed', h('.row',
     h('.col-xs-2.col-md-1', com.sidenav(state)),
     h('.col-xs-8', 
-      com.postForm(state),
+      // com.postForm(state),
       content
     ),
     h('.col-xs-2.col-md-3',

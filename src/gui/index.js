@@ -195,7 +195,7 @@ function runHandler(eventType) {
       // check if this is a page navigation
       // (normally this is handled by onhashchange, but we need to watch for "on same page" clicks)
       if (eventType == 'click' && el.tagName == "A" && el.origin == window.location.origin && el.hash && el.hash == window.location.hash)
-        return router(state), state.sync()
+        return e.preventDefault(), e.stopPropagation(), router(state), state.sync()
       // try handlers
       for (var k in handlers) {
         if (k.indexOf(eventType) === -1) continue // filter by evt type

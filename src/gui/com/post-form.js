@@ -19,6 +19,6 @@ module.exports = function(state, parent) {
           h('button.btn.btn-primary.click-cancel-newpost', { href: '#' }, 'Cancel')
       )
     ),
-    h('.closed', h('button.btn.btn-primary.click-newpost', 'New Post'))
+    h('.closed', h('button.btn.btn-primary.click-newpost', 'Compose'))
   )
 }

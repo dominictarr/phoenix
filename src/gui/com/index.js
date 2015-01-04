@@ -47,7 +47,7 @@ exports.toEmoji = function (buf, size) {
 var header =
 exports.header = function(state) {
   return h('.nav.navbar.navbar-default', [
-    h('.container', [
+    h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
         h('li.hidden-xs', a('#/network', 'network')),
@@ -127,12 +127,13 @@ var page =
 exports.page = function(state, id, content) {
   return h('div',
     header(state),
-    h('#page.container.'+id+'-page', content)
+    h('#page.container-fluid.'+id+'-page', content)
   )
 }
 
 exports.message = require('./message')
 exports.messageThread = require('./message-thread')
+exports.messageSummary = require('./message-summary')
 exports.postForm = require('./post-form')
 exports.adverts = require('./adverts')
 exports.advertForm = require('./advert-form')
