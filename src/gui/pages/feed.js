@@ -48,7 +48,6 @@ module.exports = function(state) {
     ),
     h('.col-xs-2.col-md-3',
       com.adverts(state),
-      com.advertForm(state),
       h('hr'),
       com.sidehelp()
     )

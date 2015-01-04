@@ -90,7 +90,8 @@ var sidenav =
 exports.sidenav = function(state) {
   var pages = [
     ['feed', '', 'feed'],
-    ['inbox', 'inbox', 'inbox ('+state.unreadMessages+')']
+    ['inbox', 'inbox', 'inbox ('+state.unreadMessages+')'],
+    ['adverts', 'adverts', 'adverts']
   ]
   var extraPages = [
     ['profile', 'profile/'+state.user.id, 'profile'],

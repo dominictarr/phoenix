@@ -5,7 +5,7 @@ var markdown = require('../../lib/markdown')
 
 module.exports = function(state) {
   var ads = []
-  for (var i=0; i < 3 && i < state.adverts.length; i++) {
+  for (var i=0; i < 2 && i < state.adverts.length; i++) {
     var index = state.adverts.length - (Math.random()*Math.min(state.adverts.length, 30))|0
     ads.push(state.msgsById[state.adverts[index]])
   }

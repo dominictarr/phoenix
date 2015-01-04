@@ -17,6 +17,7 @@ module.exports = {
   setup: require('./setup'),
   feed: require('./feed'),
   inbox: require('./inbox'),
+  adverts: require('./adverts'),
   message: require('./message'),
   profile: require('./profile'),
   network: require('./network'),

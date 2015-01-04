@@ -9,6 +9,8 @@ module.exports = function(state) {
     state.page.id = 'network'
   else if (hash == '#/inbox')
     state.page.id = 'inbox'
+  else if (hash == '#/adverts')
+    state.page.id = 'adverts'
   else if (hash.indexOf('#/profile/') === 0) {
     state.page.id = 'profile'
     state.page.param = hash.slice(10)

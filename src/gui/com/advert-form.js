@@ -7,10 +7,10 @@ module.exports = function(state) {
 
   return h('form.advert-form.submit-publish-advert-post',
     h('.open',
-      h('.preview.well.well-sm'),
+      h('.preview.well.well-sm.col-xs-3'),
       h('p,', textarea),
       h('p.post-form-btns',
-        h('button.btn.btn-primary', 'Advertise'),
+        h('button.btn.btn-primary', 'Post'),
         ' ',
         h('button.btn.btn-primary.click-preview-advert-post', 'Preview'),
         ' ',

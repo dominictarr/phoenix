@@ -141,19 +141,16 @@ module.exports = function(state) {
     ]
   } else if (state.page.param == 'adverts') {
     content = [
-      panel('WTF man, I thought this was free software!', [
-        'It is, don\'t worry. The devs are totally broke.', h('br'),
-        h('br'),
-        'The advertisements are personals placed by the users for their followers. ',
+      panel('Wait, Advertisements?', [
+        'The advertisements are placed by the users. ',
         'They\'re mostly for fun, but they can be useful too. ',
-        'For instance, if you ever lose your dog, you can post an advert letting your friends know to keep a look out!'
+        'For instance, if you ever lose your dog, you can post an advert letting your friends know.'
       ]),
       panel('Which Ads Do I See?', [
-        'The only ads you\'ll ever see are by friends and friends of friends. ',
         'Scuttlebutt rotates the last 30 adverts at random.',
       ]),
       panel('Do the Ads Track Me?', [
-        'Nope! They\'re just special posts. There\'s no tracking or remote-traffic involved.'
+        'There\'s no tracking involved.'
       ])
     ]
   } else {

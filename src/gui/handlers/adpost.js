@@ -25,6 +25,7 @@ exports.submit = function(state, el, e) {
       form.reset()
       form.querySelector('.preview').innerHTML = ''
       form.classList.remove('opened')
+      state.sync()
     }
   })
 }
