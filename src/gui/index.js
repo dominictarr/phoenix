@@ -29,9 +29,7 @@ var state = {
   },
   page: {
     id: 'feed',
-    param: null,
-    renderMode: 'markdown',
-    feedMode: 'threaded'
+    param: null
   },
   pendingMessages: 0,
   unreadMessages: 0,

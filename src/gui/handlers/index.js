@@ -21,9 +21,6 @@ module.exports = {
       else state.sync()
     })
   },
-  'click-header-menu': require('./header-menu').toggle,
-  'click-set-render-mode': require('./header-menu').setRenderMode,
-  'click-set-feed-mode': require('./header-menu').setFeedMode,
   'click-follow': require('./profiles').follow,
   'click-unfollow': require('./profiles').unfollow,
   'click-set-name': require('./profiles').setName,

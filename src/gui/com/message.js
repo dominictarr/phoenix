@@ -5,7 +5,9 @@ var markdown = require('../../lib/markdown')
 
 module.exports = function(state, msg, opts) {
   var content
-  if (state.page.renderMode == 'markdown') {
+  if (opts && opts.raw) {
+    content = messageRaw(state, msg)
+  } else {
     if (!msg.markdown) {
       if (!opts || !opts.mustRender)
         return ''
@@ -17,14 +19,12 @@ module.exports = function(state, msg, opts) {
       }
       content = h('div', { innerHTML: markdown.block(util.escapePlain(md), state.names) })
     }
-  }
-  else
-    content = messageRaw(state, msg)
+  }    
   return renderMsgShell(state, msg, content)
 }
 
 function messageRaw(state, msg) {
-  var obj = (state.page.renderMode == 'rawfull') ? msg.value : msg.value.content
+  var obj = (false/*state.page.renderMode == 'rawfull'*/) ? msg.value : msg.value.content
   var json = util.escapePlain(JSON.stringify(obj, null, 2))
 
   // turn feed references into links

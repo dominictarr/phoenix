@@ -15,9 +15,10 @@ module.exports = {
     ))
   }),
   setup: require('./setup'),
-  feed: require('./feed'),
+  posts: require('./posts'),
   inbox: require('./inbox'),
   adverts: require('./adverts'),
+  feed: require('./feed'),
   message: require('./message'),
   profile: require('./profile'),
   network: require('./network'),

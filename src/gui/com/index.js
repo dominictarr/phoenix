@@ -57,41 +57,20 @@ exports.header = function(state) {
         h('li', h('a.click-view-userid', {href: '#'}, 'your contact id')),
         h('li.hidden-xs', a('#/profile/' + state.user.id, 'profile')),
         h('li', h('button.btn.btn-primary.click-add-contact', 'Add contact')),
-        h('li', syncButton(state.pendingMessages)),
-        h('li#header-menu.dropdown',
-          h('button.btn.btn-primary.click-header-menu', h('span.caret')),
-          h('ul.dropdown-menu',
-            h('li.dropdown-header', 'Render Mode'),
-            headerMenuRendermode(state, 'markdown', 'Markdown'),
-            headerMenuRendermode(state, 'rawcontent', 'Raw Content'),
-            headerMenuRendermode(state, 'rawfull', 'Raw Full'),
-            h('li.divider'),
-            h('li.dropdown-header', 'Feed Mode'),
-            headerMenuFeedmode(state, 'threaded', 'Threaded'),
-            headerMenuFeedmode(state, 'flat', 'Flat')
-          )
-        )
+        h('li', syncButton(state.pendingMessages))
       ])
     ])
   ])
-}
-function headerMenuRendermode(state, id, label) {
-  if (state.page.renderMode == id)
-    label = [icon('ok'), ' ', label]
-  return h('li', h('a.click-set-render-mode', { href: '#', 'data-mode': id }, label))
-}
-function headerMenuFeedmode(state, id, label) {
-  if (state.page.feedMode == id)
-    label = [icon('ok'), ' ', label]
-  return h('li', h('a.click-set-feed-mode', { href: '#', 'data-mode': id }, label))
 }
 
 var sidenav =
 exports.sidenav = function(state) {
   var pages = [
-    ['feed', '', 'feed'],
+    ['posts', '', 'posts'],
     ['inbox', 'inbox', 'inbox ('+state.unreadMessages+')'],
-    ['adverts', 'adverts', 'adverts']
+    ['adverts', 'adverts', 'adverts'],
+    '-',
+    ['feed', 'feed', 'data feed']
   ]
   var extraPages = [
     ['profile', 'profile/'+state.user.id, 'profile'],
@@ -101,11 +80,15 @@ exports.sidenav = function(state) {
 
   return h('.side-nav', [
     pages.map(function(page) {
+      if (page == '-')
+        return h('hr')
       if (page[0] == state.page.id)
         return h('p', h('strong', a('#/'+page[1], page[2])))
       return h('p', a('#/'+page[1], page[2]))
     }),
     extraPages.map(function(page) {
+      if (page == '-')
+        return h('hr')
       if (page[0] == state.page.id)
         return h('p.visible-xs', h('strong', a('#/'+page[1], page[2])))
       return h('p.visible-xs', a('#/'+page[1], page[2]))
