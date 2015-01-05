@@ -44,8 +44,7 @@ function messageRaw(state, msg) {
 function renderMsgShell(state, msg, content) {
   return h('.panel.panel-default.message', [
     renderMsgHeader(state, msg),
-    h('.panel-body', content),
-    renderMsgFooter(state, msg)
+    h('.panel-body', content)
   ])
 }
 
@@ -58,18 +57,8 @@ function renderMsgHeader(state, msg) {
   return h('.panel-heading', [
     com.userlink(msg.value.author, state.names[msg.value.author]),
     ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
-    h('span', {innerHTML: ' &middot; '}), h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, 'reply'),
-    h('span', {innerHTML: ' &middot; '}), h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, 'react')
+    h('span', {innerHTML: ' &middot; '}), h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, 'reply')
   ])
-}
-
-function renderMsgFooter(state, msg) {
-  var reactions = getReplies(state, msg, 'action').map(function(reaction) {
-    return [com.userlink(reaction.value.author, state.names[reaction.value.author]), ' ', reaction.value.content.text, ' this. ']
-  })
-  if (reactions.length)
-    return h('.panel-footer', h('.well.well-sm', reactions))
-  return ''
 }
 
 function getReplies(state, msg, typeFilter) {

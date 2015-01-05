@@ -5,21 +5,17 @@
   border: 0;
   margin-bottom: 10px;
   
-  .panel-heading,
-  .panel-footer {
+  .panel-heading {
     border: 0;
+    border-bottom: 1px solid #ccc;
     padding: 10px 0;
     background: #fff;
-    .well {
-      margin: 0;
+    font-size: 13px;
+    a:not(.user-link) {
+      color: #808080;
     }
   }
-  .panel-footer {
-    padding-top: 0;
-  }
   .panel-body {
-    border-top: 1px solid #ccc;
-
     & > div > :first-child {
       margin-top: 0;
     }
