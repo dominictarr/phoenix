@@ -15,7 +15,7 @@ exports.submit = function(state, el, e) {
       form.text.value = ''
       var previewEl = form.querySelector('.preview')
       previewEl.innerHTML = ''
-      state.sync()
+      window.location = '#/'
     }
   }
 }

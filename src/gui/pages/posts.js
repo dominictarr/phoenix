@@ -37,10 +37,7 @@ module.exports = function(state) {
 
   state.setPage(com.page(state, 'feed', h('.row',
     h('.col-xs-2.col-md-1', com.sidenav(state)),
-    h('.col-xs-8', 
-      // com.postForm(state),
-      content
-    ),
+    h('.col-xs-8', content),
     h('.col-xs-2.col-md-3',
       com.adverts(state),
       h('hr'),

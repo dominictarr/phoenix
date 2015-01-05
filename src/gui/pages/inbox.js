@@ -5,10 +5,11 @@ var com = require('../com')
 module.exports = function(state) {
   var msgs = []
   for (var i=state.inbox.length-1; i>=0; i--) {
-    msgs.push(com.message(state, state.msgsById[state.inbox[i]]))
+    var m = com.messageSummary(state, state.msgsById[state.inbox[i]])
+    if (m) msgs.push(m)
   }
 
-  var content = [h('.message-feed', msgs)]
+  var content = [h('table.table.message-feed', msgs)]
   if (msgs.length === 0) {
     content = content.concat([
       h('p', h('strong', 'Your inbox is empty!')),
