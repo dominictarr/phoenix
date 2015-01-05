@@ -10,14 +10,16 @@ module.exports = function(state, parent) {
   }
 
   return h('form.post-form.submit-publish-text-post' + ((!!parent) ? '.reply-form' : ''), { 'data-parent': parent },
+    h('p', textarea),
     h('p.post-form-btns',
       h('button.btn.btn-primary.pull-right', 'Post'),
       (!!parent) ?
         h('button.btn.btn-primary.click-cancel-reply', { href: '#' }, 'Cancel') : 
         h('button.btn.btn-primary.click-navigate', { href: '#/' }, 'Cancel')
     ),
-    h('p', textarea),
-    h('p', h('small', 'Preview:')),
-    h('.preview')
+    h('.preview-wrapper.panel.panel-default',
+      h('.panel-heading', h('small', 'Preview:')),
+      h('.panel-body', h('.preview'))
+    )
   )
 }
