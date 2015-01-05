@@ -6,8 +6,8 @@ module.exports = function(state) {
   state.setPage(com.page(state, 'network', h('.row',
     h('.col-xs-2.col-md-1', com.sidenav(state)),
     h('.col-xs-8',
-      h('table.table',
-        h('thead', h('tr', h('th', 'Name'), h('th.text-center', {width:'70'}, 'Follow'), h('th.text-center', {width:'70'}, 'Trust'))),
+      h('table.table.addresses',
+        h('thead', h('tr', h('th', 'Name'), h('th.text-center', {width:'70'}, 'Follow'))),
         h('tbody',
           Object.keys(state.profiles).map(function(id) { 
             var profile = state.profiles[id]
@@ -15,18 +15,13 @@ module.exports = function(state) {
               h('td', 
                 h('button.btn.btn-primary.btn-sm', {title: 'Rename'}, com.icon('pencil')), ' ',
                 h('strong', com.a('#/profile/'+id, state.names[id])),
-                ' ', h('small.text-muted', 'aka bob ', h('strong', 'x5'), ' robert ', h('strong', 'x2')),
+                ' ', h('small.text-muted', 'aka bob, robert'),
                 ' ', (~state.user.followers.indexOf(id)) ? h('span.label.label-success', 'follows you') : ''
               ),
               h('td.text-center', 
                 (~state.user.following.indexOf(id))
                   ? h('button.btn.btn-primary.btn-sm', {title: 'Unfollow'}, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
                   : h('button.btn.btn-primary.btn-sm', {title: 'Follow'}, com.icon('plus'))
-              ),
-              h('td.text-center', 
-                (~state.user.following.indexOf(id))
-                  ? h('button.btn.btn-primary.btn-sm', {title: 'Untrust'}, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
-                  : h('button.btn.btn-primary.btn-sm', {title: 'Trust'}, com.icon('plus'))
               )
             )
           })

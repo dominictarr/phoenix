@@ -15,8 +15,9 @@ module.exports = function(state, msg, opts) {
   content = markdown.mentionLinks(content, state.names)
 
   var len = noHtmlLen(content)
-  if (len > 60)
-    content = content.slice(0, 60 + (content.length - len)) + '...'
+  if (len > 60 || content.length > 512) {
+    content = content.slice(0, Math.min(60 + (content.length - len), 512)) + '...'
+  }
 
   var nTextReplies = getReplies(state, msg, 'text').length
   var repliesStr = ''

@@ -11,15 +11,15 @@ module.exports = function(state) {
   // render messages
   var msgfeed, msgs = [], hasMsgs = false
   for (var i=state.msgs.length-1; i>=0; i--) {
-    if (state.msgs[i].value.author == pid) {
+    if (state.msgs[i].value.author === pid) {
       hasMsgs = true
-      var m = com.message(state, state.msgs[i])
+      var m = com.messageSummary(state, state.msgs[i])
       if (m) msgs.push(m)
     }
   }
   if (hasMsgs) {
     if (msgs.length)
-      msgfeed = h('.message-feed', msgs)
+      msgfeed = h('table.table.message-feed', msgs)
     else
       msgfeed = h('p', h('strong', 'No posts have been published by this user yet.'))
   } else {
@@ -32,17 +32,20 @@ module.exports = function(state) {
   }
 
   // render controls
-  var followBtn = '', trustBtn = '', renameBtn = ''
+  var followBtn = '', trustBtn = '', flagBtn = '', renameBtn = ''
   if (pid == state.user.id) {
     renameBtn = h('button.btn.btn-primary.click-set-name', {title: 'Rename'}, com.icon('pencil'))
   } else {
     renameBtn = h('button.btn.btn-primary.click-set-name', {'data-user-id': pid, title: 'Rename'}, com.icon('pencil'))
     followBtn = (isFollowing)
-      ? h('button.btn.btn-primary.click-unfollow', {'data-user-id': pid}, 'Unfollow')
-      : h('button.btn.btn-primary.click-follow', {'data-user-id': pid}, 'Follow')
+      ? h('button.btn.btn-primary.click-unfollow', {'data-user-id': pid}, com.icon('minus'), ' Unfollow')
+      : h('button.btn.btn-primary.click-follow', {'data-user-id': pid}, com.icon('plus'), ' Follow')
     trustBtn = (isFollowing)
-      ? h('button.btn.btn-primary.click-unfollow', {'data-user-id': pid}, 'Untrust')
-      : h('button.btn.btn-primary.click-follow', {'data-user-id': pid}, 'Trust')
+      ? h('button.btn.btn-danger.click-unfollow', {'data-user-id': pid}, com.icon('remove'), ' Untrust')
+      : h('button.btn.btn-success.click-follow', {'data-user-id': pid}, com.icon('lock'), ' Trust')
+    flagBtn = (isFollowing)
+      ? h('button.btn.btn-success.click-unfollow', {'data-user-id': pid}, com.icon('ok'), ' Unflag')
+      : h('button.btn.btn-danger.click-follow', {'data-user-id': pid}, com.icon('flag'), ' Flag')
   } 
 
   // given names
@@ -54,22 +57,30 @@ module.exports = function(state) {
     if (given.name)
       givenNames.push(h('li', given.name + ' by ', com.userlink(userid, state.names[userid])))
   })
-  if (givenNames.length)
-    givenNames = [h('small.text-muted', 'Given Names ', com.a('#/help/names', '?')), h('br'), h('ul.list-unstyled', givenNames)]
 
   // render page
   var name = state.names[pid] || util.shortString(pid)
   var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
   state.setPage(com.page(state, 'profile', h('.row',
     h('.col-xs-2.col-md-1', com.sidenav(state)),
-    h('.col-xs-7.col-md-7', msgfeed),
-    h('.col-xs-3.col-md-4',
-      h('h2', name, ' ', renameBtn),
-      h('p.text-muted', 'joined '+joinDate),
-      h('p', followBtn, trustBtn),
-      givenNames,
-      h('small.text-muted', 'Emoji Fingerprint ', com.a('#/help/fingerprint', '?')),
-      h('div', { innerHTML: com.toEmoji(pid) })
+    h('.col-xs-8', msgfeed),
+    h('.col-xs-2.col-md-3.profile-controls',
+      h('.section',
+        h('h2', name, renameBtn),
+        h('p.text-muted', 'joined '+joinDate)
+      ),
+      h('.section', h('p', followBtn), h('p', trustBtn), h('p', flagBtn)),
+      (givenNames.length)
+        ? h('.section',
+          h('small', h('strong', 'Given names '), com.a('#/help/names', '?')), 
+          h('br'),
+          h('ul.list-unstyled', givenNames)
+        )
+        : '',
+      h('.section',
+        h('small', h('strong', 'Emoji fingerprint '), com.a('#/help/fingerprint', '?')),
+        h('div', { innerHTML: com.toEmoji(pid) })
+      )
     )
   )))
 }

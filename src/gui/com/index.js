@@ -51,7 +51,7 @@ exports.header = function(state) {
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
         h('li.hidden-xs', a('#/address-book', 'address book')),
-        h('li.hidden-xs', a('#/profile/' + state.user.id, 'your profile'))
+        h('li.hidden-xs', a('#/profile/' + state.user.id, state.names[state.user.id]))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li.hidden-xs', a('#/help', 'help'))

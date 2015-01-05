@@ -7,8 +7,8 @@ module.exports = function(state) {
   for (var i=state.msgs.length-1; i>=0; i--) {
     if (state.msgs[i].repliesToLink)
       continue
-    var mt = com.messageSummary(state, state.msgs[i])
-    if (mt) msgs.push(mt)
+    var m = com.messageSummary(state, state.msgs[i])
+    if (m) msgs.push(m)
   }
 
   var content = [h('table.table.message-feed', msgs)]
