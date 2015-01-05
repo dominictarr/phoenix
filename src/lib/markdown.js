@@ -12,8 +12,8 @@ marked.setOptions({
   emoji: renderEmoji
 });
 
-exports.block = function(text, names) {
-  return mentionLinks(marked(text||''), names)
+exports.block = function(text, names, allowHtml) {
+  return mentionLinks(marked(text||'', {sanitize: !allowHtml}), names)
 }
 
 exports.inline = function(text, names) {

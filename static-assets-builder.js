@@ -46,7 +46,8 @@ module.exports = function(server) {
     // JS
     if (pathStarts('/js/') && pathEnds('.js')) {
       var browserify = require('browserify')
-      var b = browserify({ basedir: resolve('src') })
+      var stringify = require('stringify')
+      var b = browserify({ basedir: resolve('src') }).transform(stringify(['.txt', '.md', '.html']))
       b.add(resolve('src/'+path.basename(req.url)))
       return b.bundle(once(function (err, jsStr) {
         if (err) {

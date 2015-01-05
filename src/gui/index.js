@@ -187,6 +187,7 @@ function runHandler(eventType) {
         el.classList.remove('open')
       })
     }
+    console.log(eventType)
 
     var el = e.target
     while (el) {

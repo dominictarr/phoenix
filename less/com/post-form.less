@@ -6,22 +6,16 @@
   &.reply-form {
     padding: 15px;
   }
-  .open {
-    display: none;
-  }
-  &.opened {
-    .open {
-      display: block;
+  .preview {
+    margin-top: 36px;
+    & > :first-child {
+      margin-top: 0;
     }
-    .closed {
+    &:empty {
       display: none;
     }
   }
-  .preview:empty {
-    display: none;
-  }
   .post-form-btns {
-    margin: 0;
     button, a {
       margin-right: 5px;
     }

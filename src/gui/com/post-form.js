@@ -1,24 +1,23 @@
 var h = require('hyperscript')
 var suggestBox = require('suggest-box')
+var textpostHandlers = require('../handlers/textpost')
 
 module.exports = function(state, parent) {
-  var textarea = h('textarea.form-control', { name: 'text', rows: 3 })
+  var textarea = h('textarea.form-control', { name: 'text', rows: 6 })
   suggestBox(textarea, state.suggestOptions) // decorate with suggestbox 
+  textarea.onblur = function(e) {
+    textpostHandlers.preview(state, textarea, e)
+  }
 
-  return h('form.post-form.submit-publish-text-post' + ((!!parent) ? '.reply-form.opened' : ''), { 'data-parent': parent },
-    h('p.preview'),
-    h('.open',
-      h('p,', textarea),
-      h('p.post-form-btns',
-        h('button.btn.btn-primary', 'Post'),
-        ' ',
-        h('button.btn.btn-primary.click-preview-text-post', 'Preview'),
-        ' ',
-        (!!parent) ?
-          h('button.btn.btn-primary.click-cancel-reply', { href: '#' }, 'Cancel') : 
-          h('button.btn.btn-primary.click-cancel-newpost', { href: '#' }, 'Cancel')
-      )
+  return h('form.post-form.submit-publish-text-post' + ((!!parent) ? '.reply-form' : ''), { 'data-parent': parent },
+    h('p.post-form-btns',
+      h('button.btn.btn-primary.pull-right', 'Post'),
+      (!!parent) ?
+        h('button.btn.btn-primary.click-cancel-reply', { href: '#' }, 'Cancel') : 
+        h('button.btn.btn-primary.click-navigate', { href: '#/' }, 'Cancel')
     ),
-    h('.closed', h('button.btn.btn-primary.click-newpost', 'Compose'))
+    h('p', textarea),
+    h('p', h('small', 'Preview:')),
+    h('.preview')
   )
 }

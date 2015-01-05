@@ -5,6 +5,8 @@ module.exports = function(state) {
   state.page.param = null
   if (!hash || hash == '#' || hash == '#/')
     state.page.id = 'posts'
+  else if (hash == '#/compose')
+    state.page.id = 'compose'
   else if (hash == '#/address-book')
     state.page.id = 'address-book'
   else if (hash == '#/inbox')

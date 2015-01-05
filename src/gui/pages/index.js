@@ -15,6 +15,7 @@ module.exports = {
     ))
   }),
   setup: require('./setup'),
+  compose: require('./compose'),
   posts: require('./posts'),
   inbox: require('./inbox'),
   adverts: require('./adverts'),
