@@ -50,7 +50,7 @@ exports.header = function(state) {
     h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
-        h('li.hidden-xs', a('#/network', 'network')),
+        h('li.hidden-xs', a('#/address-book', 'address book')),
         h('li.hidden-xs', a('#/help', 'help'))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
