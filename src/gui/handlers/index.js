@@ -5,8 +5,6 @@ module.exports = {
   'click-preview-text-post': require('./textpost').preview,
   'submit-publish-advert-post': require('./adpost').submit,
   'click-preview-advert-post': require('./adpost').preview,
-  'click-newpost': require('./textpost').newpost,
-  'click-cancel-newpost': require('./textpost').cancelNewpost,
   'click-reply': require('./textpost').reply,
   'click-cancel-reply': require('./textpost').cancelReply,
   'click-newadvert': require('./adpost').newad,
