@@ -20,18 +20,12 @@ module.exports = function(state) {
               ),
               h('td.text-center', 
                 (~state.user.following.indexOf(id))
-                  ? [
-
-                    h('button.btn.btn-primary.btn-sm', {title: 'Unfollow'},h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
-                  ]
+                  ? h('button.btn.btn-primary.btn-sm', {title: 'Unfollow'}, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
                   : h('button.btn.btn-primary.btn-sm', {title: 'Follow'}, com.icon('plus'))
               ),
               h('td.text-center', 
                 (~state.user.following.indexOf(id))
-                  ? [
-
-                    h('button.btn.btn-primary.btn-sm', {title: 'Untrust'},h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
-                  ]
+                  ? h('button.btn.btn-primary.btn-sm', {title: 'Untrust'}, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
                   : h('button.btn.btn-primary.btn-sm', {title: 'Trust'}, com.icon('plus'))
               )
             )

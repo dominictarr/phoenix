@@ -32,15 +32,17 @@ module.exports = function(state) {
   }
 
   // render controls
-  var followBtn = '', setNameBtn = ''
+  var followBtn = '', trustBtn = '', renameBtn = ''
   if (pid == state.user.id) {
-    setNameBtn = h('button.btn.btn-default.click-set-name', 'Set Nickname')
+    renameBtn = h('button.btn.btn-primary.click-set-name', {title: 'Rename'}, com.icon('pencil'))
   } else {
-    setNameBtn = h('button.btn.btn-default.click-set-name', {'data-user-id': pid}, 'Give Nickname')
-    if (isFollowing)
-      followBtn = h('button.btn.btn-default.click-unfollow', {'data-user-id': pid}, 'Unfollow')
-    else
-      followBtn = h('button.btn.btn-default.click-follow', {'data-user-id': pid}, 'Follow')
+    renameBtn = h('button.btn.btn-primary.click-set-name', {'data-user-id': pid, title: 'Rename'}, com.icon('pencil'))
+    followBtn = (isFollowing)
+      ? h('button.btn.btn-primary.click-unfollow', {'data-user-id': pid}, 'Unfollow')
+      : h('button.btn.btn-primary.click-follow', {'data-user-id': pid}, 'Follow')
+    trustBtn = (isFollowing)
+      ? h('button.btn.btn-primary.click-unfollow', {'data-user-id': pid}, 'Untrust')
+      : h('button.btn.btn-primary.click-follow', {'data-user-id': pid}, 'Trust')
   } 
 
   // given names
@@ -53,7 +55,7 @@ module.exports = function(state) {
       givenNames.push(h('li', given.name + ' by ', com.userlink(userid, state.names[userid])))
   })
   if (givenNames.length)
-    givenNames = [h('small', 'Given Names'), h('br'), h('ul.list-unstyled', givenNames)]
+    givenNames = [h('small.text-muted', 'Given Names ', com.a('#/help/names', '?')), h('br'), h('ul.list-unstyled', givenNames)]
 
   // render page
   var name = state.names[pid] || util.shortString(pid)
@@ -62,11 +64,12 @@ module.exports = function(state) {
     h('.col-xs-2.col-md-1', com.sidenav(state)),
     h('.col-xs-7.col-md-7', msgfeed),
     h('.col-xs-3.col-md-4',
-      h('h2', name, ' ', h('small', 'joined '+joinDate)),
-      h('p', followBtn, ' ', setNameBtn),
-      h('small', 'Emoji Fingerprint'), h('br'),
-      h('div', { style: { width: '160px', 'margin-bottom': '1em' }, innerHTML: com.toEmoji(pid) }),
-      givenNames
+      h('h2', name, ' ', renameBtn),
+      h('p.text-muted', 'joined '+joinDate),
+      h('p', followBtn, trustBtn),
+      givenNames,
+      h('small.text-muted', 'Emoji Fingerprint ', com.a('#/help/fingerprint', '?')),
+      h('div', { innerHTML: com.toEmoji(pid) })
     )
   )))
 }

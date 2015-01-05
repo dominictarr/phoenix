@@ -39,7 +39,7 @@ exports.toEmoji = function (buf, size) {
   if (typeof buf == 'string')
     buf = new Buffer(buf.slice(0, buf.indexOf('.')), 'base64')
   return baseEmoji.toCustom(buf, function(v, emoji) {
-    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt=":'+emoji.name+':" title="'+((+v).toString(16))+'">'
+    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt=":'+emoji.name+':" title="'+emoji.name+'"> '+emoji.name.replace(/_/g, ' ')+'<br>'
   })
 }
 
@@ -51,13 +51,11 @@ exports.header = function(state) {
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
         h('li.hidden-xs', a('#/address-book', 'address book')),
-        h('li.hidden-xs', a('#/help', 'help'))
+        h('li.hidden-xs', a('#/profile/' + state.user.id, 'your profile'))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
-        h('li', h('a.click-view-userid', {href: '#'}, 'your contact id')),
-        h('li.hidden-xs', a('#/profile/' + state.user.id, 'profile')),
-        h('li', h('button.btn.btn-primary.click-add-contact', 'Add contact')),
-        h('li', syncButton(state.pendingMessages))
+        h('li.hidden-xs', a('#/help', 'help'))
+        // h('li', syncButton(state.pendingMessages))
       ])
     ])
   ])
