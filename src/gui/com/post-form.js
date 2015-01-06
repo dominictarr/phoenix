@@ -9,17 +9,24 @@ module.exports = function(state, parent) {
     textpostHandlers.preview(state, textarea, e)
   }
 
-  return h('form.post-form.submit-publish-text-post' + ((!!parent) ? '.reply-form' : ''), { 'data-parent': parent },
+  var form = h('form.post-form.submit-publish-text-post' + ((!!parent) ? '.reply-form' : ''), { 'data-parent': parent },
     h('p', textarea),
     h('p.post-form-btns',
       h('button.btn.btn-primary.pull-right', 'Post'),
       (!!parent) ?
         h('button.btn.btn-primary.click-cancel-reply', { href: '#' }, 'Cancel') : 
-        h('button.btn.btn-primary.click-navigate', { href: '#/' }, 'Cancel')
+        h('button.btn.btn-primary', { onclick: cancel }, 'Cancel')
     ),
     h('.preview-wrapper.panel.panel-default',
       h('.panel-heading', h('small', 'Preview:')),
       h('.panel-body', h('.preview'))
     )
   )
+
+  function cancel (e) {
+    e.preventDefault()
+    window.location.hash = '#/'
+  }
+
+  return form
 }

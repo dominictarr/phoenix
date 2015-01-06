@@ -1,5 +1,4 @@
 module.exports = {
-  'click-navigate': function(state, el) { window.location = el.href },
   'submit-publish-text-post': require('./textpost').submit,
   'click-preview-text-post': require('./textpost').preview,
   'click-reply': require('./textpost').reply,
