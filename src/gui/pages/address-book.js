@@ -12,11 +12,12 @@ module.exports = function(state) {
           Object.keys(state.profiles).map(function(id) { 
             var profile = state.profiles[id]
             var otherNames = getOtherNames(state.names[id], profile)
+            function r (e) { rename(e, id) }
             function f (e) { follow(e, id) }
             function unf (e) { unfollow(e, id) }
             return h('tr',
               h('td', 
-                h('button.btn.btn-primary.btn-sm', {title: 'Rename'}, com.icon('pencil')), ' ',
+                h('button.btn.btn-primary.btn-sm', {title: 'Rename', onclick: r}, com.icon('pencil')), ' ',
                 h('strong', com.a('#/profile/'+id, state.names[id])),
                 ' ', 
                 (otherNames.length)
@@ -44,6 +45,10 @@ module.exports = function(state) {
   )))
 
   // handlers
+  function rename (e, pid) {
+    e.preventDefault()
+    state.setNamePrompt(pid)
+  }
 
   function follow (e, pid) {
     e.preventDefault()

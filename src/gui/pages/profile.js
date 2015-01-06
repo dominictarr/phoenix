@@ -34,9 +34,9 @@ module.exports = function(state) {
   // render controls
   var followBtn = '', trustBtn = '', flagBtn = '', renameBtn = ''
   if (pid == state.user.id) {
-    renameBtn = h('button.btn.btn-primary.click-set-name', {title: 'Rename'}, com.icon('pencil'))
+    renameBtn = h('button.btn.btn-primary.click-set-name', {title: 'Rename', onclick: rename}, com.icon('pencil'))
   } else {
-    renameBtn = h('button.btn.btn-primary.click-set-name', {'data-user-id': pid, title: 'Rename'}, com.icon('pencil'))
+    renameBtn = h('button.btn.btn-primary.click-set-name', {title: 'Rename', onclick: rename}, com.icon('pencil'))
     followBtn = (isFollowing)
       ? h('button.btn.btn-primary', { onclick: unfollow }, com.icon('minus'), ' Unfollow')
       : h('button.btn.btn-primary', { onclick: follow }, com.icon('plus'), ' Follow')
@@ -108,5 +108,10 @@ module.exports = function(state) {
         else state.sync()
       })
     }
+  }
+
+  function rename (e) {
+    e.preventDefault()
+    state.setNamePrompt(pid)
   }
 }

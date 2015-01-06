@@ -7,8 +7,15 @@ module.exports = function(state) {
     h('.col-xs-12', [
       h('.jumbotron', [
         h('h1', 'Welcome to Secure Scuttlebutt'),
-        h('p', [h('.btn.btn-primary.click-set-name', 'Click Here'), ' to set your nickname.'])
+        h('p', [h('.btn.btn-primary', { onclick: rename }, 'Click Here'), ' to set your nickname.'])
       ])
     ])
   )))
+
+  // handlers
+
+  function rename (e) {
+    e.preventDefault()
+    state.setNamePrompt()
+  }
 }

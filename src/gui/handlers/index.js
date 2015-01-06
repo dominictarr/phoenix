@@ -12,6 +12,5 @@ module.exports = {
       if (err) swal('Error While Publishing', err.message, 'error')
       else state.sync()
     })
-  },
-  'click-set-name': require('./profiles').setName
+  }
 }

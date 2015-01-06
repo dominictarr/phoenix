@@ -192,6 +192,30 @@ state.followPrompt = function(e) {
   }
 }
 
+state.setNamePrompt = function (userId) {
+  userId = userId || state.user.id
+  var isSelf = state.user.id == userId
+  
+  var name = (isSelf) ?
+    prompt('What would you like your nickname to be?') :
+    prompt('What would you like their nickname to be?')
+  if (!name)
+    return
+
+  if (!confirm('Set nickname to '+name+'?'))
+    return
+
+  if (isSelf)
+    state.apis.profiles.nameSelf(name, done)
+  else
+    state.apis.profiles.nameOther(userId, name, done)
+
+  function done(err) {
+    if (err) swal('Error While Publishing', err.message, 'error')
+    else state.sync()
+  }
+}
+
 state.setPage = function(page) {
   var el = document.getElementById('page-container')
   el.innerHTML = ''
