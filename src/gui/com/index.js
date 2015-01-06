@@ -88,9 +88,9 @@ exports.sidenav = function(state) {
 }
 
 var sidehelp =
-exports.sidehelp = function(opts) {
+exports.sidehelp = function(state, opts) {
   return h('ul.list-unstyled',
-    h('li', h('button.btn.btn-primary.click-view-userid', 'Get your contact id')),
+    h('li', h('button.btn.btn-primary', { onclick: state.showUserId }, 'Get your contact id')),
     h('li', h('button.btn.btn-primary.click-add-contact', 'Add a contact')),
     h('li', h('button.btn.btn-primary.click-add-contact', 'Use an invite')),
     (!opts || !opts.noMore) ? h('li', h('span', {style:'display: inline-block; padding: 6px 12px'}, a('#/help', 'More help'))) : ''

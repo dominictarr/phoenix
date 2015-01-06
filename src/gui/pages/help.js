@@ -197,7 +197,7 @@ module.exports = function(state) {
         ['#/help/apps', '3rd-Party Apps']
       ])),
       h('hr'),
-      com.sidehelp({noMore: true})
+      com.sidehelp(state, {noMore: true})
     )
   )))
 }

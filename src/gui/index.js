@@ -145,6 +145,7 @@ state.sync = function(cb) {
 }
 
 state.setUserId = function(id) { state.user.id = id }
+state.showUserId = function() { swal('Here is your contact id', state.user.id) }
 state.setConnectionStatus = function (isConnected, message) {
   var connStatus = document.getElementById('conn-status')
   connStatus.innerHTML = ''
