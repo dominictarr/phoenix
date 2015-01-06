@@ -1,22 +1,56 @@
 var h = require('hyperscript')
 var suggestBox = require('suggest-box')
+var util = require('../../lib/util')
+var markdown = require('../../lib/markdown')
 
-module.exports = function(state) {
-  var textarea = h('textarea.form-control', { name: 'text', rows: 3 })
-  suggestBox(textarea, state.suggestOptions) // decorate with suggestbox 
+module.exports = function (state) {
+  
+  // markup
 
-  return h('form.advert-form.submit-publish-advert-post',
+  var textarea = h('textarea.form-control', { name: 'text', rows: 3, onblur: preview })
+  suggestBox(textarea, state.suggestOptions) // decorate with suggest box
+
+  var preview = h('.preview.well.well-sm.col-xs-3')
+  var form = h('form.advert-form', { onsubmit: post },
     h('.open',
-      h('.preview.well.well-sm.col-xs-3'),
-      h('p,', textarea),
-      h('p.post-form-btns',
-        h('button.btn.btn-primary', 'Post'),
-        ' ',
-        h('button.btn.btn-primary.click-preview-advert-post', 'Preview'),
-        ' ',
-        h('button.btn.btn-primary.click-cancel-advert', { href: '#' }, 'Cancel')
-      )
+      preview,
+      h('p', textarea),
+      h('p.post-form-btns', h('button.btn.btn-primary', 'Post'), ' ', h('button.btn.btn-primary', { href: '#', onclick: close }, 'Cancel'))
     ),
-    h('.closed', h('button.btn.btn-primary.click-newadvert', 'New Advert'))
+    h('.closed', h('button.btn.btn-primary', { onclick: open }, 'New Advert'))
   )
+
+  // event handlers
+
+  function preview (e) {
+    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), state.names)
+  }
+
+  function post (e) {
+    e.preventDefault()
+    state.apis.feed.postAdvert(textarea.value, function (err) {
+      if (err) swal('Error While Publishing', err.message, 'error')
+      else {
+        swal('Your Ad Has Been Published', null, 'success')
+        form.reset()
+        form.classList.remove('opened')
+        preview.innerHTML = ''
+        state.sync()
+      }
+    })
+  }
+
+  function open (e) {
+    e.preventDefault()
+    form.classList.add('opened')
+  }
+
+  function close (e) {
+    e.preventDefault()
+    form.reset()
+    form.classList.remove('opened')
+    preview.innerHTML = ''
+  }
+
+  return form
 }

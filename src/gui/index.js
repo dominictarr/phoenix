@@ -5,7 +5,6 @@ var emojiNamedCharacters = require('emoji-named-characters')
 var router = require('phoenix-router')
 var com = require('./com')
 var pages = require('./pages')
-var handlers = require('./handlers')
 var util = require('../lib/util')
 
 // gui master state object
@@ -56,8 +55,7 @@ module.exports = function(ssb, feed, profiles, network) {
   state.apis.network = network
 
   // wire up toplevel event handlers
-  document.body.addEventListener('click', runHandler('click'))
-  document.body.addEventListener('submit', runHandler('submit'))
+  document.body.addEventListener('click', navClickHandler)
   window.addEventListener('hashchange', function() { state.sync() })
   return state
 }
@@ -145,6 +143,7 @@ state.sync = function(cb) {
 }
 
 state.setUserId = function(id) { state.user.id = id }
+state.showUserId = function() { swal('Here is your contact id', state.user.id) }
 state.setConnectionStatus = function (isConnected, message) {
   var connStatus = document.getElementById('conn-status')
   connStatus.innerHTML = ''
@@ -164,6 +163,57 @@ state.setPendingMessages = function(n) {
   }
 }
 
+state.followPrompt = function(e) {
+  e.preventDefault()
+
+  var id = prompt('Enter the contact id or invite code')
+  if (!id)
+    return
+
+  var parts = id.split(',')
+  var isInvite = (parts.length === 3)
+  if (isInvite) state.apis.ssb.invite.addMe(id, next)
+  else state.apis.network.follow(id, next)
+    
+  function next (err) {
+    if (err) {
+      console.error(err)
+      swal('Error While Connecting', err.message, 'error')
+    }
+    else {
+      if (isInvite)
+        swal('Invite Code Accepted', 'You are now hosted by '+parts[0], 'success')
+      else
+        swal('Contact Added', 'You will now follow the messages published by your new contact.', 'success')
+      state.sync()
+    }
+  }
+}
+
+state.setNamePrompt = function (userId) {
+  userId = userId || state.user.id
+  var isSelf = state.user.id == userId
+  
+  var name = (isSelf) ?
+    prompt('What would you like your nickname to be?') :
+    prompt('What would you like their nickname to be?')
+  if (!name)
+    return
+
+  if (!confirm('Set nickname to '+name+'?'))
+    return
+
+  if (isSelf)
+    state.apis.profiles.nameSelf(name, done)
+  else
+    state.apis.profiles.nameOther(userId, name, done)
+
+  function done(err) {
+    if (err) swal('Error While Publishing', err.message, 'error')
+    else state.sync()
+  }
+}
+
 state.setPage = function(page) {
   var el = document.getElementById('page-container')
   el.innerHTML = ''
@@ -180,33 +230,16 @@ function getName(profile) {
   return (profile.self.name) ? '"'+profile.self.name+'"' : 'anon'//util.shortString(profile.id)
 }
 
-// - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
-function runHandler(eventType) {
-  return function(e) {
-    // close any dropdowns
-    if (eventType == 'click') {
-      Array.prototype.forEach.call(document.querySelectorAll('.dropdown'), function(el) {
-        el.classList.remove('open')
-      })
-    }
+// looks for link clicks which should trigger page refreshes
+// (normally this is handled by onhashchange, but we need to watch for "on same page" clicks)
+function navClickHandler(e) {
+  var el = e.target
+  while (el) {
+    // check if this is a page navigation
+    if (el.tagName == "A" && el.origin == window.location.origin && el.hash && el.hash == window.location.hash)
+      return e.preventDefault(), e.stopPropagation(), state.sync()
 
-    var el = e.target
-    while (el) {
-      // check if this is a page navigation
-      // (normally this is handled by onhashchange, but we need to watch for "on same page" clicks)
-      if (eventType == 'click' && el.tagName == "A" && el.origin == window.location.origin && el.hash && el.hash == window.location.hash)
-        return e.preventDefault(), e.stopPropagation(), state.sync()
-      // try handlers
-      for (var k in handlers) {
-        if (k.indexOf(eventType) === -1) continue // filter by evt type
-        if (el.classList && el.classList.contains(k)) {
-          e.preventDefault()
-          e.stopPropagation()
-          return handlers[k](state, el, e)
-        }
-      }
-      // bubble up and keep looking
-      el = el.parentNode
-    }
+    // bubble up and keep looking
+    el = el.parentNode
   }
 }

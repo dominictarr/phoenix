@@ -34,18 +34,18 @@ module.exports = function(state) {
   // render controls
   var followBtn = '', trustBtn = '', flagBtn = '', renameBtn = ''
   if (pid == state.user.id) {
-    renameBtn = h('button.btn.btn-primary.click-set-name', {title: 'Rename'}, com.icon('pencil'))
+    renameBtn = h('button.btn.btn-primary', {title: 'Rename', onclick: rename}, com.icon('pencil'))
   } else {
-    renameBtn = h('button.btn.btn-primary.click-set-name', {'data-user-id': pid, title: 'Rename'}, com.icon('pencil'))
+    renameBtn = h('button.btn.btn-primary', {title: 'Rename', onclick: rename}, com.icon('pencil'))
     followBtn = (isFollowing)
-      ? h('button.btn.btn-primary.click-unfollow', {'data-user-id': pid}, com.icon('minus'), ' Unfollow')
-      : h('button.btn.btn-primary.click-follow', {'data-user-id': pid}, com.icon('plus'), ' Follow')
+      ? h('button.btn.btn-primary', { onclick: unfollow }, com.icon('minus'), ' Unfollow')
+      : h('button.btn.btn-primary', { onclick: follow }, com.icon('plus'), ' Follow')
     trustBtn = (isFollowing)
-      ? h('button.btn.btn-danger.click-unfollow', {'data-user-id': pid}, com.icon('remove'), ' Untrust')
-      : h('button.btn.btn-success.click-follow', {'data-user-id': pid}, com.icon('lock'), ' Trust')
+      ? h('button.btn.btn-danger', com.icon('remove'), ' Untrust')
+      : h('button.btn.btn-success', com.icon('lock'), ' Trust')
     flagBtn = (isFollowing)
-      ? h('button.btn.btn-success.click-unfollow', {'data-user-id': pid}, com.icon('ok'), ' Unflag')
-      : h('button.btn.btn-danger.click-follow', {'data-user-id': pid}, com.icon('flag'), ' Flag')
+      ? h('button.btn.btn-success', com.icon('ok'), ' Unflag')
+      : h('button.btn.btn-danger', com.icon('flag'), ' Flag')
   } 
 
   // given names
@@ -85,4 +85,33 @@ module.exports = function(state) {
       )
     )
   )))
+
+  // handlers
+
+  function follow (e) {
+    e.preventDefault()
+    var isFollowing = (state.user.following.indexOf(pid) != -1)
+    if (!isFollowing) {
+      state.apis.network.follow(pid, function(err) {
+        if (err) swal('Error While Publishing', err.message, 'error')
+        else state.sync()
+      })
+    }
+  }
+
+  function unfollow (e) {
+    e.preventDefault()
+    var isFollowing = (state.user.following.indexOf(pid) != -1)
+    if (isFollowing) {
+      state.apis.network.unfollow(pid, function(err) {
+        if (err) swal('Error While Publishing', err.message, 'error')
+        else state.sync()
+      })
+    }
+  }
+
+  function rename (e) {
+    e.preventDefault()
+    state.setNamePrompt(pid)
+  }
 }
