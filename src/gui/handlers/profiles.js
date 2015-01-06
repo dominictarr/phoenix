@@ -1,26 +1,4 @@
 
-exports.follow = function(state, el, e) {
-  var userId = el.dataset.userId
-  var isFollowing = (state.user.following.indexOf(userId) != -1)
-  if (!isFollowing) {
-    state.apis.network.follow(userId, function(err) {
-      if (err) swal('Error While Publishing', err.message, 'error')
-      else state.sync()
-    })
-  }
-}
-
-exports.unfollow = function(state, el, e) {
-  var userId = el.dataset.userId
-  var isFollowing = (state.user.following.indexOf(userId) != -1)
-  if (isFollowing) {
-    state.apis.network.unfollow(userId, function(err) {
-      if (err) swal('Error While Publishing', err.message, 'error')
-      else state.sync()
-    })
-  }
-}
-
 exports.setName = function(state, el, e) {
   var userId = el.dataset.userId || state.user.id
   var isSelf = state.user.id == userId

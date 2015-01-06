@@ -13,7 +13,5 @@ module.exports = {
       else state.sync()
     })
   },
-  'click-follow': require('./profiles').follow,
-  'click-unfollow': require('./profiles').unfollow,
   'click-set-name': require('./profiles').setName
 }

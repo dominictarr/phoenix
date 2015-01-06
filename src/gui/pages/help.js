@@ -96,9 +96,7 @@ module.exports = function(state) {
         'Secure Scuttlebutt is not just this app: it\'s a full database capable of any type of messaging you want. ',
         'Developers can use it to write their own applications. ', h('br'),
         h('br'),
-        'This application usually ignores the messages by other apps, but, if you want to see them, click the down-arrow at the top right of the page and choose ',
-        h('a.btn.btn-xs.btn-primary.click-set-render-mode', { href: '#', 'data-mode': 'rawcontent' }, "Raw Content."),
-        ' Then you can browse the ', com.a('#/', 'feed page'), ' and see what\'s happening behind the scenes. ',
+        'This application usually ignores the messages by other apps, but, if you want to see them, browse to the ', com.a('#/feed', 'data feed'), ' and see what\'s happening behind the scenes. ',
         '(That\'s everything there is!)'
       ])
     ]
