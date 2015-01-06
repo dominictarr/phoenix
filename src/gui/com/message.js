@@ -83,7 +83,7 @@ function getReplies(state, msg, typeFilter) {
     .map(function(id) { return state.msgsById[id] })
     .filter(function(reply) {
       if (!reply) return false
-      if (typeFilter && reply.value.content.postType != typeFilter) return false
+      if (typeFilter && !reply.value.content[typeFilter]) return false
       return true
     })
 }

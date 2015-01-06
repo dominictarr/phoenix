@@ -20,7 +20,7 @@ function replies(state, msg) {
     if (!reply) return
     
     var content = reply.value.content
-    if (content.type != 'post' || content.postType != 'text')
+    if (content.type != 'post' || !content.text)
       return
 
     r.push(com.message(state, reply))
