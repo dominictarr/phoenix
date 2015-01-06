@@ -24,10 +24,10 @@ module.exports = function(state) {
       msgfeed = h('p', h('strong', 'No posts have been published by this user yet.'))
   } else {
     msgfeed = h('p', 
-      'No messages found for this user.',
+      h('strong', 'No messages found for this user.'),
       ((!isFollowing) ? 
-        h('p.text-muted', 'Follow this user to begin searching the network for their data.') :
-        h('p.text-muted', 'Scuttlebutt is searching the network for this user.'))
+        h('p', 'Follow this user to begin searching the network for their data.') :
+        h('p', 'Scuttlebutt is searching the network for this user.'))
     )
   }
 
@@ -50,13 +50,15 @@ module.exports = function(state) {
 
   // given names
   var givenNames = []
-  if (profile.self.name)
-    givenNames.push(h('li', profile.self.name + ' (self-assigned)'))
-  Object.keys(profile.given).forEach(function(userid) {
-    var given = profile.given[userid]
-    if (given.name)
-      givenNames.push(h('li', given.name + ' by ', com.userlink(userid, state.names[userid])))
-  })
+  if (profile) {
+    if (profile.self.name)
+      givenNames.push(h('li', profile.self.name + ' (self-assigned)'))
+    Object.keys(profile.given).forEach(function(userid) {
+      var given = profile.given[userid]
+      if (given.name)
+        givenNames.push(h('li', given.name + ' by ', com.userlink(userid, state.names[userid])))
+    })
+  }
 
   // render page
   var name = state.names[pid] || util.shortString(pid)
