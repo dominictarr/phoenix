@@ -13,14 +13,6 @@ exports.icon = function (i) {
   return h('span.glyphicon.glyphicon-'+i)
 }
 
-var syncButton =
-exports.syncButton = function(syncMsgsWaiting) {
-  var num = ''
-  if (syncMsgsWaiting > 0)
-    num = ' ('+syncMsgsWaiting+')'
-  return h('button.btn.btn-primary.sync-btn.click-sync', 'Sync' + num)
-}
-
 var userlink =
 exports.userlink = function(id, text, opts) {
   opts = opts || {}
@@ -55,7 +47,6 @@ exports.header = function(state) {
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li.hidden-xs', a('#/help', 'help'))
-        // h('li', syncButton(state.pendingMessages))
       ])
     ])
   ])
