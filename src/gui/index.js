@@ -16,6 +16,7 @@ var state = {
   msgs: [],
   msgsById: {},
   inbox: [],
+  adverts: [],
   profiles: {},
   names: {},
   peers: [],
@@ -28,9 +29,7 @@ var state = {
   },
   page: {
     id: 'feed',
-    param: null,
-    renderMode: 'markdown',
-    feedMode: 'threaded'
+    param: null
   },
   pendingMessages: 0,
   unreadMessages: 0,
@@ -93,6 +92,7 @@ state.sync = function(cb) {
     var done = multicb()
     pull(feed.all(), pull.collect(done()))
     pull(feed.inbox(state.user.id), pull.collect(done()))
+    pull(feed.adverts(), pull.collect(done()))
     profiles.getAll(done())
     pull(network.pubPeers(), pull.collect(done()))
     pull(network.following(state.user.id), pull.collect(done()))
@@ -104,10 +104,11 @@ state.sync = function(cb) {
         // pull state
         state.msgs = r[0][1]
         state.inbox = r[1][1]
-        state.profiles = r[2][1]
-        state.peers = r[3][1]
-        state.user.following = r[4][1]
-        state.user.followers = r[5][1]
+        state.adverts = r[2][1]
+        state.profiles = r[3][1]
+        state.peers = r[4][1]
+        state.user.following = r[5][1]
+        state.user.followers = r[6][1]
 
         // compute additional structures
         state.msgs.forEach(function(msg) {
@@ -153,10 +154,10 @@ state.setPendingMessages = function(n) {
   this.pendingMessages = n
   var syncbtn = document.querySelector('.sync-btn')
   if (n) {
-    document.title = '('+n+') scuttlebutt'
+    document.title = '('+n+') secure scuttlebutt'
     if (syncbtn) syncbtn.textContent = 'Sync ('+n+')'
   } else {
-    document.title = 'scuttlebutt'
+    document.title = 'secure scuttlebutt'
     if (syncbtn) syncbtn.textContent = 'Sync'
   }
 }
@@ -174,7 +175,7 @@ function getName(profile) {
     if (id == state.user.id && profile.given[id].name)
       return profile.given[id].name
   }
-  return (profile.self.name) ? '"'+profile.self.name+'"' : util.shortString(profile.id)
+  return (profile.self.name) ? '"'+profile.self.name+'"' : 'anon'//util.shortString(profile.id)
 }
 
 // - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
@@ -192,7 +193,7 @@ function runHandler(eventType) {
       // check if this is a page navigation
       // (normally this is handled by onhashchange, but we need to watch for "on same page" clicks)
       if (eventType == 'click' && el.tagName == "A" && el.origin == window.location.origin && el.hash && el.hash == window.location.hash)
-        return router(state), state.sync()
+        return e.preventDefault(), e.stopPropagation(), router(state), state.sync()
       // try handlers
       for (var k in handlers) {
         if (k.indexOf(eventType) === -1) continue // filter by evt type

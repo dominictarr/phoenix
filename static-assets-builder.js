@@ -27,7 +27,7 @@ module.exports = function(server) {
       var name = path.basename(req.url, '.css')+'.less'
       var filepath = resolve('less/'+name)
       return fs.readFile(filepath, { encoding: 'utf-8' }, function(err, lessStr) {
-        if (err) return serveCss(err)
+        if (err) return next() // not found, try pre-built static
         less.render(lessStr, { paths: [resolve('less')], filename: name }, serveCss)
       })
       function serveCss(err, cssStr) {
@@ -46,10 +46,13 @@ module.exports = function(server) {
     // JS
     if (pathStarts('/js/') && pathEnds('.js')) {
       var browserify = require('browserify')
-      var b = browserify({ basedir: resolve('src') })
+      var stringify = require('stringify')
+      var b = browserify({ basedir: resolve('src') }).transform(stringify(['.txt', '.md', '.html']))
       b.add(resolve('src/'+path.basename(req.url)))
       return b.bundle(once(function (err, jsStr) {
         if (err) {
+          if (err.toString().indexOf('Cannot find module') !== -1)
+            return next() // not found, try pre-built static
           res.writeHead(500)
           res.end(err.toString())
           console.error(err.toString())

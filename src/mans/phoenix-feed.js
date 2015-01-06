@@ -9,6 +9,7 @@ module.exports = {
   // output streams
   all: 'source',
   inbox: 'source',
+  adverts: 'source',
 
   // getters
   get: 'async',
@@ -19,5 +20,6 @@ module.exports = {
   postReply: 'async',
   postAction: 'async',
   postReaction: 'async',
+  postAdvert: 'async',
   rebroadcast: 'async'
 }

@@ -53,15 +53,17 @@
 // Phoenix styles
 @import "com/message.less";
 @import "com/message-thread.less";
+@import "com/message-summary.less";
 @import "com/post-form.less";
+@import "com/adverts.less";
+@import "com/advert-form.less";
+@import "com/profile-controls.less";
+@import "com/addresses.less";
 @import "com/suggest-box.less";
 
 // Home styles
 html {
   overflow-y: scroll; // always show scrollbar
-}
-#page-container {
-  padding-top: 75px;
 }
 .side-nav {
   white-space: nowrap;
@@ -80,7 +82,7 @@ html {
 #conn-status {
   position: fixed;
   top: 30px;
-  z-index: 1000;
+  z-index: 2000;
   width: auto;
   .alert {
     box-shadow: 1px 3px 3px rgba(0,0,0,0.25);

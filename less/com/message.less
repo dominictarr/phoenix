@@ -3,26 +3,19 @@
   margin: 0;
   border-radius: 0;
   border: 0;
+  margin-bottom: 10px;
   
-  .panel-heading,
-  .panel-footer {
-    position: relative;
-    font-size: 11px;
-    background: white;
+  .panel-heading {
     border: 0;
-    color: gray;
-    a {
-      color: gray;
+    border-bottom: 1px solid #ccc;
+    padding: 10px 0;
+    background: #fff;
+    font-size: 13px;
+    a:not(.user-link) {
+      color: #808080;
     }
-    .well {
-      margin: 0;
-    }
-  }
-  .panel-footer {
-    padding-top: 0;
   }
   .panel-body {
-    padding: 0 15px;
     & > div > :first-child {
       margin-top: 0;
     }
@@ -41,8 +34,4 @@
       overflow: auto;
     }
   }
-}
-.feed-page .panel.message .panel-body {
-  max-height: 220px;
-  overflow: scroll;
 }

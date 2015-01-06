@@ -10,12 +10,12 @@ exports.submit = function(state, el, e) {
   if (parent) state.apis.feed.postReply(text, parent, done)
   else state.apis.feed.postText(text, done)
   function done(err) {
-    if (err) alert(err.message)
+    if (err) swal('Error While Publishing', err.message, 'error')
     else {
       form.text.value = ''
       var previewEl = form.querySelector('.preview')
       previewEl.innerHTML = ''
-      state.sync()
+      window.location = '#/'
     }
   }
 }
@@ -25,7 +25,6 @@ exports.preview = function(state, el, e) {
   var text = form.text.value
 
   var previewEl = form.querySelector('.preview')
-  previewEl.style.display = 'block'
   previewEl.innerHTML = markdown.block(util.escapePlain(text), state.names)
 }
 
@@ -41,6 +40,6 @@ exports.reply = function(state, el, e) {
 }
 
 exports.cancelReply = function(state, el, e) {
-  var replyFormEl = el.parentNode.parentNode
-  replyFormEl.parentNode.removeChild(replyFormEl)
+  var form = el.parentNode.parentNode
+  form.parentNode.removeChild(form)
 }

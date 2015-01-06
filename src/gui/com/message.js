@@ -5,21 +5,26 @@ var markdown = require('../../lib/markdown')
 
 module.exports = function(state, msg, opts) {
   var content
-  if (state.page.renderMode == 'markdown') {
+  if (opts && opts.raw) {
+    content = messageRaw(state, msg)
+  } else {
     if (!msg.markdown) {
       if (!opts || !opts.mustRender)
         return ''
       content = messageRaw(state, msg)
-    } else
-      content = h('div', { innerHTML: markdown.block(util.escapePlain(msg.markdown), state.names) })
-  }
-  else
-    content = messageRaw(state, msg)
+    } else {
+      md = msg.markdown
+      if ((!opts || !opts.fullLength) && md.length >= 512) {
+        md = md.slice(0, 512) + '... [read more](#/msg/'+msg.key+')'
+      }
+      content = h('div', { innerHTML: markdown.block(util.escapePlain(md), state.names) })
+    }
+  }    
   return renderMsgShell(state, msg, content)
 }
 
 function messageRaw(state, msg) {
-  var obj = (state.page.renderMode == 'rawfull') ? msg.value : msg.value.content
+  var obj = (false/*state.page.renderMode == 'rawfull'*/) ? msg.value : msg.value.content
   var json = util.escapePlain(JSON.stringify(obj, null, 2))
 
   // turn feed references into links
@@ -39,8 +44,7 @@ function messageRaw(state, msg) {
 function renderMsgShell(state, msg, content) {
   return h('.panel.panel-default.message', [
     renderMsgHeader(state, msg),
-    h('.panel-body', content),
-    renderMsgFooter(state, msg)
+    h('.panel-body', content)
   ])
 }
 
@@ -53,18 +57,8 @@ function renderMsgHeader(state, msg) {
   return h('.panel-heading', [
     com.userlink(msg.value.author, state.names[msg.value.author]),
     ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
-    h('span', {innerHTML: ' &middot; '}), h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, 'reply'),
-    h('span', {innerHTML: ' &middot; '}), h('a.click-react', { title: 'React', href: '#', 'data-msgid': msg.key }, 'react')
+    h('span', {innerHTML: ' &middot; '}), h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, 'reply')
   ])
-}
-
-function renderMsgFooter(state, msg) {
-  var reactions = getReplies(state, msg, 'action').map(function(reaction) {
-    return [com.userlink(reaction.value.author, state.names[reaction.value.author]), ' ', reaction.value.content.text, ' this. ']
-  })
-  if (reactions.length)
-    return h('.panel-footer', h('.well.well-sm', reactions))
-  return ''
 }
 
 function getReplies(state, msg, typeFilter) {

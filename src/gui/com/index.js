@@ -18,7 +18,7 @@ exports.syncButton = function(syncMsgsWaiting) {
   var num = ''
   if (syncMsgsWaiting > 0)
     num = ' ('+syncMsgsWaiting+')'
-  return h('button.btn.btn-default.sync-btn.click-sync', 'Sync' + num)
+  return h('button.btn.btn-primary.sync-btn.click-sync', 'Sync' + num)
 }
 
 var userlink =
@@ -39,58 +39,38 @@ exports.toEmoji = function (buf, size) {
   if (typeof buf == 'string')
     buf = new Buffer(buf.slice(0, buf.indexOf('.')), 'base64')
   return baseEmoji.toCustom(buf, function(v, emoji) {
-    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt=":'+emoji.name+':" title="'+((+v).toString(16))+'">'
+    return '<img class="emoji" width="'+size+'" height="'+size+'" src="/img/emoji/'+emoji.name+'.png" alt=":'+emoji.name+':" title="'+emoji.name+'"> '+emoji.name.replace(/_/g, ' ')+'<br>'
   })
 }
 
 
 var header =
 exports.header = function(state) {
-  return h('.nav.navbar.navbar-default.navbar-fixed-top', [
-    h('.container', [
-      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'scuttlebutt')),
+  return h('.nav.navbar.navbar-default', [
+    h('.container-fluid', [
+      h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
-        h('li.hidden-xs', a('#/network', 'network')),
-        h('li.hidden-xs', a('#/help', 'help'))
+        h('li.hidden-xs', a('#/address-book', 'address book')),
+        h('li.hidden-xs', a('#/profile/' + state.user.id, state.names[state.user.id]))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
-        h('li', h('a.click-view-userid', {href: '#'}, 'your contact id')),
-        h('li.hidden-xs', a('#/profile/' + state.user.id, 'profile')),
-        h('li', h('button.btn.btn-default.click-add-contact', 'Add contact')),
-        h('li', syncButton(state.pendingMessages)),
-        h('li#header-menu.dropdown',
-          h('button.btn.btn-default.click-header-menu', h('span.caret')),
-          h('ul.dropdown-menu',
-            h('li.dropdown-header', 'Render Mode'),
-            headerMenuRendermode(state, 'markdown', 'Markdown'),
-            headerMenuRendermode(state, 'rawcontent', 'Raw Content'),
-            headerMenuRendermode(state, 'rawfull', 'Raw Full'),
-            h('li.divider'),
-            h('li.dropdown-header', 'Feed Mode'),
-            headerMenuFeedmode(state, 'threaded', 'Threaded'),
-            headerMenuFeedmode(state, 'flat', 'Flat')
-          )
-        )
+        h('li.hidden-xs', a('#/help', 'help'))
+        // h('li', syncButton(state.pendingMessages))
       ])
     ])
   ])
-}
-function headerMenuRendermode(state, id, label) {
-  if (state.page.renderMode == id)
-    label = [icon('ok'), ' ', label]
-  return h('li', h('a.click-set-render-mode', { href: '#', 'data-mode': id }, label))
-}
-function headerMenuFeedmode(state, id, label) {
-  if (state.page.feedMode == id)
-    label = [icon('ok'), ' ', label]
-  return h('li', h('a.click-set-feed-mode', { href: '#', 'data-mode': id }, label))
 }
 
 var sidenav =
 exports.sidenav = function(state) {
   var pages = [
-    ['feed', '', 'feed'],
-    ['inbox', 'inbox', 'inbox ('+state.unreadMessages+')']
+    ['compose', 'compose', 'compose'],
+    '-',
+    ['posts', '', 'posts'],
+    ['inbox', 'inbox', 'inbox ('+state.unreadMessages+')'],
+    ['adverts', 'adverts', 'adverts'],
+    '-',
+    ['feed', 'feed', 'data feed']
   ]
   var extraPages = [
     ['profile', 'profile/'+state.user.id, 'profile'],
@@ -100,11 +80,15 @@ exports.sidenav = function(state) {
 
   return h('.side-nav', [
     pages.map(function(page) {
+      if (page == '-')
+        return h('hr')
       if (page[0] == state.page.id)
         return h('p', h('strong', a('#/'+page[1], page[2])))
       return h('p', a('#/'+page[1], page[2]))
     }),
     extraPages.map(function(page) {
+      if (page == '-')
+        return h('hr')
       if (page[0] == state.page.id)
         return h('p.visible-xs', h('strong', a('#/'+page[1], page[2])))
       return h('p.visible-xs', a('#/'+page[1], page[2]))
@@ -112,14 +96,27 @@ exports.sidenav = function(state) {
   ])
 }
 
+var sidehelp =
+exports.sidehelp = function(opts) {
+  return h('ul.list-unstyled',
+    h('li', h('button.btn.btn-primary.click-view-userid', 'Get your contact id')),
+    h('li', h('button.btn.btn-primary.click-add-contact', 'Add a contact')),
+    h('li', h('button.btn.btn-primary.click-add-contact', 'Use an invite')),
+    (!opts || !opts.noMore) ? h('li', h('span', {style:'display: inline-block; padding: 6px 12px'}, a('#/help', 'More help'))) : ''
+  )
+}
+
 var page =
 exports.page = function(state, id, content) {
   return h('div',
     header(state),
-    h('#page.container.'+id+'-page', content)
+    h('#page.container-fluid.'+id+'-page', content)
   )
 }
 
 exports.message = require('./message')
 exports.messageThread = require('./message-thread')
+exports.messageSummary = require('./message-summary')
 exports.postForm = require('./post-form')
+exports.adverts = require('./adverts')
+exports.advertForm = require('./advert-form')

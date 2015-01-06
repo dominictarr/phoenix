@@ -18,6 +18,8 @@ exports.init = function (server) {
         res.writeHead(403)
         return res.end('Remote access forbidden')
       }
+      // CSPs
+      res.setHeader('Content-Security-Policy', 'default-src \'self\'; connect-src \'self\' ws://localhost:'+server.config.port)
       next()
     },
     require('./domain-auth')(server),

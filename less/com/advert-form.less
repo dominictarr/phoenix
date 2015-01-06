@@ -1,0 +1,27 @@
+.advert-form {
+  .open {
+    display: none;
+  }
+  &.opened {
+    .open {
+      display: block;
+    }
+    .closed {
+      display: none;
+    }
+  }
+  .preview:empty {
+    display: none;
+  }
+  .preview > :last-child {
+    margin-bottom: 0;
+  }
+  .post-form-btns {
+    button, a {
+      margin-right: 5px;
+    }
+    a {
+      color: @link-color;
+    }
+  }
+}

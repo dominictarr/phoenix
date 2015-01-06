@@ -4,7 +4,7 @@ exports.follow = function(state, el, e) {
   var isFollowing = (state.user.following.indexOf(userId) != -1)
   if (!isFollowing) {
     state.apis.network.follow(userId, function(err) {
-      if (err) alert(err.message)
+      if (err) swal('Error While Publishing', err.message, 'error')
       else state.sync()
     })
   }
@@ -15,14 +15,14 @@ exports.unfollow = function(state, el, e) {
   var isFollowing = (state.user.following.indexOf(userId) != -1)
   if (isFollowing) {
     state.apis.network.unfollow(userId, function(err) {
-      if (err) alert(err.message)
+      if (err) swal('Error While Publishing', err.message, 'error')
       else state.sync()
     })
   }
 }
 
 exports.followPrompt = function(state, el, e) {
-  var id = prompt('Enter the user id or invite code for who you want to follow')
+  var id = prompt('Enter the contact id or invite code')
   if (!id)
     return
   var parts = id.split(',')
@@ -32,13 +32,13 @@ exports.followPrompt = function(state, el, e) {
   function next (err) {
     if (err) {
       console.error(err)
-      alert('Error: '+err.message)
+      swal('Error While Connecting', err.message, 'error')
     }
     else {
       if (isInvite)
-        alert('Invite code accepted')
+        swal('Invite Code Accepted', 'You are now hosted by '+parts[0], 'success')
       else
-        alert('Now following '+id)
+        swal('Contact Added', 'You will now follow the messages published by your new contact.', 'success')
       state.sync()
     }
   }
@@ -59,7 +59,7 @@ exports.setName = function(state, el, e) {
   else
     state.apis.profiles.nameOther(userId, name, done)
   function done(err) {
-    if (err) alert(err.message)
+    if (err) swal('Error While Publishing', err.message, 'error')
     else state.sync()
   }
 }

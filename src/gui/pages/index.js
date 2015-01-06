@@ -15,10 +15,13 @@ module.exports = {
     ))
   }),
   setup: require('./setup'),
-  feed: require('./feed'),
+  compose: require('./compose'),
+  posts: require('./posts'),
   inbox: require('./inbox'),
+  adverts: require('./adverts'),
+  feed: require('./feed'),
   message: require('./message'),
   profile: require('./profile'),
-  network: require('./network'),
+  'address-book': require('./address-book'),
   help: require('./help')
 }

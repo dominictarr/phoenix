@@ -4,11 +4,17 @@ module.exports = function(state) {
   // set the route
   state.page.param = null
   if (!hash || hash == '#' || hash == '#/')
-    state.page.id = 'feed'
-  else if (hash == '#/network')
-    state.page.id = 'network'
+    state.page.id = 'posts'
+  else if (hash == '#/compose')
+    state.page.id = 'compose'
+  else if (hash == '#/address-book')
+    state.page.id = 'address-book'
   else if (hash == '#/inbox')
     state.page.id = 'inbox'
+  else if (hash == '#/adverts')
+    state.page.id = 'adverts'
+  else if (hash == '#/feed')
+    state.page.id = 'feed'
   else if (hash.indexOf('#/profile/') === 0) {
     state.page.id = 'profile'
     state.page.param = hash.slice(10)
