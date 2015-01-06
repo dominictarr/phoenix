@@ -5,7 +5,6 @@ var emojiNamedCharacters = require('emoji-named-characters')
 var router = require('phoenix-router')
 var com = require('./com')
 var pages = require('./pages')
-var handlers = require('./handlers')
 var util = require('../lib/util')
 
 // gui master state object
@@ -56,8 +55,7 @@ module.exports = function(ssb, feed, profiles, network) {
   state.apis.network = network
 
   // wire up toplevel event handlers
-  document.body.addEventListener('click', runHandler('click'))
-  document.body.addEventListener('submit', runHandler('submit'))
+  document.body.addEventListener('click', navClickHandler)
   window.addEventListener('hashchange', function() { state.sync() })
   return state
 }
@@ -232,33 +230,16 @@ function getName(profile) {
   return (profile.self.name) ? '"'+profile.self.name+'"' : 'anon'//util.shortString(profile.id)
 }
 
-// - we map $HANDLER to events emitted by els with class of 'ev-$HANDLER'
-function runHandler(eventType) {
-  return function(e) {
-    // close any dropdowns
-    if (eventType == 'click') {
-      Array.prototype.forEach.call(document.querySelectorAll('.dropdown'), function(el) {
-        el.classList.remove('open')
-      })
-    }
+// looks for link clicks which should trigger page refreshes
+// (normally this is handled by onhashchange, but we need to watch for "on same page" clicks)
+function navClickHandler(e) {
+  var el = e.target
+  while (el) {
+    // check if this is a page navigation
+    if (el.tagName == "A" && el.origin == window.location.origin && el.hash && el.hash == window.location.hash)
+      return e.preventDefault(), e.stopPropagation(), state.sync()
 
-    var el = e.target
-    while (el) {
-      // check if this is a page navigation
-      // (normally this is handled by onhashchange, but we need to watch for "on same page" clicks)
-      if (eventType == 'click' && el.tagName == "A" && el.origin == window.location.origin && el.hash && el.hash == window.location.hash)
-        return e.preventDefault(), e.stopPropagation(), state.sync()
-      // try handlers
-      for (var k in handlers) {
-        if (k.indexOf(eventType) === -1) continue // filter by evt type
-        if (el.classList && el.classList.contains(k)) {
-          e.preventDefault()
-          e.stopPropagation()
-          return handlers[k](state, el, e)
-        }
-      }
-      // bubble up and keep looking
-      el = el.parentNode
-    }
+    // bubble up and keep looking
+    el = el.parentNode
   }
 }

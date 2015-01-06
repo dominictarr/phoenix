@@ -42,24 +42,41 @@ function messageRaw(state, msg) {
 }
 
 function renderMsgShell(state, msg, content) {
-  return h('.panel.panel-default.message', [
-    renderMsgHeader(state, msg),
-    h('.panel-body', content)
-  ])
-}
 
-function renderMsgHeader(state, msg) {
+  // markup 
+
   var nTextReplies = getReplies(state, msg, 'text').length
   var repliesStr = ''
   if (nTextReplies == 1) repliesStr = ' (1 reply)'
   if (nTextReplies > 1) repliesStr = ' ('+nTextReplies+' replies)'
 
-  return h('.panel-heading', [
-    com.userlink(msg.value.author, state.names[msg.value.author]),
-    ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
-    h('span', {innerHTML: ' &middot; '}), h('a.click-reply', { title: 'Reply', href: '#', 'data-msgid': msg.key }, 'reply')
-  ])
+  var msgbody = h('.panel-body', content)
+  var msgpanel = h('.panel.panel-default.message',
+    h('.panel-heading',
+      com.userlink(msg.value.author, state.names[msg.value.author]),
+      ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
+      h('span', {innerHTML: ' &middot; '}), h('a', { title: 'Reply', href: '#', onclick: reply }, 'reply')
+    ),
+    msgbody
+  )
+
+  // handlers
+
+  function reply (e) {
+    e.preventDefault()
+
+    if (!msgbody.nextSibling || !msgbody.nextSibling.classList || !msgbody.nextSibling.classList.contains('reply-form')) {
+      var form = com.postForm(state, msg.key)
+      if (msgbody.nextSibling)
+        msgbody.parentNode.insertBefore(form, msgbody.nextSibling)
+      else
+        msgbody.parentNode.appendChild(form)
+    }
+  }
+
+  return msgpanel
 }
+
 
 function getReplies(state, msg, typeFilter) {
   return (msg.replies || [])
