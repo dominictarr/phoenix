@@ -2,10 +2,10 @@ var h = require('hyperscript')
 var pull = require('pull-stream')
 var multicb = require('multicb')
 var emojiNamedCharacters = require('emoji-named-characters')
+var router = require('phoenix-router')
 var com = require('./com')
 var pages = require('./pages')
 var handlers = require('./handlers')
-var router = require('./router')
 var util = require('../lib/util')
 
 // gui master state object
@@ -58,10 +58,7 @@ module.exports = function(ssb, feed, profiles, network) {
   // wire up toplevel event handlers
   document.body.addEventListener('click', runHandler('click'))
   document.body.addEventListener('submit', runHandler('submit'))
-  window.addEventListener('hashchange', function() { router(state), state.sync() })
-
-  // run the router
-  router(state)
+  window.addEventListener('hashchange', function() { state.sync() })
   return state
 }
 
@@ -75,6 +72,11 @@ state.sync = function(cb) {
 
   // clear pending messages
   this.setPendingMessages(0)
+
+  // run the router
+  var route = router(window.location.hash, 'posts')
+  state.page.id = route[0]
+  state.page.param = route[1]
 
   // sync the apis with ssb
   // :TODO: only one log feed
@@ -193,7 +195,7 @@ function runHandler(eventType) {
       // check if this is a page navigation
       // (normally this is handled by onhashchange, but we need to watch for "on same page" clicks)
       if (eventType == 'click' && el.tagName == "A" && el.origin == window.location.origin && el.hash && el.hash == window.location.hash)
-        return e.preventDefault(), e.stopPropagation(), router(state), state.sync()
+        return e.preventDefault(), e.stopPropagation(), state.sync()
       // try handlers
       for (var k in handlers) {
         if (k.indexOf(eventType) === -1) continue // filter by evt type

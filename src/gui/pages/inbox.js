@@ -3,6 +3,10 @@ var pull = require('pull-stream')
 var com = require('../com')
 
 module.exports = function(state) {
+  // track read messages
+  state.unreadMessages = 0
+  localStorage.readMessages = JSON.stringify(state.inbox)
+
   var msgs = []
   for (var i=state.inbox.length-1; i>=0; i--) {
     var m = com.messageSummary(state, state.msgsById[state.inbox[i]])

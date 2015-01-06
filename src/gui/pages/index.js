@@ -1,27 +1,23 @@
 var h = require('hyperscript')
 var com = require('../com')
 
-function simple(cb) {
-  return function(state) {
-    state.setPage(cb(state))
-  }
+function notfound (state) {
+  state.setPage(com.page(state, 'notfound', h('.row',
+    h('.col-xs-2.col-md-1', com.sidenav(state)),
+    h('.col-xs-10.col-md-11', h('p', h('strong', 'Not Found')))
+  )))
 }
 
 module.exports = {
-  notfound: simple(function(state) {
-    return com.page(state, 'notfound', h('.row',
-      h('.col-xs-2.col-md-1', com.sidenav(state)),
-      h('.col-xs-10.col-md-11', h('p', h('strong', 'Not Found')))
-    ))
-  }),
-  setup: require('./setup'),
-  compose: require('./compose'),
-  posts: require('./posts'),
-  inbox: require('./inbox'),
-  adverts: require('./adverts'),
-  feed: require('./feed'),
-  message: require('./message'),
-  profile: require('./profile'),
   'address-book': require('./address-book'),
-  help: require('./help')
+  adverts:        require('./adverts'),
+  compose:        require('./compose'),
+  feed:           require('./feed'),
+  help:           require('./help'),
+  inbox:          require('./inbox'),
+  msg:            require('./message'),
+  posts:          require('./posts'),
+  notfound:       notfound,
+  profile:        require('./profile'),
+  setup:          require('./setup')
 }
