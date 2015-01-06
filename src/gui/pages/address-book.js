@@ -7,16 +7,22 @@ module.exports = function(state) {
     h('.col-xs-2.col-md-1', com.sidenav(state)),
     h('.col-xs-8',
       h('table.table.addresses',
-        h('thead', h('tr', h('th', 'Name'), h('th.text-center', {width:'70'}, 'Follow'))),
+        h('thead', h('tr', h('th', 'Name'), h('th', {width: '100'}), h('th.text-center', {width:'70'}, 'Follow'))),
         h('tbody',
           Object.keys(state.profiles).map(function(id) { 
             var profile = state.profiles[id]
+            var otherNames = getOtherNames(state.names[id], profile)
             return h('tr',
               h('td', 
                 h('button.btn.btn-primary.btn-sm', {title: 'Rename'}, com.icon('pencil')), ' ',
                 h('strong', com.a('#/profile/'+id, state.names[id])),
-                ' ', h('small.text-muted', 'aka bob, robert'),
-                ' ', (~state.user.followers.indexOf(id)) ? h('span.label.label-success', 'follows you') : ''
+                ' ', 
+                (otherNames.length)
+                  ? h('small.text-muted', 'aka ', otherNames.join(', '))
+                  : ''
+              ),
+              h('td',
+                (~state.user.followers.indexOf(id)) ? h('small.text-muted', 'follows you') : ''
               ),
               h('td.text-center', 
                 (~state.user.following.indexOf(id))
@@ -28,30 +34,33 @@ module.exports = function(state) {
         )
       )
     ),
-    // h('.col-xs-2',
-    //   h('p', h('strong', 'Following')),
-    //   h('p', state.user.following.map(function(id) { 
-    //     return h('span', com.a('#/profile/'+id, state.names[id]), h('br'))
-    //   }))
-    // ),
-    // h('.col-xs-2',
-    //   h('p', h('strong', 'Followers')),
-    //   h('p', state.user.followers.map(function(id) { 
-    //     return h('span', com.a('#/profile/'+id, state.names[id]), h('br'))
-    //   }))
-    // ),
-    // h('.col-xs-2',
-    //   h('p', h('strong', 'Network Peers')),
-    //   h('p', state.peers.map(function(peer) { 
-    //     var addr = peer.host
-    //     if (peer.port && peer.port != 2000)
-    //       addr += ':'+peer.port
-    //     return h('span', addr, h('br'))
-    //   }))
     h('.col-xs-2.col-md-3',
       com.adverts(state),
       h('hr'),
       com.sidehelp()
     )
   )))
+}
+
+function getOtherNames(name, profile) {
+  // todo - replace with ranked names
+
+  // remove scare quotes 
+  if (name.charAt(0) === '"' && name.charAt(name.length - 1) === '"')
+    name = name.slice(1, -1)
+
+  var names = []
+  function add(n) {
+    if (n && n !== name && !~names.indexOf(n))
+      names.push(n)
+  }
+
+  // get 3 of the given or self-assigned names
+  add(profile.self.name)
+  for (var k in profile.given) {
+    if (names.length >= 3)
+      break
+    add(profile.given[k].name)
+  }
+  return names
 }
