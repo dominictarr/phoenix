@@ -22,7 +22,7 @@ module.exports = function(state) {
         'Hah, screw that. Around here, you have to know a techie with a server to get connected.'
       ),
       h('p', 'You... do know a techie, right? Ask them for an invite code, then click ',
-        h('button.btn.btn-xs.btn-primary.click-add-contact', 'Add contact'),
+        h('button.btn.btn-xs.btn-primary', { onclick: state.followPrompt }, 'Add contact'),
         ' and copy+paste it into the popup. The rest happens automatically.'
       ),
       h('p',

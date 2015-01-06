@@ -165,6 +165,33 @@ state.setPendingMessages = function(n) {
   }
 }
 
+state.followPrompt = function(e) {
+  e.preventDefault()
+
+  var id = prompt('Enter the contact id or invite code')
+  if (!id)
+    return
+
+  var parts = id.split(',')
+  var isInvite = (parts.length === 3)
+  if (isInvite) state.apis.ssb.invite.addMe(id, next)
+  else state.apis.network.follow(id, next)
+    
+  function next (err) {
+    if (err) {
+      console.error(err)
+      swal('Error While Connecting', err.message, 'error')
+    }
+    else {
+      if (isInvite)
+        swal('Invite Code Accepted', 'You are now hosted by '+parts[0], 'success')
+      else
+        swal('Contact Added', 'You will now follow the messages published by your new contact.', 'success')
+      state.sync()
+    }
+  }
+}
+
 state.setPage = function(page) {
   var el = document.getElementById('page-container')
   el.innerHTML = ''

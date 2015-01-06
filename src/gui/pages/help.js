@@ -23,12 +23,12 @@ module.exports = function(state) {
       panel('Contacts', [
         'Scuttlebutt searches the network for messages from your contacts, plus messages from the people your contacts follow. ',
         'If you want to be sure you get a specific persons\'s messages, ', 
-        h('button.btn.btn-xs.btn-primary.click-add-contact', 'Follow their contact id')
+        h('button.btn.btn-xs.btn-primary', { onclick: state.followPrompt }, 'Follow their contact id')
       ]),
       panel('Following Users', [
         'To follow somebody, find their profile page and hit the "Follow" button. ',
         'If you have their ID but not their profile page, you can hit ', 
-        h('button.btn.btn-xs.btn-primary.click-add-contact', 'Add contact'), 
+        h('button.btn.btn-xs.btn-primary', { onclick: state.followPrompt }, 'Add contact'), 
         ' on the top right and enter the ID in the popup.'
       ]),
       panel('Pub Servers', [
@@ -41,7 +41,7 @@ module.exports = function(state) {
       panel('Invite Codes', [
         'If someone you know is running a pub server, ask them for an invite code. ',
         'You can use the code by pasting it into the ', 
-        h('button.btn.btn-xs.btn-primary.click-add-contact', 'Add contact'), 
+        h('button.btn.btn-xs.btn-primary', { onclick: state.followPrompt }, 'Add contact'), 
         ' dialog, just like when following somebody.'
       ]),
       panel('Running a Pub Server', [

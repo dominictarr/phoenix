@@ -16,6 +16,5 @@ module.exports = {
   },
   'click-follow': require('./profiles').follow,
   'click-unfollow': require('./profiles').unfollow,
-  'click-set-name': require('./profiles').setName,
-  'click-add-contact': require('./profiles').followPrompt
+  'click-set-name': require('./profiles').setName
 }
