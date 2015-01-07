@@ -18,8 +18,5 @@ module.exports = {
   // publishers
   postText: 'async',
   postReply: 'async',
-  postAction: 'async',
-  postReaction: 'async',
-  postAdvert: 'async',
-  rebroadcast: 'async'
+  postAdvert: 'async'
 }

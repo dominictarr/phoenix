@@ -10,7 +10,7 @@ module.exports = function(state) {
     var ad = state.msgsById[state.adverts[i]]
     ads.push(h('.col-xs-3',
       h('small', 'advert by ', com.userlink(ad.value.author, state.names[ad.value.author])),
-      h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text), state.names) })
+      h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.markdown), state.names) })
     ))
   }
 

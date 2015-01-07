@@ -27,23 +27,15 @@ module.exports.init = function(ssb) {
     // index
     msgs[msg.key] = msg
     allFeed.push(msg)
-    if (msg.value.content.type == 'post' && msg.value.content.postType == 'advert' && !!msg.value.content.text)
+    if (msg.value.content.type == 'advert' && !!msg.value.content.text)
       adverts.push(msg.key)
     ssbmsgs.indexLinks(msg.value.content, function(link) {
-      if (link.rel == 'rebroadcasts') indexRebroadcast(msg, link)
       if (link.rel == 'replies-to')   indexReply(msg, link)
       if (link.rel == 'mentions')     indexMentions(msg, link)
     })
 
     // render message
     msg.markdown = toMarkdown(msg)
-  }
-
-  function indexRebroadcast(msg, link) {
-    try {
-      if (!link.msg) return
-      msg.isRebroadcast = true
-    } catch(e) { console.warn('failed to index rebroadcast', msg, e) }
   }
 
   function indexReply(msg, link) {
@@ -127,54 +119,27 @@ module.exports.init = function(ssb) {
     // publishers
     postText: function(text, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-      post({type: 'post', postType: 'text', text: text}, cb)
+      post({type: 'post', text: text}, cb)
     },
     postReply: function(text, parent, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
       if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-      post({type: 'post', postType: 'text', text: text, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
-    },
-    postAction: function(text, cb) {
-      if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-      post({type: 'post', postType: 'action', text: text}, cb)
-    },
-    postReaction: function(text, parent, cb) {
-      if (!text.trim()) return cb(new Error('Can not post an empty string to the feed'))
-      if (!parent) return cb(new Error('Must provide a parent message to the reply'))
-      post({type: 'post', postType: 'action', text: text, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
+      post({type: 'post', text: text, repliesTo: {msg: parent, rel: 'replies-to'}}, cb)
     },
     postAdvert: function(text, cb) {
       if (!text.trim()) return cb(new Error('Can not post an empty string to the adverts'))
-      post({type: 'post', postType: 'advert', text: text}, cb)      
-    },
-    rebroadcast: function(msg, cb) {
-      var content = JSON.parse(JSON.stringify(msg.value.content))
-      if (!content.rebroadcasts) {
-        content.rebroadcasts = {
-          rel: 'rebroadcasts',
-          msg: msg.key,
-          feed: msg.value.author,
-          timestamp: msg.value.timestamp
-        }
-      }
-      ssb.add(content, cb)
+      post({type: 'advert', text: text}, cb)      
     }
   }
 }
 
 function toMarkdown(msg) {
   try {
-    var author = msg.value.author
     var content = msg.value.content
-    if (content.type == 'post') {
-      if (content.postType == 'text')
-        return content.text
-      if (content.postType == 'action') {
-        if (msg.repliesToLink)
-          return '@'+author+' '+content.text+' [this](#/msg/'+msg.repliesToLink.msg+')'
-        return '@'+author+' '+content.text
-      }
-    }
+    if (content.type == 'post' && content.text)
+      return content.text
+    if (content.type == 'advert' && content.text)
+      return content.text
   } catch (e) {}
   return null
 }

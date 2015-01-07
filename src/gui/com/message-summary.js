@@ -5,7 +5,7 @@ var markdown = require('../../lib/markdown')
 
 module.exports = function(state, msg, opts) {
   var content = msg.markdown
-  if (!content) {
+  if (!content || msg.value.content.type != 'post') {
     if (!opts || !opts.mustRender)
       return ''
     content = JSON.stringify(msg.value.content)
@@ -36,7 +36,7 @@ function getReplies(state, msg, typeFilter) {
     .map(function(id) { return state.msgsById[id] })
     .filter(function(reply) {
       if (!reply) return false
-      if (typeFilter && reply.value.content.postType != typeFilter) return false
+      if (typeFilter && !reply.value.content[typeFilter]) return false
       return true
     })
 }
