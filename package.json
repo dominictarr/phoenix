@@ -8,6 +8,8 @@
     "url": "git://github.com/ssbc/phoenix.git"
   },
   "scripts": {
+    "browserify": "mkdir -p js; browserify -o js/home.js src/home.js",
+    "css": "mkdir -p css; lessc less/home.less css/home.css",
     "build": "mkdir -p js; browserify -o js/home.js src/home.js; mkdir -p css; lessc less/home.less css/home.css",
     "build-tests": "browserify -o test/app-auth.js test/src/app-auth.js",
     "tests-host": "cd test; python -m SimpleHTTPServer"
@@ -45,7 +47,8 @@
     "through": "~2.3.4",
     "value-event": "~3.2.0",
     "websocket-stream": "~1.1.0",
-    "xtend": "~3.0.0"
+    "xtend": "~3.0.0",
+    "nicedate": "~0.0.0"
   },
   "devDependencies": {
     "browserify": "~6.2.0",
