@@ -5,7 +5,7 @@ var Serializer = require('pull-serializer')
 var auth       = require('./lib/ssb-domain-auth')
 
 var ssb        = muxrpc(require('./mans/ssb'), false, serialize)()
-var localhost  = require('./lib/ssb-channel').connect(ssb, 'localhost')
+var localhost  = require('ssb-channel').connect(ssb, 'localhost')
 var self       = require('./apis')(ssb)
 
 var gui = require('./gui')(ssb, self.feed, self.profiles, ssb.friends)
@@ -40,7 +40,7 @@ localhost.on('error', function(err) {
   // inform user and attempt a reconnect
   console.log('Connection Error', err)
   gui.setConnectionStatus(false, 'Lost connection to the host program. Please restart the host program. Trying again in 10 seconds.')
-  localhost.reset()
+  localhost.reconnect()
 })
 localhost.on('reconnecting', function(err) {
   console.log('Attempting Reconnect')
