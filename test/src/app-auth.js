@@ -39,7 +39,7 @@ loginBtn.onclick = function(e){
     perms: ['whoami', 'add', 'messagesByType', 'createLogStream']
   }, function(err, granted) {
     if (granted)
-      ssbchan.reconnect()
+      ssbchan.reconnect({ wait: 0 })
   })
 }
 logoutBtn.onclick = function(e){
