@@ -19,12 +19,11 @@ var state = {
   profiles: {},
   names: {},
   peers: [],
+  edges: {},
 
   // ui state
   user: {
-    id: null,
-    following: [],
-    followers: []
+    id: null
   },
   page: {
     id: 'feed',
@@ -47,12 +46,12 @@ for (var emoji in emojiNamedCharacters) {
 }
 
 // init func
-module.exports = function(ssb, feed, profiles, network) {
+module.exports = function(ssb, feed, profiles, friends) {
   // connect the state object to the apis
   state.apis.ssb = ssb
   state.apis.feed = feed
   state.apis.profiles = profiles
-  state.apis.network = network
+  state.apis.friends = friends
 
   // wire up toplevel event handlers
   document.body.addEventListener('click', navClickHandler)
@@ -66,7 +65,7 @@ state.sync = function(cb) {
   var ssb = this.apis.ssb
   var feed = this.apis.feed
   var profiles = this.apis.profiles
-  var network = this.apis.network
+  var friends = this.apis.friends
 
   // clear pending messages
   this.setPendingMessages(0)
@@ -82,7 +81,6 @@ state.sync = function(cb) {
   var done = multicb()
   pull(ssb.createLogStream({ gt: lastSync }), feed.in(done()))
   pull(ssb.createLogStream({ gt: lastSync }), profiles.in(done()))
-  pull(ssb.createLogStream({ gt: lastSync }), network.in(done()))
   done(function(err) {
     if (err)
       console.error(err)
@@ -94,9 +92,9 @@ state.sync = function(cb) {
     pull(feed.inbox(state.user.id), pull.collect(done()))
     pull(feed.adverts(), pull.collect(done()))
     profiles.getAll(done())
-    pull(network.pubPeers(), pull.collect(done()))
-    pull(network.following(state.user.id), pull.collect(done()))
-    pull(network.followers(state.user.id), pull.collect(done()))
+    friends.all('follow', done())
+    friends.all('trust', done())
+    friends.all('flag', done())
     done(function(err, r) {
       if (err)
         console.error(err)
@@ -106,9 +104,9 @@ state.sync = function(cb) {
         state.inbox = r[1][1]
         state.adverts = r[2][1]
         state.profiles = r[3][1]
-        state.peers = r[4][1]
-        state.user.following = r[5][1]
-        state.user.followers = r[6][1]
+        state.edges.follow = r[4][1]
+        state.edges.trust = r[5][1]
+        state.edges.flag = r[6][1]
 
         // compute additional structures
         state.msgs.forEach(function(msg) {
@@ -144,6 +142,17 @@ state.sync = function(cb) {
 
 state.setUserId = function(id) { state.user.id = id }
 state.showUserId = function() { swal('Here is your contact id', state.user.id) }
+
+state.hasEdge = function (type, a, b) { return state.edges[type] && state.edges[type][a] && state.edges[type][a][b] }
+state.addEdge = function (type, target, cb) {
+  if (!target || typeof target != 'string') return cb(new Error('`target` string is required'))
+  state.apis.ssb.add({ type: type, rel: type+'s', feed: target }, cb)
+}
+state.delEdge = function (type, target, cb) {
+  if (!target || typeof target != 'string') return cb(new Error('`target` string is required'))
+  state.apis.ssb.add({ type: type, rel: 'un'+type+'s', feed: target }, cb)
+}
+
 state.setConnectionStatus = function (isConnected, message) {
   var connStatus = document.getElementById('conn-status')
   connStatus.innerHTML = ''
@@ -173,7 +182,7 @@ state.followPrompt = function(e) {
   var parts = id.split(',')
   var isInvite = (parts.length === 3)
   if (isInvite) state.apis.ssb.invite.addMe(id, next)
-  else state.apis.network.follow(id, next)
+  else state.addEdge('follow', id, next)
     
   function next (err) {
     if (err) {
