@@ -125,7 +125,7 @@ module.exports = function(state) {
 
   function addEdge (type) {
     return function (e) {
-      e && e.preventDefault()
+      if (e) e.preventDefault()
       if (!state.hasEdge(type, state.user.id, pid)) {
         state.addEdge(type, pid, function(err) {
           if (err) swal('Error While Publishing', err.message, 'error')
@@ -137,7 +137,7 @@ module.exports = function(state) {
 
   function delEdge (type) {
     return function (e) {
-      e && e.preventDefault()
+      if (e) e.preventDefault()
       if (state.hasEdge(type, state.user.id, pid)) {
         state.delEdge(type, pid, function(err) {
           if (err) swal('Error While Publishing', err.message, 'error')
