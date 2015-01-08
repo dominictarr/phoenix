@@ -51,11 +51,11 @@ module.exports = function(server) {
       b.add(resolve('src/'+path.basename(req.url)))
       return b.bundle(once(function (err, jsStr) {
         if (err) {
+          console.error(err.toString())
           if (err.toString().indexOf('Cannot find module') !== -1)
             return next() // not found, try pre-built static
           res.writeHead(500)
           res.end(err.toString())
-          console.error(err.toString())
         } else {
           type('application/javascript')
           res.writeHead(200)
