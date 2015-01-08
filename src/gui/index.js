@@ -145,10 +145,12 @@ state.showUserId = function() { swal('Here is your contact id', state.user.id) }
 
 state.hasEdge = function (type, a, b) { return state.edges[type] && state.edges[type][a] && state.edges[type][a][b] }
 state.addEdge = function (type, target, cb) {
+  // TODO should this be in the state object? seems like interpretation layer
   if (!target || typeof target != 'string') return cb(new Error('`target` string is required'))
   state.apis.ssb.add({ type: type, rel: type+'s', feed: target }, cb)
 }
 state.delEdge = function (type, target, cb) {
+  // TODO should this be in the state object? seems like interpretation layer
   if (!target || typeof target != 'string') return cb(new Error('`target` string is required'))
   state.apis.ssb.add({ type: type, rel: 'un'+type+'s', feed: target }, cb)
 }
