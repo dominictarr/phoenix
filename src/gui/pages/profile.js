@@ -6,7 +6,7 @@ var util = require('../../lib/util')
 module.exports = function(state) {
   var pid = state.page.param
   var profile = state.profiles[pid]
-  var isFollowing = (state.user.following.indexOf(pid) != -1)
+  var isFollowing = state.hasEdge('follow', state.user.id, pid)
 
   // render messages
   var msgfeed, msgs = [], hasMsgs = false
@@ -38,14 +38,14 @@ module.exports = function(state) {
   } else {
     renameBtn = h('button.btn.btn-primary', {title: 'Rename', onclick: rename}, com.icon('pencil'))
     followBtn = (isFollowing)
-      ? h('button.btn.btn-primary', { onclick: unfollow }, com.icon('minus'), ' Unfollow')
-      : h('button.btn.btn-primary', { onclick: follow }, com.icon('plus'), ' Follow')
-    trustBtn = (isFollowing)
-      ? h('button.btn.btn-danger', com.icon('remove'), ' Untrust')
-      : h('button.btn.btn-success', com.icon('lock'), ' Trust')
-    flagBtn = (isFollowing)
-      ? h('button.btn.btn-success', com.icon('ok'), ' Unflag')
-      : h('button.btn.btn-danger', com.icon('flag'), ' Flag')
+      ? h('button.btn.btn-primary', { onclick: delEdge('follow') }, com.icon('minus'), ' Unfollow')
+      : h('button.btn.btn-primary', { onclick: addEdge('follow') }, com.icon('plus'), ' Follow')
+    trustBtn = (state.hasEdge('trust', state.user.id, pid))
+      ? h('button.btn.btn-danger', { onclick: delEdge('trust') }, com.icon('remove'), ' Untrust')
+      : h('button.btn.btn-success', { onclick: trustPrompt }, com.icon('lock'), ' Trust')
+    flagBtn = (state.hasEdge('flag', state.user.id, pid))
+      ? h('button.btn.btn-success', { onclick: delEdge('flag') }, com.icon('ok'), ' Unflag')
+      : h('button.btn.btn-danger',{ onclick: flagPrompt },  com.icon('flag'), ' Flag')
   } 
 
   // given names
@@ -88,25 +88,62 @@ module.exports = function(state) {
 
   // handlers
 
-  function follow (e) {
+  function trustPrompt(e) {
     e.preventDefault()
-    var isFollowing = (state.user.following.indexOf(pid) != -1)
-    if (!isFollowing) {
-      state.apis.network.follow(pid, function(err) {
-        if (err) swal('Error While Publishing', err.message, 'error')
-        else state.sync()
-      })
+    swal({
+      title: 'Trust '+util.escapePlain(name)+'?',
+      text: [
+        'Use their data (names, trusts, flags) in your own account?',
+        'Only do this if you know this account is your friend, you trust them, and you think other people should too!'
+      ].join(' '),
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#12b812',
+      confirmButtonText: 'Trust'
+    }, function() {
+      addEdge('trust')()
+    })
+  }
+
+  function flagPrompt(e) {
+    e.preventDefault()
+    swal({
+      title: 'Flag '+util.escapePlain(name)+'?',
+      text: [
+        'Warn people about this user?',
+        'This will hurt their network reputation and cause fewer people to trust them.',
+        'Only do this if you believe they are a spammer, troll, or attacker.'
+      ].join(' '),
+      type: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#d9534f',
+      confirmButtonText: 'Flag'
+    }, function() {
+      addEdge('flag')()
+    })
+  }
+
+  function addEdge (type) {
+    return function (e) {
+      e && e.preventDefault()
+      if (!state.hasEdge(type, state.user.id, pid)) {
+        state.addEdge(type, pid, function(err) {
+          if (err) swal('Error While Publishing', err.message, 'error')
+          else state.sync()
+        })
+      }
     }
   }
 
-  function unfollow (e) {
-    e.preventDefault()
-    var isFollowing = (state.user.following.indexOf(pid) != -1)
-    if (isFollowing) {
-      state.apis.network.unfollow(pid, function(err) {
-        if (err) swal('Error While Publishing', err.message, 'error')
-        else state.sync()
-      })
+  function delEdge (type) {
+    return function (e) {
+      e && e.preventDefault()
+      if (state.hasEdge(type, state.user.id, pid)) {
+        state.delEdge(type, pid, function(err) {
+          if (err) swal('Error While Publishing', err.message, 'error')
+          else state.sync()
+        })
+      }
     }
   }
 

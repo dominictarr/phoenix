@@ -12,11 +12,10 @@ module.exports = function(state) {
   }
 
   var content = [h('table.table.message-feed', msgs)]
-  if (msgs.length === 0 || state.user.followers.length === 0) {
-    var why = (msgs.length === 0) ? 'your feed is empty' : 'you have no followers'
+  if (msgs.length === 0) {
     content = content.concat([
       h('hr'),
-      h('p', h('strong', 'You must be new, because '+why+'!')),
+      h('p', h('strong', 'You must be new, because your feed is empty!')),
       h('p', 
         'Let\'s fix that. Remember how, when facebook came out, you had to have a .edu to join? ',
         'Hah, screw that. Around here, you have to know a techie with a server to get connected.'

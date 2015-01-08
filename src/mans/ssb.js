@@ -27,5 +27,11 @@ module.exports = {
   // invites
   invite: {
     addMe: 'async'
+  },
+
+  // friends
+  friends: {
+    all: 'sync',
+    hops: 'sync'
   }
 }

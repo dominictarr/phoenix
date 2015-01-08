@@ -5,7 +5,7 @@ var localhost = require('./lib/localhost-ws')
 var ssb       = localhost // :TODO: ssb should be a sub api
 var self      = apis(ssb)
 
-var gui = require('./gui')(ssb, self.feed, self.profiles, self.network)
+var gui = require('./gui')(ssb, self.feed, self.profiles, ssb.friends)
 
 localhost.on('socket:connect', function() {
   gui.setConnectionStatus(true)

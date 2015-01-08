@@ -24,11 +24,9 @@ module.exports = function(state) {
                   ? h('small.text-muted', 'aka ', otherNames.join(', '))
                   : ''
               ),
-              h('td',
-                (~state.user.followers.indexOf(id)) ? h('small.text-muted', 'follows you') : ''
-              ),
+              h('td', (state.hasEdge('follow', id, state.user.id)) ? h('small.text-muted', 'follows you') : ''),
               h('td.text-center', 
-                (~state.user.following.indexOf(id))
+                (state.hasEdge('follow', state.user.id, id))
                   ? h('button.btn.btn-primary.btn-sm', { title: 'Unfollow', onclick: unf }, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
                   : h('button.btn.btn-primary.btn-sm', { title: 'Follow', onclick: f }, com.icon('plus'))
               )
@@ -52,9 +50,8 @@ module.exports = function(state) {
 
   function follow (e, pid) {
     e.preventDefault()
-    var isFollowing = (state.user.following.indexOf(pid) != -1)
-    if (!isFollowing) {
-      state.apis.network.follow(pid, function(err) {
+    if (!state.hasEdge('follow', state.user.id, pid)) {
+      state.addEdge('follow', pid, function(err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else state.sync()
       })
@@ -63,9 +60,8 @@ module.exports = function(state) {
 
   function unfollow (e, pid) {
     e.preventDefault()
-    var isFollowing = (state.user.following.indexOf(pid) != -1)
-    if (isFollowing) {
-      state.apis.network.unfollow(pid, function(err) {
+    if (state.hasEdge('follow', state.user.id, pid)) {
+      state.delEdge('follow', pid, function(err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else state.sync()
       })
