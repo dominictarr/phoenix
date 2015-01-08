@@ -2,7 +2,7 @@ var muxrpc     = require('muxrpc')
 var pull       = require('pull-stream')
 var multicb    = require('multicb')
 var Serializer = require('pull-serializer')
-var auth       = require('./lib/ssb-domain-auth')
+var auth       = require('ssb-domain-auth')
 
 var ssb        = muxrpc(require('./mans/ssb'), false, serialize)()
 var localhost  = require('ssb-channel').connect(ssb, 'localhost')

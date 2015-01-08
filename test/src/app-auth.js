@@ -1,7 +1,7 @@
 var muxrpc = require('muxrpc')
 var Serializer = require('pull-serializer')
-var chan = require('../../src/lib/ssb-channel')
-var auth = require('../../src/lib/ssb-domain-auth')
+var chan = require('ssb-channel')
+var auth = require('ssb-domain-auth')
 var loginBtn = document.getElementById('loginbtn')
 var logoutBtn = document.getElementById('logoutbtn')
 
