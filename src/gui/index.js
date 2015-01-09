@@ -116,7 +116,7 @@ state.sync = function(cb) {
         for (var k in state.profiles) {
           var profile = state.profiles[k]
           state.names[k] = getName(profile)
-          state.suggestOptions['@'].push({ title: state.names[profile.id], subtitle: util.shortString(profile.id), value: profile.id })
+          state.suggestOptions['@'].push({ title: state.names[profile.id], subtitle: util.shortString(profile.id), value: state.names[profile.id] })
         }
         var readMessages = []
         try { readMessages = JSON.parse(localStorage.readMessages) } catch(e) {}
