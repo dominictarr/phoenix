@@ -18,7 +18,7 @@ exports.block = function(text, names, allowHtml) {
   return mentionLinks(marked(text||'', {sanitize: !allowHtml}), names)
 }
 
-var mentionRegex = /(\s|>|^)@([^\s]+)/g;
+var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
 var mentionLinks =
 exports.mentionLinks = function (str, names, spansOnly) {
   if (!names)

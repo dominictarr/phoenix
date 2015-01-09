@@ -49,7 +49,7 @@ module.exports = function(state, parent) {
   }
 
   // find any mentions and replace the nicknames with ids
-  var mentionRegex = /(\s|>|^)@([^\s]+)/g;
+  var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
   function replaceMentions(str) {
     return str.replace(mentionRegex, function(full, $1, $2) {
       var id = state.ids[$2]
