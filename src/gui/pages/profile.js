@@ -94,7 +94,7 @@ module.exports = function(state) {
       title: 'Trust '+util.escapePlain(name)+'?',
       text: [
         'Use their data (names, trusts, flags) in your own account?',
-        'Only do this if you know this account is your friend, you trust them, and you think other people should too!'
+        'Only do this if you know this account is your friend\'s, you trust them, and you think other people should too!'
       ].join(' '),
       type: 'warning',
       showCancelButton: true,

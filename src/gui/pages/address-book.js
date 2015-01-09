@@ -17,14 +17,17 @@ module.exports = function(state) {
             function unf (e) { unfollow(e, id) }
             return h('tr',
               h('td', 
-                h('button.btn.btn-primary.btn-sm', {title: 'Rename', onclick: r}, com.icon('pencil')), ' ',
+                h('button.btn.btn-primary.btn-sm', { title: 'Rename', onclick: r }, com.icon('pencil')), ' ',
                 h('strong', com.a('#/profile/'+id, state.names[id])),
                 ' ', 
                 (otherNames.length)
                   ? h('small.text-muted', 'aka ', otherNames.join(', '))
                   : ''
               ),
-              h('td', (state.hasEdge('follow', id, state.user.id)) ? h('small.text-muted', 'follows you') : ''),
+              h('td', 
+                (state.hasEdge('trust', state.user.id, id)) ? h('small.text-muted', com.icon('lock'), ' trusted') : '',
+                (state.hasEdge('flag', state.user.id, id)) ? h('small.text-muted', com.icon('flag'), ' flagged') : ''
+              ),
               h('td.text-center', 
                 (state.hasEdge('follow', state.user.id, id))
                   ? h('button.btn.btn-primary.btn-sm', { title: 'Unfollow', onclick: unf }, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
