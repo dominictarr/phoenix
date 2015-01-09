@@ -231,14 +231,19 @@ state.setPage = function(page) {
   el.appendChild(page)
 }
 
+var spacesRgx = /\s/g
+function noSpaces(str) {
+  return str.replace(spacesRgx, '_')
+}
+
 function getName(profile) {
   if (profile.id == state.user.id)
-    return profile.self.name || util.shortString(profile.id)
+    return noSpaces(profile.self.name) || util.shortString(profile.id)
   for (var id in profile.given) {
     if (id == state.user.id && profile.given[id].name)
-      return profile.given[id].name
+      return noSpaces(profile.given[id].name)
   }
-  return (profile.self.name) ? '"'+profile.self.name+'"' : 'anon'//util.shortString(profile.id)
+  return (profile.self.name) ? '"'+noSpaces(profile.self.name)+'"' : 'anon'//util.shortString(profile.id)
 }
 
 // looks for link clicks which should trigger page refreshes
