@@ -18,14 +18,16 @@ exports.block = function(text, names, allowHtml) {
   return mentionLinks(marked(text||'', {sanitize: !allowHtml}), names)
 }
 
-var mentionRegex = /(\s|>|^)@([A-z0-9\/=\.\+]+)/g;
+var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
 var mentionLinks =
-exports.mentionLinks = function (str, names) {
+exports.mentionLinks = function (str, names, spansOnly) {
   if (!names)
     return str
   return str.replace(mentionRegex, function(full, $1, $2) {
-    var nickname = names[$2] || $2;
-    return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + nickname + '</a>'
+    var name = names[$2]
+    if (!name || spansOnly)
+      return ($1||'') + '<strong class="user-link">@'+(name||$2)+'</strong>'
+    return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + name + '</a>'
   })
 }
 

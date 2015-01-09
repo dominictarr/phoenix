@@ -17,7 +17,8 @@ var state = {
   inbox: [],
   adverts: [],
   profiles: {},
-  names: {},
+  names: {}, // id -> name
+  ids: {}, // name -> id
   peers: [],
   edges: {},
 
@@ -116,7 +117,8 @@ state.sync = function(cb) {
         for (var k in state.profiles) {
           var profile = state.profiles[k]
           state.names[k] = getName(profile)
-          state.suggestOptions['@'].push({ title: state.names[profile.id], subtitle: util.shortString(profile.id), value: profile.id })
+          state.ids[state.names[k]] = k
+          state.suggestOptions['@'].push({ title: state.names[profile.id], subtitle: util.shortString(profile.id), value: state.names[profile.id] })
         }
         var readMessages = []
         try { readMessages = JSON.parse(localStorage.readMessages) } catch(e) {}
@@ -231,14 +233,19 @@ state.setPage = function(page) {
   el.appendChild(page)
 }
 
+var spacesRgx = /\s/g
+function noSpaces(str) {
+  return str.replace(spacesRgx, '_')
+}
+
 function getName(profile) {
   if (profile.id == state.user.id)
-    return profile.self.name || util.shortString(profile.id)
+    return noSpaces(profile.self.name) || util.shortString(profile.id)
   for (var id in profile.given) {
     if (id == state.user.id && profile.given[id].name)
-      return profile.given[id].name
+      return noSpaces(profile.given[id].name)
   }
-  return (profile.self.name) ? '"'+profile.self.name+'"' : 'anon'//util.shortString(profile.id)
+  return (profile.self.name) ? '"'+noSpaces(profile.self.name)+'"' : 'anon'//util.shortString(profile.id)
 }
 
 // looks for link clicks which should trigger page refreshes

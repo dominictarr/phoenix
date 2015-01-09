@@ -12,7 +12,7 @@ module.exports = function(state, msg, opts) {
   }
   content = util.escapePlain(content)
   content = markdown.emojis(content)
-  content = markdown.mentionLinks(content, state.names)
+  content = markdown.mentionLinks(content, state.names, true)
 
   var len = noHtmlLen(content)
   if (len > 60 || content.length > 512) {
@@ -24,7 +24,7 @@ module.exports = function(state, msg, opts) {
   if (nTextReplies)
     repliesStr = ' ('+nTextReplies+')'
 
-  return h('tr.message-summary', { onclick: function() { window.location.hash = '#/msg/'+msg.key } },
+  return h('tr.message-summary', { onclick: function(e) { e.preventDefault(); window.location.hash = '#/msg/'+msg.key } },
     h('td', state.names[msg.value.author] + repliesStr),
     h('td', h('span', { innerHTML: content })),
     h('td.text-muted', util.prettydate(new Date(msg.value.timestamp), true))
