@@ -9,27 +9,34 @@ module.exports = function(state) {
       h('table.table.addresses',
         h('thead', h('tr', h('th', 'Name'), h('th', {width: '100'}), h('th.text-center', {width:'70'}, 'Follow'))),
         h('tbody',
-          Object.keys(state.profiles).map(function(id) { 
+          Object.keys(state.profiles).sort(sorter).map(function(id) { 
             var profile = state.profiles[id]
             var otherNames = getOtherNames(state.names[id], profile)
             function r (e) { rename(e, id) }
             function f (e) { follow(e, id) }
             function unf (e) { unfollow(e, id) }
+            var followbtn
+            if (id != state.user.id) {
+              followbtn = (state.hasEdge('follow', state.user.id, id))
+                  ? h('button.btn.btn-primary.btn-sm', { title: 'Unfollow', onclick: unf }, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
+                  : h('button.btn.btn-primary.btn-sm', { title: 'Follow', onclick: f }, com.icon('plus'))
+            } else {
+              followbtn = h('span.text-muted', 'you!')
+            }
             return h('tr',
               h('td', 
-                h('button.btn.btn-primary.btn-sm', {title: 'Rename', onclick: r}, com.icon('pencil')), ' ',
+                h('button.btn.btn-primary.btn-sm', { title: 'Rename', onclick: r }, com.icon('pencil')), ' ',
                 h('strong', com.a('#/profile/'+id, state.names[id])),
                 ' ', 
                 (otherNames.length)
                   ? h('small.text-muted', 'aka ', otherNames.join(', '))
                   : ''
               ),
-              h('td', (state.hasEdge('follow', id, state.user.id)) ? h('small.text-muted', 'follows you') : ''),
-              h('td.text-center', 
-                (state.hasEdge('follow', state.user.id, id))
-                  ? h('button.btn.btn-primary.btn-sm', { title: 'Unfollow', onclick: unf }, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
-                  : h('button.btn.btn-primary.btn-sm', { title: 'Follow', onclick: f }, com.icon('plus'))
-              )
+              h('td', 
+                (state.hasEdge('trust', state.user.id, id)) ? h('small.text-muted', com.icon('lock'), ' trusted') : '',
+                (state.hasEdge('flag', state.user.id, id)) ? h('small.text-muted', com.icon('flag'), ' flagged') : ''
+              ),
+              h('td.text-center', followbtn)
             )
           })
         )
@@ -41,6 +48,18 @@ module.exports = function(state) {
       com.sidehelp(state)
     )
   )))
+
+  // put followed and trusted friends at top
+  function sorter(a, b) {
+    var an = 0, bn = 0
+    if (state.hasEdge('follow', state.user.id, a)) an++
+    if (state.hasEdge('trust', state.user.id, a)) an++
+    if (state.hasEdge('flag', state.user.id, a)) an--
+    if (state.hasEdge('follow', state.user.id, b)) bn++
+    if (state.hasEdge('trust', state.user.id, b)) bn++
+    if (state.hasEdge('flag', state.user.id, b)) bn--
+    return bn - an
+  }
 
   // handlers
   function rename (e, pid) {
