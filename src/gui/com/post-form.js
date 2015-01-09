@@ -29,7 +29,11 @@ module.exports = function(state, parent) {
   function post (e) {
     e.preventDefault()
 
+    // prep text
     var text = textarea.value
+    text = replaceMentions(text)
+
+    // post
     if (parent) state.apis.feed.postReply(text, parent, done)
     else state.apis.feed.postText(text, done)
       
@@ -42,6 +46,16 @@ module.exports = function(state, parent) {
           window.location.hash = '#/'
       }
     }
+  }
+
+  // find any mentions and replace the nicknames with ids
+  var mentionRegex = /(\s|>|^)@([^\s]+)/g;
+  function replaceMentions(str) {
+    return str.replace(mentionRegex, function(full, $1, $2) {
+      var id = state.ids[$2]
+      if (!id) return full
+      return ($1||'') + '@' + id
+    })
   }
 
   function cancel (e) {

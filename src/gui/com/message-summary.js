@@ -24,7 +24,7 @@ module.exports = function(state, msg, opts) {
   if (nTextReplies)
     repliesStr = ' ('+nTextReplies+')'
 
-  return h('tr.message-summary', { onclick: function() { window.location.hash = '#/msg/'+msg.key } },
+  return h('tr.message-summary', { onclick: function(e) { e.preventDefault(); window.location.hash = '#/msg/'+msg.key } },
     h('td', state.names[msg.value.author] + repliesStr),
     h('td', h('span', { innerHTML: content })),
     h('td.text-muted', util.prettydate(new Date(msg.value.timestamp), true))

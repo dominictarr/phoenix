@@ -17,7 +17,8 @@ var state = {
   inbox: [],
   adverts: [],
   profiles: {},
-  names: {},
+  names: {}, // id -> name
+  ids: {}, // name -> id
   peers: [],
   edges: {},
 
@@ -116,6 +117,7 @@ state.sync = function(cb) {
         for (var k in state.profiles) {
           var profile = state.profiles[k]
           state.names[k] = getName(profile)
+          state.ids[state.names[k]] = k
           state.suggestOptions['@'].push({ title: state.names[profile.id], subtitle: util.shortString(profile.id), value: state.names[profile.id] })
         }
         var readMessages = []
