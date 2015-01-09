@@ -12,7 +12,7 @@ module.exports = function(state, msg, opts) {
   }
   content = util.escapePlain(content)
   content = markdown.emojis(content)
-  content = markdown.mentionLinks(content, state.names)
+  content = markdown.mentionLinks(content, state.names, true)
 
   var len = noHtmlLen(content)
   if (len > 60 || content.length > 512) {

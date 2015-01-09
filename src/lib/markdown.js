@@ -20,13 +20,13 @@ exports.block = function(text, names, allowHtml) {
 
 var mentionRegex = /(\s|>|^)@([^\s]+)/g;
 var mentionLinks =
-exports.mentionLinks = function (str, names) {
+exports.mentionLinks = function (str, names, spansOnly) {
   if (!names)
     return str
   return str.replace(mentionRegex, function(full, $1, $2) {
     var name = names[$2]
-    if (!name)
-      return ($1||'') + '<strong class="user-link">@'+$2+'</strong>'
+    if (!name || spansOnly)
+      return ($1||'') + '<strong class="user-link">@'+(name||$2)+'</strong>'
     return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + name + '</a>'
   })
 }
