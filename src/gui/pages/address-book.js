@@ -15,11 +15,13 @@ module.exports = function(state) {
             function r (e) { rename(e, id) }
             function f (e) { follow(e, id) }
             function unf (e) { unfollow(e, id) }
-            var followbtn = 'you!'
+            var followbtn
             if (id != state.user.id) {
               followbtn = (state.hasEdge('follow', state.user.id, id))
                   ? h('button.btn.btn-primary.btn-sm', { title: 'Unfollow', onclick: unf }, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
                   : h('button.btn.btn-primary.btn-sm', { title: 'Follow', onclick: f }, com.icon('plus'))
+            } else {
+              followbtn = h('span.text-muted', 'you!')
             }
             return h('tr',
               h('td', 
