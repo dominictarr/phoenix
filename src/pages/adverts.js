@@ -1,8 +1,8 @@
 var h = require('hyperscript')
 var pull = require('pull-stream')
 var com = require('../com')
-var util = require('../../lib/util')
-var markdown = require('../../lib/markdown')
+var util = require('../lib/util')
+var markdown = require('../lib/markdown')
 
 module.exports = function (app) {
   app.api.getAdverts({ start: 0, end: 30 }, function (err, adverts) {

@@ -1,35 +1,35 @@
 var h = require('hyperscript')
 var com = require('./index')
-var util = require('../../lib/util')
-var markdown = require('../../lib/markdown')
+var util = require('../lib/util')
+var markdown = require('../lib/markdown')
 
-module.exports = function(state, msg, opts) {
+module.exports = function (app, msg, opts) {
   var content
   if (opts && opts.raw) {
-    content = messageRaw(state, msg)
+    content = messageRaw(app, msg)
   } else {
-    if (!msg.markdown) {
-      if (!opts || !opts.mustRender)
-        return ''
-      content = messageRaw(state, msg)
-    } else {
-      md = msg.markdown
+    if (msg.value.content.type == 'post') {
+      var md = msg.value.content.text
       if ((!opts || !opts.fullLength) && md.length >= 512) {
         md = md.slice(0, 512) + '... [read more](#/msg/'+msg.key+')'
       }
-      content = h('div', { innerHTML: markdown.block(util.escapePlain(md), state.names) })
+      content = h('div', { innerHTML: markdown.block(util.escapePlain(md), app.api.getNames()) })
+    } else {
+      if (!opts || !opts.mustRender)
+        return ''
+      content = messageRaw(app, msg)
     }
   }    
-  return renderMsgShell(state, msg, content)
+  return renderMsgShell(app, msg, content)
 }
 
-function messageRaw(state, msg) {
-  var obj = (false/*state.page.renderMode == 'rawfull'*/) ? msg.value : msg.value.content
+function messageRaw (app, msg) {
+  var obj = (false/*app.page.renderMode == 'rawfull'*/) ? msg.value : msg.value.content
   var json = util.escapePlain(JSON.stringify(obj, null, 2))
 
   // turn feed references into links
   json = json.replace(/\"feed\": \"([^\"]+)\"/g, function($0, $1) {
-    var name = state.names[$1] || $1
+    var name = app.api.getNameById($1) || $1
     return '"feed": "<a class="user-link" href="/#/profile/'+$1+'">'+name+'</a>"'
   })
 
@@ -41,19 +41,19 @@ function messageRaw(state, msg) {
   return h('.message-raw', { innerHTML: json })
 }
 
-function renderMsgShell(state, msg, content) {
+function renderMsgShell(app, msg, content) {
 
   // markup 
 
-  var nTextReplies = getReplies(state, msg, 'text').length
+  var nReplies = app.api.getNumReplies(msg.key)
   var repliesStr = ''
-  if (nTextReplies == 1) repliesStr = ' (1 reply)'
-  if (nTextReplies > 1) repliesStr = ' ('+nTextReplies+' replies)'
+  if (nReplies == 1) repliesStr = ' (1 reply)'
+  if (nReplies > 1) repliesStr = ' ('+nReplies+' replies)'
 
   var msgbody = h('.panel-body', content)
   var msgpanel = h('.panel.panel-default.message',
     h('.panel-heading',
-      com.userlink(msg.value.author, state.names[msg.value.author]),
+      com.userlink(msg.value.author, app.api.getNameById(msg.value.author)),
       ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
       h('span', {innerHTML: ' &middot; '}), h('a', { title: 'Reply', href: '#', onclick: reply }, 'reply')
     ),
@@ -66,7 +66,7 @@ function renderMsgShell(state, msg, content) {
     e.preventDefault()
 
     if (!msgbody.nextSibling || !msgbody.nextSibling.classList || !msgbody.nextSibling.classList.contains('reply-form')) {
-      var form = com.postForm(state, msg.key)
+      var form = com.postForm(app, msg.key)
       if (msgbody.nextSibling)
         msgbody.parentNode.insertBefore(form, msgbody.nextSibling)
       else
@@ -75,15 +75,4 @@ function renderMsgShell(state, msg, content) {
   }
 
   return msgpanel
-}
-
-
-function getReplies(state, msg, typeFilter) {
-  return (msg.replies || [])
-    .map(function(id) { return state.msgsById[id] })
-    .filter(function(reply) {
-      if (!reply) return false
-      if (typeFilter && !reply.value.content[typeFilter]) return false
-      return true
-    })
 }

@@ -3,19 +3,16 @@ var pull = require('pull-stream')
 var com = require('../com')
 
 var rawOpts = {raw: true}
-module.exports = function(state) {
-  var msgs = []
-  for (var i=state.msgs.length-1; i>=0; i--) {
-    msgs.push(com.message(state, state.msgs[i], rawOpts))
-  }
-
-  state.setPage(com.page(state, 'feed', h('.row',
-    h('.col-xs-2.col-md-1', com.sidenav(state)),
-    h('.col-xs-8', h('.message-feed', msgs)),
-    h('.col-xs-2.col-md-3',
-      com.adverts(state),
-      h('hr'),
-      com.sidehelp(state)
-    )
-  )))
+module.exports = function (app) {
+  app.api.getFeed({ start: 0, end: 30 }, function (err, msgs) {
+    app.setPage(com.page(app, 'feed', h('.row',
+      h('.col-xs-2.col-md-1', com.sidenav(app)),
+      h('.col-xs-8', h('.message-feed', msgs.map(function (msg) { return com.message(app, msg, rawOpts) }))),
+      h('.col-xs-2.col-md-3',
+        com.adverts(app),
+        h('hr'),
+        com.sidehelp(app)
+      )
+    )))
+  })
 }
