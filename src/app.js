@@ -4,13 +4,12 @@ var com        = require('./com')
 var pages      = require('./pages')
 var util       = require('./lib/util')
 
-module.exports = function (ssb, api) {
+module.exports = function (api) {
 
   // master state object
 
   var app = {
     api: api,
-
     page: {
       id: 'feed',
       param: null
@@ -99,7 +98,7 @@ module.exports = function (ssb, api) {
 
     var parts = id.split(',')
     var isInvite = (parts.length === 3)
-    if (isInvite) ssb.invite.addMe(id, next) // :TODO: move to phoenix-api
+    if (isInvite) api.useInvite(id, next)
     else api.addEdge('follow', id, next)
       
     var self = this
