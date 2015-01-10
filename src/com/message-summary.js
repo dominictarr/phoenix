@@ -1,7 +1,7 @@
 var h = require('hyperscript')
 var com = require('./index')
-var util = require('../../lib/util')
-var markdown = require('../../lib/markdown')
+var util = require('../lib/util')
+var markdown = require('../lib/markdown')
 
 module.exports = function (app, msg, opts) {
   var content
