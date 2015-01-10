@@ -2,32 +2,32 @@ var h = require('hyperscript')
 var pull = require('pull-stream')
 var com = require('../com')
 
-module.exports = function(state) {
+module.exports = function (app) {
   // track read messages
-  state.unreadMessages = 0
-  localStorage.readMessages = JSON.stringify(state.inbox)
+  app.unreadMessages = 0
+  localStorage.readMessages = JSON.stringify([])// :TODO: app.inbox)
 
-  var msgs = []
-  for (var i=state.inbox.length-1; i>=0; i--) {
-    var m = com.messageSummary(state, state.msgsById[state.inbox[i]])
-    if (m) msgs.push(m)
-  }
+  app.api.getInbox({ start: 0, end: 30 }, function (err, msgs) {
+    var content
+    if (msgs.length === 0) {
+      content = [
+        h('p', h('strong', 'Your inbox is empty!')),
+        h('p', 'When somebody @-mentions you or replies to your posts, you\'ll see their message here.')
+      ]
+    } else {
+      content = h('table.table.message-feed', msgs.map(function (msg) {
+        com.messageSummary(app, msg)
+      }))
+    }
 
-  var content = [h('table.table.message-feed', msgs)]
-  if (msgs.length === 0) {
-    content = content.concat([
-      h('p', h('strong', 'Your inbox is empty!')),
-      h('p', 'When somebody @-mentions you or replies to your posts, you\'ll see their message here.')
-    ])
-  }
-
-  state.setPage(com.page(state, 'feed', h('.row',
-    h('.col-xs-2.col-md-1', com.sidenav(state)),
-    h('.col-xs-8', content),
-    h('.col-xs-2.col-md-3', 
-      com.adverts(state),
-      h('hr'),
-      com.sidehelp(state)
-    )
-  )))
+    app.setPage(com.page(app, 'feed', h('.row',
+      h('.col-xs-2.col-md-1', com.sidenav(app)),
+      h('.col-xs-8', content),
+      h('.col-xs-2.col-md-3', 
+        com.adverts(app),
+        h('hr'),
+        com.sidehelp(app)
+      )
+    )))
+  })
 }
