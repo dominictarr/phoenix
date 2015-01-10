@@ -37,7 +37,7 @@ module.exports = function (api) {
   var refreshPage =
   app.refreshPage = function () {
     // clear pending messages
-    this.setPendingMessages(0)
+    app.setPendingMessages(0)
 
     // re-route to setup if needed
     if (!api.getMyProfile().self.name)
@@ -47,29 +47,29 @@ module.exports = function (api) {
 
     // run the router
     var route = router(window.location.hash, 'posts')
-    this.page.id = route[0]
-    this.page.param = route[1]
+    app.page.id = route[0]
+    app.page.param = route[1]
 
     // setup suggest options for usernames
     var profiles = 
-    this.suggestOptions['@'] = []
+    app.suggestOptions['@'] = []
     for (var k in api.getAllProfiles()) {
       var name = api.getNameById(k)
-      this.suggestOptions['@'].push({ title: name, subtitle: util.shortString(k), value: name })
+      app.suggestOptions['@'].push({ title: name, subtitle: util.shortString(k), value: name })
     }
 
     // count unread messages
     var readMessages = []
     try { readMessages = JSON.parse(localStorage.readMessages) } catch(e) {}
-    this.unreadMessages = this.inbox.reduce(function(acc, mid) {
+    app.unreadMessages = app.inbox.reduce(function(acc, mid) {
       return (readMessages.indexOf(mid) === -1) ? (acc + 1) : acc
     }, 0)
 
     // render the page
-    var page = pages[this.page.id]
+    var page = pages[app.page.id]
     if (!page)
       page = pages.notfound
-    page(this)
+    page(app)
   }
 
   app.showUserId = function () { 
@@ -77,7 +77,7 @@ module.exports = function (api) {
   }
 
   app.setPendingMessages = function (n) {
-    this.pendingMessages = n
+    app.pendingMessages = n
     if (n) document.title = '('+n+') secure scuttlebutt'
     else document.title = 'secure scuttlebutt'
   }
@@ -101,7 +101,6 @@ module.exports = function (api) {
     if (isInvite) api.useInvite(id, next)
     else api.addEdge('follow', id, next)
       
-    var self = this
     function next (err) {
       if (err) {
         console.error(err)
@@ -112,7 +111,7 @@ module.exports = function (api) {
           swal('Invite Code Accepted', 'You are now hosted by '+parts[0], 'success')
         else
           swal('Contact Added', 'You will now follow the messages published by your new contact.', 'success')
-        self.refreshPage()
+        app.refreshPage()
       }
     }
   }
@@ -135,10 +134,9 @@ module.exports = function (api) {
     else
       api.nameOther(userId, name, done)
 
-    var self = this
     function done(err) {
       if (err) swal('Error While Publishing', err.message, 'error')
-      else self.refreshPage()
+      else app.refreshPage()
     }
   }
 
