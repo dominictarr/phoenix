@@ -3,7 +3,7 @@ var pull = require('pull-stream')
 var multicb = require('multicb')
 var com = require('../com')
 
-module.exports = function(app) {
+module.exports = function (app) {
   var done = multicb({ pluck: 1 })
   app.api.getGraph('follow', done())
   app.api.getGraph('trust', done())
