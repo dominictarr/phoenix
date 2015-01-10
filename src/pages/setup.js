@@ -2,8 +2,8 @@ var h = require('hyperscript')
 var pull = require('pull-stream')
 var com = require('../com')
 
-module.exports = function(state) {
-  state.setPage(com.page(state, 'setup', h('.row',
+module.exports = function (app) {
+  app.setPage(com.page(app, 'setup', h('.row',
     h('.col-xs-12', [
       h('.jumbotron', [
         h('h1', 'Welcome to Secure Scuttlebutt'),
@@ -16,6 +16,6 @@ module.exports = function(state) {
 
   function rename (e) {
     e.preventDefault()
-    state.setNamePrompt()
+    app.setNamePrompt()
   }
 }
