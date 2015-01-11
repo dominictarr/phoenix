@@ -21,7 +21,7 @@ module.exports = function (app, follows, trusts, flags) {
     return h('tr',
       h('td', 
         h('button.btn.btn-primary.btn-sm', { title: 'Rename', onclick: r }, com.icon('pencil')), ' ',
-        h('strong', com.a('#/profile/'+id, state.names[id])),
+        h('strong', com.a('#/profile/'+id, app.api.getName(id)||id)),
         ' ', 
         (otherNames.length)
           ? h('small.text-muted', 'aka ', otherNames.join(', '))
@@ -75,7 +75,7 @@ module.exports = function (app, follows, trusts, flags) {
 
   function getOtherNames(profile) {
     // todo - replace with ranked names
-    var name = app.api.getNameById(profile.id)
+    var name = app.api.getName(profile.id) || profile.id
 
     // remove scare quotes 
     if (name.charAt(0) === '"' && name.charAt(name.length - 1) === '"')

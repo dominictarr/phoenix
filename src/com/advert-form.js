@@ -28,7 +28,7 @@ module.exports = function (app) {
 
   function post (e) {
     e.preventDefault()
-    app.apis.postAdvert(textarea.value, function (err) {
+    app.api.postAdvert(textarea.value, function (err) {
       if (err) swal('Error While Publishing', err.message, 'error')
       else {
         swal('Your Ad Has Been Published', null, 'success')

@@ -3,7 +3,7 @@ var pull = require('pull-stream')
 var com = require('../com')
 
 module.exports = function (app) {
-  app.getThread(app.page.param, function (err, thread) {
+  app.api.getThread(app.page.param, function (err, thread) {
     var content
     if (thread) {
       content = com.messageThread(app, thread, { fullLength: true })

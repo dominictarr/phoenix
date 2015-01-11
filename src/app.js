@@ -54,16 +54,17 @@ module.exports = function (api) {
     var profiles = 
     app.suggestOptions['@'] = []
     for (var k in api.getAllProfiles()) {
-      var name = api.getNameById(k)
+      var name = api.getNameById(k) || k
       app.suggestOptions['@'].push({ title: name, subtitle: util.shortString(k), value: name })
     }
 
     // count unread messages
-    var readMessages = []
+    // :TODO:
+    /*var readMessages = []
     try { readMessages = JSON.parse(localStorage.readMessages) } catch(e) {}
     app.unreadMessages = app.inbox.reduce(function(acc, mid) {
       return (readMessages.indexOf(mid) === -1) ? (acc + 1) : acc
-    }, 0)
+    }, 0)*/
 
     // render the page
     var page = pages[app.page.id]

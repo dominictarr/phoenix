@@ -6,7 +6,7 @@ var util = require('../lib/util')
 
 module.exports = function (app) {
   var pid = app.page.param
-  var done = multicb({ pick: 1 })
+  var done = multicb({ pluck: 1 })
   app.api.getGraph('follow', done())
   app.api.getGraph('trust', done())
   app.api.getGraph('flag', done())
@@ -47,10 +47,10 @@ module.exports = function (app) {
       followBtn = (isFollowing)
         ? h('button.btn.btn-primary', { onclick: delEdge('follow') }, com.icon('minus'), ' Unfollow')
         : h('button.btn.btn-primary', { onclick: addEdge('follow') }, com.icon('plus'), ' Follow')
-      trustBtn = (app.hasEdge('trust', myid, pid))
+      trustBtn = (graphs.trust[myid][pid])
         ? h('button.btn.btn-danger', { onclick: delEdge('trust') }, com.icon('remove'), ' Untrust')
         : h('button.btn.btn-success', { onclick: trustPrompt }, com.icon('lock'), ' Trust')
-      flagBtn = (app.hasEdge('flag', myid, pid))
+      flagBtn = (graphs.flag[myid][pid])
         ? h('button.btn.btn-success', { onclick: delEdge('flag') }, com.icon('ok'), ' Unflag')
         : h('button.btn.btn-danger',{ onclick: flagPrompt },  com.icon('flag'), ' Flag')
     } 
@@ -136,7 +136,7 @@ module.exports = function (app) {
         if (!graphs[type][myid][pid]) {
           app.api.addEdge(type, pid, function(err) {
             if (err) swal('Error While Publishing', err.message, 'error')
-            else app.sync()
+            else app.refreshPage()
           })
         }
       }
@@ -148,7 +148,7 @@ module.exports = function (app) {
         if (graphs[type][myid][pid]) {
           app.api.delEdge(type, pid, function(err) {
             if (err) swal('Error While Publishing', err.message, 'error')
-            else app.sync()
+            else app.refreshPage()
           })
         }
       }

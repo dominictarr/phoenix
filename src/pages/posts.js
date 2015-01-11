@@ -3,7 +3,7 @@ var pull = require('pull-stream')
 var com = require('../com')
 
 module.exports = function (app) {
-  app.getPosts({ start: 0, end: 30 }, function (err, msgs) {
+  app.api.getPosts({ start: 0, end: 30 }, function (err, msgs) {
 
     if (msgs.length === 0) {
       content = [

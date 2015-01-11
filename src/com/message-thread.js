@@ -14,7 +14,7 @@ module.exports = function (app, thread, opts) {
 function replies (app, thread) {
   // collect replies
   var r = []
-  ;(thread.replies || []).forEach(function(replyId) {
+  ;(thread.replies || []).forEach(function(reply) {
     r.push(com.message(app, reply))
     r.push(replies(app, reply))
   })

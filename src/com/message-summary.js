@@ -14,20 +14,21 @@ module.exports = function (app, msg, opts) {
   }
   content = util.escapePlain(content)
   content = markdown.emojis(content)
-  content = markdown.mentionLinks(content, app.getNames(), true)
+  content = markdown.mentionLinks(content, app.api.getNames(), true)
 
   var len = noHtmlLen(content)
   if (len > 60 || content.length > 512) {
     content = content.slice(0, Math.min(60 + (content.length - len), 512)) + '...'
   }
 
-  var nReplies = app.api.getNumReplies(msg.ley)
+  var nReplies = app.api.getNumReplies(msg.key)
   var repliesStr = ''
   if (nReplies)
     repliesStr = ' ('+nReplies+')'
 
+  var name = app.api.getNameById(msg.value.author) || util.shortString(msg.value.author)
   return h('tr.message-summary', { onclick: function(e) { e.preventDefault(); window.location.hash = '#/msg/'+msg.key } },
-    h('td', app.api.getNameById(msg.value.author) + repliesStr),
+    h('td', name + repliesStr),
     h('td', h('span', { innerHTML: content })),
     h('td.text-muted', util.prettydate(new Date(msg.value.timestamp), true))
   )

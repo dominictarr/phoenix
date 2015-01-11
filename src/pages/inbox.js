@@ -16,7 +16,7 @@ module.exports = function (app) {
       ]
     } else {
       content = h('table.table.message-feed', msgs.map(function (msg) {
-        com.messageSummary(app, msg)
+        return com.messageSummary(app, msg)
       }))
     }
 
