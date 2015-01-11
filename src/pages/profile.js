@@ -70,7 +70,7 @@ module.exports = function (app) {
     // render page
     var name = app.api.getNameById(pid) || util.shortString(pid)
     var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
-    app.setPage(com.page(app, 'profile', h('.row',
+    app.setPage('profile', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-8', msgfeed),
       h('.col-xs-2.col-md-3.profile-controls',
@@ -91,7 +91,7 @@ module.exports = function (app) {
           h('div', { innerHTML: com.toEmoji(pid) })
         )
       )
-    )))
+    ))
 
     // handlers
 

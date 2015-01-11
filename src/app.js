@@ -140,10 +140,10 @@ module.exports = function (api) {
     }
   }
 
-  app.setPage = function(page) {
+  app.setPage = function(name, page) {
     var el = document.getElementById('page-container')
     el.innerHTML = ''
-    el.appendChild(page)
+    el.appendChild(com.page(app, name, page))
   }
 
   return app

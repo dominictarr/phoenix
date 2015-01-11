@@ -9,7 +9,7 @@ module.exports = function (app) {
   app.api.getGraph('trust', done())
   app.api.getGraph('flag', done())
   done(function (err, graphs) {
-    app.setPage(com.page(app, 'address-book', h('.row',
+    app.setPage('address-book', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-8',
         h('table.table.addresses',
@@ -22,6 +22,6 @@ module.exports = function (app) {
         h('hr'),
         com.sidehelp(app)
       )
-    )))
+    ))
   })
 }

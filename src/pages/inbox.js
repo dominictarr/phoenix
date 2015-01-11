@@ -20,7 +20,7 @@ module.exports = function (app) {
       }))
     }
 
-    app.setPage(com.page(app, 'feed', h('.row',
+    app.setPage('feed', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-8', content),
       h('.col-xs-2.col-md-3', 
@@ -28,6 +28,6 @@ module.exports = function (app) {
         h('hr'),
         com.sidehelp(app)
       )
-    )))
+    ))
   })
 }

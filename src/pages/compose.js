@@ -3,7 +3,7 @@ var pull = require('pull-stream')
 var com = require('../com')
 
 module.exports = function (app) {
-  app.setPage(com.page(app, 'compose', h('.row',
+  app.setPage('compose', h('.row',
     h('.col-xs-2.col-md-1', com.sidenav(app)),
     h('.col-xs-8',
       com.postForm(app)
@@ -13,5 +13,5 @@ module.exports = function (app) {
       h('hr'),
       com.sidehelp(app)
     )
-  )))
+  ))
 }

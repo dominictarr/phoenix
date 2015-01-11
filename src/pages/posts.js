@@ -29,7 +29,7 @@ module.exports = function (app) {
       content = h('table.table.message-feed', msgs.map(function (msg) { return com.messageSummary(app, msg) }))
     }
 
-    app.setPage(com.page(app, 'posts', h('.row',
+    app.setPage('posts', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-8', content),
       h('.col-xs-2.col-md-3',
@@ -37,6 +37,6 @@ module.exports = function (app) {
         h('hr'),
         com.sidehelp(app)
       )
-    )))
+    ))
   })
 }

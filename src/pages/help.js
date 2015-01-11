@@ -182,7 +182,7 @@ module.exports = function (app) {
     ]
   }
 
-  app.setPage(com.page(app, 'help', h('.row',
+  app.setPage('help', h('.row',
     h('.col-xs-2.col-md-1', com.sidenav(app)),
     h('.col-xs-7', content),
     h('.col-xs-3.col-md-4', 
@@ -197,7 +197,7 @@ module.exports = function (app) {
       h('hr'),
       com.sidehelp(app, {noMore: true})
     )
-  )))
+  ))
 }
 
 function helpnav (current, items) {

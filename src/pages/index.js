@@ -1,11 +1,11 @@
 var h = require('hyperscript')
 var com = require('../com')
 
-function notfound (state) {
-  state.setPage(com.page(state, 'notfound', h('.row',
-    h('.col-xs-2.col-md-1', com.sidenav(state)),
+function notfound (app) {
+  app.setPage('notfound', h('.row',
+    h('.col-xs-2.col-md-1', com.sidenav(app)),
     h('.col-xs-10.col-md-11', h('p', h('strong', 'Not Found')))
-  )))
+  ))
 }
 
 module.exports = {

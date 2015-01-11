@@ -11,7 +11,7 @@ module.exports = function (app) {
       content = 'Message not found.'
     }
 
-    app.setPage(com.page(app, 'message', h('.row',
+    app.setPage('message', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-8',
         content
@@ -21,6 +21,6 @@ module.exports = function (app) {
         h('hr'),
         com.sidehelp(app)
       )
-    )))
+    ))
   })
 }
