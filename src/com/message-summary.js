@@ -21,7 +21,7 @@ module.exports = function (app, msg, opts) {
     content = content.slice(0, Math.min(60 + (content.length - len), 512)) + '...'
   }
 
-  var nReplies = app.api.getNumReplies(msg.key)
+  var nReplies = app.api.getNumThreadReplies(msg.key)
   var repliesStr = ''
   if (nReplies)
     repliesStr = ' ('+nReplies+')'
