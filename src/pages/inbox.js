@@ -7,7 +7,8 @@ module.exports = function (app) {
   app.unreadMessages = 0
   localStorage.readMessages = JSON.stringify([])// :TODO: app.inbox)
 
-  app.api.getInbox({ start: 0, end: 30 }, function (err, msgs) {
+  var opts = { start: 0 }
+  app.api.getInbox(opts, function (err, msgs) {
     var content
     if (msgs.length === 0) {
       content = [
@@ -20,14 +21,30 @@ module.exports = function (app) {
       }))
     }
 
+    var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary', { onclick: loadMore }, 'Load More')) : ''
     app.setPage('feed', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8', content),
+      h('.col-xs-8', content, loadMoreBtn),
       h('.col-xs-2.col-md-3', 
         com.adverts(app),
         h('hr'),
         com.sidehelp(app)
       )
     ))
+
+    // handlers
+
+    function loadMore (e) {
+      e.preventDefault()
+      opts.start += 30
+      app.api.getInbox(opts, function (err, moreMsgs) {
+        if (moreMsgs.length > 0) {
+          moreMsgs.forEach(function (msg) { content.appendChild(com.messageSummary(app, msg)) })
+        }
+        // remove load more btn if it looks like there arent any more to load
+        if (moreMsgs.length < 30)
+          loadMoreBtn.parentNode.removeChild(loadMoreBtn)
+      })
+    }
   })
 }

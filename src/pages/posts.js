@@ -35,10 +35,7 @@ module.exports = function (app) {
     var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary', { onclick: loadMore }, 'Load More')) : ''
     app.setPage('posts', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8', 
-        content,
-        loadMoreBtn
-      ),
+      h('.col-xs-8', content, loadMoreBtn),
       h('.col-xs-2.col-md-3',
         com.adverts(app),
         h('hr'),
