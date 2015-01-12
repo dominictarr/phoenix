@@ -9,6 +9,9 @@ module.exports = function (app) {
 
   var opts = { start: 0 }
   app.api.getInbox(opts, function (err, msgs) {
+
+    // markup
+    
     var content
     if (msgs.length === 0) {
       content = [
