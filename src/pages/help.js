@@ -1,9 +1,9 @@
 var h = require('hyperscript')
 var com = require('../com')
 
-module.exports = function(state) {
+module.exports = function (app) {
   var content
-  if (state.page.param == 'apps') {
+  if (app.page.param == 'apps') {
     content = [
       panel('Applications', [
         'Web applications can detect that you\'re running Scuttlebutt and ask for access. ',
@@ -18,17 +18,17 @@ module.exports = function(state) {
         'App authorizations are only stored in memory, and so this will clear the permissions records.'
       ])
     ]
-  } else if (state.page.param == 'networking') {
+  } else if (app.page.param == 'networking') {
     content = [
       panel('Contacts', [
         'Scuttlebutt searches the network for messages from your contacts, plus messages from the people your contacts follow. ',
         'If you want to be sure you get a specific persons\'s messages, ', 
-        h('button.btn.btn-xs.btn-primary', { onclick: state.followPrompt }, 'Follow their contact id')
+        h('button.btn.btn-xs.btn-primary', { onclick: app.followPrompt }, 'Follow their contact id')
       ]),
       panel('Following Users', [
         'To follow somebody, find their profile page and hit the "Follow" button. ',
         'If you have their ID but not their profile page, you can hit ', 
-        h('button.btn.btn-xs.btn-primary', { onclick: state.followPrompt }, 'Add contact'), 
+        h('button.btn.btn-xs.btn-primary', { onclick: app.followPrompt }, 'Add contact'), 
         ' on the top right and enter the ID in the popup.'
       ]),
       panel('Pub Servers', [
@@ -41,7 +41,7 @@ module.exports = function(state) {
       panel('Invite Codes', [
         'If someone you know is running a pub server, ask them for an invite code. ',
         'You can use the code by pasting it into the ', 
-        h('button.btn.btn-xs.btn-primary', { onclick: state.followPrompt }, 'Add contact'), 
+        h('button.btn.btn-xs.btn-primary', { onclick: app.followPrompt }, 'Add contact'), 
         ' dialog, just like when following somebody.'
       ]),
       panel('Running a Pub Server', [
@@ -50,7 +50,7 @@ module.exports = function(state) {
         '. Note, this is for advanced users!'
       ])
     ]
-  } else if (state.page.param == 'privacy') {
+  } else if (app.page.param == 'privacy') {
     content = [
       panel('Privacy in Secure Scuttlebutt', [
         'Secure Scuttlebutt is anti-spyware: it runs safely on your computer and denies unexpected traffic (eg to fetch images) so that people can\'t track your activity.', h('br'),
@@ -58,7 +58,7 @@ module.exports = function(state) {
         'That said, SSB is part of a network and it does emit information. This page will explain your footprint so you can know what you\'re telling the world.'
       ]),
       panel('Anonymity', [
-        'Secure Scuttlebutt is a public global network. In this early state, it uses no encryption and does not try to hide your posts. In fact, it\'s working hard to get them out to the world!', h('br'),
+        'Secure Scuttlebutt is a public global network. In this early app, it uses no encryption and does not try to hide your posts. In fact, it\'s working hard to get them out to the world!', h('br'),
         h('br'),
         'You don\'t have to give any personal information (like your real name) but it should be possible to figure out who you are based on your posts, your friends, and the names people give you. ',
         'Don\'t expect to be anonymous!'
@@ -100,7 +100,7 @@ module.exports = function(state) {
         '(That\'s everything there is!)'
       ])
     ]
-  } else if (state.page.param == 'names') {
+  } else if (app.page.param == 'names') {
     content = [
       panel('What\'s with the Scare-Quotes Around Names?', [
         'You may have noticed quotes around people\'s names ("bob"). ',
@@ -108,7 +108,7 @@ module.exports = function(state) {
       ]),
       panel('Why Have the Quotes?', [
         'In Secure Scuttlebutt, anybody can claim a name, even if it\'s taken. ',
-        'Yes, somebody else could use "', state.names[state.user.id], '"! ',
+        'Yes, somebody else could use "', app.getNameById(app.getMyId()), '"! ',
         'And that could confuse your friends.', h('br'),
         h('br'),
         'To protect everybody, we use the quotes to show it\'s a self-assigned name.'
@@ -137,7 +137,7 @@ module.exports = function(state) {
         'Every footprint is unique, so, if it doesn\'t match, you have the wrong user.'
       ])
     ]
-  } else if (state.page.param == 'adverts') {
+  } else if (app.page.param == 'adverts') {
     content = [
       panel('Wait, Advertisements?', [
         'The advertisements are placed by the users. ',
@@ -182,11 +182,11 @@ module.exports = function(state) {
     ]
   }
 
-  state.setPage(com.page(state, 'help', h('.row',
-    h('.col-xs-2.col-md-1', com.sidenav(state)),
+  app.setPage('help', h('.row',
+    h('.col-xs-2.col-md-1', com.sidenav(app)),
     h('.col-xs-7', content),
     h('.col-xs-3.col-md-4', 
-      h('ul.nav.nav-pills.nav-stacked', helpnav('#/help/'+state.page.param, [
+      h('ul.nav.nav-pills.nav-stacked', helpnav('#/help/'+app.page.param, [
         ['#/help/intro', 'Getting Started'],
         ['#/help/networking', 'Connecting to People'],
         ['#/help/privacy', 'Privacy: Understand What\s Shared'],
@@ -195,12 +195,12 @@ module.exports = function(state) {
         ['#/help/apps', '3rd-Party Apps']
       ])),
       h('hr'),
-      com.sidehelp(state, {noMore: true})
+      com.sidehelp(app, {noMore: true})
     )
-  )))
+  ))
 }
 
-function helpnav(current, items) {
+function helpnav (current, items) {
   return items.map(function(item) {
     if (item[0] == current)
       return h('li.active', com.a(item[0], item[1]))
@@ -208,7 +208,7 @@ function helpnav(current, items) {
   })
 }
 
-function panel(title, content) {
+function panel (title, content) {
   return h('.panel.panel-default', [
     h('.panel-heading', h('h3.panel-title', title)),
     h('.panel-body', content)

@@ -2,7 +2,7 @@ var h = require('hyperscript')
 var baseEmoji   = require('base-emoji')
 
 var a =
-exports.a = function(href, text, opts) {
+exports.a = function (href, text, opts) {
   opts = opts || {}
   opts.href = href
   return h('a', opts, text)
@@ -14,7 +14,7 @@ exports.icon = function (i) {
 }
 
 var userlink =
-exports.userlink = function(id, text, opts) {
+exports.userlink = function (id, text, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
   var profileLink = a('#/profile/'+id, text, opts)
@@ -37,13 +37,14 @@ exports.toEmoji = function (buf, size) {
 
 
 var header =
-exports.header = function(state) {
+exports.header = function (app) {
+  var myid = app.api.getMyId()
   return h('.nav.navbar.navbar-default', [
     h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
         h('li.hidden-xs', a('#/address-book', 'address book')),
-        h('li.hidden-xs', a('#/profile/' + state.user.id, state.names[state.user.id]))
+        h('li.hidden-xs', a('#/profile/' + myid, app.api.getNameById(myid)))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li.hidden-xs', a('#/help', 'help'))
@@ -53,34 +54,34 @@ exports.header = function(state) {
 }
 
 var sidenav =
-exports.sidenav = function(state) {
+exports.sidenav = function (app) {
   var pages = [
     ['compose', 'compose', 'compose'],
     '-',
     ['posts', '', 'posts'],
-    ['inbox', 'inbox', 'inbox ('+state.unreadMessages+')'],
+    ['inbox', 'inbox', 'inbox ('+app.unreadMessages+')'],
     ['adverts', 'adverts', 'adverts'],
     '-',
     ['feed', 'feed', 'data feed']
   ]
   var extraPages = [
-    ['profile', 'profile/'+state.user.id, 'profile'],
+    ['profile', 'profile/'+app.api.getMyId(), 'profile'],
     ['network', 'network', 'network'],
     ['help', 'help', 'help']
   ]
 
   return h('.side-nav', [
-    pages.map(function(page) {
+    pages.map(function (page) {
       if (page == '-')
         return h('hr')
-      if (page[0] == state.page.id)
+      if (page[0] == app.page.id)
         return h('p', h('strong', a('#/'+page[1], page[2])))
       return h('p', a('#/'+page[1], page[2]))
     }),
-    extraPages.map(function(page) {
+    extraPages.map(function (page) {
       if (page == '-')
         return h('hr')
-      if (page[0] == state.page.id)
+      if (page[0] == app.page.id)
         return h('p.visible-xs', h('strong', a('#/'+page[1], page[2])))
       return h('p.visible-xs', a('#/'+page[1], page[2]))
     })
@@ -88,19 +89,19 @@ exports.sidenav = function(state) {
 }
 
 var sidehelp =
-exports.sidehelp = function(state, opts) {
+exports.sidehelp = function (app, opts) {
   return h('ul.list-unstyled',
-    h('li', h('button.btn.btn-primary', { onclick: state.showUserId }, 'Get your contact id')),
-    h('li', h('button.btn.btn-primary', { onclick: state.followPrompt }, 'Add a contact')),
-    h('li', h('button.btn.btn-primary', { onclick: state.followPrompt }, 'Use an invite')),
+    h('li', h('button.btn.btn-primary', { onclick: app.showUserId }, 'Get your contact id')),
+    h('li', h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Add a contact')),
+    h('li', h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Use an invite')),
     (!opts || !opts.noMore) ? h('li', h('span', {style:'display: inline-block; padding: 6px 12px'}, a('#/help', 'More help'))) : ''
   )
 }
 
 var page =
-exports.page = function(state, id, content) {
+exports.page = function (app, id, content) {
   return h('div',
-    header(state),
+    header(app),
     h('#page.container-fluid.'+id+'-page', content)
   )
 }
@@ -111,3 +112,4 @@ exports.messageSummary = require('./message-summary')
 exports.postForm = require('./post-form')
 exports.adverts = require('./adverts')
 exports.advertForm = require('./advert-form')
+exports.addresses = require('./addresses')

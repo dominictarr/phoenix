@@ -1,14 +1,14 @@
 var h = require('hyperscript')
 var suggestBox = require('suggest-box')
-var util = require('../../lib/util')
-var markdown = require('../../lib/markdown')
+var util = require('../lib/util')
+var markdown = require('../lib/markdown')
 
-module.exports = function (state) {
+module.exports = function (app) {
   
   // markup
 
   var textarea = h('textarea.form-control', { name: 'text', rows: 3, onblur: preview })
-  suggestBox(textarea, state.suggestOptions) // decorate with suggest box
+  suggestBox(textarea, app.suggestOptions) // decorate with suggest box
 
   var preview = h('.preview.well.well-sm.col-xs-3')
   var form = h('form.advert-form', { onsubmit: post },
@@ -23,19 +23,16 @@ module.exports = function (state) {
   // event handlers
 
   function preview (e) {
-    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), state.names)
+    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.api.getNames())
   }
 
   function post (e) {
     e.preventDefault()
-    state.apis.feed.postAdvert(textarea.value, function (err) {
+    app.api.postAdvert(textarea.value, function (err) {
       if (err) swal('Error While Publishing', err.message, 'error')
       else {
         swal('Your Ad Has Been Published', null, 'success')
-        form.reset()
-        form.classList.remove('opened')
-        preview.innerHTML = ''
-        state.sync()
+        app.refreshPage()
       }
     })
   }
