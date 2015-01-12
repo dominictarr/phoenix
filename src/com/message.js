@@ -45,7 +45,7 @@ function renderMsgShell(app, msg, content) {
 
   // markup 
 
-  var nReplies = app.api.getNumReplies(msg.key)
+  var nReplies = app.api.getReplyCount(msg.key)
   var repliesStr = ''
   if (nReplies == 1) repliesStr = ' (1 reply)'
   if (nReplies > 1) repliesStr = ' ('+nReplies+' replies)'

@@ -63,12 +63,7 @@ module.exports = function (api) {
     }
 
     // count unread messages
-    // :TODO:
-    /*var readMessages = []
-    try { readMessages = JSON.parse(localStorage.readMessages) } catch(e) {}
-    app.unreadMessages = app.inbox.reduce(function(acc, mid) {
-      return (readMessages.indexOf(mid) === -1) ? (acc + 1) : acc
-    }, 0)*/
+    app.unreadMessages = api.getInboxCount() - (+localStorage.readMessages || 0)
 
     // render the page
     var page = pages[app.page.id]

@@ -5,7 +5,7 @@ var com = require('../com')
 module.exports = function (app) {
   // track read messages
   app.unreadMessages = 0
-  localStorage.readMessages = JSON.stringify([])// :TODO: app.inbox)
+  localStorage.readMessages = app.api.getInboxCount()
 
   var opts = { start: 0 }
   app.api.getInbox(opts, function (err, msgs) {
