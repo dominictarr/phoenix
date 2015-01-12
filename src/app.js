@@ -32,6 +32,10 @@ module.exports = function (api) {
     }
   })
 
+  api.on('post', function (msg) {
+    app.setPendingMessages(app.pendingMessages + 1)
+  })
+
   // toplevel & common methods
 
   var refreshPage =
