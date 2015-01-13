@@ -1,4 +1,5 @@
 var h          = require('hyperscript')
+var multicb    = require('multicb')
 var router     = require('phoenix-router')
 var com        = require('./com')
 var pages      = require('./pages')
@@ -10,6 +11,8 @@ module.exports = function (ssb) {
 
   var app = {
     ssb: ssb,
+    myid: null,
+    myname: null,
     page: {
       id: 'feed',
       param: null
@@ -71,9 +74,14 @@ module.exports = function (ssb) {
       }
     })
 
-    // count unread messages
-    ssb.phoenix.getInboxCount(function (err, count) {
-      app.unreadMessages = count - (+localStorage.readMessages || 0)
+    // collect common data
+    var done = multicb()
+    ssb.whoami(done())
+    ssb.phoenix.getMyProfile(done())
+    ssb.phoenix.getInboxCount(function (err, data) {
+      app.myid = data[0].id
+      app.myname = data[1].self.name
+      app.unreadMessages = data[2] - (+localStorage.readMessages || 0)
 
       // render the page
       var page = pages[app.page.id]

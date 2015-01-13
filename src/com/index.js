@@ -38,13 +38,12 @@ exports.toEmoji = function (buf, size) {
 
 var header =
 exports.header = function (app) {
-  var myid = app.api.getMyId()
   return h('.nav.navbar.navbar-default', [
     h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
         h('li.hidden-xs', a('#/address-book', 'address book')),
-        h('li.hidden-xs', a('#/profile/' + myid, app.api.getNameById(myid)))
+        h('li.hidden-xs', a('#/profile/' + app.myid, app.myname))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li.hidden-xs', a('#/help', 'help'))
@@ -65,7 +64,7 @@ exports.sidenav = function (app) {
     ['feed', 'feed', 'data feed']
   ]
   var extraPages = [
-    ['profile', 'profile/'+app.api.getMyId(), 'profile'],
+    ['profile', 'profile/'+app.myid, 'profile'],
     ['network', 'network', 'network'],
     ['help', 'help', 'help']
   ]
