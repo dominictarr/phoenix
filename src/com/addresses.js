@@ -1,11 +1,12 @@
 var h = require('hyperscript')
 var com = require('./index')
 
-module.exports = function (app, follows, trusts, flags) {
-  var myid = app.api.getMyId()
+module.exports = function (app, myid, profiles, names, follows, trusts) {
 
-  var addresses = Object.keys(app.api.getAllProfiles()).sort(sorter).map(function (id) { 
-    var profile = app.api.getProfile(id)
+  // markup
+
+  var addresses = Object.keys(profiles).sort(sorter).map(function (id) { 
+    var profile = profiles[id]
     var otherNames = getOtherNames(profile)
     function r (e) { rename(e, id) }
     function f (e) { follow(e, id) }
@@ -21,7 +22,7 @@ module.exports = function (app, follows, trusts, flags) {
     return h('tr',
       h('td', 
         h('button.btn.btn-primary.btn-sm', { title: 'Rename', onclick: r }, com.icon('pencil')), ' ',
-        h('strong', com.a('#/profile/'+id, app.api.getName(id)||id)),
+        h('strong', com.a('#/profile/'+id, names[id]||id)),
         ' ', 
         (otherNames.length)
           ? h('small.text-muted', 'aka ', otherNames.join(', '))
@@ -38,44 +39,16 @@ module.exports = function (app, follows, trusts, flags) {
   // put followed and trusted friends at top
   function sorter(a, b) {
     var an = 0, bn = 0
-    if (follows[myid][a]) an++
-    if (trusts [myid][a]) an++
-    if (flags  [myid][a]) an--
-    if (follows[myid][b]) bn++
-    if (trusts [myid][b]) bn++
-    if (flags  [myid][b]) bn--
+    if (follows[myid][a]) an += 1
+    if (trusts [myid][a]) an += trusts[myid][a]
+    if (follows[myid][b]) bn += 1
+    if (trusts [myid][b]) bn += trusts[myid][b]
     return bn - an
-  }
-
-  // handlers
-  function rename (e, pid) {
-    e.preventDefault()
-    app.setNamePrompt(pid)
-  }
-
-  function follow (e, pid) {
-    e.preventDefault()
-    if (!follows[myid][pid]) {
-      app.api.addEdge('follow', pid, function(err) {
-        if (err) swal('Error While Publishing', err.message, 'error')
-        else app.refreshPage()
-      })
-    }
-  }
-
-  function unfollow (e, pid) {
-    e.preventDefault()
-    if (follows[myid][pid]) {
-      app.api.delEdge('follow', pid, function(err) {
-        if (err) swal('Error While Publishing', err.message, 'error')
-        else app.refreshPage()
-      })
-    }
   }
 
   function getOtherNames(profile) {
     // todo - replace with ranked names
-    var name = app.api.getName(profile.id) || profile.id
+    var name = names[profile.id] || profile.id
 
     // remove scare quotes 
     if (name.charAt(0) === '"' && name.charAt(name.length - 1) === '"')
@@ -95,6 +68,33 @@ module.exports = function (app, follows, trusts, flags) {
       add(profile.given[k].name)
     }
     return names
+  }
+
+  // handlers
+
+  function rename (e, pid) {
+    e.preventDefault()
+    app.setNamePrompt(pid)
+  }
+
+  function follow (e, pid) {
+    e.preventDefault()
+    if (!follows[myid][pid]) {
+      app.ssb.friends.follow(pid, function(err) {
+        if (err) swal('Error While Publishing', err.message, 'error')
+        else app.refreshPage()
+      })
+    }
+  }
+
+  function unfollow (e, pid) {
+    e.preventDefault()
+    if (follows[myid][pid]) {
+      app.ssb.friends.unfollow(pid, function(err) {
+        if (err) swal('Error While Publishing', err.message, 'error')
+        else app.refreshPage()
+      })
+    }
   }
 
   return addresses
