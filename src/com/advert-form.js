@@ -23,12 +23,14 @@ module.exports = function (app) {
   // event handlers
 
   function preview (e) {
-    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.api.getNames())
+    app.ssb.phoenix.getNamesById(function (err, names) {
+      preview.innerHTML = markdown.block(util.escapePlain(textarea.value), names)
+    })
   }
 
   function post (e) {
     e.preventDefault()
-    app.api.postAdvert(textarea.value, function (err) {
+    app.ssb.phoenix.postAdvert(textarea.value, function (err) {
       if (err) swal('Error While Publishing', err.message, 'error')
       else {
         swal('Your Ad Has Been Published', null, 'success')
