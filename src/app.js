@@ -75,10 +75,12 @@ module.exports = function (ssb) {
     })
 
     // collect common data
-    var done = multicb()
+    var done = multicb({ pluck: 1 })
     ssb.whoami(done())
     ssb.phoenix.getNamesById(done())
-    ssb.phoenix.getInboxCount(function (err, data) {
+    ssb.phoenix.getInboxCount(done())
+    done(function (err, data) {
+      if (err) throw err.message
       app.myid = data[0].id
       app.names = data[1]
       app.unreadMessages = data[2] - (+localStorage.readMessages || 0)

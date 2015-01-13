@@ -33,5 +33,4 @@ localhost.on('reconnecting', function(err) {
 // DEBUG
 window.PULL = require('pull-stream')
 window.SSB = ssb
-window.API = api
 window.APP = app

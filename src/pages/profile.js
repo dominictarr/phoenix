@@ -16,7 +16,9 @@ module.exports = function (app) {
       follow: datas[0],
       trust:  datas[1]
     }
-    var isFollowing = graphs.follow[myid][pid]
+    graphs.follow[app.myid] = graphs.follow[app.myid] || {}
+    graphs.trust [app.myid] = graphs.trust [app.myid] || {}
+    var isFollowing = graphs.follow[app.myid][pid]
     var profile = datas[2]
     var msgs = datas[3]
 
@@ -38,21 +40,21 @@ module.exports = function (app) {
 
     // render controls
     var followBtn = '', trustBtn = '', flagBtn = '', renameBtn = ''
-    if (pid === myid) {
+    if (pid === app.myid) {
       renameBtn = h('button.btn.btn-primary', {title: 'Rename', onclick: rename}, com.icon('pencil'))
     } else {
       renameBtn = h('button.btn.btn-primary', {title: 'Rename', onclick: rename}, com.icon('pencil'))
       followBtn = (isFollowing)
         ? h('button.btn.btn-primary', { onclick: unfollow }, com.icon('minus'), ' Unfollow')
         : h('button.btn.btn-primary', { onclick: follow }, com.icon('plus'), ' Follow')
-      trustBtn = (graphs.trust[myid][pid] == 1)
+      trustBtn = (graphs.trust[app.myid][pid] == 1)
         ? h('button.btn.btn-danger', { onclick: detrust }, com.icon('remove'), ' Untrust')
-        : (graphs.trust[myid][pid] == 0)
+        : (!graphs.trust[app.myid][pid])
           ? h('button.btn.btn-success', { onclick: trustPrompt }, com.icon('lock'), ' Trust')
           : ''
-      flagBtn = (graphs.trust[myid][pid] == -1)
+      flagBtn = (graphs.trust[app.myid][pid] == -1)
         ? h('button.btn.btn-success', { onclick: detrust }, com.icon('ok'), ' Unflag')
-        : (graphs.trust[myid][pid] == 0)
+        : (!graphs.trust[app.myid][pid])
           ? h('button.btn.btn-danger',{ onclick: flagPrompt },  com.icon('flag'), ' Flag')
           : ''
     } 
@@ -148,7 +150,7 @@ module.exports = function (app) {
     
     function follow (e) {
       e.preventDefault()
-      if (!graphs.follow[myid][pid]) {
+      if (!graphs.follow[app.myid][pid]) {
         app.ssb.friends.follow(pid, function(err) {
           if (err) swal('Error While Publishing', err.message, 'error')
           else app.refreshPage()
@@ -158,7 +160,7 @@ module.exports = function (app) {
 
     function unfollow (e) {
       e.preventDefault()
-      if (graphs.follow[myid][pid]) {
+      if (graphs.follow[app.myid][pid]) {
         app.ssb.friends.unfollow(pid, function(err) {
           if (err) swal('Error While Publishing', err.message, 'error')
           else app.refreshPage()

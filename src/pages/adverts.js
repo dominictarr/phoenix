@@ -8,7 +8,7 @@ var markdown = require('../lib/markdown')
 module.exports = function (app) {
   var opts = { start: 0 }
   var done = multicb()
-  app.ssb.getAdverts(opts, function (err, adverts) {
+  app.ssb.phoenix.getAdverts(opts, function (err, adverts) {
 
     // markup 
 

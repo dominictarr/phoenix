@@ -33,5 +33,8 @@ module.exports = {
   friends: {
     all: 'sync',
     hops: 'sync'
-  }
+  },
+
+  // phoenxi api
+  phoenix: require('phoenix-api/manifest')
 }

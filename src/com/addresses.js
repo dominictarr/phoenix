@@ -2,6 +2,8 @@ var h = require('hyperscript')
 var com = require('./index')
 
 module.exports = function (app, profiles, follows, trusts) {
+  follows[app.myid] = follows[app.myid] || {}
+  trusts [app.myid] = trusts [app.myid] || {}
 
   // markup
 
@@ -29,8 +31,8 @@ module.exports = function (app, profiles, follows, trusts) {
           : ''
       ),
       h('td', 
-        (trusts[app.myid][id]) ? h('small.text-muted', com.icon('lock'), ' trusted') : '',
-        (flags[app.myid][id]) ? h('small.text-muted', com.icon('flag'), ' flagged') : ''
+        (trusts[app.myid][id] > 0) ? h('small.text-muted', com.icon('lock'), ' trusted') : '',
+        (trusts[app.myid][id] < 0) ? h('small.text-muted', com.icon('flag'), ' flagged') : ''
       ),
       h('td.text-center', followbtn)
     )
