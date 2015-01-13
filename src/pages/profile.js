@@ -112,7 +112,7 @@ module.exports = function (app) {
         confirmButtonColor: '#12b812',
         confirmButtonText: 'Trust'
       }, function() {
-        app.ssb.friends.assign('trust', 1, pid, function (err) {
+        app.ssb.friends.trust(1, pid, function (err) {
           if (err) swal('Error While Publishing', err.message, 'error')
           else app.refreshPage()
         })
@@ -133,7 +133,7 @@ module.exports = function (app) {
         confirmButtonColor: '#d9534f',
         confirmButtonText: 'Flag'
       }, function() {
-        app.ssb.friends.assign('trust', -1, pid, function (err) {
+        app.ssb.friends.trust(-1, pid, function (err) {
           if (err) swal('Error While Publishing', err.message, 'error')
           else app.refreshPage()
         })
@@ -142,7 +142,7 @@ module.exports = function (app) {
 
     function detrust (e) {
       e.preventDefault()
-      app.ssb.friends.assign('trust', 0, pid, function(err) {
+      app.ssb.friends.trust(0, pid, function(err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else app.refreshPage()
       })

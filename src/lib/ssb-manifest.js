@@ -32,7 +32,10 @@ module.exports = {
   // friends
   friends: {
     all: 'sync',
-    hops: 'sync'
+    hops: 'sync',
+    follow: 'async',
+    unfollow: 'async',
+    trust: 'async'
   },
 
   // phoenxi api
