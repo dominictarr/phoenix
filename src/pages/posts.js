@@ -4,14 +4,7 @@ var com = require('../com')
 
 module.exports = function (app) {
   var opts = { start: 0 }
-  var done = multicb({ pluck: 1 })
-  app.ssb.phoenix.getNamesById(done())
-  app.ssb.phoenix.getThreadMetas(done())
-  app.ssb.phoenix.getPosts(opts, done())
-  done(function (err, data) {
-    var names = data[0]
-    var threadMetas = data[1]
-    var msgs = data[2]
+  app.ssb.phoenix.getPosts(opts, function (err, msgs) {
 
     // markup
 
@@ -38,7 +31,7 @@ module.exports = function (app) {
       ]
     } else {
       content = h('table.table.message-feed', msgs.map(function (msg) {
-        return com.messageSummary(app, msg, threadMetas[msg.key], names)
+        return com.messageSummary(app, msg)
       }))
     }
    
@@ -60,7 +53,7 @@ module.exports = function (app) {
       opts.start += 30
       app.ssb.phoenix.getPosts(opts, function (err, moreMsgs) {
         if (moreMsgs.length > 0)
-          moreMsgs.forEach(function (msg) { content.appendChild(com.messageSummary(app, msg, threadMetas[msg.key], names)) })
+          moreMsgs.forEach(function (msg) { content.appendChild(com.messageSummary(app, msg)) })
         // remove load more btn if it looks like there arent any more to load
         if (moreMsgs.length < 30)
           loadMoreBtn.parentNode.removeChild(loadMoreBtn)

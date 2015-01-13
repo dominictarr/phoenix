@@ -43,7 +43,7 @@ exports.header = function (app) {
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
         h('li.hidden-xs', a('#/address-book', 'address book')),
-        h('li.hidden-xs', a('#/profile/' + app.myid, app.myname))
+        h('li.hidden-xs', a('#/profile/' + app.myid, app.names[app.myid]))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li.hidden-xs', a('#/help', 'help'))

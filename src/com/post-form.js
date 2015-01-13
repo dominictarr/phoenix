@@ -23,36 +23,38 @@ module.exports = function (app, parent) {
   // handlers
 
   function preview (e) {
-    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.api.getNames())
+    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.names)
   }
 
   function post (e) {
     e.preventDefault()
 
     // prep text
-    var text = textarea.value
-    text = replaceMentions(text)
+    app.ssb.phoenix.getIdsByName(function (err, idsByName) {
+      var text = textarea.value
+      text = replaceMentions(text, idsByName)
 
-    // post
-    if (parent) app.api.postReply(text, parent, done)
-    else app.api.postText(text, done)
-      
-    function done (err) {
-      if (err) swal('Error While Publishing', err.message, 'error')
-      else {
-        if (parent)
-          app.refreshPage()
-        else
-          window.location.hash = '#/'
+      // post
+      if (parent) app.ssb.phoenix.postReply(text, parent, done)
+      else app.ssb.phoenix.postText(text, done)
+        
+      function done (err) {
+        if (err) swal('Error While Publishing', err.message, 'error')
+        else {
+          if (parent)
+            app.refreshPage()
+          else
+            window.location.hash = '#/'
+        }
       }
-    }
+    })
   }
 
   // find any mentions and replace the nicknames with ids
   var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
-  function replaceMentions(str) {
+  function replaceMentions(str, idsByName) {
     return str.replace(mentionRegex, function(full, $1, $2) {
-      var id = app.api.getIdByName($2)
+      var id = idsByName[$2]
       if (!id) return full
       return ($1||'') + '@' + id
     })

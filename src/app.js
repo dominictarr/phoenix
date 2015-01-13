@@ -12,7 +12,7 @@ module.exports = function (ssb) {
   var app = {
     ssb: ssb,
     myid: null,
-    myname: null,
+    names: null,
     page: {
       id: 'feed',
       param: null
@@ -77,10 +77,10 @@ module.exports = function (ssb) {
     // collect common data
     var done = multicb()
     ssb.whoami(done())
-    ssb.phoenix.getMyProfile(done())
+    ssb.phoenix.getNamesById(done())
     ssb.phoenix.getInboxCount(function (err, data) {
       app.myid = data[0].id
-      app.myname = data[1].self.name
+      app.names = data[1]
       app.unreadMessages = data[2] - (+localStorage.readMessages || 0)
 
       // render the page

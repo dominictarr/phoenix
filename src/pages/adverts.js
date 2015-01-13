@@ -8,11 +8,7 @@ var markdown = require('../lib/markdown')
 module.exports = function (app) {
   var opts = { start: 0 }
   var done = multicb()
-  app.ssb.getNamesById(done())
-  app.ssb.getAdverts(opts, done())
-  done(function (err, data) {
-    var names = data[0]
-    var adverts = data[1]
+  app.ssb.getAdverts(opts, function (err, adverts) {
 
     // markup 
 
@@ -37,8 +33,8 @@ module.exports = function (app) {
     function renderAd (ad) {
       var author = ad.value.author
       return h('.col-xs-3',
-        h('small', 'advert by ', com.userlink(author, names[author])),
-        h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text), names) })
+        h('small', 'advert by ', com.userlink(author, app.names[author])),
+        h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text), app.names) })
       )
     }
 

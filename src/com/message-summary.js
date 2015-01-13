@@ -3,7 +3,7 @@ var com = require('./index')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
 
-module.exports = function (app, msg, threadMeta, names, opts) {
+module.exports = function (app, msg, opts) {
   var content
   if (msg.value.content.type == 'post') {
     content = msg.value.content.text
@@ -14,19 +14,19 @@ module.exports = function (app, msg, threadMeta, names, opts) {
   }
   content = util.escapePlain(content)
   content = markdown.emojis(content)
-  content = markdown.mentionLinks(content, names, true)
+  content = markdown.mentionLinks(content, app.names, true)
 
   var len = noHtmlLen(content)
   if (len > 60 || content.length > 512) {
     content = content.slice(0, Math.min(60 + (content.length - len), 512)) + '...'
   }
 
-  var nReplies = threadMeta ? threadMeta.numThreadReplies : 0
+  var nReplies = msg.numThreadReplies
   var repliesStr = ''
   if (nReplies)
     repliesStr = ' ('+nReplies+')'
 
-  var name = names[msg.value.author] || util.shortString(msg.value.author)
+  var name = app.names[msg.value.author] || util.shortString(msg.value.author)
   return h('tr.message-summary', { onclick: function(e) { e.preventDefault(); window.location.hash = '#/msg/'+msg.key } },
     h('td', name + repliesStr),
     h('td', h('span', { innerHTML: content })),

@@ -1,7 +1,7 @@
 var h = require('hyperscript')
 var com = require('./index')
 
-module.exports = function (app, myid, profiles, names, follows, trusts) {
+module.exports = function (app, profiles, follows, trusts) {
 
   // markup
 
@@ -12,8 +12,8 @@ module.exports = function (app, myid, profiles, names, follows, trusts) {
     function f (e) { follow(e, id) }
     function unf (e) { unfollow(e, id) }
     var followbtn
-    if (id !== myid) {
-      followbtn = (follows[myid][id])
+    if (id !== app.myid) {
+      followbtn = (follows[app.myid][id])
           ? h('button.btn.btn-primary.btn-sm', { title: 'Unfollow', onclick: unf }, h('span.label.label-success', com.icon('ok')), ' ', com.icon('minus'))
           : h('button.btn.btn-primary.btn-sm', { title: 'Follow', onclick: f }, com.icon('plus'))
     } else {
@@ -22,15 +22,15 @@ module.exports = function (app, myid, profiles, names, follows, trusts) {
     return h('tr',
       h('td', 
         h('button.btn.btn-primary.btn-sm', { title: 'Rename', onclick: r }, com.icon('pencil')), ' ',
-        h('strong', com.a('#/profile/'+id, names[id]||id)),
+        h('strong', com.a('#/profile/'+id, app.names[id]||id)),
         ' ', 
         (otherNames.length)
           ? h('small.text-muted', 'aka ', otherNames.join(', '))
           : ''
       ),
       h('td', 
-        (trusts[myid][id]) ? h('small.text-muted', com.icon('lock'), ' trusted') : '',
-        (flags[myid][id]) ? h('small.text-muted', com.icon('flag'), ' flagged') : ''
+        (trusts[app.myid][id]) ? h('small.text-muted', com.icon('lock'), ' trusted') : '',
+        (flags[app.myid][id]) ? h('small.text-muted', com.icon('flag'), ' flagged') : ''
       ),
       h('td.text-center', followbtn)
     )
@@ -39,16 +39,16 @@ module.exports = function (app, myid, profiles, names, follows, trusts) {
   // put followed and trusted friends at top
   function sorter(a, b) {
     var an = 0, bn = 0
-    if (follows[myid][a]) an += 1
-    if (trusts [myid][a]) an += trusts[myid][a]
-    if (follows[myid][b]) bn += 1
-    if (trusts [myid][b]) bn += trusts[myid][b]
+    if (follows[app.myid][a]) an += 1
+    if (trusts [app.myid][a]) an += trusts[app.myid][a]
+    if (follows[app.myid][b]) bn += 1
+    if (trusts [app.myid][b]) bn += trusts[app.myid][b]
     return bn - an
   }
 
   function getOtherNames(profile) {
     // todo - replace with ranked names
-    var name = names[profile.id] || profile.id
+    var name = app.names[profile.id] || profile.id
 
     // remove scare quotes 
     if (name.charAt(0) === '"' && name.charAt(name.length - 1) === '"')
@@ -79,7 +79,7 @@ module.exports = function (app, myid, profiles, names, follows, trusts) {
 
   function follow (e, pid) {
     e.preventDefault()
-    if (!follows[myid][pid]) {
+    if (!follows[app.myid][pid]) {
       app.ssb.friends.follow(pid, function(err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else app.refreshPage()
@@ -89,7 +89,7 @@ module.exports = function (app, myid, profiles, names, follows, trusts) {
 
   function unfollow (e, pid) {
     e.preventDefault()
-    if (follows[myid][pid]) {
+    if (follows[app.myid][pid]) {
       app.ssb.friends.unfollow(pid, function(err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else app.refreshPage()

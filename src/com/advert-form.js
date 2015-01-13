@@ -23,9 +23,7 @@ module.exports = function (app) {
   // event handlers
 
   function preview (e) {
-    app.ssb.phoenix.getNamesById(function (err, names) {
-      preview.innerHTML = markdown.block(util.escapePlain(textarea.value), names)
-    })
+    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.names)
   }
 
   function post (e) {
