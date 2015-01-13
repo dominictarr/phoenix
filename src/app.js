@@ -1,6 +1,7 @@
 var h          = require('hyperscript')
 var multicb    = require('multicb')
 var router     = require('phoenix-router')
+var pull       = require('pull-stream')
 var com        = require('./com')
 var pages      = require('./pages')
 var util       = require('./lib/util')
@@ -35,12 +36,15 @@ module.exports = function (ssb) {
     }
   })
 
-  // :TODO: replace
-  // ssb.on('post', function (msg) {
-  //   app.setPendingMessages(app.pendingMessages + 1)
-  // })
-
   // toplevel & common methods
+
+  // should be called each time the rpc connection is (re)established
+  app.setupRpcConnection = function () {
+    pull(ssb.phoenix.events(), pull.drain(function (event) {
+      if (event.type == 'post')
+        app.setPendingMessages(app.pendingMessages + 1)
+    }))
+  }
 
   var firstRefresh = true
   var refreshPage =

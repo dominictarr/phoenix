@@ -12,6 +12,7 @@ localhost.on('connect', function() {
     if (err) return localhost.close(), console.error('Token fetch failed', err)
     ssb.auth(token, function(err) {
       app.setConnectionStatus(true)
+      app.setupRpcConnection()
       app.refreshPage()
     })
   })
