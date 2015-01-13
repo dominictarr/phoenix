@@ -4,8 +4,7 @@ var auth       = require('ssb-domain-auth')
 
 var ssb        = muxrpc(require('./lib/ssb-manifest'), false, function (stream) { return Serializer(stream, JSON, {split: '\n\n'}) })()
 var localhost  = require('ssb-channel').connect(ssb, 'localhost')
-var api        = require('phoenix-api')(ssb)
-var app        = require('./app')(api)
+var app        = require('./app')(ssb)
 
 localhost.on('connect', function() {
   // authenticate the connection
@@ -13,14 +12,7 @@ localhost.on('connect', function() {
     if (err) return localhost.close(), console.error('Token fetch failed', err)
     ssb.auth(token, function(err) {
       app.setConnectionStatus(true)
-      app.api.startIndexing(function (err) {
-        if (err) {
-          console.error(err)          
-          localhost.disconnect()
-          return
-        }
-        app.refreshPage()
-      })
+      app.refreshPage()
     })
   })
 })

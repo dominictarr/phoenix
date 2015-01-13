@@ -4,12 +4,12 @@ var com        = require('./com')
 var pages      = require('./pages')
 var util       = require('./lib/util')
 
-module.exports = function (api) {
+module.exports = function (ssb) {
 
   // master state object
 
   var app = {
-    api: api,
+    ssb: ssb,
     page: {
       id: 'feed',
       param: null
@@ -32,48 +32,61 @@ module.exports = function (api) {
     }
   })
 
-  api.on('post', function (msg) {
-    app.setPendingMessages(app.pendingMessages + 1)
-  })
+  // :TODO: replace
+  // ssb.on('post', function (msg) {
+  //   app.setPendingMessages(app.pendingMessages + 1)
+  // })
 
   // toplevel & common methods
 
+  var firstRefresh = true
   var refreshPage =
   app.refreshPage = function () {
     // clear pending messages
     app.setPendingMessages(0)
 
     // re-route to setup if needed
-    if (!api.getMyProfile().self.name)
-      window.location.hash = '#/setup'
-    else if (window.location.hash == '#/setup')
-      window.location.hash = '#/'
+    if (firstRefresh) {
+      firstRefresh = false
+      ssb.phoenix.getMyProfile(function (err, me) {
+        if (err || !me || !me.self.name)
+          window.location.hash = '#/setup'
+        else if (window.location.hash == '#/setup')
+          window.location.hash = '#/'
+      })
+    }
 
     // run the router
     var route = router(window.location.hash, 'posts')
     app.page.id = route[0]
     app.page.param = route[1]
 
-    // setup suggest options for usernames
+    // refresh suggest options for usernames
     var profiles = 
     app.suggestOptions['@'] = []
-    for (var k in api.getAllProfiles()) {
-      var name = api.getNameById(k) || k
-      app.suggestOptions['@'].push({ title: name, subtitle: util.shortString(k), value: name })
-    }
+    ssb.phoenix.getNamesById(function (err, names) {
+      for (var k in names) {
+        var name = names[k] || k
+        app.suggestOptions['@'].push({ title: name, subtitle: util.shortString(k), value: name })
+      }
+    })
 
     // count unread messages
-    app.unreadMessages = api.getInboxCount() - (+localStorage.readMessages || 0)
+    ssb.phoenix.getInboxCount(function (err, count) {
+      app.unreadMessages = count - (+localStorage.readMessages || 0)
 
-    // render the page
-    var page = pages[app.page.id]
-    if (!page)
-      page = pages.notfound
-    page(app)
+      // render the page
+      var page = pages[app.page.id]
+      if (!page)
+        page = pages.notfound
+      page(app)
+    })
   }
 
   app.showUserId = function () { 
-    swal('Here is your contact id', api.getMyId())
+    ssb.whoami(function (err, user) {
+      swal('Here is your contact id', user.id)
+    })
   }
 
   app.setPendingMessages = function (n) {
@@ -98,8 +111,8 @@ module.exports = function (api) {
 
     var parts = id.split(',')
     var isInvite = (parts.length === 3)
-    if (isInvite) api.useInvite(id, next)
-    else api.addEdge('follow', id, next)
+    if (isInvite) ssb.invite.addMe(id, next)
+    else ssb.friends.follow(id, next)
       
     function next (err) {
       if (err) {
@@ -117,27 +130,29 @@ module.exports = function (api) {
   }
 
   app.setNamePrompt = function (userId) {
-    userId = userId || api.getMyId()
-    var isSelf = api.getMyId() === userId
-    
-    var name = (isSelf) ?
-      prompt('What would you like your nickname to be?') :
-      prompt('What would you like their nickname to be?')
-    if (!name)
-      return
+    ssb.whoami(function (err, user) {
+      userId = userId || user.id
+      var isSelf = user.id === userId
+      
+      var name = (isSelf) ?
+        prompt('What would you like your nickname to be?') :
+        prompt('What would you like their nickname to be?')
+      if (!name)
+        return
 
-    if (!confirm('Set nickname to '+name+'?'))
-      return
+      if (!confirm('Set nickname to '+name+'?'))
+        return
 
-    if (isSelf)
-      api.nameSelf(name, done)
-    else
-      api.nameOther(userId, name, done)
+      if (isSelf)
+        ssb.phoenix.nameSelf(name, done)
+      else
+        ssb.phoenix.nameOther(userId, name, done)
 
-    function done(err) {
-      if (err) swal('Error While Publishing', err.message, 'error')
-      else app.refreshPage()
-    }
+      function done(err) {
+        if (err) swal('Error While Publishing', err.message, 'error')
+        else app.refreshPage()
+      }
+    })
   }
 
   app.setPage = function(name, page) {
