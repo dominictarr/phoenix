@@ -1,4 +1,5 @@
 var h = require('hyperscript')
+var schemas = require('ssb-msg-schemas')
 var com = require('./index')
 
 module.exports = function (app, profiles, follows, trusts) {
@@ -82,7 +83,7 @@ module.exports = function (app, profiles, follows, trusts) {
   function follow (e, pid) {
     e.preventDefault()
     if (!follows[app.myid][pid]) {
-      app.ssb.friends.follow(pid, function(err) {
+      schemas.addFollow(app.ssb, pid, function(err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else app.refreshPage()
       })
@@ -92,7 +93,7 @@ module.exports = function (app, profiles, follows, trusts) {
   function unfollow (e, pid) {
     e.preventDefault()
     if (follows[app.myid][pid]) {
-      app.ssb.friends.unfollow(pid, function(err) {
+      schemas.addUnfollow(app.ssb, pid, function(err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else app.refreshPage()
       })

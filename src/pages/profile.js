@@ -1,6 +1,7 @@
 var h = require('hyperscript')
 var pull = require('pull-stream')
 var multicb = require('multicb')
+var schemas = require('ssb-msg-schemas')
 var com = require('../com')
 var util = require('../lib/util')
 
@@ -112,7 +113,7 @@ module.exports = function (app) {
         confirmButtonColor: '#12b812',
         confirmButtonText: 'Trust'
       }, function() {
-        app.ssb.friends.trust(1, pid, function (err) {
+        schemas.addTrust(app.ssb, pid, 1, function (err) {
           if (err) swal('Error While Publishing', err.message, 'error')
           else app.refreshPage()
         })
@@ -133,7 +134,7 @@ module.exports = function (app) {
         confirmButtonColor: '#d9534f',
         confirmButtonText: 'Flag'
       }, function() {
-        app.ssb.friends.trust(-1, pid, function (err) {
+        schemas.addTrust(app.ssb, pid, -1, function (err) {
           if (err) swal('Error While Publishing', err.message, 'error')
           else app.refreshPage()
         })
@@ -142,7 +143,7 @@ module.exports = function (app) {
 
     function detrust (e) {
       e.preventDefault()
-      app.ssb.friends.trust(0, pid, function(err) {
+      schemas.addTrust(app.ssb, pid, 0, function(err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else app.refreshPage()
       })
@@ -151,7 +152,7 @@ module.exports = function (app) {
     function follow (e) {
       e.preventDefault()
       if (!graphs.follow[app.myid][pid]) {
-        app.ssb.friends.follow(pid, function(err) {
+        schemas.addFollow(app.ssb, pid, function(err) {
           if (err) swal('Error While Publishing', err.message, 'error')
           else app.refreshPage()
         })
@@ -161,7 +162,7 @@ module.exports = function (app) {
     function unfollow (e) {
       e.preventDefault()
       if (graphs.follow[app.myid][pid]) {
-        app.ssb.friends.unfollow(pid, function(err) {
+        schemas.addUnfollow(app.ssb, pid, function(err) {
           if (err) swal('Error While Publishing', err.message, 'error')
           else app.refreshPage()
         })

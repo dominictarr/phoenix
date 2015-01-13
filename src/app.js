@@ -2,6 +2,7 @@ var h          = require('hyperscript')
 var multicb    = require('multicb')
 var router     = require('phoenix-router')
 var pull       = require('pull-stream')
+var schemas    = require('ssb-msg-schemas')
 var com        = require('./com')
 var pages      = require('./pages')
 var util       = require('./lib/util')
@@ -126,7 +127,7 @@ module.exports = function (ssb) {
     var parts = id.split(',')
     var isInvite = (parts.length === 3)
     if (isInvite) ssb.invite.addMe(id, next)
-    else ssb.friends.follow(id, next)
+    else schemas.addFollow(ssb, id, next)
       
     function next (err) {
       if (err) {
@@ -158,9 +159,9 @@ module.exports = function (ssb) {
         return
 
       if (isSelf)
-        ssb.phoenix.nameSelf(name, done)
+        schemas.addOwnName(ssb, name, done)
       else
-        ssb.phoenix.nameOther(userId, name, done)
+        schemas.addOtherName(ssb, userId, name, done)
 
       function done(err) {
         if (err) swal('Error While Publishing', err.message, 'error')

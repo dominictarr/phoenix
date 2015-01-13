@@ -1,5 +1,6 @@
 var h = require('hyperscript')
 var suggestBox = require('suggest-box')
+var schemas = require('ssb-msg-schemas')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
 
@@ -35,8 +36,8 @@ module.exports = function (app, parent) {
       text = replaceMentions(text, idsByName)
 
       // post
-      if (parent) app.ssb.phoenix.postReply(text, parent, done)
-      else app.ssb.phoenix.postText(text, done)
+      if (parent) schemas.addReplyPost(app.ssb, text, parent, done)
+      else schemas.addPost(app.ssb, text, done)
         
       function done (err) {
         if (err) swal('Error While Publishing', err.message, 'error')
