@@ -91,6 +91,11 @@ module.exports = function (ssb) {
       app.myid = data[0].id
       app.names = data[1]
       app.unreadMessages = data[2] - (+localStorage.readMessages || 0)
+      if (app.unreadMessages < 0) {
+        // probably a new account on the machine, reset
+        app.unreadMessages = 0
+        localStorage.readMessages = 0
+      }
 
       // re-route to setup if needed
       if (!app.names[app.myid]) {
