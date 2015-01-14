@@ -11,23 +11,29 @@ module.exports = function (app) {
     var content
     if (msgs.length === 0) {
       content = [
-        h('hr'),
-        h('p', h('strong', 'You must be new, because your feed is empty!')),
-        h('p', 
-          'Let\'s fix that. Remember how, when facebook came out, you had to have a .edu to join? ',
-          'Hah, screw that. Around here, you have to know a techie with a server to get connected.'
-        ),
-        h('p', 'You... do know a techie, right? Ask them for an invite code, then click ',
-          h('button.btn.btn-xs.btn-primary', { onclick: app.followPrompt }, 'Add contact'),
-          ' and copy+paste it into the popup. The rest happens automatically.'
-        ),
-        h('p',
-          h('strong', 'Techies. '),
-          'You run this show. ',
-          com.a('https://github.com/ssbc/scuttlebot#running-your-own-pub-server', 'Set up a pub server'),
-          ' and keep out the trolls.'
-        ),
-        h('p', 'Enjoy!')
+        h('.row',
+          h('.col-xs-4',
+            com.panel(h('span', 'Join a Pub Server ', h('small', 'recommended')),
+              h('div',
+                h('p', 'Ask the owner of a pub server for an ', com.a('#/help/networking', 'invite code'), '.'),
+                h('p', h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Use invite'))
+              )
+            )
+          ),
+          h('.col-xs-4',
+            com.panel('Connect over WiFi',
+              h('p', 'Open the ', com.a('#/address-book', 'address book'), ' and find peers on your WiFi in the ', h('strong', 'Network'), ' column.')
+            )
+          ),
+          h('.col-xs-4',
+            com.panel(h('span', 'Start a Pub Server ', h('small', 'advanced')),
+              h('p',
+                com.a('https://github.com/ssbc/scuttlebot#running-your-own-pub-server', 'Follow these instructions'),
+                ' then hand out invite codes to friends.'
+              )
+            )
+          )
+        )
       ]
     } else {
       content = h('table.table.message-feed', msgs.map(function (msg) {

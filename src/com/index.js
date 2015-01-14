@@ -97,6 +97,14 @@ exports.sidehelp = function (app, opts) {
   )
 }
 
+var panel =
+exports.panel = function (title, content) {
+  return h('.panel.panel-default', [
+    (title) ? h('.panel-heading', h('h3.panel-title', title)) : '',
+    h('.panel-body', content)
+  ])
+}
+
 var page =
 exports.page = function (app, id, content) {
   return h('div',
