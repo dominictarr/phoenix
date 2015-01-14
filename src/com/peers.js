@@ -7,7 +7,13 @@ module.exports = function (app, peers) {
 
   var rows = peers.sort(sorter).map(function (peer) { 
     var muted = (peer.connected) ? '' : '.text-muted'
-    var status = ''
+    var id = '', status = ''
+
+    if (peer.id) {
+      id = com.userlink(peer.id, app.names[peer.id])
+    } else
+      id = peer.host
+
     if (peer.connected) {
       if (peer.time.connect)
         status = 'connected'
@@ -19,7 +25,7 @@ module.exports = function (app, peers) {
       }
     }
     return h('tr',
-      h('td'+muted, peer.host + ' ' + status)
+      h('td'+muted, id, ' ', status)
     )
   })
 
