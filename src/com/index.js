@@ -105,10 +105,11 @@ exports.page = function (app, id, content) {
   )
 }
 
+exports.addresses = require('./addresses')
+exports.advertForm = require('./advert-form')
+exports.adverts = require('./adverts')
 exports.message = require('./message')
 exports.messageThread = require('./message-thread')
 exports.messageSummary = require('./message-summary')
+exports.peers = require('./peers')
 exports.postForm = require('./post-form')
-exports.adverts = require('./adverts')
-exports.advertForm = require('./advert-form')
-exports.addresses = require('./addresses')

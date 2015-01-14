@@ -29,6 +29,11 @@ module.exports = {
     addMe: 'async'
   },
 
+  // gossip
+  gossip: {
+    peers: 'sync'
+  },
+
   // friends
   friends: {
     all: 'sync',

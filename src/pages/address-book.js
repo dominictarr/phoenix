@@ -11,6 +11,7 @@ module.exports = function (app) {
   app.ssb.phoenix.getAllProfiles(done())
   app.ssb.friends.all('follow', done())
   app.ssb.friends.all('trust', done())
+  app.ssb.gossip.peers(done())
   done(function (err, data) {
 
     // markup
@@ -24,7 +25,10 @@ module.exports = function (app) {
         )
       ),
       h('.col-xs-2.col-md-3',
-        com.adverts(app),
+        h('table.table.peers',
+          h('thead', h('tr', h('th', 'Network'))),
+          h('tbody', com.peers(app, data[3]))
+        ),
         h('hr'),
         com.sidehelp(app)
       )

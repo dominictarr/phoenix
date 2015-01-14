@@ -37,6 +37,20 @@ module.exports = function (ssb) {
     }
   })
 
+  // periodically poll and rerender the current connections
+  setInterval(function () {
+    ssb.gossip.peers(function (err, peers) {
+      if (err)
+        return
+      Array.prototype.forEach.call(document.querySelectorAll('table.peers tbody'), function (tb) {
+        tb.innerHTML = ''
+        com.peers(app, peers).forEach(function (row) {
+          tb.appendChild(row)
+        })
+      })
+    })
+  }, 5000)
+
   // toplevel & common methods
 
   // should be called each time the rpc connection is (re)established
