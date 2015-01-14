@@ -61,22 +61,10 @@ module.exports = function (ssb) {
     }))
   }
 
-  var firstRefresh = true
   var refreshPage =
   app.refreshPage = function () {
     // clear pending messages
     app.setPendingMessages(0)
-
-    // re-route to setup if needed
-    if (firstRefresh) {
-      firstRefresh = false
-      ssb.phoenix.getMyProfile(function (err, me) {
-        if (err || !me || !me.self.name)
-          window.location.hash = '#/setup'
-        else if (window.location.hash == '#/setup')
-          window.location.hash = '#/'
-      })
-    }
 
     // run the router
     var route = router(window.location.hash, 'posts')
@@ -103,6 +91,18 @@ module.exports = function (ssb) {
       app.myid = data[0].id
       app.names = data[1]
       app.unreadMessages = data[2] - (+localStorage.readMessages || 0)
+
+      // re-route to setup if needed
+      if (!app.names[app.myid]) {
+        if (window.location.hash != '#/setup') {      
+          window.location.hash = '#/setup'
+          return
+        }
+      } else if (window.location.hash == '#/setup') {
+        console.log('nope')
+        window.location.hash = '#/'
+        return
+      }
 
       // render the page
       var page = pages[app.page.id]
@@ -184,10 +184,13 @@ module.exports = function (ssb) {
     })
   }
 
-  app.setPage = function(name, page) {
+  app.setPage = function(name, page, opts) {
     var el = document.getElementById('page-container')
     el.innerHTML = ''
-    el.appendChild(com.page(app, name, page))
+    if (!opts || !opts.noHeader)
+      el.appendChild(com.page(app, name, page))
+    else
+      el.appendChild(h('#page.container-fluid.'+name+'-page', page))
   }
 
   return app
