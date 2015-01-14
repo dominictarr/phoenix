@@ -33,11 +33,23 @@ module.exports = function (app, parent) {
     // prep text
     app.ssb.phoenix.getIdsByName(function (err, idsByName) {
       var text = textarea.value
-      text = replaceMentions(text, idsByName)
+
+      // collect any mentions and replace the nicknames with ids
+      var mentions = []
+      var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
+      text = text.replace(mentionRegex, function(full, $1, $2) {
+        var id = idsByName[$2] || $2
+        if (schemas.isHash(id))
+          mentions.push(id)
+        return ($1||'') + '@' + id
+      })
 
       // post
-      if (parent) schemas.addReplyPost(app.ssb, text, parent, done)
-      else schemas.addPost(app.ssb, text, done)
+      var opts = null
+      if (mentions.length)
+        opts = { mentions: mentions }
+      if (parent) schemas.addReplyPost(app.ssb, text, parent, opts, done)
+      else schemas.addPost(app.ssb, text, opts, done)
         
       function done (err) {
         if (err) swal('Error While Publishing', err.message, 'error')
@@ -48,16 +60,6 @@ module.exports = function (app, parent) {
             window.location.hash = '#/'
         }
       }
-    })
-  }
-
-  // find any mentions and replace the nicknames with ids
-  var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
-  function replaceMentions(str, idsByName) {
-    return str.replace(mentionRegex, function(full, $1, $2) {
-      var id = idsByName[$2]
-      if (!id) return full
-      return ($1||'') + '@' + id
     })
   }
 
