@@ -34,8 +34,8 @@ module.exports = function (app, peers) {
     var an = 0, bn = 0
     if (a.connected) an += 100
     if (b.connected) bn += 100
-    an -= a.failure
-    bn -= b.failure
+    if (a.failure) an -= a.failure
+    if (b.failure) bn -= b.failure
     return bn - an
   }
 
