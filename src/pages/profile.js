@@ -29,13 +29,17 @@ module.exports = function (app) {
       if (msgs.length)
         msgfeed = h('table.table.message-feed', msgs.map(function (msg) { return com.messageSummary(app, msg) }))
       else
-        msgfeed = h('p', h('strong', 'No posts have been published by this user yet.'))
+        msgfeed = h('div', { style: 'display: inline-block' }, com.panel('', 'No posts have been published by this user yet.'))
     } else {
-      msgfeed = h('p', 
-        h('strong', 'No messages found for this user.'),
-        ((!isFollowing) ? 
-          h('p', 'Follow this user to begin searching the network for their data.') :
-          h('p', 'Scuttlebutt is searching the network for this user.'))
+      msgfeed = h('div', { style: 'display: inline-block' },
+        com.panel('',
+          h('div',
+            h('strong', 'No messages found for this user.'), h('br'),
+            ((!isFollowing) ? 
+              h('span', 'Follow this user to begin searching the network for their data.') :
+              h('span', 'Scuttlebutt is searching the network for this user.'))
+          )
+        )
       )
     }
 
