@@ -1,14 +1,19 @@
 var h = require('hyperscript')
-var pull = require('pull-stream')
+var multicb = require('multicb')
 var com = require('../com')
 
 module.exports = function (app) {
-  // track read messages
-  app.unreadMessages = 0
-  localStorage.readMessages = app.api.getInboxCount()
-
   var opts = { start: 0 }
-  app.api.getInbox(opts, function (err, msgs) {
+  var done = multicb({ pluck: 1 })
+  app.ssb.phoenix.getInboxCount(done())
+  app.ssb.phoenix.getInbox(opts, done())
+  done(function (err, data) {
+    var inboxCount = data[0]
+    var msgs = data[1]
+
+    // track read messages
+    app.unreadMessages = 0
+    localStorage.readMessages = inboxCount
 
     // markup
     
@@ -40,10 +45,9 @@ module.exports = function (app) {
     function loadMore (e) {
       e.preventDefault()
       opts.start += 30
-      app.api.getInbox(opts, function (err, moreMsgs) {
-        if (moreMsgs.length > 0) {
+      app.ssb.phoenix.getInbox(opts, function (err, moreMsgs) {
+        if (moreMsgs.length > 0)
           moreMsgs.forEach(function (msg) { content.appendChild(com.messageSummary(app, msg)) })
-        }
         // remove load more btn if it looks like there arent any more to load
         if (moreMsgs.length < 30)
           loadMoreBtn.parentNode.removeChild(loadMoreBtn)

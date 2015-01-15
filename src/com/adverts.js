@@ -5,18 +5,18 @@ var markdown = require('../lib/markdown')
 
 module.exports = function (app) {
   var adspace = h('.adverts-but-its-cool-tho')
-  app.api.getRandomAdverts(3, 30, function (err, ads) {
+  app.ssb.phoenix.getRandomAdverts(3, 30, function (err, ads) {
     if (ads.length)
       ads.forEach(function (ad) { adspace.appendChild(renderAd(app, ad)) })
     else
-      adspace.appendChild(h('small', 'this space is reserved for user adverts - ', com.a('#/adverts', 'try it out!')))
+      adspace.appendChild(h('.well.well-sm', com.a('#/adverts', 'Create ads'), ' to let your friends know about events, websites, etc. ', com.a('#/help/adverts', 'About')))
   })
   return adspace
 }
 
 function renderAd (app, ad) {
   return h('div',
-    h('small', 'advert by ', com.userlink(ad.value.author, app.api.getNameById(ad.value.author))),
+    h('small', 'advert by ', com.userlink(ad.value.author, app.names[ad.value.author])),
     h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text)) })
   )
 }

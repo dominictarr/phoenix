@@ -1,13 +1,10 @@
 var stack = require('stack')
+var api   = require('phoenix-api')
 
-exports.name = 'phoenix'
-exports.version = '1.0.0'
-
-exports.manifest = {
-}
-exports.permissions = {
-  anonymous: {}
-}
+exports.name        = 'phoenix'
+exports.version     = '1.0.0'
+exports.manifest    = api.manifest
+exports.permissions = api.permissions
 
 exports.init = function (server) {
   server.on('request', stack(
@@ -26,4 +23,6 @@ exports.init = function (server) {
     require('./static-assets-builder')(server),
     require('./static-assets')(server)
   ))
+
+  return api.init(server)
 }

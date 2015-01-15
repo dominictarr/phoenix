@@ -1,5 +1,6 @@
 var h = require('hyperscript')
-var baseEmoji   = require('base-emoji')
+var baseEmoji = require('base-emoji')
+var util = require('../lib/util')
 
 var a =
 exports.a = function (href, text, opts) {
@@ -17,6 +18,7 @@ var userlink =
 exports.userlink = function (id, text, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
+  text = text || util.shortString(id)
   var profileLink = a('#/profile/'+id, text, opts)
   var followLink = ''//followlink(id, user, events) :TODO:
 
@@ -38,13 +40,12 @@ exports.toEmoji = function (buf, size) {
 
 var header =
 exports.header = function (app) {
-  var myid = app.api.getMyId()
   return h('.nav.navbar.navbar-default', [
     h('.container-fluid', [
       h('.navbar-header', h('a.navbar-brand', { href: '#/' }, 'secure scuttlebutt')),
       h('ul.nav.navbar-nav', [
         h('li.hidden-xs', a('#/address-book', 'address book')),
-        h('li.hidden-xs', a('#/profile/' + myid, app.api.getNameById(myid)))
+        h('li.hidden-xs', a('#/profile/' + app.myid, app.names[app.myid]))
       ]),
       h('ul.nav.navbar-nav.navbar-right', [
         h('li.hidden-xs', a('#/help', 'help'))
@@ -65,7 +66,7 @@ exports.sidenav = function (app) {
     ['feed', 'feed', 'data feed']
   ]
   var extraPages = [
-    ['profile', 'profile/'+app.api.getMyId(), 'profile'],
+    ['profile', 'profile/'+app.myid, 'profile'],
     ['network', 'network', 'network'],
     ['help', 'help', 'help']
   ]
@@ -98,6 +99,14 @@ exports.sidehelp = function (app, opts) {
   )
 }
 
+var panel =
+exports.panel = function (title, content) {
+  return h('.panel.panel-default', [
+    (title) ? h('.panel-heading', h('h3.panel-title', title)) : '',
+    h('.panel-body', content)
+  ])
+}
+
 var page =
 exports.page = function (app, id, content) {
   return h('div',
@@ -106,10 +115,11 @@ exports.page = function (app, id, content) {
   )
 }
 
+exports.addresses = require('./addresses')
+exports.advertForm = require('./advert-form')
+exports.adverts = require('./adverts')
 exports.message = require('./message')
 exports.messageThread = require('./message-thread')
 exports.messageSummary = require('./message-summary')
+exports.peers = require('./peers')
 exports.postForm = require('./post-form')
-exports.adverts = require('./adverts')
-exports.advertForm = require('./advert-form')
-exports.addresses = require('./addresses')

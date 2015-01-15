@@ -24,15 +24,15 @@ module.exports = function(server) {
     }
 
     // Static asset routes
-    if (pathEnds('jpg'))        type('image/jpeg')
-    else if (pathEnds('jpeg'))  type('image/jpeg')
-    else if (pathEnds('gif'))   type('image/gif')
-    else if (pathEnds('ico'))   type('image/x-icon');
-    else if (pathEnds('png'))   type('image/png');
-    else if (pathEnds('woff'))  type('application/x-font-woff')
-    else if (pathEnds('woff2')) type('application/font-woff2')
-    else if (pathEnds('js'))    type('application/javascript')
-    else if (pathEnds('css'))   type('text/css')
+    if (pathEnds('.jpg'))        type('image/jpeg')
+    else if (pathEnds('.jpeg'))  type('image/jpeg')
+    else if (pathEnds('.gif'))   type('image/gif')
+    else if (pathEnds('.ico'))   type('image/x-icon');
+    else if (pathEnds('.png'))   type('image/png');
+    else if (pathEnds('.woff'))  type('application/x-font-woff')
+    else if (pathEnds('.woff2')) type('application/font-woff2')
+    else if (pathEnds('.js'))    type('application/javascript')
+    else if (pathEnds('.css'))   type('text/css')
     if (pathStarts('/img/') || pathStarts('/fonts/') || pathStarts('/css/') || pathStarts('/js/'))
       return serve(req.url)
     next()

@@ -5,7 +5,7 @@ var com = require('../com')
 var rawOpts = {raw: true}
 module.exports = function (app) {
   var opts = { limit: 30, reverse: true }
-  app.api.getFeed(opts, function (err, msgs) {
+  app.ssb.phoenix.getFeed(opts, function (err, msgs) {
     var lastMsg = msgs.slice(-1)[0]
 
     // markup
@@ -27,7 +27,7 @@ module.exports = function (app) {
     function loadMore (e) {
       e.preventDefault()
       opts.lt = lastMsg
-      app.api.getFeed(opts, function (err, moreMsgs) {
+      app.ssb.phoenix.getFeed(opts, function (err, moreMsgs) {
         if (moreMsgs.length > 0) {
           moreMsgs.forEach(function (msg) { content.appendChild(com.message(app, msg, rawOpts)) })
           lastMsg = moreMsgs.slice(-1)[0]

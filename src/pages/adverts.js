@@ -1,12 +1,14 @@
 var h = require('hyperscript')
 var pull = require('pull-stream')
+var multicb = require('multicb')
 var com = require('../com')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
 
 module.exports = function (app) {
   var opts = { start: 0 }
-  app.api.getAdverts(opts, function (err, adverts) {
+  var done = multicb()
+  app.ssb.phoenix.getAdverts(opts, function (err, adverts) {
 
     // markup 
 
@@ -19,20 +21,20 @@ module.exports = function (app) {
         com.advertForm(app),
         h('hr'),
         h('.row', content),
-        loadMoreBtn,
-        h('hr'),
-        h('p.text-muted', {style:'padding-left:10px'}, 
-          'Create ads to let your friends know about events, websites, etc. ',
-          com.a('#/help/adverts', 'About')
-        )
+        h('.row',
+          h('.col-xs-3',
+            h('.well.well-sm', 'Create ads to let your friends know about events, websites, etc. ', com.a('#/help/adverts', 'About'))
+          )
+        ),
+        loadMoreBtn
       )
     ))
 
     function renderAd (ad) {
       var author = ad.value.author
       return h('.col-xs-3',
-        h('small', 'advert by ', com.userlink(author, app.api.getNameById(author))),
-        h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text), app.api.getNames()) })
+        h('small', 'advert by ', com.userlink(author, app.names[author])),
+        h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text), app.names) })
       )
     }
 
@@ -41,7 +43,7 @@ module.exports = function (app) {
     function loadMore (e) {
       e.preventDefault()
       opts.start += 30
-      app.api.getAdverts(opts, function (err, moreAdverts) {
+      app.ssb.getAdverts(opts, function (err, moreAdverts) {
         if (moreAdverts.length > 0) {
           moreAdverts.forEach(function (ad) { content.appendChild(renderAd(ad)) })
         }

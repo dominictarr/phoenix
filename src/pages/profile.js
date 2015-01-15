@@ -1,25 +1,26 @@
 var h = require('hyperscript')
 var pull = require('pull-stream')
 var multicb = require('multicb')
+var schemas = require('ssb-msg-schemas')
 var com = require('../com')
 var util = require('../lib/util')
 
 module.exports = function (app) {
   var pid = app.page.param
   var done = multicb({ pluck: 1 })
-  app.api.getGraph('follow', done())
-  app.api.getGraph('trust', done())
-  app.api.getGraph('flag', done())
-  app.api.getPostsBy(pid, done())
+  app.ssb.friends.all('follow', done())
+  app.ssb.friends.all('trust', done())
+  app.ssb.phoenix.getProfile(pid, done())
+  app.ssb.phoenix.getPostsBy(pid, done())
   done(function (err, datas) {
-    var myid = app.api.getMyId()
-    var profile = app.api.getProfile(pid)
     var graphs = {
       follow: datas[0],
-      trust:  datas[1],
-      flag:   datas[2]
+      trust:  datas[1]
     }
-    var isFollowing = graphs.follow[myid][pid]
+    graphs.follow[app.myid] = graphs.follow[app.myid] || {}
+    graphs.trust [app.myid] = graphs.trust [app.myid] || {}
+    var isFollowing = graphs.follow[app.myid][pid]
+    var profile = datas[2]
     var msgs = datas[3]
 
     // render messages
@@ -28,31 +29,39 @@ module.exports = function (app) {
       if (msgs.length)
         msgfeed = h('table.table.message-feed', msgs.map(function (msg) { return com.messageSummary(app, msg) }))
       else
-        msgfeed = h('p', h('strong', 'No posts have been published by this user yet.'))
+        msgfeed = h('div', { style: 'display: inline-block' }, com.panel('', 'No posts have been published by this user yet.'))
     } else {
-      msgfeed = h('p', 
-        h('strong', 'No messages found for this user.'),
-        ((!isFollowing) ? 
-          h('p', 'Follow this user to begin searching the network for their data.') :
-          h('p', 'Scuttlebutt is searching the network for this user.'))
+      msgfeed = h('div', { style: 'display: inline-block' },
+        com.panel('',
+          h('div',
+            h('strong', 'No messages found for this user.'), h('br'),
+            ((!isFollowing) ? 
+              h('span', 'Follow this user to begin searching the network for their data.') :
+              h('span', 'Scuttlebutt is searching the network for this user.'))
+          )
+        )
       )
     }
 
     // render controls
     var followBtn = '', trustBtn = '', flagBtn = '', renameBtn = ''
-    if (pid === myid) {
+    if (pid === app.myid) {
       renameBtn = h('button.btn.btn-primary', {title: 'Rename', onclick: rename}, com.icon('pencil'))
     } else {
       renameBtn = h('button.btn.btn-primary', {title: 'Rename', onclick: rename}, com.icon('pencil'))
       followBtn = (isFollowing)
-        ? h('button.btn.btn-primary', { onclick: delEdge('follow') }, com.icon('minus'), ' Unfollow')
-        : h('button.btn.btn-primary', { onclick: addEdge('follow') }, com.icon('plus'), ' Follow')
-      trustBtn = (graphs.trust[myid][pid])
-        ? h('button.btn.btn-danger', { onclick: delEdge('trust') }, com.icon('remove'), ' Untrust')
-        : h('button.btn.btn-success', { onclick: trustPrompt }, com.icon('lock'), ' Trust')
-      flagBtn = (graphs.flag[myid][pid])
-        ? h('button.btn.btn-success', { onclick: delEdge('flag') }, com.icon('ok'), ' Unflag')
-        : h('button.btn.btn-danger',{ onclick: flagPrompt },  com.icon('flag'), ' Flag')
+        ? h('button.btn.btn-primary', { onclick: unfollow }, com.icon('minus'), ' Unfollow')
+        : h('button.btn.btn-primary', { onclick: follow }, com.icon('plus'), ' Follow')
+      trustBtn = (graphs.trust[app.myid][pid] == 1)
+        ? h('button.btn.btn-danger', { onclick: detrust }, com.icon('remove'), ' Untrust')
+        : (!graphs.trust[app.myid][pid])
+          ? h('button.btn.btn-success', { onclick: trustPrompt }, com.icon('lock'), ' Trust')
+          : ''
+      flagBtn = (graphs.trust[app.myid][pid] == -1)
+        ? h('button.btn.btn-success', { onclick: detrust }, com.icon('ok'), ' Unflag')
+        : (!graphs.trust[app.myid][pid])
+          ? h('button.btn.btn-danger',{ onclick: flagPrompt },  com.icon('flag'), ' Flag')
+          : ''
     } 
 
     // given names
@@ -63,12 +72,12 @@ module.exports = function (app) {
       Object.keys(profile.given).forEach(function(userid) {
         var given = profile.given[userid]
         if (given.name)
-          givenNames.push(h('li', given.name + ' by ', com.userlink(userid, app.api.getNameById(userid))))
+          givenNames.push(h('li', given.name + ' by ', com.userlink(userid, app.names[userid])))
       })
     }
 
     // render page
-    var name = app.api.getNameById(pid) || util.shortString(pid)
+    var name = app.names[pid] || util.shortString(pid)
     var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
     app.setPage('profile', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
@@ -95,7 +104,7 @@ module.exports = function (app) {
 
     // handlers
 
-    function trustPrompt(e) {
+    function trustPrompt (e) {
       e.preventDefault()
       swal({
         title: 'Trust '+util.escapePlain(name)+'?',
@@ -108,11 +117,14 @@ module.exports = function (app) {
         confirmButtonColor: '#12b812',
         confirmButtonText: 'Trust'
       }, function() {
-        addEdge('trust')()
+        schemas.addTrust(app.ssb, pid, 1, function (err) {
+          if (err) swal('Error While Publishing', err.message, 'error')
+          else app.refreshPage()
+        })
       })
     }
 
-    function flagPrompt(e) {
+    function flagPrompt (e) {
       e.preventDefault()
       swal({
         title: 'Flag '+util.escapePlain(name)+'?',
@@ -126,31 +138,38 @@ module.exports = function (app) {
         confirmButtonColor: '#d9534f',
         confirmButtonText: 'Flag'
       }, function() {
-        addEdge('flag')()
+        schemas.addTrust(app.ssb, pid, -1, function (err) {
+          if (err) swal('Error While Publishing', err.message, 'error')
+          else app.refreshPage()
+        })
       })
     }
 
-    function addEdge (type) {
-      return function (e) {
-        if (e) e.preventDefault()
-        if (!graphs[type][myid][pid]) {
-          app.api.addEdge(type, pid, function(err) {
-            if (err) swal('Error While Publishing', err.message, 'error')
-            else app.refreshPage()
-          })
-        }
+    function detrust (e) {
+      e.preventDefault()
+      schemas.addTrust(app.ssb, pid, 0, function(err) {
+        if (err) swal('Error While Publishing', err.message, 'error')
+        else app.refreshPage()
+      })
+    }
+    
+    function follow (e) {
+      e.preventDefault()
+      if (!graphs.follow[app.myid][pid]) {
+        schemas.addFollow(app.ssb, pid, function(err) {
+          if (err) swal('Error While Publishing', err.message, 'error')
+          else app.refreshPage()
+        })
       }
     }
 
-    function delEdge (type) {
-      return function (e) {
-        if (e) e.preventDefault()
-        if (graphs[type][myid][pid]) {
-          app.api.delEdge(type, pid, function(err) {
-            if (err) swal('Error While Publishing', err.message, 'error')
-            else app.refreshPage()
-          })
-        }
+    function unfollow (e) {
+      e.preventDefault()
+      if (graphs.follow[app.myid][pid]) {
+        schemas.addUnfollow(app.ssb, pid, function(err) {
+          if (err) swal('Error While Publishing', err.message, 'error')
+          else app.refreshPage()
+        })
       }
     }
 

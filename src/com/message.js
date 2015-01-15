@@ -13,7 +13,7 @@ module.exports = function (app, msg, opts) {
       if ((!opts || !opts.fullLength) && md.length >= 512) {
         md = md.slice(0, 512) + '... [read more](#/msg/'+msg.key+')'
       }
-      content = h('div', { innerHTML: markdown.block(util.escapePlain(md), app.api.getNames()) })
+      content = h('div', { innerHTML: markdown.block(util.escapePlain(md), app.names) })
     } else {
       if (!opts || !opts.mustRender)
         return ''
@@ -29,7 +29,7 @@ function messageRaw (app, msg) {
 
   // turn feed references into links
   json = json.replace(/\"feed\": \"([^\"]+)\"/g, function($0, $1) {
-    var name = app.api.getNameById($1) || $1
+    var name = app.names[$1] || $1
     return '"feed": "<a class="user-link" href="/#/profile/'+$1+'">'+name+'</a>"'
   })
 
@@ -45,7 +45,7 @@ function renderMsgShell(app, msg, content) {
 
   // markup 
 
-  var nReplies = app.api.getReplyCount(msg.key)
+  var nReplies = (msg.replies) ? msg.replies.length : 0
   var repliesStr = ''
   if (nReplies == 1) repliesStr = ' (1 reply)'
   if (nReplies > 1) repliesStr = ' ('+nReplies+' replies)'
@@ -53,7 +53,7 @@ function renderMsgShell(app, msg, content) {
   var msgbody = h('.panel-body', content)
   var msgpanel = h('.panel.panel-default.message',
     h('.panel-heading',
-      com.userlink(msg.value.author, app.api.getNameById(msg.value.author)),
+      com.userlink(msg.value.author, app.names[msg.value.author]),
       ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
       h('span.in-response-to'), // may be populated by the message page
       h('span', {innerHTML: ' &middot; '}), h('a', { title: 'Reply', href: '#', onclick: reply }, 'reply')

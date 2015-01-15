@@ -1,5 +1,6 @@
 var h = require('hyperscript')
 var suggestBox = require('suggest-box')
+var schemas = require('ssb-msg-schemas')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
 
@@ -23,12 +24,12 @@ module.exports = function (app) {
   // event handlers
 
   function preview (e) {
-    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.api.getNames())
+    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.names)
   }
 
   function post (e) {
     e.preventDefault()
-    app.api.postAdvert(textarea.value, function (err) {
+    schemas.addAdvert(app.ssb, textarea.value, function (err) {
       if (err) swal('Error While Publishing', err.message, 'error')
       else {
         swal('Your Ad Has Been Published', null, 'success')

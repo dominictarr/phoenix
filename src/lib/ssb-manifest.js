@@ -29,9 +29,17 @@ module.exports = {
     addMe: 'async'
   },
 
+  // gossip
+  gossip: {
+    peers: 'sync'
+  },
+
   // friends
   friends: {
     all: 'sync',
     hops: 'sync'
-  }
+  },
+
+  // phoenxi api
+  phoenix: require('phoenix-api/manifest')
 }
