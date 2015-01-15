@@ -11,7 +11,7 @@ localhost.on('connect', function() {
   auth.getToken('localhost', function(err, token) {
     if (err) return localhost.close(), console.error('Token fetch failed', err)
     ssb.auth(token, function(err) {
-      app.setConnectionStatus(true)
+      app.setStatus(false)
       app.setupRpcConnection()
       app.refreshPage()
     })
@@ -21,13 +21,13 @@ localhost.on('connect', function() {
 localhost.on('error', function(err) {
   // inform user and attempt a reconnect
   console.log('Connection Error', err)
-  app.setConnectionStatus(false, 'Lost connection to the host program. Please restart the host program. Trying again in 10 seconds.')
+  app.setStatus('danger', 'Lost connection to the host program. Please restart the host program. Trying again in 10 seconds.')
   localhost.reconnect()
 })
 
 localhost.on('reconnecting', function(err) {
   console.log('Attempting Reconnect')
-  app.setConnectionStatus(false, 'Lost connection to the host program. Reconnecting...')
+  app.setStatus('danger', 'Lost connection to the host program. Reconnecting...')
 })
 
 

@@ -129,11 +129,11 @@ module.exports = function (ssb) {
     else document.title = 'secure scuttlebutt'
   }
 
-  app.setConnectionStatus = function (isConnected, message) {
-    var connStatus = document.getElementById('conn-status')
-    connStatus.innerHTML = ''
-    if (!isConnected)
-      connStatus.appendChild(h('.alert.alert-danger', message))
+  app.setStatus = function (type, message) {
+    var status = document.getElementById('app-status')
+    status.innerHTML = ''
+    if (type)
+      status.appendChild(h('.alert.alert-'+type, message))
   }
 
   app.followPrompt = function(e) {
@@ -143,15 +143,27 @@ module.exports = function (ssb) {
     if (!id)
       return
 
+    // surrounded by quotes?
+    // the scuttlebot cli ouputs invite codes with quotes, so this could happen
+    if (id.charAt(0) == '"' && id.charAt(id.length - 1) == '"')
+      id = id.slice(1, -1) // strip em
+
     var parts = id.split(',')
     var isInvite = (parts.length === 3)
-    if (isInvite) ssb.invite.addMe(id, next)
+    if (isInvite) {
+      app.setStatus('info', 'Contacting server with invite code, this may take a few moments...')
+      ssb.invite.addMe(id, next)
+    }
     else schemas.addFollow(ssb, id, next)
       
     function next (err) {
+      app.setStatus(false)
       if (err) {
         console.error(err)
-        swal('Error While Connecting', err.message, 'error')
+        if (isInvite)
+          swal('Invite Code Failed', userFriendlyInviteError(err.message), 'error')
+        else
+          swal('Error While Publishing', err.message, 'error')
       }
       else {
         if (isInvite)
@@ -160,6 +172,18 @@ module.exports = function (ssb) {
           swal('Contact Added', 'You will now follow the messages published by your new contact.', 'success')
         app.refreshPage()
       }
+    }
+
+    function userFriendlyInviteError(msg) {
+      if (~msg.indexOf('incorrect or expired') || ~msg.indexOf('has expired'))
+        return 'Invite code is incorrect or expired. Make sure you copy/pasted it correctly. If you did, ask the pub-server owner for a new code and try again.'
+      if (~msg.indexOf('invalid') || ~msg.indexOf('feed to follow is missing') || ~msg.indexOf('may not be used to follow another key'))
+        return 'Invite code is malformed. Make sure you copy/pasted it correctly. If you did, ask the pub-server owner for a new code and try again.'
+      if (~msg.indexOf('pub server did not have correct public key'))
+        return 'The pub server did not identify itself correctly for the invite code. Ask the pub-server owner for a new code and try again.'
+      if (~msg.indexOf('unexpected end of parent stream'))
+        return 'Failed to connect to the pub server. Check your connection, make sure the pub server is online, and try again.'
+      return 'Sorry, an unexpected error occurred. Please try again.'
     }
   }
 
