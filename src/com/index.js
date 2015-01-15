@@ -1,5 +1,6 @@
 var h = require('hyperscript')
-var baseEmoji   = require('base-emoji')
+var baseEmoji = require('base-emoji')
+var util = require('../lib/util')
 
 var a =
 exports.a = function (href, text, opts) {
@@ -17,6 +18,7 @@ var userlink =
 exports.userlink = function (id, text, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
+  text = text || util.shortString(id)
   var profileLink = a('#/profile/'+id, text, opts)
   var followLink = ''//followlink(id, user, events) :TODO:
 
