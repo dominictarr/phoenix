@@ -6,7 +6,10 @@ var markdown = require('../lib/markdown')
 module.exports = function (app) {
   var adspace = h('.adverts-but-its-cool-tho')
   app.ssb.phoenix.getRandomAdverts(3, 30, function (err, ads) {
-    ads.forEach(function (ad) { adspace.appendChild(renderAd(app, ad)) })
+    if (ads.length)
+      ads.forEach(function (ad) { adspace.appendChild(renderAd(app, ad)) })
+    else
+      adspace.appendChild(h('.well.well-sm', com.a('#/adverts', 'Create ads'), ' to let your friends know about events, websites, etc. ', com.a('#/help/adverts', 'About')))
   })
   return adspace
 }

@@ -21,12 +21,12 @@ module.exports = function (app) {
         com.advertForm(app),
         h('hr'),
         h('.row', content),
-        loadMoreBtn,
-        h('hr'),
-        h('p.text-muted', {style:'padding-left:10px'}, 
-          'Create ads to let your friends know about events, websites, etc. ',
-          com.a('#/help/adverts', 'About')
-        )
+        h('.row',
+          h('.col-xs-3',
+            h('.well.well-sm', 'Create ads to let your friends know about events, websites, etc. ', com.a('#/help/adverts', 'About'))
+          )
+        ),
+        loadMoreBtn
       )
     ))
 
