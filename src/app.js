@@ -161,7 +161,7 @@ module.exports = function (ssb) {
       if (err) {
         console.error(err)
         if (isInvite)
-          swal('Invite Code Failed', userFriendlyInviteError(err.message), 'error')
+          swal('Invite Code Failed', userFriendlyInviteError(err.stack || err.message), 'error')
         else
           swal('Error While Publishing', err.message, 'error')
       }
