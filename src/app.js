@@ -183,6 +183,8 @@ module.exports = function (ssb) {
         return 'The pub server did not identify itself correctly for the invite code. Ask the pub-server owner for a new code and try again.'
       if (~msg.indexOf('unexpected end of parent stream'))
         return 'Failed to connect to the pub server. Check your connection, make sure the pub server is online, and try again.'
+      if (~msg.indexOf('already following'))
+        return 'You are already followed by this pub server.'
       return 'Sorry, an unexpected error occurred. Please try again.'
     }
   }
