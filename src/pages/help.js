@@ -18,47 +18,68 @@ module.exports = function (app) {
         'App authorizations are only stored in memory, and so this will clear the permissions records.'
       ])
     ]
-  } else if (app.page.param == 'networking') {
+  } else if (app.page.param == 'posts') {
+    content = [
+      com.panel('Posts', [
+        'Posts in Secure Scuttlebutt are public and readable by anybody that follows your feed.',
+        h('br'), h('br'),
+        'Take care! There is currently no undo or delete.'
+      ]),
+      com.panel('Mentions', [
+        'Posts can "@-mention" users. ',
+        'Check your ', com.a('#/inbox', 'Inbox'), ' to find messages that mention you.',
+         h('.text-muted', { style: 'padding: 20px; padding-bottom: 10px' }, 'eg "Hello ', com.userlink(app.myid, '@'+app.names[app.myid]), '!"')
+      ]),
+      com.panel('Emojis', [
+        'Emojis are written as words surrounded by colons. ',
+        'Check the ', com.a('http://www.emoji-cheat-sheet.com/', 'Emoji Cheat Sheet'), ' to see what\'s available.',
+         h('.text-muted', { style: 'padding: 20px; padding-bottom: 10px' }, 'eg ":smile:" = ', h('img.emoji', { src: '/img/emoji/smile.png', height: 20, width: 20})) 
+      ])
+    ]
+  } else if (app.page.param == 'contacts') {
     content = [
       com.panel('Contacts', [
-        'Scuttlebutt searches the network for messages from your contacts, plus messages from the people your contacts follow. ',
-        'If you want to be sure you get a specific persons\'s messages, ', 
-        h('button.btn.btn-xs.btn-primary', { onclick: app.followPrompt }, 'Follow their contact id')
+        'Scuttlebutt searches the network for messages from your contacts. ',
+        h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Add a contact')
       ]),
-      com.panel('Following Users', [
-        'To follow somebody, find their profile page and hit the "Follow" button. ',
-        'If you have their ID but not their profile page, you can hit ', 
-        h('button.btn.btn-xs.btn-primary', { onclick: app.followPrompt }, 'Add contact'), 
-        ' on the top right and enter the ID in the popup.'
+      com.panel('User IDs', [
+        'User IDs are generated with cryptography so that they are globally unique. ',
+        'Specifically, they are ',
+        com.a('https://en.wikipedia.org/wiki/Base64', 'base64'),'-encoded ',
+        com.a('https://blake2.net/', 'blake2s'),' hashes of public ',
+        com.a('https://en.wikipedia.org/wiki/Elliptic_curve_cryptography', 'elliptic-curve'), ' keys.'
       ]),
+      com.panel('Your ID:', app.myid)
+    ]
+  } else if (app.page.param == 'pubs') {
+    content = [
       com.panel('Pub Servers', [
-        'Scuttlebutt uses "pub servers" to get messages across the internet. ',
-        'Pub servers are bots that receive your messages and host them for other people to fetch. ',
-        'Since they\'re on the public web and always on, they help the network stay available.', h('br'), 
+        'Pub servers are bots that host your messages for other people to download. ',
+        'Since they\'re on the public web and always online, they help the network stay available.', h('br'), 
         h('br'),
         'You\'ll need to use a pub server if you want to reach people outside of your wifi.'
       ]),
       com.panel('Invite Codes', [
         'If someone you know is running a pub server, ask them for an invite code. ',
         'You can use the code by pasting it into the ', 
-        h('button.btn.btn-xs.btn-primary', { onclick: app.followPrompt }, 'Add contact'), 
-        ' dialog, just like when following somebody.'
+        h('button.btn.btn-xs.btn-primary', { onclick: app.followPrompt }, 'Use an invite'), 
+        ' dialog.'
       ]),
-      com.panel('Running a Pub Server', [
+      com.panel(['Running a Pub Server ', h('small.text-muted', 'advanced')], [
         'If you want to run your own pub server, ', 
-        com.a('https://github.com/ssbc/scuttlebot#running-your-own-pub-server', 'follow the instructions in the scuttlebot repo'), 
-        '. Note, this is for advanced users!'
+        com.a('https://github.com/ssbc/scuttlebot#running-your-own-pub-server', 'follow the instructions in the scuttlebot repo'),
+        '.'
       ])
     ]
   } else if (app.page.param == 'privacy') {
     content = [
       com.panel('Privacy in Secure Scuttlebutt', [
-        'Secure Scuttlebutt is anti-spyware: it runs safely on your computer and denies unexpected traffic (eg to fetch images) so that people can\'t track your activity.', h('br'),
+        'Secure Scuttlebutt is anti-spyware: it runs on your computer and keeps your personal data private.', h('br'),
         h('br'),
         'That said, SSB is part of a network and it does emit information. This page will explain your footprint so you can know what you\'re telling the world.'
       ]),
       com.panel('Anonymity', [
-        'Secure Scuttlebutt is a public global network. In this early app, it uses no encryption and does not try to hide your posts. In fact, it\'s working hard to get them out to the world!', h('br'),
+        'Secure Scuttlebutt is a public global network. In this current version, all posts are public.', h('br'),
         h('br'),
         'You don\'t have to give any personal information (like your real name) but it should be possible to figure out who you are based on your posts, your friends, and the names people give you. ',
         'Don\'t expect to be anonymous!'
@@ -70,11 +91,13 @@ module.exports = function (app) {
         'You can see what computers your PC talks to in the ', com.a('#/network', 'rightmost column of the network page.')
       ]),
       com.panel('What Have I Posted? is Public', [
-        'Posts, replies, and reactions are broadcasted publicly. ',
-        'In the future, encryption will be added for private messages.'
+        'Posts and replies are broadcasted publicly.',
       ]),
       com.panel('Who Do I Follow? and Who Follows Me? is Public', [
         'Follows and unfollows are broadcasted publicly.'
+      ]),
+      com.panel('Who Do I Trust or Distrust? is Public', [
+        'Trusts and flags are broadcasted publicly.'
       ]),
       com.panel('What\'s My Username? is Public', [
         'Nicknames that you give yourself and others are broadcasted publicly.'
@@ -102,83 +125,73 @@ module.exports = function (app) {
     ]
   } else if (app.page.param == 'names') {
     content = [
-      com.panel('What\'s with the Scare-Quotes Around Names?', [
-        'You may have noticed quotes around people\'s names ("bob"). ',
-        'This means you\'re seeing a name they gave themselves - not one you assigned.'
+      com.panel('Quoted Names (eg "bob")', [
+        'Quotes around a name means you\'re seeing the name the user chose, not one you assigned.'
       ]),
-      com.panel('Why Have the Quotes?', [
-        'In Secure Scuttlebutt, anybody can claim a name, even if it\'s taken. ',
-        'Yes, somebody else could use "', app.getNameById(app.getMyId()), '"! ',
-        'And that could confuse your friends.', h('br'),
+      com.panel('Conflicting Names', [
+        'Names are not unique in Secure Scuttlebutt. ',
+        '(Somebody else could use "', app.names[app.myid], '.")'
+      ]),
+      com.panel('Assigning Names', [
+        'Open your ', com.a('#/address-book', 'address book'), ' and click the pencil next to somebody\'s name to change it.'
+      ])
+    ]
+  } else if (app.page.param == 'trust') {
+    content = [
+      com.panel('Trust', [
+        'In Secure Scuttlebutt, there\'s no central authority, so you have to appoint other people to be trusted.', h('br'),
         h('br'),
-        'To protect everybody, we use the quotes to show it\'s a self-assigned name.'
+        'You can appoint somebody as "trusted" by opening their profile page and clicking the Trust button.',
       ]),
-      com.panel('How Do I Get Rid of Them?', [
-        'By assigning a name to that user. ',
-        'Navigate to their profile and hit the "Give Nickname" button on the right. ',
-        'Your UI will update with the new name (quotes removed) and your name-choice will be broadcast.'
-      ]),
-      com.panel('Should I Give Names to Everybody?', [
-        'You can, but make sure you\'re giving the right name to the right people. ',
-        'Names are not just for convenience here; they help people find each other. ',
-        'The names you give will help people realize that a stranger is actually a mutual friend.', h('br'),
+      com.panel('Effects of Trust', [
+        'Trusting somebody currently does the following:', h('br'),
         h('br'),
-        'If you\'re not sure the user is who you think it is, indicate that in the name. ',
-        'Use "maybe-bob" instead of just "bob," for instance, then change it to just "bob" when you\'re sure it\'s him. ',
-        'That\'ll be helpful for you and your friends.'
+        h('ul', 
+          h('li', 'Broadcasts your trust in that user.'),
+          h('li', 'Tells Secure Scuttlebutt to use the names given by that user.')
+        )
       ]),
-      com.panel('How Can I See the Names Given to Another User?', [
-        'Check the right hand side of their profile page. ',
-        'You should see the names given and who gave them. ',
-        'If you expect the user to be a mutual friend, but none of your friends have given them a name, then it\'s probably not who you think it is.'
+      com.panel('Verifying Identity', [
+        'To make sure you\'re trusting the right account, call your friend and read them the "Emoji Fingerprint" on the right side of their profile. ',
+        'If the fingerprint matches, then you have the right account.'
       ]),
-      com.panel('How Can I Be 100% Sure Who Someone Is?', [
-        'Ask your friend to describe their Emoji footprint (right side of their profile). ',
-        'Every footprint is unique, so, if it doesn\'t match, you have the wrong user.'
+      com.panel('Flagging', [
+        'If somebody is behaving poorly (spamming, trolling) you can flag their account to signal to other users that they should be avoided.'
       ])
     ]
   } else if (app.page.param == 'adverts') {
     content = [
-      com.panel('Wait, Advertisements?', [
-        'The advertisements are placed by the users. ',
-        'They\'re mostly for fun, but they can be useful too. ',
-        'For instance, if you ever lose your dog, you can post an advert letting your friends know.'
+      com.panel('Advertisements', [
+        'Advertisements are placed by the users. ',
+        'They\'re mostly for fun, but they can be useful too.',
       ]),
       com.panel('Which Ads Do I See?', [
         'Scuttlebutt rotates the last 30 adverts at random.',
       ]),
       com.panel('Do the Ads Track Me?', [
-        'There\'s no tracking involved.'
+        'There\'s no tracking involved or allowed.'
       ])
     ]
   } else {
     content = [
-      com.panel('Welcome', [
-        'Secure Scuttlebutt is a free online network that runs on user devices. ',
-        'That means there\'s no company running the show! ',
-        'Your computers stay in sync automatically by connecting over the wifi and public web.',
+      com.panel('About', [
+        'Secure Scuttlebutt is a network for users, by users.',
         h('br'), h('br'),
         h('ul',
-          h('li', h('strong', 'Anti-spyware:'), ' your browsing, personal data, and applications are not tracked.'),
-          h('li', h('strong', 'Decentralized:'), ' the network is controlled by users, not a parent company.'),
-          h('li', h('strong', 'Free as in Freedom:'), ' the source-code is on your computer and licensed for you to edit and share.')
+          h('li', h('strong', 'Anti-spyware:'), ' your browsing habits are never tracked.'),
+          h('li', h('strong', 'Decentralized:'), '  you sync over wifi and with "pub" servers.'),
+          h('li', h('strong', 'Open-source:'), ' the code is on your computer and ready to edit.')
         )
       ]),
-      com.panel('Posts', [
-        'Posts in Scuttlebutt are formatted in ', com.a('https://en.wikipedia.org/wiki/Markdown', 'Markdown'), 
-        '. Hit the Preview button to see your message. ',
-        'Be warned, once you press the "Post" button, there is no undo or delete!'
-      ]),
-      com.panel('Mentions', [
-        'Like in most social networks, you can "@-mention" other users. ',
-        'When they receive the message, they\'ll be notified of the mention. ',
-        'Check your ', com.a('#/inbox', 'Inbox'), ' to find your notifications.'
-      ]),
-      com.panel('Emojis', [
-        'You can put emojis in your posts using colons. ',
-        'For instance, \':smile:\' will result in ', h('img.emoji', { src: '/img/emoji/smile.png', height: 20, width: 20}), 
-        '. Check the ', com.a('http://www.emoji-cheat-sheet.com/', 'Emoji Cheat Sheet'), ' to see what\'s available.'
-      ])
+      com.panel('Links', [
+      h('ul.list-unstyled', 
+        h('li', com.a('https://github.com/ssbc/scuttlebot', 'Main Repository'), ' - find the source-code here.'),
+        h('li', com.a('https://github.com/ssbc', 'Organization on GitHub'), ' - find related code packages here.'),
+        h('li', com.a('https://github.com/ssbc/scuttlebot/issues', 'Bug Tracker'), ' - file issues here.'),
+        h('hr'),
+        h('li', com.a('https://twitter.com/pfrazee', '@pfrazee'), ' - send money, compliments, and marriage proposals here.'),
+        h('li', com.a('https://twitter.com/dominictarr', '@dominictarr'), ' - receive cyber-wizardry here.')
+      )])
     ]
   }
 
@@ -186,13 +199,16 @@ module.exports = function (app) {
     h('.col-xs-2.col-md-1', com.sidenav(app)),
     h('.col-xs-7', content),
     h('.col-xs-3.col-md-4', 
-      h('ul.nav.nav-pills.nav-stacked', helpnav('#/help/'+app.page.param, [
-        ['#/help/intro', 'Getting Started'],
-        ['#/help/networking', 'Connecting to People'],
-        ['#/help/privacy', 'Privacy: Understand What\s Shared'],
-        ['#/help/names', '"User Names"'],
-        ['#/help/adverts', 'Wait, Advertisements?'],
-        ['#/help/apps', '3rd-Party Apps']
+      h('ul.nav.nav-pills.nav-stacked', helpnav('#/help/'+(app.page.param||'intro'), [
+        ['#/help/intro', 'About'],
+        ['#/help/posts', 'Posts'],
+        ['#/help/contacts', 'Contacts'],
+        ['#/help/names', 'User Names'],
+        ['#/help/trust', 'Trust and Flagging'],
+        ['#/help/pubs', 'Pub Servers'],
+        ['#/help/adverts', 'Advertisements'],
+        ['#/help/privacy', 'Privacy']
+        // ['#/help/apps', '3rd-Party Apps'] :TODO: document?
       ])),
       h('hr'),
       com.sidehelp(app, {noMore: true})
