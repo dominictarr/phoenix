@@ -1,5 +1,5 @@
+'use strict'
 var h = require('hyperscript')
-var pull = require('pull-stream')
 var multicb = require('multicb')
 var com = require('../com')
 var util = require('../lib/util')
@@ -7,7 +7,6 @@ var markdown = require('../lib/markdown')
 
 module.exports = function (app) {
   var opts = { start: 0 }
-  var done = multicb()
   app.ssb.phoenix.getAdverts(opts, function (err, adverts) {
 
     // markup 

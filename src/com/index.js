@@ -1,3 +1,4 @@
+'use strict'
 var h = require('hyperscript')
 var baseEmoji = require('base-emoji')
 var util = require('../lib/util')

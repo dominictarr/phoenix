@@ -1,3 +1,4 @@
+'use strict'
 var emojiNamedCharacters = require('emoji-named-characters')
 var marked = require('marked');
 

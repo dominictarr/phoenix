@@ -1,5 +1,5 @@
+'use strict'
 var h = require('hyperscript')
-var pull = require('pull-stream')
 var multicb = require('multicb')
 var com = require('../com')
 

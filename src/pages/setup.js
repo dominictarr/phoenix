@@ -1,5 +1,5 @@
+'ust strict'
 var h = require('hyperscript')
-var pull = require('pull-stream')
 var schemas = require('ssb-msg-schemas')
 var com = require('../com')
 
@@ -31,13 +31,13 @@ module.exports = function (app) {
   // handlers
 
   function checkInput (e) {
+    var valid = true
     if (!input.value)
       valid = false
     else if(/ /.test(input.value)) {
       valid = false
       issue.textContent = 'Spaces are not allowed'
-    } else
-      valid = true
+    }
 
     if (valid) {
       postBtn.removeAttribute('disabled')

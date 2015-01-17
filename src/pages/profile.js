@@ -1,5 +1,5 @@
+'use strict'
 var h = require('hyperscript')
-var pull = require('pull-stream')
 var multicb = require('multicb')
 var schemas = require('ssb-msg-schemas')
 var com = require('../com')

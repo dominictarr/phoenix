@@ -1,6 +1,6 @@
+'use strict'
 var h = require('hyperscript')
 var com = require('./index')
-var message = require('./message')
 
 var messageOpts = { mustRender: false }
 module.exports = function (app, thread, opts) {

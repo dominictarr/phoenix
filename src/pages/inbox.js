@@ -1,3 +1,4 @@
+'use strict'
 var h = require('hyperscript')
 var multicb = require('multicb')
 var com = require('../com')

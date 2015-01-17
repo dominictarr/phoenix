@@ -1,3 +1,4 @@
+'use strict'
 var querystr = require('querystring')
 var util = require('./lib/util')
 

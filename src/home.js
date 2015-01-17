@@ -1,3 +1,4 @@
+'use strict'
 var muxrpc     = require('muxrpc')
 var Serializer = require('pull-serializer')
 var auth       = require('ssb-domain-auth')

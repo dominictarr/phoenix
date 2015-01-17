@@ -1,3 +1,4 @@
+'use strict'
 var h = require('hyperscript')
 var suggestBox = require('suggest-box')
 var schemas = require('ssb-msg-schemas')
@@ -8,7 +9,7 @@ module.exports = function (app, parent) {
 
   // markup
 
-  var textarea = h('textarea.form-control', { name: 'text', rows: 6, onblur: preview })
+  var textarea = h('textarea.form-control', { name: 'text', rows: 6, onblur: renderPreview })
   suggestBox(textarea, app.suggestOptions) // decorate with suggestbox 
 
   var preview = h('.preview')
@@ -24,7 +25,7 @@ module.exports = function (app, parent) {
 
   // handlers
 
-  function preview (e) {
+  function renderPreview (e) {
     preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.names)
   }
 

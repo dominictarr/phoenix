@@ -1,8 +1,9 @@
+'use strict'
 var h = require('hyperscript')
-var multicb = require('multicb')
 var com = require('../com')
 
 module.exports = function (app) {
+
   var opts = { start: 0 }
   app.ssb.phoenix.getPosts(opts, function (err, msgs) {
 
