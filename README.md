@@ -3,41 +3,25 @@ Phoenix v1
 
 ![phoenix](phoenix.png) **It's distributed!**
 
-Web applications without servers, social networks without advertisers, messaging without surveillance, gardens without walls.
-
-Phoenix is a peer-to-peer network. It uses cryptographic keypairs to create feeds and publish unforgeable entries which can spread across the network (see [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt)). Public bot users aggregate and redistribute the feeds, but phoenix has no "servers." Every node is equal, and the network is fully open!
+Phoenix is the web UI for [scuttlebot](https://github.com/ssbc/scuttlebot) and part of the [secure-scuttlebutt](https://github.com/ssbc/secure-scuttlebutt) decentralized network. Secure Scuttlebutt (SSB) is a fully-decentralized data network designed to replace Web services. It uses cryptographic keypairs to gossip unforgeable data-feeds across the network. "Pub" servers aggregate and redistribute the feeds, but SSB has no central authority: every node is equal, and the network is fully open.
 
 Join us in #scuttlebutt on freenode.
 
 ## Getting Started
 
-**To start on your localhost**
-
-Follow the instructions for using [ssbui](https://github.com/pfraze/ssbui#readme).
+Follow the instructions for using [scuttlebot](https://github.com/ssbc/scuttlebot). Phoenix comes packaged with scuttlebot by default.
 
 ## Building
 
-On load, phoenix checks for the `./js` and `./css` directories. If they're present, it will serve from those directories. You can build the assets for them by installing `browserify` and `lessc` and running `npm run build`.
-
-If you are doing a lot of development on phoenix, you can remove the `./js` and `./css` directories, then do an `npm install -d`. Phoenix will live-build the assets on page refresh.
+To build phoenix, run `npm run build`. If you're doing active development, run `sbot server` with the `--dev` flag. This will cause the frontend assets to be built on each request.
 
 ## Contributing
 
-Contributions are welcome! The fastest way to get started is to check the issues board. Issues tagged "Help Wanted" are the low-hanging fruit and should be easy to handle. Submit your update as a PR; maintainers will review and merge asap.
+Contributions are welcome! Submit your update as a PR; maintainers will review and merge asap.
 
 Make sure your submissions are licensed for free use. All code in Phoenix (including contributions) falls under the license below, or under the licenses attached to included libraries.
 
 You can get help in #scuttlebutt on freenode.
-
-## Project Repos
-
-The phoenix project is broken into four main repositories:
-
- - [secure-scuttlebutt](https://github.com/dominictarr/secure-scuttlebutt): a library on top of leveldb that adds the data structures, crypto, and indexing of the ssb protocol.
- - [scuttlebot](https://github.com/pfraze/scuttlebot): a network server & server-library which wraps ssb
- - [muxrpc](https://github.com/dominictarr/muxrpc): the RPC protocol used by scuttlebot and phoenix
- - [phoenix](https://github.com/pfraze/phoenix): a social-feeds plugin to scuttlebot
- - [ssbui](https://github.com/pfraze/ssbui): an installable package for using phoenix with scuttlebot
 
 ## License
 
