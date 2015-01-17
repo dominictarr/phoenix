@@ -68,7 +68,7 @@ module.exports = function (app) {
       ]),
       com.panel(['Running a Pub Server ', h('small.text-muted', 'advanced')], [
         'If you want to run your own pub server, ', 
-        com.a('https://github.com/ssbc/scuttlebot#running-your-own-pub-server', 'follow the instructions in the scuttlebot repo'),
+        com.a('https://github.com/ssbc/scuttlebot#running-a-pub-server', 'follow the instructions in the scuttlebot repo'),
         '.'
       ])
     ]

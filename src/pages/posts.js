@@ -30,7 +30,7 @@ module.exports = function (app) {
       h('.col-xs-4',
         com.panel(h('span', 'Start a Pub Server ', h('small', 'advanced')),
           h('p',
-            com.a('https://github.com/ssbc/scuttlebot#running-your-own-pub-server', 'Follow these instructions'),
+            com.a('https://github.com/ssbc/scuttlebot#running-a-pub-server', 'Follow these instructions'),
             ' then hand out invite codes to friends.'
           )
         )
