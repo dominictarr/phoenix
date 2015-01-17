@@ -23,7 +23,7 @@
     "form-data-set": "~1.1.1",
     "global": "~4.2.1",
     "hash-router": "~0.4.0",
-    "hyperscript": "~1.4.2",
+    "hyperscript": "~1.4.3",
     "marked": "git://github.com/clehner/marked#8af8ae018ba452b5c7f936a474dbce265f2ae732",
     "multicb": "~1.1.0",
     "muxrpc": "~3.3.0",
