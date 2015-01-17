@@ -180,7 +180,7 @@ module.exports = function (app) {
         h('br'), h('br'),
         h('ul',
           h('li', h('strong', 'Anti-spyware:'), ' your browsing habits are never tracked.'),
-          h('li', h('strong', 'Decentralized:'), '  you sync over wifi and with "pub" servers.'),
+          h('li', h('strong', 'Decentralized:'), '  sync over wifi or with user-hosted "pub" servers.'),
           h('li', h('strong', 'Open-source:'), ' the code is on your computer and ready to edit.')
         )
       ]),

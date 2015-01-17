@@ -17,8 +17,8 @@ module.exports = function (app) {
       h('.col-xs-4',
         com.panel(h('span', 'Join a Pub Server ', h('small', 'recommended')),
           h('div',
-            h('p', 'Ask the owner of a pub server for an ', com.a('#/help/networking', 'invite code'), '.'),
-            h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Use invite')
+            h('p', 'Ask the owner of a pub server for an ', com.a('#/help/pubs', 'invite code'), '.'),
+            h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Use an invite')
           )
         )
       ),
