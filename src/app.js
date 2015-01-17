@@ -31,17 +31,17 @@ module.exports = function (ssb) {
   document.body.addEventListener('click', onClick(app))
 
   // periodically poll and rerender the current connections
-  setInterval(pollPeers(app), 5000)
+  setInterval(pollPeers.bind(app), 5000)
 
   // toplevel & common methods
-  app.setupRpcConnection = setupRpcConnection
-  app.refreshPage = refreshPage
-  app.showUserId = showUserId
-  app.setPendingMessages = setPendingMessages
-  app.setStatus = setStatus
-  app.followPrompt = followPrompt
-  app.setNamePrompt = setNamePrompt
-  app.setPage = setPage
+  app.setupRpcConnection = setupRpcConnection.bind(app)
+  app.refreshPage        = refreshPage.bind(app)
+  app.showUserId         = showUserId.bind(app)
+  app.setPendingMessages = setPendingMessages.bind(app)
+  app.setStatus          = setStatus.bind(app)
+  app.followPrompt       = followPrompt.bind(app)
+  app.setNamePrompt      = setNamePrompt.bind(app)
+  app.setPage            = setPage.bind(app)
 
   return app
 }
@@ -58,19 +58,18 @@ function onClick (app) {
   }
 }
 
-function pollPeers (app) {
-  return function () {
-    app.ssb.gossip.peers(function (err, peers) {
-      if (err)
-        return
-      Array.prototype.forEach.call(document.querySelectorAll('table.peers tbody'), function (tb) {
-        tb.innerHTML = ''
-        com.peers(app, peers).forEach(function (row) {
-          tb.appendChild(row)
-        })
+function pollPeers () {
+  var app = this
+  app.ssb.gossip.peers(function (err, peers) {
+    if (err)
+      return
+    Array.prototype.forEach.call(document.querySelectorAll('table.peers tbody'), function (tb) {
+      tb.innerHTML = ''
+      com.peers(app, peers).forEach(function (row) {
+        tb.appendChild(row)
       })
     })
-  }
+  })
 }
 
 // should be called each time the rpc connection is (re)established
@@ -138,9 +137,7 @@ function refreshPage () {
 }
 
 function showUserId () { 
-  app.ssb.whoami(function (err, user) {
-    swal('Here is your contact id', user.id)
-  })
+  swal('Here is your contact id', this.myid)
 }
 
 function setPendingMessages (n) {
