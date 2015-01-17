@@ -129,6 +129,7 @@ function refreshPage () {
     }
 
     // render the page
+    h.cleanup()    
     var page = pages[app.page.id]
     if (!page)
       page = pages.notfound
@@ -238,7 +239,6 @@ function setNamePrompt (userId) {
 
 function setPage (name, page, opts) {
   var el = document.getElementById('page-container')
-  h.cleanup()
   el.innerHTML = ''
   if (!opts || !opts.noHeader)
     el.appendChild(com.page(this, name, page))
