@@ -5,6 +5,9 @@ var util = require('../lib/util')
 var markdown = require('../lib/markdown')
 
 module.exports = function (app, msg, opts) {
+
+  // markup
+
   var content, isRaw
   if (msg.value.content.type == 'post') {
     content = msg.value.content.text
@@ -29,11 +32,27 @@ module.exports = function (app, msg, opts) {
     repliesStr = ' ('+nReplies+')'
 
   var name = app.names[msg.value.author] || util.shortString(msg.value.author)
-  return h('tr.message-summary', { onclick: function(e) { e.preventDefault(); window.location.hash = '#/msg/'+msg.key } },
-    h('td', name + repliesStr),
+  var nameConfidence = com.nameConfidence(msg.value.author, app)
+  return h('tr.message-summary', { onclick: openMsg },
+    h('td', name, nameConfidence, repliesStr),
     h('td', h((isRaw) ? 'code' : 'span', { innerHTML: content })),
     h('td.text-muted', util.prettydate(new Date(msg.value.timestamp), true))
   )
+
+  // handlers
+
+  function openMsg (e) {
+    // abort if clicked on a sub-link
+    var el = e.target
+    while (el) {
+      if (el.tagName == 'A')
+        return
+      el = el.parentNode
+    }
+
+    e.preventDefault()
+    window.location.hash = '#/msg/'+msg.key
+  }
 }
 
 function noHtmlLen (str) {

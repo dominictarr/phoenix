@@ -84,7 +84,7 @@ module.exports = function (app) {
       h('.col-xs-8', msgfeed),
       h('.col-xs-2.col-md-3.profile-controls',
         h('.section',
-          h('h2', name, renameBtn),
+          h('h2', name, com.nameConfidence(pid, app), renameBtn),
           h('p.text-muted', 'joined '+joinDate)
         ),
         h('.section', h('p', followBtn), h('p', trustBtn), h('p', flagBtn)),
