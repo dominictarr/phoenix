@@ -37,10 +37,15 @@ module.exports = function (app) {
       )
     )
    
-    var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary', { onclick: loadMore, style: 'margin-bottom: 24px' }, 'Load More')) : ''
+    var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary.btn-block', { onclick: loadMore, style: 'margin-bottom: 24px' }, 'Load More')) : ''
     app.setPage('posts', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8', content, loadMoreBtn, help),
+      h('.col-xs-8', 
+        h('p#get-latest.hidden', h('button.btn.btn-primary.btn-block', { onclick: app.refreshPage }, 'Get Latest')),
+        content, 
+        loadMoreBtn, 
+        help
+      ),
       h('.col-xs-2.col-md-3',
         com.adverts(app),
         h('hr'),
