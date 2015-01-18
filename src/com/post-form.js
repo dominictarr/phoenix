@@ -7,6 +7,11 @@ var markdown = require('../lib/markdown')
 
 module.exports = function (app, parent) {
 
+  // a name->name map for the previews
+  var namesList = {}
+  for (var id in app.names)
+    namesList[app.names[id]] = app.names[id]
+
   // markup
 
   var textarea = h('textarea.form-control', { name: 'text', rows: 6, onblur: renderPreview })
@@ -26,7 +31,7 @@ module.exports = function (app, parent) {
   // handlers
 
   function renderPreview (e) {
-    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.names)
+    preview.innerHTML = markdown.mentionLinks(markdown.block(util.escapePlain(textarea.value)), namesList, true)
   }
 
   function post (e) {

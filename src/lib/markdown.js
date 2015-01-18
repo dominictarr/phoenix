@@ -26,7 +26,9 @@ exports.mentionLinks = function (str, names, spansOnly) {
     return str
   return str.replace(mentionRegex, function(full, $1, $2) {
     var name = names[$2]
-    if (!name || spansOnly)
+    if (!name)
+      return full
+    if (spansOnly)
       return ($1||'') + '<strong class="user-link">@'+(name||$2)+'</strong>'
     return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + name + '</a>'
   })
