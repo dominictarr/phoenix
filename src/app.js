@@ -81,8 +81,10 @@ function setupRpcConnection () {
   }))
 }
 
-function refreshPage () {
+function refreshPage (e) {
   var app = this
+  e && e.preventDefault()
+
   // clear pending messages
   app.setPendingMessages(0)
 
@@ -142,8 +144,18 @@ function showUserId () {
 
 function setPendingMessages (n) {
   this.pendingMessages = n
-  if (n) document.title = '('+n+') secure scuttlebutt'
-  else document.title = 'secure scuttlebutt'
+  try {
+    if (n) {
+      document.title = '('+n+') secure scuttlebutt'
+      document.getElementById('get-latest').classList.remove('hidden')
+      document.querySelector('#get-latest .btn').textContent = 'Get Latest ('+n+')'
+    }
+    else {
+      document.title = 'secure scuttlebutt'
+      document.getElementById('get-latest').classList.add('hidden')
+      document.querySelector('#get-latest .btn').textContent = 'Get Latest'
+    }
+  } catch (e) {}
 }
 
 function setStatus (type, message) {

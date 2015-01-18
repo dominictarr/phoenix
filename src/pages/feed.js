@@ -10,7 +10,7 @@ module.exports = function (app) {
 
     // markup
 
-    var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary', { onclick: loadMore }, 'Load More')) : ''
+    var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary.btn-block', { onclick: loadMore }, 'Load More')) : ''
     var content = h('.message-feed', msgs.map(function (msg) { return com.message(app, msg, rawOpts) }))
     app.setPage('feed', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
