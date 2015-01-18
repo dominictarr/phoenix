@@ -23,7 +23,7 @@ module.exports = function (app) {
     var profile = datas[2]
     var msgs = datas[3]
 
-    // render messages
+    // messages
     var msgfeed
     if (profile) {
       if (msgs.length)
@@ -43,7 +43,27 @@ module.exports = function (app) {
       )
     }
 
-    // render controls
+    // name confidence controls
+    var nameTrustDlg
+    if (app.nameTrustRanks[pid] !== 1) {
+      nameTrustDlg = h('.well',
+        h('h3', { style: 'margin-top: 0' }, (!!app.names[pid]) ? 'Is this "'+app.names[pid]+'?"' : 'Who is this user?'),
+        h('p',
+          'Users whose identity you haven\'t confirmed will have a ',
+          h('span.text-muted', com.icon('user'), '?'),
+          ' next to their name.'
+        ),
+        (!!app.names[pid]) ?
+          [
+            h('button.btn.btn-primary', {style: 'border-color: #ddd', onclick: confirmName}, 'Confirm This Name'),
+            ' or ',
+            h('button.btn.btn-primary', {style: 'border-color: #ddd', onclick: rename}, 'Choose Another Name')
+          ] :
+          h('button.btn.btn-primary', {style: 'border-color: #ddd', onclick: rename}, 'Choose a Name')
+      )
+    }
+
+    // profile controls
     var followBtn = '', trustBtn = '', flagBtn = '', renameBtn = ''
     if (pid === app.myid) {
       renameBtn = h('button.btn.btn-primary', {title: 'Rename', onclick: rename}, com.icon('pencil'))
@@ -81,10 +101,10 @@ module.exports = function (app) {
     var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
     app.setPage('profile', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8', msgfeed),
+      h('.col-xs-8', nameTrustDlg, msgfeed),
       h('.col-xs-2.col-md-3.profile-controls',
         h('.section',
-          h('h2', name, renameBtn),
+          h('h2', name, com.nameConfidence(pid, app), renameBtn),
           h('p.text-muted', 'joined '+joinDate)
         ),
         h('.section', h('p', followBtn), h('p', trustBtn), h('p', flagBtn)),
@@ -176,6 +196,14 @@ module.exports = function (app) {
     function rename (e) {
       e.preventDefault()
       app.setNamePrompt(pid)
+    }
+
+    function confirmName (e) {
+      e.preventDefault()
+      schemas.addOtherName(app.ssb, pid, app.names[pid], function (err) {
+        if (err) swal('Error While Publishing', err.message, 'error')
+        else app.refreshPage()
+      })
     }
   })
 }

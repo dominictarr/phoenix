@@ -54,7 +54,7 @@ function renderMsgShell(app, msg, content) {
   var msgbody = h('.panel-body', content)
   var msgpanel = h('.panel.panel-default.message',
     h('.panel-heading',
-      com.userlink(msg.value.author, app.names[msg.value.author]),
+      com.userlink(msg.value.author, app.names[msg.value.author]), com.nameConfidence(msg.value.author, app),
       ' ', com.a('#/msg/'+msg.key, util.prettydate(new Date(msg.value.timestamp), true)+repliesStr, { title: 'View message thread' }),
       h('span.in-response-to'), // may be populated by the message page
       h('span', {innerHTML: ' &middot; '}), h('a', { title: 'Reply', href: '#', onclick: reply }, 'reply')

@@ -26,7 +26,7 @@ module.exports = function (app, profiles, follows, trusts) {
     return h('tr',
       h('td', 
         h('button.btn.btn-primary.btn-sm', { title: 'Rename', onclick: r }, com.icon('pencil')), ' ',
-        h('strong', com.a('#/profile/'+id, app.names[id]||id)),
+        h('strong', com.a('#/profile/'+id, app.names[id]||id), com.nameConfidence(id, app)),
         ' ', 
         (otherNames.length)
           ? h('small.text-muted', 'aka ', otherNames.join(', '))

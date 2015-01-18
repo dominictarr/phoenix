@@ -15,15 +15,23 @@ exports.icon = function (i) {
   return h('span.glyphicon.glyphicon-'+i)
 }
 
+var nameConfidence =
+exports.nameConfidence = function (id, app) {
+  if (app.nameTrustRanks[id] !== 1) {
+    return [' ', h('a', 
+      { title: 'This name was self-assigned and needs to be confirmed.', href: '#/profile/'+id },
+      h('span.text-muted', icon('user'), '?')
+    )]
+  }
+  return ''
+}
+
 var userlink =
 exports.userlink = function (id, text, opts) {
   opts = opts || {}
   opts.className = (opts.className || '') + ' user-link'
   text = text || util.shortString(id)
-  var profileLink = a('#/profile/'+id, text, opts)
-  var followLink = ''//followlink(id, user, events) :TODO:
-
-  return h('span', [profileLink, ' ', followLink])
+  return h('span', a('#/profile/'+id, text, opts))
 }
 
 var toEmoji =

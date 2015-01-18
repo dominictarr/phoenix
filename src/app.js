@@ -16,6 +16,7 @@ module.exports = function (ssb) {
     ssb: ssb,
     myid: null,
     names: null,
+    nameTrustRanks: null,
     page: {
       id: 'feed',
       param: null
@@ -106,12 +107,14 @@ function refreshPage (e) {
   var done = multicb({ pluck: 1 })
   app.ssb.whoami(done())
   app.ssb.phoenix.getNamesById(done())
+  app.ssb.phoenix.getNameTrustRanks(done())
   app.ssb.phoenix.getInboxCount(done())
   done(function (err, data) {
     if (err) throw err.message
     app.myid = data[0].id
     app.names = data[1]
-    app.unreadMessages = data[2] - (+localStorage.readMessages || 0)
+    app.nameTrustRanks = data[2]
+    app.unreadMessages = data[3] - (+localStorage.readMessages || 0)
     if (app.unreadMessages < 0) {
       // probably a new account on the machine, reset
       app.unreadMessages = 0
