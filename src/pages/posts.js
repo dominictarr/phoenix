@@ -2,6 +2,7 @@
 var h = require('hyperscript')
 var com = require('../com')
 
+var mustRenderOpts = { mustRender: true }
 module.exports = function (app) {
 
   var opts = { start: 0 }
@@ -10,7 +11,7 @@ module.exports = function (app) {
     // markup
 
     var content = h('table.table.message-feed', msgs.map(function (msg) {
-      return com.messageSummary(app, msg)
+      return com.messageSummary(app, msg, mustRenderOpts)
     }))
 
     var help = h('.row',
@@ -60,7 +61,7 @@ module.exports = function (app) {
       opts.start += 30
       app.ssb.phoenix.getPosts(opts, function (err, moreMsgs) {
         if (moreMsgs.length > 0)
-          moreMsgs.forEach(function (msg) { content.appendChild(com.messageSummary(app, msg)) })
+          moreMsgs.forEach(function (msg) { content.appendChild(com.messageSummary(app, msg, mustRenderOpts)) })
         // remove load more btn if it looks like there arent any more to load
         if (moreMsgs.length < 30)
           loadMoreBtn.parentNode.removeChild(loadMoreBtn)
