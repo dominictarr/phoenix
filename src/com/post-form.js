@@ -7,21 +7,27 @@ var markdown = require('../lib/markdown')
 
 module.exports = function (app, parent) {
 
-  // a name->name map for the previews
-  var namesList = {}
+  var attachments = []
+  var namesList = {} // a name->name map for the previews
   for (var id in app.names)
     namesList[app.names[id]] = app.names[id]
 
   // markup
 
+  var preview = h('.preview')
+  var filesInput = h('input.hidden', { type: 'file', multiple: true, onchange: filesAdded })  
+  var filesList = h('ul')
   var textarea = h('textarea', { name: 'text', placeholder: 'Compose your message', rows: 6, onblur: renderPreview })
   suggestBox(textarea, app.suggestOptions) // decorate with suggestbox 
 
-  var preview = h('.preview')
   var form = h('form.post-form' + ((!!parent) ? '.reply-form' : ''), { onsubmit: post },
     h('div',
       h('.post-form-textarea', textarea),
-      h('.post-form-attachments', h('a', { href: '#', onclick: addAttachment }, 'Click here to add an attachment'))
+      h('.post-form-attachments',
+        filesList,
+        h('a', { href: '#', onclick: addFile }, 'Click here to add an attachment'),
+        filesInput
+      )
     ),
     h('p.post-form-btns', h('button.btn.btn-primary.pull-right', 'Post'), h('button.btn.btn-primary', { onclick: cancel }, 'Cancel')),
     h('.preview-wrapper.panel.panel-default',
@@ -81,9 +87,30 @@ module.exports = function (app, parent) {
       window.location.hash = '#/'
   }
 
-  function addAttachment (e) {
+  function addFile (e) {
     e.preventDefault()
-    // :TODO:
+    filesInput.click() // trigger file-selector
+  }
+
+  function fileRemover (index) {
+    return function (e) {
+      e.preventDefault()
+      attachments.splice(index, 1)
+      renderAttachments()
+    }
+  }
+
+  function filesAdded (e) {
+    for (var i=0; i < filesInput.files.length; i++)
+      attachments.push(filesInput.files[i])
+    renderAttachments()
+  }
+
+  function renderAttachments () {
+    filesList.innerHTML = ''
+    attachments.forEach(function (file, i) {
+      filesList.appendChild(h('li', file.name, ' ', h('a', { href: '#', onclick: fileRemover(i) }, 'remove')))
+    })
   }
 
   return form
