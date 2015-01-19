@@ -2,6 +2,9 @@
 var h = require('hyperscript')
 var suggestBox = require('suggest-box')
 var schemas = require('ssb-msg-schemas')
+var createHash = require('multiblob/util').createHash
+var pull = require('pull-stream')
+var pushable = require('pull-pushable')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
 
@@ -46,36 +49,43 @@ module.exports = function (app, parent) {
   function post (e) {
     e.preventDefault()
 
-    // prep text
-    app.ssb.phoenix.getIdsByName(function (err, idsByName) {
-      var text = textarea.value
+    app.setStatus('info', 'Posting...')
+    uploadFiles(function (err, extLinks) {
+      if (err)
+        return swal('Error Uploading Attachments', err.message, 'error')
 
-      // collect any mentions and replace the nicknames with ids
-      var mentions = []
-      var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
-      text = text.replace(mentionRegex, function(full, $1, $2) {
-        var id = idsByName[$2] || $2
-        if (schemas.isHash(id))
-          mentions.push(id)
-        return ($1||'') + '@' + id
+      // prep text
+      app.ssb.phoenix.getIdsByName(function (err, idsByName) {
+        var text = textarea.value
+
+        // collect any mentions and replace the nicknames with ids
+        var mentions = []
+        var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
+        text = text.replace(mentionRegex, function(full, $1, $2) {
+          var id = idsByName[$2] || $2
+          if (schemas.isHash(id))
+            mentions.push(id)
+          return ($1||'') + '@' + id
+        })
+
+        // post
+        var opts = null
+        if (mentions.length)
+          opts = { mentions: mentions }
+        var post = (parent) ? schemas.schemas.replyPost(text, parent, opts) : schemas.schemas.post(text, opts)
+        if (extLinks.length)
+          post.attachments = extLinks
+        app.ssb.add(post, function (err) {
+          app.setStatus(null)
+          if (err) swal('Error While Publishing', err.message, 'error')
+          else {
+            if (parent)
+              app.refreshPage()
+            else
+              window.location.hash = '#/'
+          }
+        })
       })
-
-      // post
-      var opts = null
-      if (mentions.length)
-        opts = { mentions: mentions }
-      if (parent) schemas.addReplyPost(app.ssb, text, parent, opts, done)
-      else schemas.addPost(app.ssb, text, opts, done)
-        
-      function done (err) {
-        if (err) swal('Error While Publishing', err.message, 'error')
-        else {
-          if (parent)
-            app.refreshPage()
-          else
-            window.location.hash = '#/'
-        }
-      }
     })
   }
 
@@ -92,7 +102,7 @@ module.exports = function (app, parent) {
     filesInput.click() // trigger file-selector
   }
 
-  function fileRemover (index) {
+  function removeFile (index) {
     return function (e) {
       e.preventDefault()
       attachments.splice(index, 1)
@@ -106,10 +116,65 @@ module.exports = function (app, parent) {
     renderAttachments()
   }
 
+  function uploadFiles (cb) {
+    var links = []
+    if (attachments.length === 0)
+      return cb(null, links)
+
+    app.setStatus('info', 'Uploading ('+attachments.length+' files left)...')
+    attachments.forEach(function (file) {
+      var link = { rel: 'attachment', ext: null, name: null, size: null }
+      links.push(link)
+
+      // read file
+      var ps = pushable()
+      var reader = new FileReader()
+      reader.onload = function () {
+        var base64encoded = reader.result.split(',').slice(1).join(',') // drop data-url prefix
+        ps.push(base64encoded)
+        ps.end()
+      }
+      reader.onerror = function (e) {
+        console.error(e)
+        ps.end(new Error('Failed to upload '+file.name))
+      }
+      reader.readAsDataURL(file)
+
+      // hash and store
+      var hasher = createHash()
+      pull(
+        ps,
+        hasher,
+        app.ssb.blobs.add(function (err) {
+          if(err) return next(err)
+          link.name = file.name
+          link.ext  = hasher.digest
+          link.size = file.size || hasher.size
+          next()
+        })
+      )
+    })
+
+    var n = 0
+    function next (err) {
+      console.log('next', n)
+      if (n < 0) return
+      if (err) {
+        n = -1
+        return cb (err)
+      }
+      n++
+      console.log('done?', n, attachments.length)
+      app.setStatus('info', 'Uploading ('+(attachments.length-n)+' files left)...')
+      if (n === attachments.length)
+        cb(null, links)
+    }
+  }
+
   function renderAttachments () {
     filesList.innerHTML = ''
     attachments.forEach(function (file, i) {
-      filesList.appendChild(h('li', file.name, ' ', h('a', { href: '#', onclick: fileRemover(i) }, 'remove')))
+      filesList.appendChild(h('li', file.name, ' ', h('a', { href: '#', onclick: removeFile(i) }, 'remove')))
     })
   }
 
