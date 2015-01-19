@@ -66,10 +66,10 @@ module.exports = function (app, profiles, follows, trusts) {
 
     // get 3 of the given or self-assigned names
     add(profile.self.name)
-    for (var k in profile.given) {
+    for (var k in profile.assignedBy) {
       if (names.length >= 3)
         break
-      add(profile.given[k].name)
+      add(profile.assignedBy[k].name)
     }
     return names
   }

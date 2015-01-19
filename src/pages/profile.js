@@ -89,8 +89,8 @@ module.exports = function (app) {
     if (profile) {
       if (profile.self.name)
         givenNames.push(h('li', profile.self.name + ' (self-assigned)'))
-      Object.keys(profile.given).forEach(function(userid) {
-        var given = profile.given[userid]
+      Object.keys(profile.assignedBy).forEach(function(userid) {
+        var given = profile.assignedBy[userid]
         if (given.name)
           givenNames.push(h('li', given.name + ' by ', com.userlink(userid, app.names[userid])))
       })
