@@ -14,12 +14,15 @@ module.exports = function (app, parent) {
 
   // markup
 
-  var textarea = h('textarea.form-control', { name: 'text', rows: 6, onblur: renderPreview })
+  var textarea = h('textarea', { name: 'text', placeholder: 'Compose your message', rows: 6, onblur: renderPreview })
   suggestBox(textarea, app.suggestOptions) // decorate with suggestbox 
 
   var preview = h('.preview')
   var form = h('form.post-form' + ((!!parent) ? '.reply-form' : ''), { onsubmit: post },
-    h('p', textarea),
+    h('div',
+      h('.post-form-textarea', textarea),
+      h('.post-form-attachments', h('a', { href: '#', onclick: addAttachment }, 'Click here to add an attachment'))
+    ),
     h('p.post-form-btns', h('button.btn.btn-primary.pull-right', 'Post'), h('button.btn.btn-primary', { onclick: cancel }, 'Cancel')),
     h('.preview-wrapper.panel.panel-default',
       h('.panel-heading', h('small', 'Preview:')),
@@ -76,6 +79,11 @@ module.exports = function (app, parent) {
       form.parentNode.removeChild(form)
     else
       window.location.hash = '#/'
+  }
+
+  function addAttachment (e) {
+    e.preventDefault()
+    // :TODO:
   }
 
   return form

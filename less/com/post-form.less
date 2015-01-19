@@ -21,6 +21,45 @@
       }
     }
   }
+  .post-form-textarea {
+    textarea {
+      display: block;
+      width: 100%;
+      padding: @padding-base-vertical @padding-base-horizontal;
+      font-size: @font-size-base;
+      line-height: @line-height-base;
+      color: @input-color;
+      background-color: #fafafa;
+      background-image: none;
+      border: 1px solid @input-border;
+      border-radius: @input-border-radius;
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      border-bottom-style: dashed;
+      outline: none;
+      .box-shadow(inset 0 1px 1px rgba(0,0,0,.075));
+      .transition(~"background ease-in-out .15s, box-shadow ease-in-out .15s");
+
+      // Placeholder
+      .placeholder();
+
+      &:focus {
+        background: #fff;
+        box-shadow: 0 2px 1px rgba(0,0,0,0.05);      
+      }
+    }
+  }
+  .post-form-attachments {
+    background: #fafafa;
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    padding: 5px 10px;
+    margin-bottom: 10px;
+    border: 1px solid @input-border;
+    border-top: 0;
+    color: #999;
+    font-size: 12px;
+  }
   .post-form-btns {
     button, a {
       margin-right: 5px;
