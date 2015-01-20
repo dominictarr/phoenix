@@ -94,16 +94,52 @@ module.exports = function (app) {
       Object.keys(profile.assignedBy).forEach(function(userid) {
         var given = profile.assignedBy[userid]
         if (given.name)
-          givenNames.push(h('li', given.name + ' by ', com.userlink(userid, app.names[userid])))
+          givenNames.push(h('li', given.name + ' by ', com.a('#/profile/'+userid, app.names[userid] || util.shortString(userid))))
       })
     }
+
+    // follows, trusts, flags
+    function outEdges(g, v) {
+      var arr = []
+      if (g[pid]) {
+        for (var userid in g[pid]) {
+          if (g[pid][userid] == v)
+            arr.push(h('span', ' ', com.a('#/profile/'+userid, app.names[userid] || util.shortString(userid))))
+        }
+      }
+      return arr
+    }
+    function inEdges(g, v) {
+      var arr = []
+      for (var userid in g) {
+        if (g[userid][pid] == v)
+          arr.push(h('span', ' ', com.a('#/profile/'+userid, app.names[userid] || util.shortString(userid))))
+      }
+      return arr      
+    }
+    var follows   = outEdges(graphs.follow, true)
+    var followers = inEdges(graphs.follow, true)
+    var trusts    = outEdges(graphs.trust, 1)
+    var trusters  = inEdges(graphs.trust, 1)
+    var flags     = outEdges(graphs.trust, -1)
+    var flaggers  = inEdges(graphs.trust, -1)
 
     // render page
     var name = app.names[pid] || util.shortString(pid)
     var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
     app.setPage('profile', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8', nameTrustDlg, msgfeed),
+      h('.col-xs-8',
+        nameTrustDlg,
+        follows.length   ? h('p', h('small', h('strong', 'Follows')), h('br'), follows) : '',
+        followers.length ? h('p', h('small', h('strong', 'Followed by')), h('br'), followers) : '',
+        trusts.length    ? h('p', h('small', h('strong', 'Trusts')), h('br'), trusts) : '',
+        trusters.length  ? h('p', h('small', h('strong.text-success', com.icon('check'), 'Trusted by')), h('br'), trusters) : '',
+        flags.length     ? h('p', h('small', h('strong', 'Flags')), h('br'), flags) : '',
+        flaggers.length  ? h('p', h('small', h('strong.text-danger', com.icon('flag'), 'Flagged by')), h('br'), flaggers) : '',
+        h('hr'),
+        msgfeed
+      ),
       h('.col-xs-2.col-md-3.profile-controls',
         h('.section',
           h('h2', name, com.nameConfidence(pid, app), renameBtn),
