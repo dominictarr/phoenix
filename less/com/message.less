@@ -16,6 +16,9 @@
     }
   }
   .panel-body {
+    padding-left: 0;
+    padding-right: 0;
+
     & > div > :first-child {
       margin-top: 0;
     }
@@ -32,6 +35,12 @@
       color: @pre-color;
       background-color: @pre-bg;
       overflow: auto;
+    }
+  }
+  .panel-footer {
+    ul {
+      margin: 0;
+      padding-left: 23px;
     }
   }
 }

@@ -17,6 +17,7 @@ module.exports = {
   help:           require('./help'),
   inbox:          require('./inbox'),
   msg:            require('./message'),
+  ext:            require('./ext'),
   posts:          require('./posts'),
   notfound:       notfound,
   profile:        require('./profile'),

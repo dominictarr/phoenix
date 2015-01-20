@@ -8,10 +8,12 @@ module.exports = function (app) {
   var opts = { start: 0 }
   app.ssb.phoenix.getPosts(opts, function (err, msgs) {
 
+    console.log(err, msgs)
+
     // markup
 
     var content = h('table.table.message-feed', msgs.map(function (msg) {
-      return com.messageSummary(app, msg, mustRenderOpts)
+      if (msg.value) return com.messageSummary(app, msg, mustRenderOpts)
     }))
 
     var help = h('.row',
@@ -43,7 +45,7 @@ module.exports = function (app) {
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-8', 
         h('p#get-latest.hidden', h('button.btn.btn-primary.btn-block', { onclick: app.refreshPage }, 'Get Latest')),
-        content, 
+        content,
         loadMoreBtn, 
         help
       ),

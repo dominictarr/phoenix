@@ -1,11 +1,31 @@
 .message-summary {
+  background: #fafafa;
+  position: relative;
   height: 36px;
   overflow: hidden;
-  border: 1px solid #ccc;
+  border: 1px dashed #ccc;
   border-width: 1px 0;
   cursor: pointer;
 
+  &:first-child {
+    border-top-style: solid;
+  }
+
+  td {
+    padding: 0 10px;
+    border: 1px dashed #ccc;    
+  }
   td:first-child {
-    padding-left: 10px;
+    border-left-color: transparent;
+  }
+  td:last-child {
+    border-right-color: transparent;
+  }
+
+
+  &:hover {
+    td {
+      background: #eee;
+    }
   }
 }

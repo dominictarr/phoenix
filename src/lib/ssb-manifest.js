@@ -24,22 +24,23 @@ module.exports = {
   // publishers
   add: 'async',
 
-  // invites
+  // plugins
   invite: {
     addMe: 'async'
   },
-
-  // gossip
   gossip: {
     peers: 'sync'
   },
-
-  // friends
   friends: {
     all: 'sync',
     hops: 'sync'
   },
-
-  // phoenxi api
+  blobs: {
+    get: 'source',
+    has: 'async',
+    add: 'sink',
+    ls: 'source',
+    want: 'async'
+  },
   phoenix: require('phoenix-api/manifest')
 }

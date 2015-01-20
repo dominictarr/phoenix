@@ -91,8 +91,9 @@ function refreshPage (e) {
 
   // run the router
   var route = router(window.location.hash, 'posts')
-  app.page.id = route[0]
+  app.page.id    = route[0]
   app.page.param = route[1]
+  app.page.qs    = route[2] || {}
 
   // refresh suggest options for usernames
   app.suggestOptions['@'] = []
