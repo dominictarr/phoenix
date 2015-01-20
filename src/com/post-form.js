@@ -49,7 +49,6 @@ module.exports = function (app, parent) {
   function post (e) {
     e.preventDefault()
 
-    app.setStatus('info', 'Posting...')
     uploadFiles(function (err, extLinks) {
       if (err)
         return swal('Error Uploading Attachments', err.message, 'error')
@@ -76,7 +75,6 @@ module.exports = function (app, parent) {
         if (extLinks.length)
           post.attachments = extLinks
         app.ssb.add(post, function (err) {
-          app.setStatus(null)
           if (err) swal('Error While Publishing', err.message, 'error')
           else {
             if (parent)
@@ -130,21 +128,21 @@ module.exports = function (app, parent) {
       var ps = pushable()
       var reader = new FileReader()
       reader.onload = function () {
-        var base64encoded = reader.result.split(',').slice(1).join(',') // drop data-url prefix
-        ps.push(base64encoded)
+        ps.push(new Buffer(new Uint8Array(reader.result)))
         ps.end()
       }
       reader.onerror = function (e) {
         console.error(e)
         ps.end(new Error('Failed to upload '+file.name))
       }
-      reader.readAsDataURL(file)
+      reader.readAsArrayBuffer(file)
 
       // hash and store
       var hasher = createHash()
       pull(
         ps,
         hasher,
+        pull.map(function (buf) { return new Buffer(new Uint8Array(buf)).toString('base64') }),
         app.ssb.blobs.add(function (err) {
           if(err) return next(err)
           link.name = file.name
@@ -157,17 +155,17 @@ module.exports = function (app, parent) {
 
     var n = 0
     function next (err) {
-      console.log('next', n)
       if (n < 0) return
       if (err) {
         n = -1
         return cb (err)
       }
       n++
-      console.log('done?', n, attachments.length)
-      app.setStatus('info', 'Uploading ('+(attachments.length-n)+' files left)...')
-      if (n === attachments.length)
+      if (n === attachments.length) {
+        app.setStatus(null)
         cb(null, links)
+      } else
+        app.setStatus('info', 'Uploading ('+(attachments.length-n)+' files left)...')
     }
   }
 
