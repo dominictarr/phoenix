@@ -94,9 +94,35 @@ module.exports = function (app) {
       Object.keys(profile.assignedBy).forEach(function(userid) {
         var given = profile.assignedBy[userid]
         if (given.name)
-          givenNames.push(h('li', given.name + ' by ', com.userlink(userid, app.names[userid])))
+          givenNames.push(h('li', given.name + ' by ', com.userlinkThin(userid, app.names[userid])))
       })
     }
+
+    // follows, trusts, flags
+    function outEdges(g, v) {
+      var arr = []
+      if (g[pid]) {
+        for (var userid in g[pid]) {
+          if (g[pid][userid] == v)
+            arr.push(h('li', com.userlinkThin(userid, app.names[userid])))
+        }
+      }
+      return arr
+    }
+    function inEdges(g, v) {
+      var arr = []
+      for (var userid in g) {
+        if (g[userid][pid] == v)
+          arr.push(h('li', com.userlinkThin(userid, app.names[userid])))
+      }
+      return arr      
+    }
+    var follows   = outEdges(graphs.follow, true)
+    var followers = inEdges(graphs.follow, true)
+    var trusts    = outEdges(graphs.trust, 1)
+    var trusters  = inEdges(graphs.trust, 1)
+    var flags     = outEdges(graphs.trust, -1)
+    var flaggers  = inEdges(graphs.trust, -1)
 
     // render page
     var name = app.names[pid] || util.shortString(pid)
@@ -117,8 +143,14 @@ module.exports = function (app) {
             h('ul.list-unstyled', givenNames)
           )
           : '',
+        trusters.length  ? h('.section', h('small', h('strong.text-success', com.icon('ok'), ' Trusted by'), ' ', com.a('#/help/trust', '?')), h('br'), h('ul.list-unstyled', trusters)) : '',
+        flaggers.length  ? h('.section', h('small', h('strong.text-danger', com.icon('flag'), ' Flagged by'), ' ', com.a('#/help/trust', '?')), h('br'), h('ul.list-unstyled', flaggers)) : '',
+        follows.length   ? h('.section', h('small', h('strong', 'Follows'), ' ', com.a('#/help/contacts', '?')), h('br'), h('ul.list-unstyled', follows)) : '',
+        followers.length ? h('.section', h('small', h('strong', 'Followed by'), ' ', com.a('#/help/contacts', '?')), h('br'), h('ul.list-unstyled', followers)) : '',
+        trusts.length    ? h('.section', h('small', h('strong', 'Trusts'), ' ', com.a('#/help/trust', '?')), h('br'), h('ul.list-unstyled', trusts)) : '',
+        flags.length     ? h('.section', h('small', h('strong', 'Flags'), ' ', com.a('#/help/trust', '?')), h('br'), h('ul.list-unstyled', flags)) : '',
         h('.section',
-          h('small', h('strong', 'Emoji fingerprint '), com.a('#/help/fingerprint', '?')),
+          h('small', h('strong', 'Emoji fingerprint '), com.a('#/help/trust', '?')),
           h('div', { innerHTML: com.toEmoji(pid) })
         )
       )
