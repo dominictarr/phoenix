@@ -1,5 +1,6 @@
 'use strict'
 var h = require('hyperscript')
+var mlib = require('ssb-msgs')
 var com = require('./index')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
@@ -42,6 +43,7 @@ function messageRaw (app, msg) {
   return h('.message-raw', { innerHTML: json })
 }
 
+var attachmentOpts = { toext: true, rel: 'attachment' }
 function renderMsgShell(app, msg, content) {
 
   // markup 
@@ -51,6 +53,20 @@ function renderMsgShell(app, msg, content) {
   if (nReplies == 1) repliesStr = ' (1 reply)'
   if (nReplies > 1) repliesStr = ' ('+nReplies+' replies)'
 
+  var msgfooter
+  var attachments = mlib.getLinks(msg.value.content, attachmentOpts)
+  if (attachments.length) {
+    msgfooter = h('.panel-footer',
+      h('p', h('small.text-muted', 'attachments')),
+      h('ul', attachments.map(function (link) {
+        var url = '#/ext/'+link.ext
+        if (link.name)
+          url += '?name='+encodeURIComponent(link.name)
+        return h('li', h('a', { href: url }, link.name || util.shortString(link.ext)))
+      }))
+    )
+  }
+
   var msgbody = h('.panel-body', content)
   var msgpanel = h('.panel.panel-default.message',
     h('.panel-heading',
@@ -59,7 +75,8 @@ function renderMsgShell(app, msg, content) {
       h('span.in-response-to'), // may be populated by the message page
       h('span', {innerHTML: ' &middot; '}), h('a', { title: 'Reply', href: '#', onclick: reply }, 'reply')
     ),
-    msgbody
+    msgbody,
+    msgfooter
   )
 
   // handlers
