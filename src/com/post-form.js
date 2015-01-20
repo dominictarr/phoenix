@@ -79,7 +79,7 @@ module.exports = function (app, parent) {
         var opts = null
         if (mentions.length)
           opts = { mentions: mentions }
-        var post = (parent) ? schemas.schemas.replyPost(text, parent, opts) : schemas.schemas.post(text, opts)
+        var post = (parent) ? schemas.schemas.replyPost(text, opts, parent) : schemas.schemas.post(text, opts)
         if (extLinks.length)
           post.attachments = extLinks
         app.ssb.add(post, function (err) {
