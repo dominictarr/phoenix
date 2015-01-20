@@ -57,7 +57,6 @@ function renderMsgShell(app, msg, content) {
   var attachments = mlib.getLinks(msg.value.content, attachmentOpts)
   if (attachments.length) {
     msgfooter = h('.panel-footer',
-      h('p', h('small.text-muted', 'attachments')),
       h('ul', attachments.map(function (link) {
         var url = '#/ext/'+link.ext
         if (link.name)
