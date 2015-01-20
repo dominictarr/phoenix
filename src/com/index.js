@@ -34,6 +34,13 @@ exports.userlink = function (id, text, opts) {
   return h('span', a('#/profile/'+id, text, opts))
 }
 
+var userlinkThin =
+exports.userlinkThin = function (id, text, opts) {
+  opts = opts || {}
+  opts.className = (opts.className || '') + 'thin'
+  return userlink(id, text, opts)
+}
+
 var toEmoji =
 exports.toEmoji = function (buf, size) {
   size = size || 20

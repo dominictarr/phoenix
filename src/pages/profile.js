@@ -94,7 +94,7 @@ module.exports = function (app) {
       Object.keys(profile.assignedBy).forEach(function(userid) {
         var given = profile.assignedBy[userid]
         if (given.name)
-          givenNames.push(h('li', given.name + ' by ', com.a('#/profile/'+userid, app.names[userid] || util.shortString(userid))))
+          givenNames.push(h('li', given.name + ' by ', com.userlinkThin(userid, app.names[userid])))
       })
     }
 
@@ -104,7 +104,7 @@ module.exports = function (app) {
       if (g[pid]) {
         for (var userid in g[pid]) {
           if (g[pid][userid] == v)
-            arr.push(h('span', ' ', com.a('#/profile/'+userid, app.names[userid] || util.shortString(userid))))
+            arr.push(h('li', com.userlinkThin(userid, app.names[userid])))
         }
       }
       return arr
@@ -113,7 +113,7 @@ module.exports = function (app) {
       var arr = []
       for (var userid in g) {
         if (g[userid][pid] == v)
-          arr.push(h('span', ' ', com.a('#/profile/'+userid, app.names[userid] || util.shortString(userid))))
+          arr.push(h('li', com.userlinkThin(userid, app.names[userid])))
       }
       return arr      
     }
@@ -129,17 +129,7 @@ module.exports = function (app) {
     var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
     app.setPage('profile', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8',
-        nameTrustDlg,
-        follows.length   ? h('p', h('small', h('strong', 'Follows')), h('br'), follows) : '',
-        followers.length ? h('p', h('small', h('strong', 'Followed by')), h('br'), followers) : '',
-        trusts.length    ? h('p', h('small', h('strong', 'Trusts')), h('br'), trusts) : '',
-        trusters.length  ? h('p', h('small', h('strong.text-success', com.icon('check'), 'Trusted by')), h('br'), trusters) : '',
-        flags.length     ? h('p', h('small', h('strong', 'Flags')), h('br'), flags) : '',
-        flaggers.length  ? h('p', h('small', h('strong.text-danger', com.icon('flag'), 'Flagged by')), h('br'), flaggers) : '',
-        h('hr'),
-        msgfeed
-      ),
+      h('.col-xs-8', nameTrustDlg, msgfeed),
       h('.col-xs-2.col-md-3.profile-controls',
         h('.section',
           h('h2', name, com.nameConfidence(pid, app), renameBtn),
@@ -153,6 +143,12 @@ module.exports = function (app) {
             h('ul.list-unstyled', givenNames)
           )
           : '',
+        trusters.length  ? h('.section', h('small', h('strong.text-success', com.icon('ok'), ' Trusted by')), h('br'), h('ul.list-unstyled', trusters)) : '',
+        flaggers.length  ? h('.section', h('small', h('strong.text-danger', com.icon('flag'), ' Flagged by')), h('br'), h('ul.list-unstyled', flaggers)) : '',
+        follows.length   ? h('.section', h('small', h('strong', 'Follows')), h('br'), h('ul.list-unstyled', follows)) : '',
+        followers.length ? h('.section', h('small', h('strong', 'Followed by')), h('br'), h('ul.list-unstyled', followers)) : '',
+        trusts.length    ? h('.section', h('small', h('strong', 'Trusts')), h('br'), h('ul.list-unstyled', trusts)) : '',
+        flags.length     ? h('.section', h('small', h('strong', 'Flags')), h('br'), h('ul.list-unstyled', flags)) : '',
         h('.section',
           h('small', h('strong', 'Emoji fingerprint '), com.a('#/help/fingerprint', '?')),
           h('div', { innerHTML: com.toEmoji(pid) })
