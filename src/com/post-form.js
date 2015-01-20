@@ -20,8 +20,9 @@ module.exports = function (app, parent) {
   var preview = h('.preview')
   var filesInput = h('input.hidden', { type: 'file', multiple: true, onchange: filesAdded })  
   var filesList = h('ul')
-  var textarea = h('textarea', { name: 'text', placeholder: 'Compose your message', rows: 6, onkeyup: renderPreview })
+  var textarea = h('textarea', { name: 'text', placeholder: 'Compose your message', rows: 6, onkeyup: onPostTextChange })
   suggestBox(textarea, app.suggestOptions) // decorate with suggestbox 
+  var postBtn = h('button.btn.btn-primary.btn-strong.pull-right', { disabled: true }, 'Post')
 
   var form = h('form.post-form' + ((!!parent) ? '.reply-form' : ''), { onsubmit: post },
     h('small.text-muted', 'All posts are public. Markdown, @-mentions, and emojis are supported.'),
@@ -33,7 +34,7 @@ module.exports = function (app, parent) {
         filesInput
       )
     ),
-    h('p.post-form-btns', h('button.btn.btn-primary.btn-strong.pull-right', 'Post'), h('button.btn.btn-primary', { onclick: cancel }, 'Cancel')),
+    h('p.post-form-btns', postBtn, h('button.btn.btn-primary', { onclick: cancel }, 'Cancel')),
     h('.preview-wrapper.panel.panel-default',
       h('.panel-heading', h('small', 'Preview:')),
       h('.panel-body', preview)
@@ -42,12 +43,20 @@ module.exports = function (app, parent) {
 
   // handlers
 
-  function renderPreview (e) {
+  function onPostTextChange (e) {
     preview.innerHTML = markdown.mentionLinks(markdown.block(util.escapePlain(textarea.value)), namesList, true)
+    if (textarea.value.trim())
+      postBtn.removeAttribute('disabled')
+    else
+      postBtn.setAttribute('disabled', true)
   }
 
   function post (e) {
     e.preventDefault()
+
+    var text = textarea.value
+    if (!text.trim())
+      return
 
     uploadFiles(function (err, extLinks) {
       if (err)
@@ -55,7 +64,6 @@ module.exports = function (app, parent) {
 
       // prep text
       app.ssb.phoenix.getIdsByName(function (err, idsByName) {
-        var text = textarea.value
 
         // collect any mentions and replace the nicknames with ids
         var mentions = []
