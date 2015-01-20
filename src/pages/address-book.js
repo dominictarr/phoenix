@@ -18,13 +18,13 @@ module.exports = function (app) {
 
     app.setPage('address-book', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8',
+      h('.col-xs-10.col-md-8',
         h('table.table.addresses',
           h('thead', h('tr', h('th', 'Name'), h('th', {width: '100'}), h('th.text-center', {width:'70'}, 'Follow'))),
           h('tbody', com.addresses(app, data[0], data[1], data[2]))
         )
       ),
-      h('.col-xs-2.col-md-3',
+      h('.col-xs-10.col-xs-push-2.col-md-3.col-md-push-0',
         h('table.table.peers',
           h('thead', h('tr', h('th', 'Network'))),
           h('tbody', com.peers(app, data[3]))

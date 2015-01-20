@@ -73,8 +73,8 @@ exports.sidenav = function (app) {
     ['feed', 'feed', 'data feed']
   ]
   var extraPages = [
-    ['profile', 'profile/'+app.myid, 'profile'],
-    ['network', 'network', 'network'],
+    ['address-book', 'address-book', 'addresses'],
+    ['profile', 'profile/'+app.myid, app.names[app.myid] || 'profile'],
     ['help', 'help', 'help']
   ]
 
@@ -101,7 +101,7 @@ exports.sidenav = function (app) {
 var sidehelp =
 exports.sidehelp = function (app, opts) {
   return h('ul.list-unstyled',
-    h('li', h('button.btn.btn-primary', { onclick: app.showUserId }, 'Get your contact id')),
+    h('li', h('button.btn.btn-primary', { onclick: app.showUserId }, 'Get your id')),
     h('li', h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Add a contact')),
     h('li', h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Use an invite')),
     (!opts || !opts.noMore) ? h('li', h('span', {style:'display: inline-block; padding: 6px 12px'}, a('#/help', 'More help'))) : ''

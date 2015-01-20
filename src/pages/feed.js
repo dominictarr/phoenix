@@ -14,8 +14,8 @@ module.exports = function (app) {
     var content = h('.message-feed', msgs.map(function (msg) { return com.message(app, msg, rawOpts) }))
     app.setPage('feed', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8', content, loadMoreBtn),
-      h('.col-xs-2.col-md-3',
+      h('.col-xs-10.col-md-9', content, loadMoreBtn),
+      h('.hidden-xs.hidden-sm.col-md-2',
         com.adverts(app),
         h('hr'),
         com.sidehelp(app)
