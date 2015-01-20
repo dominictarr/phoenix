@@ -66,8 +66,6 @@ exports.header = function (app) {
 var sidenav =
 exports.sidenav = function (app) {
   var pages = [
-    ['compose', 'compose', 'compose'],
-    '-',
     ['posts', '', 'posts'],
     ['inbox', 'inbox', 'inbox ('+app.unreadMessages+')'],
     ['adverts', 'adverts', 'adverts'],
