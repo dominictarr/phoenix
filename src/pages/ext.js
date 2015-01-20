@@ -13,10 +13,10 @@ module.exports = function (app) {
     var content
     if (!err) {
       var name = app.page.qs.name
-      if (!name)
-        content = h('.ext', com.panel(app.page.param, blob))
-      else
-        content = h('.ext', (isImage(name)) ? com.panel(name, imageEl(name, blob)) : com.panel(name, h('pre', blob)))
+      content = h('.ext',
+        h('p', h('small.text-muted', name)),
+        (isImage(name)) ? imageEl(name, blob) : h('div', blob)
+      )
     } else {
       content = h('div', { style: 'display: inline-block' },
         com.panel('', [
