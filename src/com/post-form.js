@@ -24,6 +24,7 @@ module.exports = function (app, parent) {
   suggestBox(textarea, app.suggestOptions) // decorate with suggestbox 
 
   var form = h('form.post-form' + ((!!parent) ? '.reply-form' : ''), { onsubmit: post },
+    h('small.text-muted', 'All posts are public. Markdown, @-mentions, and emojis are supported.'),
     h('div',
       h('.post-form-textarea', textarea),
       h('.post-form-attachments',
@@ -36,8 +37,7 @@ module.exports = function (app, parent) {
     h('.preview-wrapper.panel.panel-default',
       h('.panel-heading', h('small', 'Preview:')),
       h('.panel-body', preview)
-    ),
-    h('.text-muted', 'All posts are public. Markdown, @-mentions, and emojis are supported.')
+    )
   )
 
   // handlers
