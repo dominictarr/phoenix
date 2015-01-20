@@ -39,7 +39,7 @@ module.exports = function (app) {
     ]
   } else if (app.page.param == 'contacts') {
     content = [
-      com.panel('Contacts', [
+      com.panel('Contacts / Following', [
         'Scuttlebutt searches the network for messages from your contacts. ',
         h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Add a contact')
       ]),
