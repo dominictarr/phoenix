@@ -32,7 +32,7 @@ module.exports = function (app, parent) {
         filesInput
       )
     ),
-    h('p.post-form-btns', h('button.btn.btn-primary.pull-right', 'Post'), h('button.btn.btn-primary', { onclick: cancel }, 'Cancel')),
+    h('p.post-form-btns', h('button.btn.btn-primary.btn-strong.pull-right', 'Post'), h('button.btn.btn-primary', { onclick: cancel }, 'Cancel')),
     h('.preview-wrapper.panel.panel-default',
       h('.panel-heading', h('small', 'Preview:')),
       h('.panel-body', preview)

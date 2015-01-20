@@ -43,7 +43,6 @@ module.exports = function (app) {
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-8', 
         h('p#get-latest.hidden', h('button.btn.btn-primary.btn-block', { onclick: app.refreshPage }, 'Get Latest')),
-        h('p', h('a.btn.btn-block.btn-primary', { href: '#/compose' }, 'New Post')),
         content,
         loadMoreBtn, 
         help
