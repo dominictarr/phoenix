@@ -20,7 +20,7 @@ module.exports = function (app, parent) {
   var preview = h('.preview')
   var filesInput = h('input.hidden', { type: 'file', multiple: true, onchange: filesAdded })  
   var filesList = h('ul')
-  var textarea = h('textarea', { name: 'text', placeholder: 'Compose your message', rows: 6, onblur: renderPreview })
+  var textarea = h('textarea', { name: 'text', placeholder: 'Compose your message', rows: 6, onkeyup: renderPreview })
   suggestBox(textarea, app.suggestOptions) // decorate with suggestbox 
 
   var form = h('form.post-form' + ((!!parent) ? '.reply-form' : ''), { onsubmit: post },
