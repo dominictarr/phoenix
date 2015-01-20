@@ -27,7 +27,7 @@ module.exports = function (app) {
     var msgfeed
     if (profile) {
       if (msgs.length)
-        msgfeed = h('table.table.message-feed', msgs.map(function (msg) { return com.messageSummary(app, msg) }))
+        msgfeed = h('table.table.message-feed', msgs.map(function (msg) { if (msg.value) return com.messageSummary(app, msg) }))
       else
         msgfeed = h('div', { style: 'display: inline-block' }, com.panel('', 'No posts have been published by this user yet.'))
     } else {

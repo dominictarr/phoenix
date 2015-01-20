@@ -30,11 +30,13 @@ module.exports = function (app) {
     ))
 
     function renderAd (ad) {
-      var author = ad.value.author
-      return h('.col-xs-3',
-        h('small', 'advert by ', com.userlink(author, app.names[author])),
-        h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text), app.names) })
-      )
+      if (ad.value) {
+        var author = ad.value.author
+        return h('.col-xs-3',
+          h('small', 'advert by ', com.userlink(author, app.names[author])),
+          h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text), app.names) })
+        )
+      }
     }
 
     // handlers

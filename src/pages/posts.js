@@ -8,10 +8,12 @@ module.exports = function (app) {
   var opts = { start: 0 }
   app.ssb.phoenix.getPosts(opts, function (err, msgs) {
 
+    console.log(err, msgs)
+
     // markup
 
     var content = h('table.table.message-feed', msgs.map(function (msg) {
-      return com.messageSummary(app, msg, mustRenderOpts)
+      if (msg.value) return com.messageSummary(app, msg, mustRenderOpts)
     }))
 
     var help = h('.row',
