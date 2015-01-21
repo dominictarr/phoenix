@@ -12,7 +12,8 @@
     "css": "mkdir -p css; lessc less/home.less css/home.css",
     "build": "mkdir -p js; browserify -o js/home.js src/home.js; mkdir -p css; lessc less/home.less css/home.css",
     "build-tests": "browserify -o test/app-auth.js test/src/app-auth.js",
-    "tests-host": "cd test; python -m SimpleHTTPServer"
+    "tests-host": "cd test; python -m SimpleHTTPServer",
+    "prepublish": "npm run build"
   },
   "dependencies": {
     "base-emoji": "~0.3.0",
