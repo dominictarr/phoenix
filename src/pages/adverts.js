@@ -46,7 +46,10 @@ module.exports = function (app) {
       opts.start += 30
       app.ssb.getAdverts(opts, function (err, moreAdverts) {
         if (moreAdverts.length > 0) {
-          moreAdverts.forEach(function (ad) { content.appendChild(renderAd(ad)) })
+          moreAdverts.forEach(function (ad) { 
+            var el = renderAd(ad)
+            if (el) content.appendChild(el)
+          })
         }
         // remove load more btn if it looks like there arent any more to load
         if (moreAdverts.length < 30)

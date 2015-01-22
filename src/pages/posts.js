@@ -60,8 +60,11 @@ module.exports = function (app) {
       e.preventDefault()
       opts.start += 30
       app.ssb.phoenix.getPosts(opts, function (err, moreMsgs) {
-        if (moreMsgs.length > 0)
-          moreMsgs.forEach(function (msg) { content.appendChild(com.messageSummary(app, msg, mustRenderOpts)) })
+        if (moreMsgs.length > 0) {
+          moreMsgs.forEach(function (msg) { 
+            if (msg.value) content.appendChild(com.messageSummary(app, msg, mustRenderOpts))
+          })
+        }
         // remove load more btn if it looks like there arent any more to load
         if (moreMsgs.length < 30)
           loadMoreBtn.parentNode.removeChild(loadMoreBtn)
