@@ -41,14 +41,22 @@ module.exports = function (app, parent) {
     )
   )
 
+  function disable () {
+    postBtn.setAttribute('disabled', true)
+  }
+
+  function enable () {
+    postBtn.removeAttribute('disabled')
+  }
+
   // handlers
 
   function onPostTextChange (e) {
     preview.innerHTML = markdown.mentionLinks(markdown.block(util.escapePlain(textarea.value)), namesList, true)
     if (textarea.value.trim())
-      postBtn.removeAttribute('disabled')
+      enable()
     else
-      postBtn.setAttribute('disabled', true)
+      disable()
   }
 
   function post (e) {
@@ -58,9 +66,11 @@ module.exports = function (app, parent) {
     if (!text.trim())
       return
 
+    disable()
     uploadFiles(function (err, extLinks) {
       if (err)
-        return swal('Error Uploading Attachments', err.message, 'error')
+        return enable(), swal('Error Uploading Attachments', err.message, 'error')
+      app.setStatus('info', 'Publishing...')
 
       // prep text
       app.ssb.phoenix.getIdsByName(function (err, idsByName) {
@@ -83,6 +93,8 @@ module.exports = function (app, parent) {
         if (extLinks.length)
           post.attachments = extLinks
         app.ssb.add(post, function (err) {
+          app.setStatus(null)
+          enable()
           if (err) swal('Error While Publishing', err.message, 'error')
           else {
             if (parent)
@@ -166,6 +178,7 @@ module.exports = function (app, parent) {
       if (n < 0) return
       if (err) {
         n = -1
+        app.setStatus(null)
         return cb (err)
       }
       n++
