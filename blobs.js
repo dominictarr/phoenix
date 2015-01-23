@@ -16,7 +16,7 @@ module.exports = function(server) {
     var msgExtMatch = msgExtRe.exec(req.url)
     if (pathStarts('/ext/') || msgExtMatch) {
       // restrict the CSP
-      res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\' \'unsafe-eval\' data:; connect-src \'none\'; object-src \'none\'; frame-src \'none\'; sandbox allow-same-origin allow-scripts')
+      res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\' \'unsafe-eval\' data:; connect-src \'none\'; object-src \'none\'; frame-src \'none\'; sandbox allow-same-origin allow-scripts allow-popups')
     }
 
     if (pathStarts('/ext/')) {

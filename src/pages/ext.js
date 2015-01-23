@@ -20,15 +20,22 @@ var markdownTypes = {
 var objectTypes = {
   pdf: 'application/pdf'
 }
+var htmlTypes = {
+  html: 'text/html',
+  htm: 'text/html'
+}
 
 module.exports = function (app) {
   app.ssb.blobs.has(app.page.param, function (err, has) {
     var content
     if (has) {
+      var uri = (app.page.qs.msg && app.page.qs.name) ?
+        '/msg/'+app.page.qs.msg+'/ext/'+app.page.qs.name :
+        '/ext/'+app.page.param
       content = h('.ext',
         h('div', 
           h('small.text-muted', app.page.qs.name), ' ',
-          com.a('/ext/'+app.page.param, 'open', { target: '_blank' })
+          com.a(uri, 'open', { target: '_blank' })
         ),
         render(app)
       )
@@ -74,7 +81,9 @@ function render (app) {
   if (ext in markdownTypes)
     return markdownExt(app)
   if (ext in objectTypes)
-    return objectExt(app)    
+    return objectExt(app)
+  if (ext in htmlTypes)
+    return htmlExt(app)
   return undefined
 }
 
@@ -102,6 +111,13 @@ function markdownExt (app) {
     options(app, { md: 'markdown', txt: 'text' }, 'as'),
     h('hr'), el
   )
+}
+
+function htmlExt (app) {
+  var uri = (app.page.qs.msg && app.page.qs.name) ?
+    '/msg/'+app.page.qs.msg+'/ext/'+app.page.qs.name :
+    '/ext/'+app.page.param
+  return h('iframe.ext-html', { src: uri, sandbox: 'allow-scripts allow-same-origin allow-popups' })
 }
 
 function options (app, opts, k) {

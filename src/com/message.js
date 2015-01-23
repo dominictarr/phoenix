@@ -60,7 +60,7 @@ function renderMsgShell(app, msg, content) {
       h('ul', attachments.map(function (link) {
         var url = '#/ext/'+link.ext
         if (link.name)
-          url += '?name='+encodeURIComponent(link.name)
+          url += '?name='+encodeURIComponent(link.name)+'&msg='+encodeURIComponent(msg.key)
         return h('li', h('a', { href: url }, link.name || util.shortString(link.ext)))
       }))
     )
