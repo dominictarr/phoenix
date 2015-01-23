@@ -1,8 +1,22 @@
 'use strict'
 var h = require('hyperscript')
 var pull = require('pull-stream')
+var qs = require('querystring')
 var com = require('../com')
 var util = require('../lib/util')
+var markdown = require('../lib/markdown')
+
+var imageTypes = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+  svg: 'image/svg+xml'  
+}
+var markdownTypes = {
+  md: 'text/x-markdown',
+  txt: 'text/plain'
+}
 
 module.exports = function (app) {
   var blob = ''
@@ -12,10 +26,9 @@ module.exports = function (app) {
   pull(app.ssb.blobs.get(app.page.param), pull.drain(concat, function (err) {
     var content
     if (!err) {
-      var name = app.page.qs.name
       content = h('.ext',
-        h('p', h('small.text-muted', name)),
-        (isImage(name)) ? imageEl(name, blob) : h('div', blob)
+        h('div', h('small.text-muted', app.page.qs.name)),
+        render(app, blob)
       )
     } else {
       content = h('div', { style: 'display: inline-block' },
@@ -38,22 +51,45 @@ module.exports = function (app) {
   }))
 }
 
-var imageTypes = {
-  png: 'image/png',
-  jpg: 'image/jpeg',
-  jpeg: 'image/jpeg',
-  gif: 'image/gif',
-  svg: 'image/svg+xml'  
-}
-
 function getExt (name) {
   return name.split('.').slice(-1)
 }
 
-function isImage (name) {
-  return (getExt(name) in imageTypes)
+function render (app, blob) {
+  var ext = getExt(app.page.qs.name)
+  if (ext in imageTypes)
+    return imageExt(app, blob)
+  if (ext in markdownTypes)
+    return markdownExt(app, blob)
+  return h('div', blob)
 }
 
-function imageEl (name, blob) {
-  return h('img', { src: 'data:'+imageTypes[getExt(name)]+';base64,'+btoa(blob) })
+function imageExt (app, blob) {
+  var name = app.page.qs.name
+  return h('img.ext-img', { alt: name, title: name, src: 'data:'+imageTypes[getExt(name)]+';base64,'+btoa(blob) })
+}
+
+function markdownExt (app, blob) {
+  app.page.qs.as = app.page.qs.as || getExt(app.page.qs.name)
+  return h('div',
+    options(app, { md: 'markdown', txt: 'raw' }, 'as'),
+    h('hr'),
+    (app.page.qs.as == 'md') ?
+      h('.ext-markdown', { innerHTML: markdown.block(util.escapePlain(blob), app.names) }) :
+      h('.ext-txt', blob)
+  )
+}
+
+function options (app, opts, k) {
+  var els = []
+  for (var o in opts) {
+    var q = JSON.parse(JSON.stringify(app.page.qs))
+    q[k] = o
+
+    var el = com.a('#/ext/'+app.page.param+'?'+qs.encode(q), opts[o])
+    if (app.page.qs[k] == o)
+      el = h('strong', el)
+    els.push(h('li', el))
+  }
+  return h('ul.list-inline', els)
 }
