@@ -20,6 +20,7 @@ exports.init = function (server) {
       next()
     },
     require('./domain-auth')(server),
+    require('./blobs')(server),
     require('./static-assets-builder')(server),
     require('./static-assets')(server)
   ))
