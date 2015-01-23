@@ -22,16 +22,15 @@ var objectTypes = {
 }
 
 module.exports = function (app) {
-  var blob = ''
-  function concat (chunk) {
-    blob += atob(chunk)
-  }
-  pull(app.ssb.blobs.get(app.page.param), pull.drain(concat, function (err) {
+  app.ssb.blobs.has(app.page.param, function (err, has) {
     var content
-    if (!err) {
+    if (has) {
       content = h('.ext',
-        h('div', h('small.text-muted', app.page.qs.name)),
-        render(app, blob)
+        h('div', 
+          h('small.text-muted', app.page.qs.name), ' ',
+          com.a('/ext/'+app.page.param, 'open', { target: '_blank' })
+        ),
+        render(app)
       )
     } else {
       content = h('div', { style: 'display: inline-block' },
@@ -51,43 +50,57 @@ module.exports = function (app) {
         com.sidehelp(app)
       )
     ))
-  }))
+  })
 }
 
 function getExt (name) {
   return name.split('.').slice(-1)
 }
 
-function render (app, blob) {
+function fetch(app, cb) {
+  var blob = ''
+  function concat (chunk) {
+    blob += atob(chunk)
+  }
+  pull(app.ssb.blobs.get(app.page.param), pull.drain(concat, function (err) {
+    cb(err, blob)
+  }))
+}
+
+function render (app) {
   var ext = getExt(app.page.qs.name)
   if (ext in imageTypes)
-    return imageExt(app, blob)
+    return imageExt(app)
   if (ext in markdownTypes)
-    return markdownExt(app, blob)
+    return markdownExt(app)
   if (ext in objectTypes)
-    return objectExt(app, blob)    
-  return h('div', blob)
+    return objectExt(app)    
+  return undefined
 }
 
-function imageExt (app, blob) {
+function imageExt (app) {
   var name = app.page.qs.name
-  return h('img.ext-img', { alt: name, title: name, src: 'data:'+imageTypes[getExt(name)]+';base64,'+btoa(blob) })
+  return h('img.ext-img', { alt: name, title: name, src: '/ext/'+app.page.param })
 }
 
-function objectExt (app, blob) {
+function objectExt (app) {
   var name = app.page.qs.name
   var type = objectTypes[getExt(name)]
-  return h('object.ext-obj', { data: 'data:'+type+';charset=utf-8;base64,'+btoa(blob), type: type })
+  return h('object.ext-obj', { data: '/ext/'+app.page.param, type: type })
 }
 
-function markdownExt (app, blob) {
-  app.page.qs.as = app.page.qs.as || getExt(app.page.qs.name)
+function markdownExt (app) {
+  var as = app.page.qs.as = app.page.qs.as || getExt(app.page.qs.name)
+  var el = (as == 'md') ? h('.ext-markdown') : h('.ext-txt')
+  fetch(app, function (err, blob) {
+    if (as == 'md')
+      el.innerHTML = markdown.block(blob, app.names)
+    else
+      el.textContent = blob
+  })
   return h('div',
-    options(app, { md: 'markdown', txt: 'raw' }, 'as'),
-    h('hr'),
-    (app.page.qs.as == 'md') ?
-      h('.ext-markdown', { innerHTML: markdown.block(blob, app.names) }) :
-      h('.ext-txt', blob)
+    options(app, { md: 'markdown', txt: 'text' }, 'as'),
+    h('hr'), el
   )
 }
 
