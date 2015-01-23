@@ -86,7 +86,7 @@ function markdownExt (app, blob) {
     options(app, { md: 'markdown', txt: 'raw' }, 'as'),
     h('hr'),
     (app.page.qs.as == 'md') ?
-      h('.ext-markdown', { innerHTML: markdown.block(util.escapePlain(blob), app.names) }) :
+      h('.ext-markdown', { innerHTML: markdown.block(blob, app.names) }) :
       h('.ext-txt', blob)
   )
 }

@@ -25,7 +25,7 @@ module.exports = function (app) {
   // event handlers
 
   function renderPreview (e) {
-    preview.innerHTML = markdown.block(util.escapePlain(textarea.value), app.names)
+    preview.innerHTML = markdown.block(textarea.value, app.names)
   }
 
   function post (e) {

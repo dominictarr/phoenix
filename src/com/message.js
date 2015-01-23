@@ -15,7 +15,7 @@ module.exports = function (app, msg, opts) {
       if ((!opts || !opts.fullLength) && md.length >= 512) {
         md = md.slice(0, 512) + '... [read more](#/msg/'+msg.key+')'
       }
-      content = h('div', { innerHTML: markdown.block(util.escapePlain(md), app.names) })
+      content = h('div', { innerHTML: markdown.block(md, app.names) })
     } else {
       if (!opts || !opts.mustRender)
         return ''
