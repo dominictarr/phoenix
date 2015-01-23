@@ -17,6 +17,9 @@ var markdownTypes = {
   md: 'text/x-markdown',
   txt: 'text/plain'
 }
+var objectTypes = {
+  pdf: 'application/pdf'
+}
 
 module.exports = function (app) {
   var blob = ''
@@ -61,12 +64,20 @@ function render (app, blob) {
     return imageExt(app, blob)
   if (ext in markdownTypes)
     return markdownExt(app, blob)
+  if (ext in objectTypes)
+    return objectExt(app, blob)    
   return h('div', blob)
 }
 
 function imageExt (app, blob) {
   var name = app.page.qs.name
   return h('img.ext-img', { alt: name, title: name, src: 'data:'+imageTypes[getExt(name)]+';base64,'+btoa(blob) })
+}
+
+function objectExt (app, blob) {
+  var name = app.page.qs.name
+  var type = objectTypes[getExt(name)]
+  return h('object.ext-obj', { data: 'data:'+type+';charset=utf-8;base64,'+btoa(blob), type: type })
 }
 
 function markdownExt (app, blob) {
