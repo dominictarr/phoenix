@@ -12,6 +12,9 @@ module.exports = function(server) {
     function pathStarts(v) { return req.url.indexOf(v) === 0; }
 
     if (pathStarts('/ext/')) {
+      // restrict the CSP
+      res.setHeader('Content-Security-Policy', 'default-src \'self\' \'unsafe-inline\' \'unsafe-eval\' data:; connect-src \'none\'; object-src \'none\'; frame-src \'none\'; sandbox allow-same-origin allow-scripts')
+
       var hash = req.url.slice(5)
       return server.blobs.has(hash, function(err, has) {
         if (!has) {
