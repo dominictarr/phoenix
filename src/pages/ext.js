@@ -44,8 +44,8 @@ module.exports = function (app) {
 
     app.setPage('ext', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8', content),
-      h('.col-xs-2.col-md-3',
+      h('.col-xs-10.col-md-9', content),
+      h('.hidden-xs.hidden-sm.col-md-2',
         com.adverts(app),
         h('hr'),
         com.sidehelp(app)
