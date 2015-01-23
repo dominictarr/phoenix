@@ -52,7 +52,7 @@ module.exports = function (app, parent) {
   // handlers
 
   function onPostTextChange (e) {
-    preview.innerHTML = markdown.mentionLinks(markdown.block(util.escapePlain(textarea.value)), namesList, true)
+    preview.innerHTML = markdown.mentionLinks(markdown.block(textarea.value), namesList, true)
     if (textarea.value.trim())
       enable()
     else

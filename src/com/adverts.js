@@ -18,6 +18,6 @@ module.exports = function (app) {
 function renderAd (app, ad) {
   return h('div',
     h('small', 'advert by ', com.userlink(ad.value.author, app.names[ad.value.author])),
-    h('.well.well-sm', { innerHTML: markdown.block(util.escapePlain(ad.value.content.text)) })
+    h('.well.well-sm', { innerHTML: markdown.block(ad.value.content.text) })
   )
 }
