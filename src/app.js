@@ -77,7 +77,7 @@ function pollPeers () {
 function setupRpcConnection () {
   var app = this
   pull(app.ssb.phoenix.events(), pull.drain(function (event) {
-    if (event.type == 'post')
+    if (event.type == 'post' || event.type == 'notification')
       app.setPendingMessages(app.pendingMessages + 1)
   }))
 }

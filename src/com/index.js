@@ -92,15 +92,15 @@ exports.sidenav = function (app) {
       if (page == '-')
         return h('hr')
       if (page[0] == app.page.id)
-        return h('p', h('strong', a('#/'+page[1], page[2])))
-      return h('p', a('#/'+page[1], page[2]))
+        return h('p.side-nav-'+page[0], h('strong', a('#/'+page[1], page[2])))
+      return h('p.side-nav-'+page[0], a('#/'+page[1], page[2]))
     }),
     extraPages.map(function (page) {
       if (page == '-')
         return h('hr')
       if (page[0] == app.page.id)
-        return h('p.visible-xs', h('strong', a('#/'+page[1], page[2])))
-      return h('p.visible-xs', a('#/'+page[1], page[2]))
+        return h('p.visible-xs.side-nav-'+page[0], h('strong', a('#/'+page[1], page[2])))
+      return h('p.visible-xs.side-nav-'+page[0], a('#/'+page[1], page[2]))
     })
   ])
 }
