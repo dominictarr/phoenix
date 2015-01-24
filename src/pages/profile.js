@@ -11,7 +11,8 @@ module.exports = function (app) {
   app.ssb.friends.all('follow', done())
   app.ssb.friends.all('trust', done())
   app.ssb.phoenix.getProfile(pid, done())
-  app.ssb.phoenix.getPostsBy(pid, done())
+  var fetchOpts = { start: 0 }  
+  app.ssb.phoenix.getPostsBy(pid, fetchOpts, done())
   done(function (err, datas) {
     var graphs = {
       follow: datas[0],
@@ -127,9 +128,10 @@ module.exports = function (app) {
     // render page
     var name = app.names[pid] || util.shortString(pid)
     var joinDate = (profile) ? util.prettydate(new Date(profile.createdAt), true) : '-'
+    var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary.btn-block', { onclick: loadMore, style: 'margin-bottom: 24px' }, 'Load More')) : ''    
     app.setPage('profile', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-8', nameTrustDlg, msgfeed),
+      h('.col-xs-8', nameTrustDlg, msgfeed, loadMoreBtn),
       h('.col-xs-2.col-md-3.profile-controls',
         h('.section',
           h('h2', name, com.nameConfidence(pid, app), renameBtn),
@@ -237,6 +239,21 @@ module.exports = function (app) {
       schemas.addOtherName(app.ssb, pid, app.names[pid], function (err) {
         if (err) swal('Error While Publishing', err.message, 'error')
         else app.refreshPage()
+      })
+    }
+
+    function loadMore (e) {
+      e.preventDefault()
+      fetchOpts.start += 30
+      app.ssb.phoenix.getPostsBy(pid, fetchOpts, function (err, moreMsgs) {
+        if (moreMsgs.length > 0) {
+          moreMsgs.forEach(function (msg) { 
+            if (msg.value) msgfeed.appendChild(com.messageSummary(app, msg))
+          })
+        }
+        // remove load more btn if it looks like there arent any more to load
+        if (moreMsgs.length < 30)
+          loadMoreBtn.parentNode.removeChild(loadMoreBtn)
       })
     }
   })
