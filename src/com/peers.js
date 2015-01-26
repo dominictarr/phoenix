@@ -1,6 +1,7 @@
 'use strict'
 var h = require('hyperscript')
 var com = require('./index')
+var util = require('../lib/util')
 
 module.exports = function (app, peers) {
 
@@ -8,7 +9,7 @@ module.exports = function (app, peers) {
 
   var rows = peers.sort(sorter).map(function (peer) { 
     var muted = (peer.connected) ? '' : '.text-muted'
-    var id = '', status = ''
+    var id = '', status = '', history = ''
 
     if (peer.id) {
       id = com.userlink(peer.id, app.names[peer.id])
@@ -25,8 +26,16 @@ module.exports = function (app, peers) {
           status = 'connecting...'
       }
     }
+
+    if (peer.time) {
+      if (peer.time.connect > peer.time.attempt)
+        history = [h('br'), h('small.text-muted', 'connected '+util.prettydate(peer.time.connect, true))]
+      else if (peer.time.attempt)
+        history = [h('br'), h('small.text-muted', 'attempted connect '+util.prettydate(peer.time.attempt, true))]
+    }
+
     return h('tr',
-      h('td'+muted, id, ' ', status)
+      h('td'+muted, id, ' ', status, history)
     )
   })
 
