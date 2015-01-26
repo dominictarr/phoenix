@@ -34,7 +34,7 @@ exports.mentionLinks = function (str, names, spansOnly) {
   })
 }
 
-var emojiRegex = /(\s|>|^):([A-z0-9_]+):(\s|<|$)/g;
+var emojiRegex = /(\s|>|^)?:([A-z0-9_]+):(\s|<|$)/g;
 exports.emojis = function (str) {
   return str.replace(emojiRegex, function(full, $1, $2, $3) {
     return ($1||'') + renderEmoji($2) + ($3||'')
