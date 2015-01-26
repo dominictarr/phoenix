@@ -8,9 +8,9 @@
   .panel-heading {
     border: 0;
     border-bottom: 1px solid #ccc;
-    padding: 10px 0;
+    padding: 10px 0 2px;
     background: #fff;
-    font-size: 13px;
+    font-size: 12px;
     a:not(.user-link) {
       color: #808080;
     }
@@ -18,9 +18,14 @@
   .panel-body {
     padding-left: 0;
     padding-right: 0;
+    color: #555;
+    font-family: @font-family-sans-serif;
 
     & > div > :first-child {
       margin-top: 0;
+    }
+    & > div > :last-child {
+      margin-bottom: 0;
     }
 
     .message-raw {
