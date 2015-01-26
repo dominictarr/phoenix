@@ -29,17 +29,21 @@ module.exports = function (app, peers) {
 
     if (peer.time) {
       if (peer.time.connect > peer.time.attempt)
-        history = [h('br'), h('small.text-muted', 'connected '+util.prettydate(peer.time.connect, true))]
+        history = 'connected '+util.prettydate(peer.time.connect, true)
       else if (peer.time.attempt)
-        history = [h('br'), h('small.text-muted', 'attempted connect '+util.prettydate(peer.time.attempt, true))]
+        history = 'attempted connect '+util.prettydate(peer.time.attempt, true)
     }
 
     return h('tr',
-      h('td'+muted, id, ' ', status, history)
+      h('td'+muted, 
+        (peer.connected) ? '' : h('a.btn.btn-xs.btn-default', { href: '#', title: 'Syncronize now', onclick: syncronize }, com.icon('transfer')),
+        id, ' ', status, h('br'), 
+        h('small.text-muted', history)
+      )
     )
   })
 
-  // put followed and trusted friends at top
+  // put connected peers at top
   function sorter(a, b) {
     var an = 0, bn = 0
     if (a.connected) an += 100
@@ -47,6 +51,13 @@ module.exports = function (app, peers) {
     if (a.failure) an -= a.failure
     if (b.failure) bn -= b.failure
     return bn - an
+  }
+
+  // handlers
+
+  function syncronize (e) {
+    e.preventDefault()
+    alert('todo')
   }
 
   return rows
