@@ -40,8 +40,9 @@ module.exports = function (app, peers) {
 
     return h('tr',
       h('td'+muted, 
-        (peer.connected) ? '' : h('a.btn.btn-xs.btn-default', { href: '#', title: 'Syncronize now', onclick: syncronize(peer) }, com.icon('transfer')),
-        id, ' ', status, h('br'), 
+        id,
+        (peer.connected) ? ' '+status : h('a.btn.btn-xs.btn-default', { href: '#', title: 'Syncronize now', onclick: syncronize(peer) }, com.icon('transfer')),        
+        h('br'),
         h('small.text-muted', history)
       )
     )
