@@ -31,9 +31,6 @@ module.exports = function (ssb) {
   window.addEventListener('hashchange', function() { app.refreshPage() })
   document.body.addEventListener('click', onClick(app))
 
-  // periodically poll and rerender the current connections
-  setInterval(pollPeers.bind(app), 5000)
-
   // toplevel & common methods
   app.setupRpcConnection = setupRpcConnection.bind(app)
   app.refreshPage        = refreshPage.bind(app)
@@ -43,6 +40,10 @@ module.exports = function (ssb) {
   app.followPrompt       = followPrompt.bind(app)
   app.setNamePrompt      = setNamePrompt.bind(app)
   app.setPage            = setPage.bind(app)
+  app.pollPeers          = pollPeers.bind(app)
+
+  // periodically poll and rerender the current connections
+  setInterval(app.pollPeers, 5000)
 
   return app
 }
@@ -61,10 +62,13 @@ function onClick (app) {
 
 function pollPeers () {
   var app = this
+  var peersTables = Array.prototype.slice.call(document.querySelectorAll('table.peers tbody'))
+  if (!peersTables.length)
+    return // only update if peers are in the ui
   app.ssb.gossip.peers(function (err, peers) {
     if (err)
       return
-    Array.prototype.forEach.call(document.querySelectorAll('table.peers tbody'), function (tb) {
+    peersTables.forEach(function (tb) {  
       tb.innerHTML = ''
       com.peers(app, peers).forEach(function (row) {
         tb.appendChild(row)

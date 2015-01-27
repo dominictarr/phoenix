@@ -47,7 +47,10 @@ module.exports = function (app, profiles, follows, trusts) {
     if (trusts [app.myid][a]) an += trusts[app.myid][a]
     if (follows[app.myid][b]) bn += 1
     if (trusts [app.myid][b]) bn += trusts[app.myid][b]
-    return bn - an
+    var n = bn - an
+    if (n === 0)
+      n = ((app.names[a]||'zzz').toLowerCase() < (app.names[b]||'zzz').toLowerCase()) ? -1 : 1
+    return n
   }
 
   function getOtherNames(profile) {
