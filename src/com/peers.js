@@ -30,13 +30,17 @@ module.exports = function (app, peers) {
     if (peer.time) {
       if (peer.time.connect > peer.time.attempt)
         history = 'connected '+util.prettydate(peer.time.connect, true)
-      else if (peer.time.attempt)
-        history = 'attempted connect '+util.prettydate(peer.time.attempt, true)
+      else if (peer.time.attempt) {
+        if (peer.connected)
+          history = 'started attempt '+util.prettydate(peer.time.attempt, true)
+        else
+          history = 'attempted connect '+util.prettydate(peer.time.attempt, true)
+      }
     }
 
     return h('tr',
       h('td'+muted, 
-        (peer.connected) ? '' : h('a.btn.btn-xs.btn-default', { href: '#', title: 'Syncronize now', onclick: syncronize }, com.icon('transfer')),
+        (peer.connected) ? '' : h('a.btn.btn-xs.btn-default', { href: '#', title: 'Syncronize now', onclick: syncronize(peer) }, com.icon('transfer')),
         id, ' ', status, h('br'), 
         h('small.text-muted', history)
       )
@@ -55,9 +59,15 @@ module.exports = function (app, peers) {
 
   // handlers
 
-  function syncronize (e) {
-    e.preventDefault()
-    alert('todo')
+  function syncronize (p) {
+    return function (e) {
+      e.preventDefault()
+      app.ssb.gossip.connect(p, function (err) {
+        if (err)
+          console.error(err)
+        app.pollPeers()        
+      })
+    }
   }
 
   return rows
