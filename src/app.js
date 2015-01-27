@@ -62,10 +62,13 @@ function onClick (app) {
 
 function pollPeers () {
   var app = this
+  var peersTables = Array.prototype.slice.call(document.querySelectorAll('table.peers tbody'))
+  if (!peersTables.length)
+    return // only update if peers are in the ui
   app.ssb.gossip.peers(function (err, peers) {
     if (err)
       return
-    Array.prototype.forEach.call(document.querySelectorAll('table.peers tbody'), function (tb) {
+    peersTables.forEach(function (tb) {  
       tb.innerHTML = ''
       com.peers(app, peers).forEach(function (row) {
         tb.appendChild(row)
