@@ -5,7 +5,7 @@ var auth = require('ssb-domain-auth')
 var loginBtn = document.getElementById('loginbtn')
 var logoutBtn = document.getElementById('logoutbtn')
 
-var ssb = muxrpc(require('../../src/mans/ssb'), false, serialize)()
+var ssb = muxrpc(require('../../src/lib/ssb-manifest'), false, serialize)()
 var ssbchan = chan.connect(ssb, 'localhost')
 ssbchan.on('connect', function() {
   console.log('Connected')
