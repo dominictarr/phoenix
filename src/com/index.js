@@ -86,7 +86,7 @@ exports.sidenav = function (app) {
   ]
 
   return h('.side-nav', [
-    h('p', h('a.btn.btn-danger.btn-strong', { href: '#/compose' }, 'new post')),
+    h('p', h('a.btn.btn-primary.btn-strong', { href: '#/compose' }, 'new post')),
     h('hr'),
     pages.map(function (page) {
       if (page == '-')

@@ -8,9 +8,13 @@
     "url": "git://github.com/ssbc/phoenix.git"
   },
   "scripts": {
-    "browserify": "mkdir -p js; browserify -o js/home.js src/home.js",
-    "css": "mkdir -p css; lessc less/home.less css/home.css",
-    "build": "mkdir -p js; browserify -o js/home.js src/home.js; mkdir -p css; lessc less/home.less css/home.css",
+    "build-js-home": "mkdir -p js; browserify -o js/home.js src/home.js",
+    "build-js-auth": "mkdir -p js; browserify -o js/auth.js src/auth.js",
+    "build-js": "mkdir -p js; npm run build-js-home; npm run build-js-auth",
+    "build-css-home": "mkdir -p css; lessc less/home.less css/home.css",
+    "build-css-auth": "mkdir -p css; lessc less/auth.less css/auth.css",
+    "build-css": "mkdir -p css; npm run build-css-home; npm run build-css-auth",
+    "build": "npm run build-css; npm run build-js",
     "build-tests": "browserify -o test/app-auth.js test/src/app-auth.js",
     "tests-host": "cd test; python -m SimpleHTTPServer",
     "prepublish": "npm run build"
