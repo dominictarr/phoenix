@@ -10,10 +10,14 @@ module.exports = function (app) {
       content = com.messageThread(app, thread, { fullLength: true })
       app.ssb.phoenix.getPostParent(app.page.param, function (err, parent) {
         if (parent) {
-          var pauthor = parent.value.author
-          var header = content.querySelector('.panel-heading .in-response-to')
-          header.appendChild(h('span', {innerHTML: ' &middot; in response to '}))
-          header.appendChild(com.a('#/msg/'+parent.key, 'a post by ' + (app.names[pauthor] || util.shortString(pauthor))))
+          var header = content.querySelector('.in-response-to')
+          var pauthor = (app.names[parent.value.author] || util.shortString(parent.value.author))
+          var summary
+          if (parent.value.content.text)
+            summary = '^ ' + pauthor + ': "' + util.shortString(parent.value.content.text, 100) + '"'
+          else
+            summary = '^ '+parent.value.content.type+' message by ' + pauthor
+          header.appendChild(com.a('#/msg/'+parent.key, summary))
         }
       })
     } else {
