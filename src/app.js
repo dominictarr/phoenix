@@ -34,6 +34,7 @@ module.exports = function (ssb) {
   // toplevel & common methods
   app.setupRpcConnection = setupRpcConnection.bind(app)
   app.refreshPage        = refreshPage.bind(app)
+  app.getOtherNames      = getOtherNames.bind(app)
   app.showUserId         = showUserId.bind(app)
   app.setPendingMessages = setPendingMessages.bind(app)
   app.setStatus          = setStatus.bind(app)
@@ -99,31 +100,32 @@ function refreshPage (e) {
   app.page.param = route[1]
   app.page.qs    = route[2] || {}
 
-  // refresh suggest options for usernames
-  app.suggestOptions['@'] = []
-  app.ssb.phoenix.getNamesById(function (err, names) {
-    for (var k in names) {
-      var name = names[k] || k
-      app.suggestOptions['@'].push({ title: name, subtitle: util.shortString(k), value: name })
-    }
-  })
-
   // collect common data
   var done = multicb({ pluck: 1 })
   app.ssb.whoami(done())
   app.ssb.phoenix.getNamesById(done())
   app.ssb.phoenix.getNameTrustRanks(done())
+  app.ssb.phoenix.getAllProfiles(done())
   app.ssb.phoenix.getInboxCount(done())
   done(function (err, data) {
     if (err) throw err.message
     app.myid = data[0].id
     app.names = data[1]
     app.nameTrustRanks = data[2]
-    app.unreadMessages = data[3] - (+localStorage.readMessages || 0)
+    var profiles = data[3]
+
+    app.unreadMessages = data[4] - (+localStorage.readMessages || 0)
     if (app.unreadMessages < 0) {
       // probably a new account on the machine, reset
       app.unreadMessages = 0
       localStorage.readMessages = 0
+    }
+
+    // refresh suggest options for usernames
+    app.suggestOptions['@'] = []
+    for (var k in profiles) {
+      var name = app.names[k] || k
+      app.suggestOptions['@'].push({ title: name, subtitle: app.getOtherNames(profiles[k]) + ' ' + util.shortString(k), value: name })
     }
 
     // re-route to setup if needed
@@ -144,6 +146,26 @@ function refreshPage (e) {
       page = pages.notfound
     page(app)
   })
+}
+
+function getOtherNames (profile) {
+  // todo - replace with ranked names
+  var name = this.names[profile.id] || profile.id
+
+  var names = []
+  function add(n) {
+    if (n && n !== name && !~names.indexOf(n))
+      names.push(n)
+  }
+
+  // get 3 of the given or self-assigned names
+  add(profile.self.name)
+  for (var k in profile.assignedBy) {
+    if (names.length >= 3)
+      break
+    add(profile.assignedBy[k].name)
+  }
+  return names
 }
 
 function showUserId () { 
