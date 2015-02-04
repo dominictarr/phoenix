@@ -22,7 +22,7 @@ module.exports = function (app, msg, opts) {
       content = messageRaw(app, msg)
     }
   }    
-  return renderMsgShell(app, msg, content)
+  return renderMsgShell(app, msg, content, opts)
 }
 
 function messageRaw (app, msg) {
@@ -44,14 +44,16 @@ function messageRaw (app, msg) {
 }
 
 var attachmentOpts = { toext: true, rel: 'attachment' }
-function renderMsgShell(app, msg, content) {
+function renderMsgShell(app, msg, content, opts) {
 
   // markup 
 
-  var nReplies = (msg.replies) ? msg.replies.length : 0
   var repliesStr = ''
-  if (nReplies == 1) repliesStr = ' (1 reply)'
-  if (nReplies > 1) repliesStr = ' ('+nReplies+' replies)'
+  if (opts && opts.topmost) {
+    var nReplies = msg.numThreadReplies
+    if (nReplies == 1) repliesStr = ', 1 reply'
+    if (nReplies > 1) repliesStr = ', '+nReplies+' replies'
+  }
 
   var msgfooter
   var attachments = mlib.getLinks(msg.value.content, attachmentOpts)
