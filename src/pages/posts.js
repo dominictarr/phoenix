@@ -39,19 +39,17 @@ module.exports = function (app) {
       )
     )
 
-    var prevBtn = h('a.btn.btn-primary', { href: '#/posts?start='+((opts.start - 30 > 0) ? opts.start - 30 : 0) }, '<')
-    var nextBtn = h('a.btn.btn-primary', { href: '#/posts?start='+(opts.start+30) }, '>')
-    if (opts.start <= 0) prevBtn.setAttribute('disabled', true)    
-    if (opts.start+30 > msgcount) nextBtn.setAttribute('disabled', true)
+    
    
     app.setPage('posts', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-10.col-md-9', 
         h('p#get-latest.hidden', h('button.btn.btn-primary.btn-block', { onclick: app.refreshPage }, 'Get Latest')),
-        h('p', prevBtn, (opts.start + 1), ' - ', Math.min(msgcount, (opts.start + 30)), ' ('+msgcount+')', nextBtn),
+        com.paginator('#/posts?start=', opts.start, msgcount),
         h('table.table.message-feed', msgs.map(function (msg) { 
           if (msg.value) return com.messageSummary(app, msg, mustRenderOpts)
         })),
+        com.paginator('#/posts?start=', opts.start, msgcount),
         help
       ),
       h('.hidden-xs.hidden-sm.col-md-2',

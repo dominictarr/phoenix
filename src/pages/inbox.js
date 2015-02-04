@@ -30,16 +30,12 @@ module.exports = function (app) {
       }))
     }
 
-    var prevBtn = h('a.btn.btn-primary', { href: '#/inbox?start='+((opts.start - 30 > 0) ? opts.start - 30 : 0) }, '<')
-    var nextBtn = h('a.btn.btn-primary', { href: '#/inbox?start='+(opts.start+30) }, '>')
-    if (opts.start <= 0) prevBtn.setAttribute('disabled', true)    
-    if (opts.start+30 > msgcount) nextBtn.setAttribute('disabled', true)
-
     app.setPage('feed', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-10.col-md-9',
-        h('p', prevBtn, (opts.start + 1), ' - ', Math.min(msgcount, (opts.start + 30)), ' ('+msgcount+')', nextBtn),
-        content
+        com.paginator('#/inbox?start=', opts.start, msgcount),
+        content,
+        com.paginator('#/inbox?start=', opts.start, msgcount)
       ),
       h('.hidden-xs.hidden-sm.col-md-2',
         com.adverts(app),

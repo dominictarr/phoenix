@@ -115,6 +115,14 @@ exports.sidehelp = function (app, opts) {
   )
 }
 
+exports.paginator = function (base, start, count) {
+  var prevBtn = h('a.btn.btn-primary', { href: base+((start - 30 > 0) ? start - 30 : 0) }, '<')
+  var nextBtn = h('a.btn.btn-primary', { href: base+(start+30) }, '>')
+  if (start <= 0) prevBtn.setAttribute('disabled', true)    
+  if (start+30 > count) nextBtn.setAttribute('disabled', true)
+  return h('p', prevBtn, (start + 1), ' - ', Math.min(count, (start + 30)), ' ('+count+')', nextBtn)
+}
+
 var panel =
 exports.panel = function (title, content) {
   return h('.panel.panel-default', [
