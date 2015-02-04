@@ -103,7 +103,7 @@ function markdownExt (app) {
   var el = (as == 'md') ? h('.ext-markdown') : h('.ext-txt')
   fetch(app, function (err, blob) {
     if (as == 'md')
-      el.innerHTML = markdown.block(blob, app.names)
+      el.innerHTML = markdown.block(blob)
     else
       el.textContent = blob
   })

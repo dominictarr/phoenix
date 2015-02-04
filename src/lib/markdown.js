@@ -1,8 +1,6 @@
 'use strict'
 var emojiNamedCharacters = require('emoji-named-characters')
-var marked = require('marked');
-
-var mentionRegex = /(\s|>|^)@([A-z0-9\/=\.\+]+)/g;
+var marked = require('marked')
 
 marked.setOptions({
   gfm: true,
@@ -15,23 +13,9 @@ marked.setOptions({
   emoji: renderEmoji
 });
 
-exports.block = function(text, names, allowHtml) {
-  return mentionLinks(marked(text||'', {sanitize: !allowHtml}), names)
-}
-
-var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
-var mentionLinks =
-exports.mentionLinks = function (str, names, spansOnly) {
-  if (!names)
-    return str
-  return str.replace(mentionRegex, function(full, $1, $2) {
-    var name = names[$2]
-    if (!name)
-      return ($1||'') + '<abbr class="text-danger" title="User not found">@'+$2+'</abbr>'
-    if (spansOnly)
-      return ($1||'') + '<strong class="user-link">@'+(name||$2)+'</strong>'
-    return ($1||'') + '<a class="user-link" href="#/profile/'+$2+'">@' + name + '</a>'
-  })
+var markedOpts = {sanitize: true}
+exports.block = function(text) {
+  return marked(text||'', markedOpts)
 }
 
 var emojiRegex = /(\s|>|^)?:([A-z0-9_]+):(\s|<|$)/g;
