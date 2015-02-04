@@ -4,17 +4,17 @@ var multicb = require('multicb')
 var com = require('../com')
 
 module.exports = function (app) {
-  var opts = { start: 0 }
   var done = multicb({ pluck: 1 })
+  var opts = { start: +app.page.qs.start || 0 }
   app.ssb.phoenix.getInboxCount(done())
   app.ssb.phoenix.getInbox(opts, done())
   done(function (err, data) {
-    var inboxCount = data[0]
+    var msgcount = data[0]
     var msgs = data[1]
 
     // track read messages
     app.unreadMessages = 0
-    localStorage.readMessages = inboxCount
+    localStorage.readMessages = msgcount
 
     // markup
     
@@ -30,32 +30,22 @@ module.exports = function (app) {
       }))
     }
 
-    var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary.btn-block', { onclick: loadMore }, 'Load More')) : ''
+    var prevBtn = h('a.btn.btn-primary', { href: '#/inbox?start='+((opts.start - 30 > 0) ? opts.start - 30 : 0) }, '<')
+    var nextBtn = h('a.btn.btn-primary', { href: '#/inbox?start='+(opts.start+30) }, '>')
+    if (opts.start <= 0) prevBtn.setAttribute('disabled', true)    
+    if (opts.start+30 > msgcount) nextBtn.setAttribute('disabled', true)
+
     app.setPage('feed', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
-      h('.col-xs-10.col-md-9', content, loadMoreBtn),
+      h('.col-xs-10.col-md-9',
+        h('p', prevBtn, (opts.start + 1), ' - ', Math.min(msgcount, (opts.start + 30)), ' ('+msgcount+')', nextBtn),
+        content
+      ),
       h('.hidden-xs.hidden-sm.col-md-2',
         com.adverts(app),
         h('hr'),
         com.sidehelp(app)
       )
     ))
-
-    // handlers
-
-    function loadMore (e) {
-      e.preventDefault()
-      opts.start += 30
-      app.ssb.phoenix.getInbox(opts, function (err, moreMsgs) {
-        if (moreMsgs.length > 0) {
-          moreMsgs.forEach(function (msg) { 
-            if (msg.value) content.appendChild(com.messageSummary(app, msg))
-          })
-        }
-        // remove load more btn if it looks like there arent any more to load
-        if (moreMsgs.length < 30)
-          loadMoreBtn.parentNode.removeChild(loadMoreBtn)
-      })
-    }
   })
 }

@@ -48,7 +48,7 @@ module.exports = function (app) {
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-10.col-md-9', 
         h('p#get-latest.hidden', h('button.btn.btn-primary.btn-block', { onclick: app.refreshPage }, 'Get Latest')),
-        h('p', prevBtn, (opts.start + 1), ' - ', Math.min(msgcount, (opts.start + 30)), ' ('+msgcount+')', nextBtn), 
+        h('p', prevBtn, (opts.start + 1), ' - ', Math.min(msgcount, (opts.start + 30)), ' ('+msgcount+')', nextBtn),
         h('table.table.message-feed', msgs.map(function (msg) { 
           if (msg.value) return com.messageSummary(app, msg, mustRenderOpts)
         })),
