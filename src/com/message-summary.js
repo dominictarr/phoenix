@@ -43,7 +43,7 @@ module.exports = function (app, msg, opts) {
     h('td.text-right', name, nameConfidence),
     h('td', attachments),
     h('td', replies),
-    h('td', h('span', { innerHTML: content })),
+    h('td', h('span' + (isRaw ? '.monospace' : ''), { innerHTML: content })),
     h('td.text-muted', util.prettydate(new Date(msg.value.timestamp), true))
   )
 
