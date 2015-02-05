@@ -1,18 +1,19 @@
 'use strict'
 var h = require('hyperscript')
+var multicb = require('multicb')
 var com = require('../com')
 
 var mustRenderOpts = { mustRender: true }
 module.exports = function (app) {
-
-  var opts = { start: 0 }
-  app.ssb.phoenix.getPosts(opts, function (err, msgs) {
+  var done = multicb({ pluck: 1 })
+  var opts = { start: +app.page.qs.start || 0 }
+  app.ssb.phoenix.getPostCount(done())
+  app.ssb.phoenix.getPosts(opts, done())
+  done(function (err, res) {
+    var msgcount = res[0]
+    var msgs = res[1]
 
     // markup
-
-    var content = h('table.table.message-feed', msgs.map(function (msg) {
-      if (msg.value) return com.messageSummary(app, msg, mustRenderOpts)
-    }))
 
     var help = h('.row',
       h('.col-xs-4',
@@ -37,14 +38,18 @@ module.exports = function (app) {
         )
       )
     )
+
+    
    
-    var loadMoreBtn = (msgs.length === 30) ? h('p', h('button.btn.btn-primary.btn-block', { onclick: loadMore, style: 'margin-bottom: 24px' }, 'Load More')) : ''
     app.setPage('posts', h('.row',
       h('.col-xs-2.col-md-1', com.sidenav(app)),
       h('.col-xs-10.col-md-9', 
         h('p#get-latest.hidden', h('button.btn.btn-primary.btn-block', { onclick: app.refreshPage }, 'Get Latest')),
-        content,
-        loadMoreBtn, 
+        com.paginator('#/posts?start=', opts.start, msgcount),
+        h('table.table.message-feed', msgs.map(function (msg) { 
+          if (msg.value) return com.messageSummary(app, msg, mustRenderOpts)
+        })),
+        com.paginator('#/posts?start=', opts.start, msgcount),
         help
       ),
       h('.hidden-xs.hidden-sm.col-md-2',
@@ -53,22 +58,6 @@ module.exports = function (app) {
         com.sidehelp(app)
       )
     ))
-
-    // handlers
-
-    function loadMore (e) {
-      e.preventDefault()
-      opts.start += 30
-      app.ssb.phoenix.getPosts(opts, function (err, moreMsgs) {
-        if (moreMsgs.length > 0) {
-          moreMsgs.forEach(function (msg) { 
-            if (msg.value) content.appendChild(com.messageSummary(app, msg, mustRenderOpts))
-          })
-        }
-        // remove load more btn if it looks like there arent any more to load
-        if (moreMsgs.length < 30)
-          loadMoreBtn.parentNode.removeChild(loadMoreBtn)
-      })
-    }
+      
   })
 }
