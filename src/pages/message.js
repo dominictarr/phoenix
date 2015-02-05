@@ -1,26 +1,31 @@
 'use strict'
 var h = require('hyperscript')
+var mlib = require('ssb-msgs')
 var com = require('../com')
 var util = require('../lib/util')
 
 module.exports = function (app) {
-  app.ssb.phoenix.getThread(app.page.param, function (err, thread) {
+  app.ssb.relatedMessages({
+    id: app.page.param, rel: 'replies-to',
+    count: true, parent: true
+  }, function (err, thread) {
     var content
     if (thread) {
       content = com.messageThread(app, thread, { fullLength: true })
-      if (thread.parent) {
-        app.ssb.phoenix.getPostParent(app.page.param, function (err, parent) {
+      var plink = mlib.getLinks(thread.value.content, { tomsg: true, rel: 'replies-to' })[0]
+      if (plink) {
+        app.ssb.get(plink.msg, function (err, parent) {
           var summary
           if (parent) {
-            var pauthor = (app.names[parent.value.author] || util.shortString(parent.value.author))
-            if (parent.value.content.text)
-              summary = '^ ' + pauthor + ': "' + util.shortString(parent.value.content.text, 100) + '"'
+            var pauthor = (app.names[parent.author] || util.shortString(parent.author))
+            if (parent.content.text)
+              summary = '^ ' + pauthor + ': "' + util.shortString(parent.content.text, 100) + '"'
             else
-              summary = '^ '+parent.value.content.type+' message by ' + pauthor
+              summary = '^ '+parent.content.type+' message by ' + pauthor
           } else {
-            summary = '^ parent message not yet received (' + thread.parent + ')'
+            summary = '^ parent message not yet received (' + plink.msg + ')'
           }
-          content.querySelector('.in-response-to').appendChild(com.a('#/msg/'+thread.parent, summary))
+          content.querySelector('.in-response-to').appendChild(com.a('#/msg/'+plink.msg, summary))
         })
       }
     } else {

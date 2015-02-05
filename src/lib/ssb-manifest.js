@@ -20,6 +20,7 @@ module.exports = {
   getLatest: 'async',
   whoami: 'async',
   getLocal: 'async',
+  relatedMessages: 'async',
 
   // publishers
   add: 'async',
