@@ -16,8 +16,8 @@ function replies (app, thread) {
   // collect replies
   var r = []
   ;(thread.related || thread.replies || []).forEach(function(reply) {
-    r.push(com.message(app, reply))
-    r.push(replies(app, reply))
+    r.unshift(replies(app, reply))
+    r.unshift(com.message(app, reply))
   })
 
   if (r.length)
