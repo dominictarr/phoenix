@@ -4,6 +4,7 @@ var mlib = require('ssb-msgs')
 var com = require('./index')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
+var mentions = require('../lib/mentions')
 
 module.exports = function (app, msg, opts) {
   var content
@@ -15,7 +16,7 @@ module.exports = function (app, msg, opts) {
       if ((!opts || !opts.fullLength) && md.length >= 512) {
         md = md.slice(0, 512) + '... [read more](#/msg/'+msg.key+')'
       }
-      content = h('div', { innerHTML: markdown.block(md, app.names) })
+      content = h('div', { innerHTML: mentions.post(markdown.block(md), app, msg) })
     } else {
       if (!opts || !opts.mustRender)
         return ''

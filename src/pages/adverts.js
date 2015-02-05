@@ -34,7 +34,7 @@ module.exports = function (app) {
         var author = ad.value.author
         return h('.col-xs-2',
           h('small', 'advert by ', com.userlink(author, app.names[author])),
-          h('.well.well-sm', { innerHTML: markdown.block(ad.value.content.text, app.names) })
+          h('.well.well-sm', { innerHTML: markdown.block(ad.value.content.text) })
         )
       }
     }

@@ -4,6 +4,7 @@ var mlib = require('ssb-msgs')
 var com = require('./index')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
+var mentions = require('../lib/mentions')
 
 var attachmentOpts = { toext: true, rel: 'attachment' }
 module.exports = function (app, msg, opts) {
@@ -21,7 +22,7 @@ module.exports = function (app, msg, opts) {
   }
   content = util.escapePlain(content)
   content = markdown.emojis(content)
-  content = markdown.mentionLinks(content, app.names, true)
+  content = mentions.post(content, app, msg, true)
 
   var len = noHtmlLen(content)
   if (len > 60 || content.length > 512) {

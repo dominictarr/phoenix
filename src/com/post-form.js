@@ -7,6 +7,7 @@ var pull = require('pull-stream')
 var pushable = require('pull-pushable')
 var util = require('../lib/util')
 var markdown = require('../lib/markdown')
+var mentions = require('../lib/mentions')
 
 module.exports = function (app, parent) {
 
@@ -52,7 +53,7 @@ module.exports = function (app, parent) {
   // handlers
 
   function onPostTextChange (e) {
-    preview.innerHTML = markdown.mentionLinks(markdown.block(textarea.value), namesList, true)
+    preview.innerHTML = mentions.preview(markdown.block(textarea.value), namesList)
     if (textarea.value.trim())
       enable()
     else
@@ -75,23 +76,30 @@ module.exports = function (app, parent) {
       // prep text
       app.ssb.phoenix.getIdsByName(function (err, idsByName) {
 
-        // collect any mentions and replace the nicknames with ids
-        var mentions = []
+        // collect any mentions
+        var mentions = [], mentionedIds = {}
         var mentionRegex = /(\s|>|^)@([^\s^<]+)/g;
-        text = text.replace(mentionRegex, function(full, $1, $2) {
-          var id = idsByName[$2] || $2
-          if (schemas.isHash(id))
-            mentions.push(id)
-          return ($1||'') + '@' + id
-        })
+        var match
+        while ((match = mentionRegex.exec(text))) {
+          var name = match[2]
+          var id = idsByName[name]
+          if (schemas.isHash(id)) {
+            if (!mentionedIds[id]) {
+              mentions.push({ feed: id, rel: 'mentions', name: name })
+              mentionedIds[id] = true
+            }
+          } else if (schemas.isHash(name)) {
+            if (!mentionedIds[name]) {
+              mentions.push({ feed: name, rel: 'mentions' })
+              mentionedIds[name] = true
+            }
+          }
+        }
 
         // post
-        var opts = null
-        if (mentions.length)
-          opts = { mentions: mentions }
-        var post = (parent) ? schemas.schemas.replyPost(text, opts, parent) : schemas.schemas.post(text, opts)
-        if (extLinks.length)
-          post.attachments = extLinks
+        var post = (parent) ? schemas.schemas.replyPost(text, null, parent) : schemas.schemas.post(text)
+        if (mentions.length) post.mentions = mentions
+        if (extLinks.length) post.attachments = extLinks
         app.ssb.add(post, function (err) {
           app.setStatus(null)
           enable()

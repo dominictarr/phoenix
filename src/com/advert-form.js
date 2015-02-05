@@ -10,8 +10,6 @@ module.exports = function (app) {
   // markup
 
   var textarea = h('textarea.form-control', { name: 'text', rows: 3, onblur: renderPreview })
-  suggestBox(textarea, app.suggestOptions) // decorate with suggest box
-
   var preview = h('.preview.well.well-sm.col-xs-3')
   var form = h('form.advert-form', { onsubmit: post },
     h('.open',
@@ -25,7 +23,7 @@ module.exports = function (app) {
   // event handlers
 
   function renderPreview (e) {
-    preview.innerHTML = markdown.block(textarea.value, app.names)
+    preview.innerHTML = markdown.block(textarea.value)
   }
 
   function post (e) {
