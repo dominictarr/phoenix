@@ -115,6 +115,32 @@ exports.sidehelp = function (app, opts) {
   )
 }
 
+exports.introhelp = function (app) {
+  return h('.row',
+    h('.col-xs-4',
+      panel(h('span', 'Join a Pub Server ', h('small', 'recommended')),
+        h('div',
+          h('p', 'Ask the owner of a pub server for an ', a('#/help/pubs', 'invite code'), '.'),
+          h('button.btn.btn-primary', { onclick: app.followPrompt }, 'Use an invite')
+        )
+      )
+    ),
+    h('.col-xs-4',
+      panel('Connect over WiFi',
+        h('p', 'Open the ', a('#/address-book', 'address book'), ' and find peers on your WiFi in the ', h('strong', 'Network'), ' column.')
+      )
+    ),
+    h('.col-xs-4',
+      panel(h('span', 'Start a Pub Server ', h('small', 'advanced')),
+        h('p',
+          a('https://github.com/ssbc/scuttlebot#running-a-pub-server', 'Follow these instructions'),
+          ' then hand out invite codes to friends.'
+        )
+      )
+    )
+  )
+}
+
 exports.paginator = function (base, start, count) {
   var prevBtn = h('a.btn.btn-primary', { href: base+((start - 30 > 0) ? start - 30 : 0) }, icon('chevron-left'))
   var nextBtn = h('a.btn.btn-primary', { href: base+(start+30) }, icon('chevron-right'))
