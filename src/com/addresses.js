@@ -11,7 +11,7 @@ module.exports = function (app, profiles, follows, trusts) {
 
   var addresses = Object.keys(profiles).sort(sorter).map(function (id) { 
     var profile = profiles[id]
-    var otherNames = getOtherNames(profile)
+    var otherNames = app.getOtherNames(profile)
     function r (e) { rename(e, id) }
     function f (e) { follow(e, id) }
     function unf (e) { unfollow(e, id) }
@@ -51,30 +51,6 @@ module.exports = function (app, profiles, follows, trusts) {
     if (n === 0)
       n = ((app.names[a]||'zzz').toLowerCase() < (app.names[b]||'zzz').toLowerCase()) ? -1 : 1
     return n
-  }
-
-  function getOtherNames(profile) {
-    // todo - replace with ranked names
-    var name = app.names[profile.id] || profile.id
-
-    // remove scare quotes 
-    if (name.charAt(0) === '"' && name.charAt(name.length - 1) === '"')
-      name = name.slice(1, -1)
-
-    var names = []
-    function add(n) {
-      if (n && n !== name && !~names.indexOf(n))
-        names.push(n)
-    }
-
-    // get 3 of the given or self-assigned names
-    add(profile.self.name)
-    for (var k in profile.assignedBy) {
-      if (names.length >= 3)
-        break
-      add(profile.assignedBy[k].name)
-    }
-    return names
   }
 
   // handlers

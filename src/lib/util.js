@@ -39,6 +39,9 @@ exports.escapePlain = function(str) {
     .replace(/>/g, '&gt;')
 }
 
-exports.shortString = function(str) {
-  return str.slice(0, 6) + '...'
+exports.shortString = function(str, len) {
+  len = len || 6
+  if (str.length - 3 > len)
+    return str.slice(0, len) + '...'
+  return str
 }

@@ -8,14 +8,21 @@ module.exports = function (app) {
     var content
     if (thread) {
       content = com.messageThread(app, thread, { fullLength: true })
-      app.ssb.phoenix.getPostParent(app.page.param, function (err, parent) {
-        if (parent) {
-          var pauthor = parent.value.author
-          var header = content.querySelector('.panel-heading .in-response-to')
-          header.appendChild(h('span', {innerHTML: ' &middot; in response to '}))
-          header.appendChild(com.a('#/msg/'+parent.key, 'a post by ' + (app.names[pauthor] || util.shortString(pauthor))))
-        }
-      })
+      if (thread.parent) {
+        app.ssb.phoenix.getPostParent(app.page.param, function (err, parent) {
+          var summary
+          if (parent) {
+            var pauthor = (app.names[parent.value.author] || util.shortString(parent.value.author))
+            if (parent.value.content.text)
+              summary = '^ ' + pauthor + ': "' + util.shortString(parent.value.content.text, 100) + '"'
+            else
+              summary = '^ '+parent.value.content.type+' message by ' + pauthor
+          } else {
+            summary = '^ parent message not yet received (' + thread.parent + ')'
+          }
+          content.querySelector('.in-response-to').appendChild(com.a('#/msg/'+thread.parent, summary))
+        })
+      }
     } else {
       content = 'Message not found.'
     }
