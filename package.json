@@ -1,16 +1,16 @@
 {
   "name": "ssbplug-phoenix",
   "description": "a web-interface plugin for scuttlebot",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "homepage": "https://github.com/ssbc/phoenix",
   "repository": {
     "type": "git",
     "url": "git://github.com/ssbc/phoenix.git"
   },
   "scripts": {
-    "build-js-home": "mkdir -p js; browserify -o js/home.js src/home.js  --debug" ,
-     "build-js-auth": "mkdir -p js; browserify -o js/auth.js src/auth.js  --debug",
-     "build-js": "mkdir -p js; npm run build-js-home; npm run build-js-auth",
+    "build-js-home": "mkdir -p js; browserify -o js/home.js src/home.js  --debug",
+    "build-js-auth": "mkdir -p js; browserify -o js/auth.js src/auth.js  --debug",
+    "build-js": "mkdir -p js; npm run build-js-home; npm run build-js-auth",
     "build-css-home": "mkdir -p css; lessc less/home.less css/home.css",
     "build-css-auth": "mkdir -p css; lessc less/auth.less css/auth.css",
     "build-css": "mkdir -p css; npm run build-css-home; npm run build-css-auth",
