@@ -22,7 +22,7 @@ module.exports = function (app, msg, opts) {
   }
   content = util.escapePlain(content)
   content = markdown.emojis(content)
-  content = mentions.post(content, app, msg, true)
+  content = mentions.post(content, app, msg)
 
   var len = noHtmlLen(content)
   if (len > 60 || content.length > 512) {
@@ -41,7 +41,7 @@ module.exports = function (app, msg, opts) {
   var name = app.names[msg.value.author] || util.shortString(msg.value.author)
   var nameConfidence = com.nameConfidence(msg.value.author, app)
   return h('tr.message-summary', { onclick: openMsg },
-    h('td.text-right', name, nameConfidence),
+    h('td.text-right', com.userlink(msg.value.author, name), nameConfidence),
     h('td', attachments),
     h('td', replies),
     h('td', h('span' + (isRaw ? '.monospace' : ''), { innerHTML: content })),
