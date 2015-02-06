@@ -21,7 +21,7 @@ exports.init = function (server) {
     },
     require('./domain-auth')(server),
     require('./blobs')(server),
-    require('./static-assets-builder')(server),
+    require('stack-assets-builder')({ enabled: server.config.dev, root: __dirname }),
     require('./static-assets')(server)
   ))
 
