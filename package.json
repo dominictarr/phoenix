@@ -52,6 +52,7 @@
     "ssb-msg-schemas": "~1.0.0",
     "stack": "~0.1.0",
     "stack-assets-builder": "~1.0.0",
+    "stack-assets-static": "~1.0.0",    
     "stream-to-pull-stream": "~1.6.0",
     "stringify": "~3.0.0",
     "suggest-box": "~1.1.1",
