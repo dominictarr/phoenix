@@ -7,7 +7,7 @@ exports.manifest    = api.manifest
 exports.permissions = api.permissions
 
 exports.init = function (server) {
-  server.on('request', stack(
+  server.http.use(stack(
     function (req, res, next) {
       // Local-host only
       if (req.socket.remoteAddress != '127.0.0.1') {
